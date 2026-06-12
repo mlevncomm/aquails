@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# HashRouter kullanılıyor - SPA uyumlu
+# Sitemap: /sitemap.xml
+
+Disallow: /hesabim/
+Disallow: /admin/
+Disallow: /giris
+Disallow: /kayit-ol
+Disallow: /sifremi-unuttum
+
+Sitemap: /sitemap.xml

@@ -1,0 +1,167 @@
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router';
+import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { useCartStore } from '@/stores/cartStore';
+
+export function CartDrawer() {
+  const { items, isDrawerOpen, closeDrawer, updateQuantity, removeItem, getSubtotal } = useCartStore();
+  const subtotal = getSubtotal();
+  const shipping = subtotal >= 1500 ? 0 : 49;
+  const total = subtotal + shipping;
+
+  return (
+    <AnimatePresence>
+      {isDrawerOpen && (
+        <>
+          {/* Overlay */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-aqua-secondary/40 z-50"
+            onClick={closeDrawer}
+          />
+
+          {/* Drawer */}
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="fixed top-0 right-0 bottom-0 w-full max-w-[420px] bg-white z-50 shadow-drawer flex flex-col"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-aqua-border-light">
+              <h3 className="text-lg font-semibold text-aqua-secondary flex items-center gap-2">
+                <ShoppingBag className="w-5 h-5 text-aqua-primary" />
+                Sepetim
+              </h3>
+              <button
+                onClick={closeDrawer}
+                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-aqua-bg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Items */}
+            <div className="flex-1 overflow-y-auto p-5">
+              {items.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <ShoppingBag className="w-16 h-16 text-aqua-border mb-4" />
+                  <p className="text-lg font-semibold text-aqua-text-muted">Sepetiniz boş</p>
+                  <p className="text-sm text-aqua-text-muted mt-1">
+                    Ürünleri keşfetmeye başlayın
+                  </p>
+                  <Link
+                    to="/urunler"
+                    onClick={closeDrawer}
+                    className="mt-5 bg-aqua-primary text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-aqua-primary-dark transition-colors"
+                  >
+                    Alışverişe Başla
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <AnimatePresence mode="popLayout">
+                    {items.map((item) => (
+                      <motion.div
+                        key={item.product.id}
+                        layout
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20, height: 0, marginBottom: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex items-center gap-3 pb-4 border-b border-aqua-border-light last:border-0"
+                      >
+                        {/* Image */}
+                        <div className="w-[60px] h-[60px] bg-aqua-bg rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          <img
+                            src={item.product.images?.[0] || '/images/products/placeholder.jpg'}
+                            alt={item.product.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
+                          />
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-aqua-secondary truncate">
+                            {item.product.name}
+                          </p>
+                          <p className="text-sm font-semibold text-aqua-secondary mt-1">
+                            {(item.product.price * item.quantity).toLocaleString('tr-TR')}₺
+                          </p>
+
+                          {/* Quantity */}
+                          <div className="flex items-center gap-2 mt-2">
+                            <button
+                              onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-aqua-bg text-aqua-text-secondary hover:bg-aqua-border-light transition-colors"
+                            >
+                              <Minus className="w-3 h-3" />
+                            </button>
+                            <span className="text-sm font-semibold w-6 text-center">
+                              {item.quantity}
+                            </span>
+                            <button
+                              onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-aqua-bg text-aqua-text-secondary hover:bg-aqua-border-light transition-colors"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Delete */}
+                        <button
+                          onClick={() => removeItem(item.product.id)}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-aqua-text-muted hover:bg-aqua-danger/10 hover:text-aqua-danger transition-colors flex-shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            {items.length > 0 && (
+              <div className="p-5 border-t border-aqua-border-light bg-white">
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-aqua-text-secondary">Ara Toplam</span>
+                    <span className="font-medium text-aqua-secondary">
+                      {subtotal.toLocaleString('tr-TR')}₺
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-aqua-text-secondary">Kargo</span>
+                    <span className={shipping === 0 ? 'text-aqua-success font-medium' : 'font-medium text-aqua-secondary'}>
+                      {shipping === 0 ? 'Ücretsiz' : `${shipping}₺`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-base font-semibold pt-2 border-t border-aqua-border-light">
+                    <span className="text-aqua-secondary">Toplam</span>
+                    <span className="text-aqua-secondary">{total.toLocaleString('tr-TR')}₺</span>
+                  </div>
+                </div>
+                <Link
+                  to="/odeme"
+                  onClick={closeDrawer}
+                  className="flex items-center justify-center gap-2 w-full bg-aqua-primary text-white py-3.5 rounded-full font-semibold hover:bg-aqua-primary-dark hover:shadow-primary transition-all"
+                >
+                  Ödemeye Geç
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
