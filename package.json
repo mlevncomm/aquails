@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:server": "npm run dev --prefix server",
+    "build:server": "npm run build --prefix server",
+    "start:server": "npm run start --prefix server"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
