@@ -1,5 +1,6 @@
 import { createApp } from './app.js';
 import { env } from './config/env.js';
+import { prisma } from './lib/prisma.js';
 
 const app = createApp();
 
@@ -9,12 +10,18 @@ const server = app.listen(env.PORT, () => {
   );
 });
 
-function shutdown(signal: string) {
+async function shutdown(signal: string) {
   console.log(`Received ${signal}, shutting down gracefully...`);
-  server.close(() => {
+
+  server.close(async () => {
+    await prisma.$disconnect();
     process.exit(0);
   });
 }
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => {
+  void shutdown('SIGTERM');
+});
+process.on('SIGINT', () => {
+  void shutdown('SIGINT');
+});

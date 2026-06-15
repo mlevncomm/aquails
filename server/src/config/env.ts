@@ -17,7 +17,13 @@ const envSchema = z.object({
         .map((origin) => origin.trim())
         .filter(Boolean),
     ),
-  DATABASE_URL: z.string().optional(),
+  DATABASE_URL: z
+    .string()
+    .refine(
+      (url) => url.startsWith('postgresql://') || url.startsWith('postgres://'),
+      { message: 'DATABASE_URL must be a PostgreSQL connection string' },
+    )
+    .optional(),
   JWT_SECRET: z.string().min(32).optional(),
   JWT_EXPIRES_IN: z.string().default('7d'),
 });
