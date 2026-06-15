@@ -44,3 +44,10 @@ Products are not hard-deleted. Use `isActive = false` to hide from catalog.
 Frontend mock badges: `discount`, `premium`, `new` (lowercase).
 Database enum: `DISCOUNT`, `PREMIUM`, `NEW` (uppercase).
 Mapping happens in API/seed layer (see `prisma/seed/mappers/productMapper.ts`).
+
+## Auth admin seed
+
+- Admin user is created during `npm run db:seed` only when `SEED_ADMIN_PASSWORD` is set in environment.
+- Default email: `admin@aquails.com` (override with `SEED_ADMIN_EMAIL`).
+- **Never** run `db:seed` automatically in production deploy pipelines.
+- Set `SEED_ADMIN_PASSWORD` only in local or staging `.env` files — never commit real passwords.

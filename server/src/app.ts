@@ -7,6 +7,7 @@ import { sendSuccess } from './lib/apiResponse.js';
 import { checkDatabaseConnection } from './lib/prisma.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { authRouter } from './modules/auth/auth.routes.js';
 
 export function createApp() {
   const app = express();
@@ -38,6 +39,8 @@ export function createApp() {
       database,
     });
   });
+
+  app.use('/api/auth', authRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
