@@ -11,10 +11,10 @@ import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { useCartStore } from '@/stores/cartStore';
 import { validateCoupon } from '@/services/couponService';
+import { createOrder } from '@/services/orderService';
 import { useToastStore } from '@/components/Toast';
+import { ApiError } from '@/lib/apiClient';
 import { cn } from '@/lib/utils';
-
-
 
 const steps = [
   { label: 'Sepet', href: '/sepet' },
@@ -41,47 +41,119 @@ export default function Checkout() {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlot, setSelectedSlot] = useState('');
   const [availableSlots, setAvailableSlots] = useState<ServiceSlot[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'transfer' | 'cod'>('card');
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [isCompleted, setIsCompleted] = useState(false);
+  const [orderNumber, setOrderNumber] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number; type: string } | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [note, setNote] = useState('');
+  const [addressTitle, setAddressTitle] = useState('');
+  const [city, setCity] = useState('İstanbul');
+  const [district, setDistrict] = useState('');
+  const [fullAddress, setFullAddress] = useState('');
 
   const subtotal = getSubtotal();
   const codFee = paymentMethod === 'cod' ? 150 : 0;
   const shippingCost = shippingMethods.find((s) => s.id === shippingMethod)?.price || 0;
   const couponDiscount = appliedCoupon?.discount || 0;
-  const isFreeShipping = appliedCoupon?.type === 'shipping';
+  const isFreeShipping = appliedCoupon?.type === 'SHIPPING';
   const effectiveShipping = isFreeShipping ? 0 : shippingCost;
   const discount = couponDiscount > 0 ? couponDiscount : 0;
   const total = subtotal + effectiveShipping + codFee - discount;
 
-  const handleApplyCoupon = () => {
+  const handleDateChange = async (date: string) => {
+    setSelectedDate(date);
+    setSelectedSlot('');
+    if (!date) {
+      setAvailableSlots([]);
+      return;
+    }
+    setSlotsLoading(true);
+    try {
+      const slots = await getSlotsForDate(date);
+      setAvailableSlots(slots);
+    } catch (err) {
+      addToast(err instanceof ApiError ? err.message : 'Slotlar yüklenemedi.', 'error');
+      setAvailableSlots([]);
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
+  const handleApplyCoupon = async () => {
     if (!couponCode.trim()) { addToast('Kupon kodu girin.', 'error'); return; }
     setCouponLoading(true);
-    setTimeout(() => {
-      const result = validateCoupon(couponCode, subtotal);
-      if (result.valid && result.coupon) {
-        if (result.coupon.type === 'shipping') {
-          setAppliedCoupon({ code: result.coupon.code, discount: 0, type: 'shipping' });
-          addToast('Kargo ücretsiz kuponu uygulandı!', 'success');
-        } else {
-          setAppliedCoupon({ code: result.coupon.code, discount: result.discount, type: result.coupon.type });
-          addToast(`${result.coupon.code} kuponu uygulandı! ${result.discount.toLocaleString('tr-TR')}₺ indirim`, 'success');
-        }
+    try {
+      const result = await validateCoupon(couponCode, subtotal);
+      if (result.type === 'SHIPPING') {
+        setAppliedCoupon({ code: result.code, discount: 0, type: 'SHIPPING' });
+        addToast('Kargo ücretsiz kuponu uygulandı!', 'success');
       } else {
-        addToast(result.message || 'Geçersiz kupon.', 'error');
-        setAppliedCoupon(null);
+        setAppliedCoupon({ code: result.code, discount: result.discount, type: result.type });
+        addToast(`${result.code} kuponu uygulandı! ${result.discount.toLocaleString('tr-TR')}₺ indirim`, 'success');
       }
+    } catch (err) {
+      addToast(err instanceof ApiError ? err.message : 'Geçersiz kupon.', 'error');
+      setAppliedCoupon(null);
+    } finally {
       setCouponLoading(false);
-    }, 400);
+    }
   };
 
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
     setCouponCode('');
     addToast('Kupon kaldırıldı.', 'info');
+  };
+
+  const handleSubmit = async () => {
+    if (!customerName.trim() || !customerEmail.trim() || !customerPhone.trim()) {
+      addToast('Lütfen iletişim bilgilerinizi doldurun.', 'error');
+      return;
+    }
+    if (!addressTitle.trim() || !fullAddress.trim()) {
+      addToast('Lütfen teslimat adresinizi doldurun.', 'error');
+      return;
+    }
+    if (items.length === 0) {
+      addToast('Sepetiniz boş.', 'error');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const order = await createOrder({
+        customerName: customerName.trim(),
+        customerEmail: customerEmail.trim(),
+        customerPhone: customerPhone.trim(),
+        paymentMethod,
+        shippingAddress: {
+          title: addressTitle.trim(),
+          city: city.trim(),
+          district: district.trim() || undefined,
+          fullAddress: fullAddress.trim(),
+        },
+        note: note.trim() || undefined,
+        couponCode: appliedCoupon?.code,
+        serviceSlotId: selectedSlot || undefined,
+        useCart: true,
+        sessionId: localStorage.getItem('aquails_cart_session') ?? undefined,
+      });
+      setOrderNumber(order.orderNumber);
+      setIsCompleted(true);
+    } catch (err) {
+      addToast(err instanceof ApiError ? err.message : 'Sipariş oluşturulamadı.', 'error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (isCompleted) {
@@ -111,7 +183,7 @@ export default function Checkout() {
             className="mt-4"
           >
             <span className="inline-block bg-aqua-primary/10 text-aqua-primary font-semibold px-4 py-2 rounded-lg">
-              Sipariş No: AQ-2025-1847
+              Sipariş No: {orderNumber}
             </span>
           </motion.div>
           <motion.p
@@ -204,19 +276,43 @@ export default function Checkout() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="text-sm font-medium text-aqua-secondary mb-1 block">Ad Soyad</label>
-                    <input type="text" placeholder="Adınız ve Soyadınız" className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary focus:ring-2 focus:ring-aqua-primary/10" />
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Adınız ve Soyadınız"
+                      className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary focus:ring-2 focus:ring-aqua-primary/10"
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-aqua-secondary mb-1 block">E-posta</label>
-                    <input type="email" placeholder="ornek@email.com" className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary focus:ring-2 focus:ring-aqua-primary/10" />
+                    <input
+                      type="email"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      placeholder="ornek@email.com"
+                      className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary focus:ring-2 focus:ring-aqua-primary/10"
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-aqua-secondary mb-1 block">Telefon</label>
-                    <input type="tel" placeholder="05XX XXX XX XX" className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary focus:ring-2 focus:ring-aqua-primary/10" />
+                    <input
+                      type="tel"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="05XX XXX XX XX"
+                      className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary focus:ring-2 focus:ring-aqua-primary/10"
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-aqua-secondary mb-1 block">Sipariş Notu</label>
-                    <textarea placeholder="Teslimat ile ilgili notunuz (opsiyel)" rows={1} className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary focus:ring-2 focus:ring-aqua-primary/10 resize-none" />
+                    <textarea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder="Teslimat ile ilgili notunuz (opsiyel)"
+                      rows={1}
+                      className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary focus:ring-2 focus:ring-aqua-primary/10 resize-none"
+                    />
                   </div>
                 </div>
               </div>
@@ -238,19 +334,45 @@ export default function Checkout() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="text-sm font-medium text-aqua-secondary mb-1 block">Adres Başlığı</label>
-                    <input type="text" placeholder="Örn: Ev, İş" className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary" />
+                    <input
+                      type="text"
+                      value={addressTitle}
+                      onChange={(e) => setAddressTitle(e.target.value)}
+                      placeholder="Örn: Ev, İş"
+                      className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary"
+                    />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-aqua-secondary mb-1 block">Şehir</label>
-                    <select className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary bg-white">
+                    <select
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary bg-white"
+                    >
                       <option>İstanbul</option>
                       <option>Ankara</option>
                       <option>İzmir</option>
                     </select>
                   </div>
+                  <div>
+                    <label className="text-sm font-medium text-aqua-secondary mb-1 block">İlçe</label>
+                    <input
+                      type="text"
+                      value={district}
+                      onChange={(e) => setDistrict(e.target.value)}
+                      placeholder="İlçe"
+                      className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary"
+                    />
+                  </div>
                   <div className="sm:col-span-2">
                     <label className="text-sm font-medium text-aqua-secondary mb-1 block">Açık Adres</label>
-                    <textarea placeholder="Sokak, mahalle, bina no, daire no" rows={2} className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary resize-none" />
+                    <textarea
+                      value={fullAddress}
+                      onChange={(e) => setFullAddress(e.target.value)}
+                      placeholder="Sokak, mahalle, bina no, daire no"
+                      rows={2}
+                      className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary resize-none"
+                    />
                   </div>
                 </div>
               </div>
@@ -279,24 +401,21 @@ export default function Checkout() {
                   <input
                     type="date"
                     value={selectedDate}
-                    onChange={(e) => {
-                      setSelectedDate(e.target.value);
-                      setSelectedSlot('');
-                      if (e.target.value) {
-                        setAvailableSlots(getSlotsForDate(e.target.value));
-                      }
-                    }}
+                    onChange={(e) => void handleDateChange(e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
                     className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl bg-aqua-bg focus:outline-none focus:border-aqua-primary mb-3"
                   />
                   {selectedDate && (
                     <div className="grid grid-cols-2 gap-2">
-                      {availableSlots.filter(s => s.available).length === 0 ? (
+                      {slotsLoading ? (
+                        <p className="text-xs text-aqua-text-muted col-span-2">Slotlar yükleniyor...</p>
+                      ) : availableSlots.filter(s => s.available).length === 0 ? (
                         <p className="text-xs text-aqua-text-muted col-span-2">Bu tarihte musait slot bulunmuyor. Baska tarih secin.</p>
                       ) : (
                         availableSlots.filter(s => s.available).map((slot) => (
                           <button
                             key={slot.id}
+                            type="button"
                             onClick={() => setSelectedSlot(slot.id)}
                             className={cn(
                               'flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all',
@@ -327,7 +446,7 @@ export default function Checkout() {
                   {paymentMethods.map((method) => (
                     <div
                       key={method.id}
-                      onClick={() => setPaymentMethod(method.id)}
+                      onClick={() => setPaymentMethod(method.id as 'card' | 'transfer' | 'cod')}
                       className={cn(
                         'flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all',
                         paymentMethod === method.id
@@ -464,13 +583,13 @@ export default function Checkout() {
                         type="text"
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                        onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
+                        onKeyDown={(e) => e.key === 'Enter' && void handleApplyCoupon()}
                         placeholder="Kupon kodu"
                         className="w-full pl-8 pr-3 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary bg-[#F8FBFF]"
                       />
                     </div>
                     <button
-                      onClick={handleApplyCoupon}
+                      onClick={() => void handleApplyCoupon()}
                       disabled={couponLoading}
                       className="px-4 py-2.5 text-sm font-semibold text-aqua-primary border-2 border-aqua-primary rounded-xl hover:bg-aqua-primary hover:text-white transition-all disabled:opacity-50"
                     >
@@ -483,7 +602,7 @@ export default function Checkout() {
                       <CheckCircle className="w-4 h-4 text-emerald-500" />
                       <span className="text-sm font-semibold text-emerald-700">{appliedCoupon.code}</span>
                       <span className="text-xs text-emerald-600">
-                        {appliedCoupon.type === 'shipping' ? 'Ücretsiz Kargo' : `-${appliedCoupon.discount.toLocaleString('tr-TR')}₺`}
+                        {appliedCoupon.type === 'SHIPPING' ? 'Ücretsiz Kargo' : `-${appliedCoupon.discount.toLocaleString('tr-TR')}₺`}
                       </span>
                     </div>
                     <button onClick={handleRemoveCoupon} className="text-xs text-emerald-600 hover:text-red-500 font-medium">Kaldır</button>
@@ -538,11 +657,12 @@ export default function Checkout() {
               </div>
 
               <button
-                onClick={() => setIsCompleted(true)}
-                className="flex items-center justify-center gap-2 w-full bg-aqua-primary text-white py-4 rounded-full font-semibold hover:bg-aqua-primary-dark hover:shadow-primary transition-all mt-4"
+                onClick={() => void handleSubmit()}
+                disabled={submitting}
+                className="flex items-center justify-center gap-2 w-full bg-aqua-primary text-white py-4 rounded-full font-semibold hover:bg-aqua-primary-dark hover:shadow-primary transition-all mt-4 disabled:opacity-50"
               >
                 <Lock className="w-4 h-4" />
-                Siparişi Tamamla
+                {submitting ? 'İşleniyor...' : 'Siparişi Tamamla'}
               </button>
               <p className="text-[11px] text-aqua-text-muted text-center mt-3">
                 Siparişi tamamlayarak kullanım koşullarını kabul etmiş olursunuz.

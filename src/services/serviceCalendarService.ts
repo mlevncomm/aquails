@@ -1,78 +1,64 @@
+import { apiClient } from '@/lib/apiClient';
+
 export interface ServiceSlot {
   id: string;
   date: string;
   time: string;
   label: string;
   available: boolean;
-  customerName?: string;
+  status: string;
+  customerName?: string | null;
+  customerPhone?: string | null;
+  serviceType?: string | null;
+  address?: string | null;
+  orderId?: string | null;
+}
+
+export async function getSlotsForDate(date: string): Promise<ServiceSlot[]> {
+  return apiClient.get<ServiceSlot[]>(`/api/service-slots?date=${encodeURIComponent(date)}`);
+}
+
+export async function bookSlot(payload: {
+  slotId: string;
+  customerName: string;
+  customerPhone: string;
   serviceType?: string;
   address?: string;
-  status?: 'available' | 'booked' | 'completed';
+  orderId?: string;
+}) {
+  return apiClient.post<ServiceSlot>('/api/service-slots/book', payload);
 }
 
-const TIME_SLOTS = ['09:00 - 11:00', '11:00 - 13:00', '13:00 - 15:00', '15:00 - 17:00'];
-
-export function generateSlots(daysAhead = 14): ServiceSlot[] {
-  const saved = localStorage.getItem('service-slots');
-  if (saved) return JSON.parse(saved);
-
-  const slots: ServiceSlot[] = [];
-  const today = new Date();
-  for (let d = 0; d < daysAhead; d++) {
-    const date = new Date(today);
-    date.setDate(date.getDate() + d);
-    const dateStr = date.toISOString().split('T')[0];
-    TIME_SLOTS.forEach((time, i) => {
-      slots.push({
-        id: `${dateStr}-${i}`,
-        date: dateStr,
-        time,
-        label: time,
-        available: Math.random() > 0.3,
-        status: Math.random() > 0.3 ? 'available' : 'booked',
-      });
-    });
-  }
-  localStorage.setItem('service-slots', JSON.stringify(slots));
-  return slots;
+export async function adminGetSlots(): Promise<ServiceSlot[]> {
+  return apiClient.get<ServiceSlot[]>('/api/admin/service-slots');
 }
 
-export function bookSlot(slotId: string, customerName: string, serviceType: string, address: string): boolean {
-  const slots = generateSlots();
-  const slot = slots.find(s => s.id === slotId);
-  if (!slot || !slot.available) return false;
-  slot.available = false;
-  slot.status = 'booked';
-  slot.customerName = customerName;
-  slot.serviceType = serviceType;
-  slot.address = address;
-  localStorage.setItem('service-slots', JSON.stringify(slots));
-  return true;
+export async function adminCreateSlot(body: Record<string, unknown>) {
+  return apiClient.post<ServiceSlot>('/api/admin/service-slots', body);
 }
 
-export function getSlotsForDate(date: string): ServiceSlot[] {
-  return generateSlots().filter(s => s.date === date);
+export async function adminUpdateSlot(id: string, body: Record<string, unknown>) {
+  return apiClient.patch<ServiceSlot>(`/api/admin/service-slots/${id}`, body);
 }
 
-export function getTodaySlots(): ServiceSlot[] {
-  const today = new Date().toISOString().split('T')[0];
-  return generateSlots().filter(s => s.date === today);
+export async function adminDeleteSlot(id: string) {
+  return apiClient.delete(`/api/admin/service-slots/${id}`);
 }
 
-export function getWeekSlots(): ServiceSlot[] {
-  const today = new Date();
-  const weekDates: string[] = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() + i);
-    weekDates.push(d.toISOString().split('T')[0]);
-  }
-  return generateSlots().filter(s => weekDates.includes(s.date));
+// Legacy helpers for checkout compatibility
+export function generateSlots(): ServiceSlot[] {
+  return [];
 }
 
-export function completeSlot(slotId: string): void {
-  const slots = generateSlots();
-  const slot = slots.find(s => s.id === slotId);
-  if (slot) slot.status = 'completed';
-  localStorage.setItem('service-slots', JSON.stringify(slots));
+export async function getTodaySlots(): Promise<ServiceSlot[]> {
+  const today = new Date().toISOString().slice(0, 10);
+  return getSlotsForDate(today);
+}
+
+export async function getWeekSlots(): Promise<ServiceSlot[]> {
+  return apiClient.get<ServiceSlot[]>('/api/service-slots');
+}
+
+export async function completeSlot(): Promise<void> {
+  // Admin updates via adminUpdateSlot
 }

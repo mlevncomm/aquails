@@ -1,40 +1,13 @@
-export interface StockNotification {
-  id: string;
-  productId: string;
-  productName: string;
-  email: string;
-  phone?: string;
-  status: 'pending' | 'notified';
-  createdAt: string;
-  notifiedAt?: string;
+import { apiClient } from '@/lib/apiClient';
+
+export async function requestNotification(productId: string, email: string, phone?: string) {
+  return apiClient.post('/api/stock-notifications', { productId, email, phone });
 }
 
-export function requestNotification(productId: string, productName: string, email: string, phone?: string): void {
-  const notifications = getNotifications();
-  notifications.push({
-    id: Date.now().toString(),
-    productId,
-    productName,
-    email,
-    phone,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  });
-  localStorage.setItem('stock-notifications', JSON.stringify(notifications));
+export async function adminGetNotifications() {
+  return apiClient.get('/api/admin/stock-notifications');
 }
 
-export function getNotifications(): StockNotification[] {
-  return JSON.parse(localStorage.getItem('stock-notifications') || '[]');
-}
-
-export function markAsNotified(id: string): void {
-  const notifications = getNotifications();
-  const n = notifications.find(n => n.id === id);
-  if (n) { n.status = 'notified'; n.notifiedAt = new Date().toISOString(); }
-  localStorage.setItem('stock-notifications', JSON.stringify(notifications));
-}
-
-export function deleteNotification(id: string): void {
-  const notifications = getNotifications().filter(n => n.id !== id);
-  localStorage.setItem('stock-notifications', JSON.stringify(notifications));
+export async function adminMarkNotified(id: string) {
+  return apiClient.patch(`/api/admin/stock-notifications/${id}/mark-notified`);
 }

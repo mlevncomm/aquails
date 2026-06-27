@@ -8,6 +8,15 @@ import { checkDatabaseConnection } from './lib/prisma.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { authRouter } from './modules/auth/auth.routes.js';
+import { productsRouter } from './modules/products/products.routes.js';
+import { categoriesRouter } from './modules/categories/categories.routes.js';
+import { cartRouter } from './modules/cart/cart.routes.js';
+import { couponsRouter } from './modules/coupons/coupons.routes.js';
+import { ordersRouter } from './modules/orders/orders.routes.js';
+import { customersRouter } from './modules/customers/customers.routes.js';
+import { serviceSlotsRouter } from './modules/serviceSlots/serviceSlots.routes.js';
+import { stockNotificationsRouter } from './modules/stockNotifications/stockNotifications.routes.js';
+import { adminRouter } from './modules/admin/admin.routes.js';
 
 export function createApp() {
   const app = express();
@@ -41,6 +50,15 @@ export function createApp() {
   });
 
   app.use('/api/auth', authRouter);
+  app.use('/api/products', productsRouter);
+  app.use('/api/categories', categoriesRouter);
+  app.use('/api/cart', cartRouter);
+  app.use('/api/coupons', couponsRouter);
+  app.use('/api/orders', ordersRouter);
+  app.use('/api/customers', customersRouter);
+  app.use('/api/service-slots', serviceSlotsRouter);
+  app.use('/api/stock-notifications', stockNotificationsRouter);
+  app.use('/api/admin', adminRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

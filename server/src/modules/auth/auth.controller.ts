@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { registerSchema, loginSchema } from './auth.validation.js';
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from './auth.validation.js';
 import * as authService from './auth.service.js';
 import { sendSuccess } from '../../lib/apiResponse.js';
 
@@ -46,4 +46,32 @@ export async function me(
 
 export function logout(_req: Request, res: Response): void {
   sendSuccess(res, { message: 'Logged out successfully' });
+}
+
+export async function forgotPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const input = forgotPasswordSchema.parse(req.body);
+    const result = await authService.forgotPassword(input);
+    sendSuccess(res, result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function resetPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const input = resetPasswordSchema.parse(req.body);
+    const result = await authService.resetPassword(input);
+    sendSuccess(res, result);
+  } catch (error) {
+    next(error);
+  }
 }

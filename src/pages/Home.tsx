@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Check, ArrowRight, ChevronDown, Users, ShieldCheck, Clock, Award,
@@ -13,7 +13,8 @@ import { ProductCard } from '@/components/ProductCard';
 import { RatingStars } from '@/components/RatingStars';
 import { SEO } from '@/components/SEO';
 import { getOrganizationSchema, getWebsiteSchema } from '@/components/SchemaOrg';
-import { products, categories } from '@/data';
+import { getProducts, getCategories, type CategoryDto } from '@/services/productService';
+import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -84,8 +85,31 @@ const categoryImages: Record<string, string> = {
 export default function Home() {
   const [activeTab, setActiveTab] = useState('cok-satanlar');
   const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
 
-  const tabProducts: Record<string, typeof products> = {
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      getProducts({ limit: 8 }),
+      getCategories(),
+    ])
+      .then(([productResult, categoryList]) => {
+        if (!cancelled) {
+          setProducts(productResult.items);
+          setCategories(categoryList);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProducts([]);
+          setCategories([]);
+        }
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const tabProducts: Record<string, Product[]> = {
     'cok-satanlar': products.filter(p => p.rating >= 4.5).slice(0, 4),
     'yeni-gelenler': products.filter(p => p.badge === 'new').slice(0, 4),
     'kampanyali': products.filter(p => p.discountPercent && p.discountPercent > 0).slice(0, 4),

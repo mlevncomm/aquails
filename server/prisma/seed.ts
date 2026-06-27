@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { categorySeedData } from './seed/categories.js';
 import { seedAdminUser } from './seed/admin.js';
+import { seedProducts } from './seed/products.js';
+import { seedCoupons } from './seed/coupons.js';
 
 const prisma = new PrismaClient();
 
@@ -29,8 +31,9 @@ async function seedCategories() {
 
 async function main() {
   await seedCategories();
+  await seedProducts(prisma);
+  await seedCoupons(prisma);
   await seedAdminUser(prisma);
-  // Full product import from frontend mock data: FAZ 4 (uses productMapper.ts)
 }
 
 main()

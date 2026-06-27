@@ -2,7 +2,15 @@ import { prisma } from '../../lib/prisma.js';
 import { AppError } from '../../lib/AppError.js';
 import { hashPassword, comparePasswordSafe } from '../../lib/password.js';
 import { signToken } from '../../lib/jwt.js';
-import type { RegisterInput, LoginInput } from './auth.validation.js';
+import { env } from '../../config/env.js';
+import crypto from 'node:crypto';
+import bcrypt from 'bcryptjs';
+import type {
+  RegisterInput,
+  LoginInput,
+  ForgotPasswordInput,
+  ResetPasswordInput,
+} from './auth.validation.js';
 import {
   toPublicUser,
   type AuthResponse,
@@ -88,4 +96,61 @@ export async function getUserById(userId: string): Promise<PublicUser> {
 export async function getMe(userId: string): Promise<MeResponse> {
   const user = await getUserById(userId);
   return { user };
+}
+
+export async function forgotPassword(input: ForgotPasswordInput) {
+  const user = await prisma.user.findUnique({ where: { email: input.email } });
+
+  if (user) {
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = await bcrypt.hash(rawToken, 12);
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } });
+    await prisma.passwordResetToken.create({
+      data: { userId: user.id, tokenHash, expiresAt },
+    });
+
+    if (env.NODE_ENV === 'development') {
+      return {
+        message: 'If the email exists, reset instructions have been sent.',
+        devResetToken: rawToken,
+      };
+    }
+  }
+
+  return {
+    message: 'If the email exists, reset instructions have been sent.',
+  };
+}
+
+export async function resetPassword(input: ResetPasswordInput) {
+  const tokens = await prisma.passwordResetToken.findMany({
+    where: { expiresAt: { gt: new Date() } },
+    include: { user: true },
+  });
+
+  let matchedToken: (typeof tokens)[number] | undefined;
+  for (const token of tokens) {
+    const isMatch = await bcrypt.compare(input.token, token.tokenHash);
+    if (isMatch) {
+      matchedToken = token;
+      break;
+    }
+  }
+
+  if (!matchedToken) {
+    throw new AppError('Invalid or expired reset token', 400, 'INVALID_RESET_TOKEN');
+  }
+
+  const passwordHash = await hashPassword(input.password);
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: matchedToken.userId },
+      data: { passwordHash },
+    }),
+    prisma.passwordResetToken.deleteMany({ where: { userId: matchedToken.userId } }),
+  ]);
+
+  return { message: 'Password updated successfully' };
 }

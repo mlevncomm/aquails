@@ -1,3 +1,31 @@
+# Aquails E-Ticaret
+
+React + Vite frontend ve Express + Prisma backend monorepo.
+
+## Local development
+
+```bash
+# Frontend
+cp .env.example .env
+npm install
+npm run dev
+
+# Backend (ayrı terminal)
+cd server
+cp .env.example .env
+# DATABASE_URL, DIRECT_URL, JWT_SECRET, SEED_ADMIN_PASSWORD doldurun
+npm install
+npm run db:migrate:deploy
+npm run db:seed
+npm run dev
+```
+
+- Frontend: http://localhost:3000
+- API: http://localhost:4000
+- Detaylı deploy: `server/DEPLOY.md`
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

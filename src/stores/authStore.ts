@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { User } from '@/services/authService';
-import { loadUserFromStorage } from '@/services/authService';
+import { initAuth } from '@/services/authService';
 
 interface AuthStore {
   user: User | null;
@@ -17,14 +17,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isAuthenticated: false,
   isAdmin: false,
   hasHydrated: false,
-  setUser: (user) => set({ user, isAuthenticated: !!user, isAdmin: user?.role === 'admin' }),
+  setUser: (user) =>
+    set({
+      user,
+      isAuthenticated: !!user,
+      isAdmin: user?.role === 'admin',
+    }),
   clearUser: () => set({ user: null, isAuthenticated: false, isAdmin: false }),
   setHydrated: () => set({ hasHydrated: true }),
 }));
 
-// Hydrate from localStorage on init
-const stored = loadUserFromStorage();
-if (stored) {
-  useAuthStore.getState().setUser(stored);
-}
-useAuthStore.getState().setHydrated();
+void initAuth();

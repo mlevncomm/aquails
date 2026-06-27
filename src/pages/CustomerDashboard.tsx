@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import {
   ShoppingBag, Truck, Filter as FilterIcon, Heart, Clock,
@@ -6,18 +7,24 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
-import { orders, filterStatuses } from '@/data';
+import { filterStatuses, products } from '@/data';
 import { cn } from '@/lib/utils';
 import { ProductCard } from '@/components/ProductCard';
-import { products } from '@/data';
+import { getCustomerOrders, type ApiOrder } from '@/services/orderService';
+import { useAuthStore } from '@/stores/authStore';
 
-const stats = [
-  { icon: ShoppingBag, label: 'Toplam Sipariş', value: '12', trend: '+2', color: 'bg-[#1A73E8]/10 text-[#1A73E8]' },
-  { icon: Truck, label: 'Kargoda / Bekliyor', value: '2', trend: '1 yeni', color: 'bg-emerald-50 text-emerald-600' },
+const statusLabels: Record<string, string> = {
+  delivered: 'Tamamlandı',
+  shipped: 'Kargoda',
+  pending: 'Bekliyor',
+  processing: 'Hazırlanıyor',
+  cancelled: 'İptal',
+};
+
+const staticStats = [
   { icon: FilterIcon, label: 'Filtre Değişimine', value: '15 Gün', trend: 'Acele et', color: 'bg-amber-50 text-amber-600' },
   { icon: Heart, label: 'Favorilerim', value: '5', trend: '', color: 'bg-red-50 text-red-500' },
 ];
-
 const quickActions = [
   { icon: ShoppingBag, label: 'Sipariş Ver', href: '/urunler', color: 'from-[#1A73E8] to-[#1557B0]' },
   { icon: Wrench, label: 'Servis Talebi', href: '/hesabim/servis-talepleri', color: 'from-emerald-500 to-emerald-600' },
@@ -42,15 +49,50 @@ const addresses = [
   { title: 'İş', address: 'Caferağa Mah. Moda Cad. No:12, Kadıköy/İstanbul', isDefault: false },
 ];
 
+function formatOrderDate(iso: string) {
+  return new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 export default function CustomerDashboard() {
+  const user = useAuthStore((s) => s.user);
+  const [orders, setOrders] = useState<ApiOrder[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await getCustomerOrders();
+        if (!cancelled) setOrders(data);
+      } catch {
+        if (!cancelled) setOrders([]);
+      } finally {
+        if (!cancelled) setOrdersLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const activeCount = orders.filter(o => ['pending', 'processing', 'shipped'].includes(o.status)).length;
+  const latestOrder = orders[0];
+  const welcomeSubtitle = latestOrder
+    ? `Son siparişiniz: ${latestOrder.orderNumber} (${statusLabels[latestOrder.status] ?? latestOrder.status})`
+    : 'Henüz siparişiniz yok. İlk siparişinizi verin!';
+
+  const stats = [
+    { icon: ShoppingBag, label: 'Toplam Sipariş', value: String(orders.length), trend: '', color: 'bg-[#1A73E8]/10 text-[#1A73E8]' },
+    { icon: Truck, label: 'Kargoda / Bekliyor', value: String(activeCount), trend: '', color: 'bg-emerald-50 text-emerald-600' },
+    ...staticStats,
+  ];
+
   return (
     <>
       {/* Welcome Banner */}
       <ScrollReveal>
         <div className="bg-gradient-to-r from-[#1A73E8] to-[#4285F4] rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-white">Tekrar Hoş Geldiniz, Ahmet!</h3>
-            <p className="text-sm text-white/80 mt-1">Son siparişiniz kargoya verildi. 2 aktif bildiriminiz var.</p>
+            <h3 className="text-lg sm:text-xl font-bold text-white">Tekrar Hoş Geldiniz{user?.name ? `, ${user.name.split(' ')[0]}` : ''}!</h3>
+            <p className="text-sm text-white/80 mt-1">{welcomeSubtitle}</p>
           </div>
           <Link
             to="/hesabim/siparisler"
@@ -111,35 +153,41 @@ export default function CustomerDashboard() {
                 <Link to="/hesabim/siparisler" className="text-[13px] text-[#1A73E8] hover:underline font-medium">Tümünü Gör</Link>
               </div>
               <div className="divide-y divide-[#F0F6FF]">
-                {orders.slice(0, 5).map((order) => (
-                  <Link
-                    key={order.id}
-                    to={`/hesabim/siparisler/${order.id}`}
-                    className="flex items-center justify-between px-5 py-3.5 hover:bg-[#F8FBFF]/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-[#F0F6FF] rounded-lg flex items-center justify-center">
-                        <Package className="w-4 h-4 text-[#1A73E8]/40" />
+                {ordersLoading ? (
+                  <p className="px-5 py-6 text-sm text-[#8B9DAF] text-center">Siparişler yükleniyor...</p>
+                ) : orders.length === 0 ? (
+                  <p className="px-5 py-6 text-sm text-[#8B9DAF] text-center">Henüz siparişiniz yok.</p>
+                ) : (
+                  orders.slice(0, 5).map((order) => (
+                    <Link
+                      key={order.id}
+                      to={`/hesabim/siparisler/${order.id}`}
+                      className="flex items-center justify-between px-5 py-3.5 hover:bg-[#F8FBFF]/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-[#F0F6FF] rounded-lg flex items-center justify-center">
+                          <Package className="w-4 h-4 text-[#1A73E8]/40" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-[#1A73E8]">{order.orderNumber}</p>
+                          <p className="text-xs text-[#8B9DAF] mt-0.5">{formatOrderDate(order.createdAt)}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-[#1A73E8]">{order.orderNumber}</p>
-                        <p className="text-xs text-[#8B9DAF] mt-0.5">{order.createdAt}</p>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-[#0D2137]">{order.total.toLocaleString('tr-TR')}₺</p>
+                        <span className={cn(
+                          'text-[11px] font-medium px-2 py-0.5 rounded-full',
+                          order.status === 'delivered' && 'bg-emerald-50 text-emerald-600',
+                          order.status === 'shipped' && 'bg-blue-50 text-blue-600',
+                          (order.status === 'pending' || order.status === 'processing') && 'bg-amber-50 text-amber-600',
+                          order.status === 'cancelled' && 'bg-red-50 text-red-500',
+                        )}>
+                          {statusLabels[order.status] ?? order.status}
+                        </span>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-[#0D2137]">{order.total.toLocaleString('tr-TR')}₺</p>
-                      <span className={cn(
-                        'text-[11px] font-medium px-2 py-0.5 rounded-full',
-                        order.status === 'delivered' && 'bg-emerald-50 text-emerald-600',
-                        order.status === 'shipped' && 'bg-blue-50 text-blue-600',
-                        order.status === 'pending' && 'bg-amber-50 text-amber-600',
-                        order.status === 'cancelled' && 'bg-red-50 text-red-500',
-                      )}>
-                        {order.status === 'delivered' ? 'Tamamlandı' : order.status === 'shipped' ? 'Kargoda' : order.status === 'pending' ? 'Bekliyor' : 'İptal'}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  ))
+                )}
               </div>
             </div>
           </ScrollReveal>

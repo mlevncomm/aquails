@@ -1,38 +1,82 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Home, PanelBottom, Factory, Layers, Cog, Wrench } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
+import {
+  adminGetCategories,
+  adminCreateCategory,
+  adminUpdateCategory,
+  adminDeleteCategory,
+  type CategoryDto,
+} from '@/services/productService';
 
 const icons: Record<string, React.ElementType> = { Home, PanelBottom, Factory, Layers, Cog, Wrench };
-const initial = [
-  { id: '1', name: 'Ev Tipi Su Arıtma', slug: 'ev-tipi', icon: 'Home', count: 24, order: 1, active: true },
-  { id: '2', name: 'Tezgah Altı Sistemler', slug: 'tezgah-alti', icon: 'PanelBottom', count: 18, order: 2, active: true },
-  { id: '3', name: 'Endüstriyel Arıtma', slug: 'endustriyel', icon: 'Factory', count: 12, order: 3, active: true },
-  { id: '4', name: 'Filtre Setleri', slug: 'filtre-setleri', icon: 'Layers', count: 36, order: 4, active: true },
-  { id: '5', name: 'Yedek Parçalar', slug: 'yedek-parca', icon: 'Cog', count: 42, order: 5, active: true },
-  { id: '6', name: 'Servis ve Bakım', slug: 'servis-bakim', icon: 'Wrench', count: 8, order: 6, active: true },
-];
 
 export default function AdminCategoriesPage() {
-  const [cats, setCats] = useState(initial);
+  const [cats, setCats] = useState<CategoryDto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: '', slug: '', icon: 'Home', active: true });
   const addToast = useToastStore((s) => s.add);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const loadCategories = () => {
+    setLoading(true);
+    setError(null);
+    adminGetCategories()
+      .then(setCats)
+      .catch((err) => setError(err instanceof Error ? err.message : 'Kategoriler yüklenemedi.'))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCats((prev) => [...prev, { id: Date.now().toString(), ...form, count: 0, order: prev.length + 1 }]);
-    addToast('Kategori eklendi.', 'success');
-    setShowForm(false);
-    setForm({ name: '', slug: '', icon: 'Home', active: true });
+    try {
+      await adminCreateCategory({
+        name: form.name,
+        slug: form.slug,
+        icon: form.icon,
+        isActive: form.active,
+      });
+      addToast('Kategori eklendi.', 'success');
+      setShowForm(false);
+      setForm({ name: '', slug: '', icon: 'Home', active: true });
+      loadCategories();
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : 'Ekleme başarısız.', 'error');
+    }
   };
-  const remove = (id: string) => {
-    setCats((prev) => prev.filter((c) => c.id !== id));
-    addToast('Kategori silindi.', 'success');
+
+  const remove = async (id: string) => {
+    try {
+      await adminDeleteCategory(id);
+      setCats((prev) => prev.filter((c) => c.id !== id));
+      addToast('Kategori silindi.', 'success');
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : 'Silme başarısız.', 'error');
+    }
   };
-  const toggleActive = (id: string) => {
-    setCats((prev) => prev.map((c) => (c.id === id ? { ...c, active: !c.active } : c)));
-    addToast('Durum güncellendi.', 'info');
+
+  const toggleActive = async (cat: CategoryDto) => {
+    try {
+      const updated = await adminUpdateCategory(cat.id, { isActive: !cat.isActive });
+      setCats((prev) => prev.map((c) => (c.id === cat.id ? { ...c, isActive: updated.isActive } : c)));
+      addToast('Durum güncellendi.', 'info');
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : 'Güncelleme başarısız.', 'error');
+    }
   };
+
+  if (loading) {
+    return <div className="text-center py-12 text-[#8B9DAF]">Yükleniyor...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-12 text-red-500">{error}</div>;
+  }
 
   return (
     <>
@@ -68,6 +112,7 @@ export default function AdminCategoriesPage() {
             <tbody>
               {cats.map((c) => {
                 const Icon = icons[c.icon] || Home;
+                const active = c.isActive !== false;
                 return (
                   <tr key={c.id} className="border-b border-[#F0F6FF] last:border-0 hover:bg-[#F8FBFF]/50">
                     <td className="px-4 py-3">
@@ -79,10 +124,10 @@ export default function AdminCategoriesPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-[#5A6B7B]">{c.slug}</td>
-                    <td className="px-4 py-3 text-sm text-[#0D2137]">{c.count}</td>
+                    <td className="px-4 py-3 text-sm text-[#0D2137]">{c.productCount}</td>
                     <td className="px-4 py-3">
-                      <button onClick={() => toggleActive(c.id)} className={`text-xs font-medium px-2 py-0.5 rounded-full ${c.active ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}>
-                        {c.active ? 'Aktif' : 'Pasif'}
+                      <button onClick={() => toggleActive(c)} className={`text-xs font-medium px-2 py-0.5 rounded-full ${active ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}>
+                        {active ? 'Aktif' : 'Pasif'}
                       </button>
                     </td>
                     <td className="px-4 py-3">
@@ -101,6 +146,7 @@ export default function AdminCategoriesPage() {
             </tbody>
           </table>
         </div>
+        {cats.length === 0 && <div className="text-center py-8 text-sm text-[#8B9DAF]">Kategori bulunamadı</div>}
       </div>
     </>
   );

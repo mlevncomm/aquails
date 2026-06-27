@@ -1,15 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Search, Plus, Pencil, Trash2 } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import { products } from '@/data/products';
+import { adminGetProducts, adminDeleteProduct } from '@/services/productService';
+import type { Product } from '@/types';
 import { useToastStore } from '@/components/Toast';
 
 export default function AdminProductsPage() {
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
-  const [productList, setProductList] = useState(products);
+  const [productList, setProductList] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const addToast = useToastStore((s) => s.add);
+
+  const loadProducts = () => {
+    setLoading(true);
+    setError(null);
+    adminGetProducts({ limit: 100, includeInactive: true })
+      .then((result) => setProductList(result.items))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Ürünler yüklenemedi.'))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   const filtered = productList.filter(p => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
@@ -17,11 +33,25 @@ export default function AdminProductsPage() {
     return matchSearch && matchCat;
   });
 
-  const cats = ['all', ...Array.from(new Set(products.map(p => p.category)))];
-  const remove = (id: string) => {
-    setProductList(prev => prev.filter(p => p.id !== id));
-    addToast('Ürün silindi.', 'success');
+  const cats = ['all', ...Array.from(new Set(productList.map(p => p.category)))];
+
+  const remove = async (id: string) => {
+    try {
+      await adminDeleteProduct(id);
+      setProductList(prev => prev.filter(p => p.id !== id));
+      addToast('Ürün silindi.', 'success');
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : 'Silme başarısız.', 'error');
+    }
   };
+
+  if (loading) {
+    return <div className="text-center py-12 text-[#8B9DAF]">Yükleniyor...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-12 text-red-500">{error}</div>;
+  }
 
   return (
       <>      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
@@ -31,7 +61,6 @@ export default function AdminProductsPage() {
         </Link>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-5">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B9DAF]" />
@@ -43,7 +72,6 @@ export default function AdminProductsPage() {
         </select>
       </div>
 
-      {/* Table */}
       <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">

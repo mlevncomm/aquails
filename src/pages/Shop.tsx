@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PageLayout } from '@/layouts/PageLayout';
 import { StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
 import { ProductCard } from '@/components/ProductCard';
-import { products, categories } from '@/data';
+import { getProducts, getCategories, type CategoryDto } from '@/services/productService';
+import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
 import { SEO } from '@/components/SEO';
 
@@ -29,6 +30,9 @@ const sortOptions = [
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlCategoryId = searchParams.get('kategori');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
@@ -37,6 +41,31 @@ export default function Shop() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [gridView, setGridView] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    Promise.all([
+      getProducts({ limit: 100, category: urlCategoryId ?? undefined }),
+      getCategories(),
+    ])
+      .then(([productResult, categoryList]) => {
+        if (!cancelled) {
+          setProducts(productResult.items);
+          setCategories(categoryList);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProducts([]);
+          setCategories([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [urlCategoryId]);
 
   // Sync URL category param with filter state
   useEffect(() => {
@@ -49,7 +78,7 @@ export default function Shop() {
       // Clear if URL has no category but state does (on direct nav to /urunler)
       // Only clear if we just arrived (check if it was set from URL)
     }
-  }, [urlCategoryId]);
+  }, [urlCategoryId, categories]);
 
   // Get active category info for display
   const activeCategory = urlCategoryId ? categories.find(c => c.id === urlCategoryId) : null;
@@ -95,7 +124,7 @@ export default function Shop() {
     }
 
     return result;
-  }, [selectedCategories, priceRange, selectedBrands, stockStatus, sortBy, searchQuery]);
+  }, [products, selectedCategories, priceRange, selectedBrands, stockStatus, sortBy, searchQuery]);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -373,7 +402,11 @@ export default function Shop() {
                 ))}
               </div>
             )}
-            {filteredProducts.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-20">
+                <p className="text-lg font-semibold text-aqua-text-muted">Ürünler yükleniyor...</p>
+              </div>
+            ) : filteredProducts.length === 0 ? (
               <div className="text-center py-20">
                 <Search className="w-16 h-16 text-aqua-border mx-auto mb-4" />
                 <p className="text-lg font-semibold text-aqua-text-muted">Ürün bulunamadı</p>
