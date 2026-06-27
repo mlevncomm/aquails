@@ -24,8 +24,22 @@ const envSchema = z.object({
       { message: 'DATABASE_URL must be a PostgreSQL connection string' },
     )
     .optional(),
+  DIRECT_URL: z
+    .string()
+    .refine(
+      (url) => url.startsWith('postgresql://') || url.startsWith('postgres://'),
+      { message: 'DIRECT_URL must be a PostgreSQL connection string' },
+    )
+    .optional(),
   JWT_SECRET: z.string().min(32).optional(),
   JWT_EXPIRES_IN: z.string().default('7d'),
+  SEED_ADMIN_EMAIL: z
+    .string()
+    .email()
+    .default('admin@aquails.com')
+    .transform((v) => v.toLowerCase()),
+  SEED_ADMIN_NAME: z.string().default('Aquails Admin'),
+  SEED_ADMIN_PASSWORD: z.string().optional(),
 });
 
 function parseEnv() {

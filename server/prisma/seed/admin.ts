@@ -1,11 +1,9 @@
 import type { PrismaClient } from '@prisma/client';
+import { env } from '../../src/config/env.js';
 import { hashPassword } from '../../src/lib/password.js';
 
-const DEFAULT_ADMIN_EMAIL = 'admin@aquails.com';
-const DEFAULT_ADMIN_NAME = 'Aquails Admin';
-
 export async function seedAdminUser(prisma: PrismaClient): Promise<void> {
-  const password = process.env.SEED_ADMIN_PASSWORD;
+  const password = env.SEED_ADMIN_PASSWORD;
 
   if (!password) {
     console.warn(
@@ -14,10 +12,8 @@ export async function seedAdminUser(prisma: PrismaClient): Promise<void> {
     return;
   }
 
-  const email = (
-    process.env.SEED_ADMIN_EMAIL ?? DEFAULT_ADMIN_EMAIL
-  ).toLowerCase();
-  const name = process.env.SEED_ADMIN_NAME ?? DEFAULT_ADMIN_NAME;
+  const email = env.SEED_ADMIN_EMAIL;
+  const name = env.SEED_ADMIN_NAME;
   const passwordHash = await hashPassword(password);
 
   await prisma.user.upsert({

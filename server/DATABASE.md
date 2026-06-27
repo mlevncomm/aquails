@@ -2,13 +2,18 @@
 
 ## Local setup
 
+See **[DEPLOY.md](./DEPLOY.md)** for Supabase + Vercel (recommended).
+
 1. Copy environment file:
    ```bash
    cp .env.example .env
    ```
-2. Set `DATABASE_URL` to your local PostgreSQL instance:
+2. Set `DATABASE_URL` and `DIRECT_URL`:
+   - **Supabase:** pooler URL (6543) + direct URL (5432) — see DEPLOY.md
+   - **Local:** same URL for both, e.g.
    ```
    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/aquails?schema=public
+   DIRECT_URL=postgresql://postgres:postgres@localhost:5432/aquails?schema=public
    ```
 3. Run migrations and seed (development only):
    ```bash
