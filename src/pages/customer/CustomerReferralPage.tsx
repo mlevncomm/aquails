@@ -1,12 +1,26 @@
 import { Copy, Check, MessageCircle, Users, Gift } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useToastStore } from '@/components/Toast';
-import { getReferralData } from '@/services/referralService';
+import { getReferralData, type ReferralData } from '@/services/referralService';
+
+const emptyData: ReferralData = {
+  code: '',
+  referrals: 0,
+  earned: 0,
+  link: '',
+  invitedCount: 0,
+  earnedCoupons: [],
+  history: [],
+};
 
 export default function CustomerReferralPage() {
   const addToast = useToastStore(s => s.add);
   const [copied, setCopied] = useState(false);
-  const data = getReferralData();
+  const [data, setData] = useState<ReferralData>(emptyData);
+
+  useEffect(() => {
+    void getReferralData().then(setData);
+  }, []);
 
   const handleCopy = () => {
     navigator.clipboard?.writeText(data.link);
@@ -16,7 +30,7 @@ export default function CustomerReferralPage() {
   };
 
   const handleShareWhatsApp = () => {
-    const msg = `Aquails'ten su aritma cihazi almak icin bu linki kullan, %10 indirim kazan! ${data.link}`;
+    const msg = `Aquails'ten su arıtma cihazı almak için bu linki kullan, %10 indirim kazan! ${data.link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
 

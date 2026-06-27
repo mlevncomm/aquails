@@ -10,11 +10,11 @@ export default function CustomerLoyaltyPage() {
   const addToast = useToastStore(s => s.add);
   const [convertAmount, setConvertAmount] = useState(500);
 
-  const handleConvert = () => {
-    const coupon = convertPointsToCoupon(convertAmount);
+  const handleConvert = async () => {
+    const coupon = await convertPointsToCoupon(convertAmount);
     if (coupon) {
       addToast(`${coupon.discount}₺ degerinde kupon olusturuldu: ${coupon.code}`, 'success');
-      refresh();
+      await refresh();
     } else {
       addToast('Yetersiz puan veya gecersiz miktar.', 'error');
     }
@@ -57,7 +57,7 @@ export default function CustomerLoyaltyPage() {
           />
           <span className="text-sm text-[#8B9DAF]">puan = {Math.floor(convertAmount / 100) * 10}₺</span>
           <button
-            onClick={handleConvert}
+            onClick={() => void handleConvert()}
             className="ml-auto bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1557B0] transition-all"
           >
             Cevir
@@ -94,7 +94,7 @@ export default function CustomerLoyaltyPage() {
               <div key={tx.id} className="flex items-center justify-between p-3 bg-[#F8FBFF] rounded-xl">
                 <div>
                   <p className="text-sm text-[#0D2137]">{tx.description}</p>
-                  <p className="text-[11px] text-[#8B9DAF]">{new Date(tx.date).toLocaleDateString('tr-TR')}</p>
+                  <p className="text-[11px] text-[#8B9DAF]">{new Date(tx.createdAt).toLocaleDateString('tr-TR')}</p>
                 </div>
                 <span className={`text-sm font-semibold ${tx.type === 'earn' ? 'text-[#00C9A7]' : 'text-[#E85454]'}`}>
                   {tx.type === 'earn' ? '+' : '-'}{tx.amount}

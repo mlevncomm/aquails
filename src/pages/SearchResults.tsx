@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Search, SlidersHorizontal, X, ArrowUpDown } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -6,7 +6,8 @@ import { PageLayout } from '@/layouts/PageLayout';
 import { ProductCard } from '@/components/ProductCard';
 import { EmptyState } from '@/components/EmptyState';
 import { ProductGridSkeleton } from '@/components/Skeleton';
-import { products } from '@/data';
+import { searchProducts } from '@/services/productService';
+import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
 
 const sortOptions = [
@@ -20,13 +21,30 @@ const sortOptions = [
 
 export default function SearchResults() {
   const query = new URLSearchParams(window.location.search).get('q') || '';
+  const [products, setProducts] = useState<Product[]>([]);
   const [sort, setSort] = useState('default');
   const [catFilter, setCatFilter] = useState('all');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
   const [showFilters, setShowFilters] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const cats = useMemo(() => ['all', ...Array.from(new Set(products.map(p => p.category)))], []);
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    searchProducts(query)
+      .then((items) => {
+        if (!cancelled) setProducts(items);
+      })
+      .catch(() => {
+        if (!cancelled) setProducts([]);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [query]);
+
+  const cats = useMemo(() => ['all', ...Array.from(new Set(products.map(p => p.category)))], [products]);
 
   const filtered = useMemo(() => {
     let res = products.filter(p => {
@@ -43,12 +61,10 @@ export default function SearchResults() {
       default: break;
     }
     return res;
-  }, [query, sort, catFilter, priceRange]);
+  }, [products, query, sort, catFilter, priceRange]);
 
   const handleSort = (val: string) => {
-    setIsLoading(true);
     setSort(val);
-    setTimeout(() => setIsLoading(false), 300);
   };
 
   const activeFilters = [

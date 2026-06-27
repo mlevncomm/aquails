@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -7,7 +7,7 @@ import {
   MessageCircle, Bell, Mail, Phone, Send, AlertCircle
 } from 'lucide-react';
 import { openWhatsApp, getProductInquiryMessage } from '@/services/whatsappService';
-import { requestNotification, getNotifications } from '@/services/stockNotificationService';
+import { requestNotification } from '@/services/stockNotificationService';
 import { useToastStore } from '@/components/Toast';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
@@ -16,7 +16,8 @@ import { RatingStars } from '@/components/RatingStars';
 import { QuantitySelector } from '@/components/QuantitySelector';
 import { SEO } from '@/components/SEO';
 import { getProductSchema, getBreadcrumbSchema } from '@/components/SchemaOrg';
-import { getProductBySlug, getRelatedProducts, products } from '@/data';
+import { getProduct, getRelated, getProducts } from '@/services/productService';
+import type { Product } from '@/types';
 import { useCartStore } from '@/stores/cartStore';
 import { cn } from '@/lib/utils';
 
@@ -35,7 +36,11 @@ const reviews = [
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const product = getProductBySlug(slug || '');
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const { addItem, openDrawer } = useCartStore();
   const addToast = useToastStore(s => s.add);
   const [quantity, setQuantity] = useState(1);
@@ -50,13 +55,59 @@ export default function ProductDetail() {
   const [notifySubmitted, setNotifySubmitted] = useState(false);
   const [notifyErrors, setNotifyErrors] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    if (!slug) {
+      setLoading(false);
+      setError(true);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    setError(false);
+
+    getProduct(slug)
+      .then(async (p) => {
+        if (cancelled) return;
+        setProduct(p);
+        const [related, recent] = await Promise.all([
+          getRelated(p.id, 4),
+          getProducts({ limit: 4 }).then(r => r.items),
+        ]);
+        if (!cancelled) {
+          setRelatedProducts(related);
+          setRecentProducts(recent);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProduct(null);
+          setError(true);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [slug]);
+
   const isLowStock = product ? product.stock <= 5 : false;
   const isOutOfStock = product ? product.stock === 0 : false;
-  const existingNotification = product
-    ? getNotifications().find(n => n.productId === product.id && n.status === 'pending')
-    : undefined;
 
-  if (!product) {
+  if (loading) {
+    return (
+      <>
+        <SEO title="Yükleniyor | Aquails" noindex />
+        <PageLayout>
+          <div className="max-w-[1280px] mx-auto px-6 py-20 text-center">
+            <p className="text-lg text-aqua-text-muted">Ürün yükleniyor...</p>
+          </div>
+        </PageLayout>
+      </>
+    );
+  }
+
+  if (error || !product) {
     return (
       <>
         <SEO title="Ürün Bulunamadı | Aquails" noindex />
@@ -92,8 +143,6 @@ export default function ProductDetail() {
     { name: product.name, url: `/urun/${product.slug}` },
   ]);
 
-  const relatedProducts = getRelatedProducts(product.id, 4);
-
   const handleAddToCart = () => {
     addItem(product, quantity);
     openDrawer();
@@ -112,7 +161,7 @@ export default function ProductDetail() {
     setNotifyErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    requestNotification(product.id, product.name, notifyEmail, notifyPhone || undefined);
+    requestNotification(product.id, notifyEmail, notifyPhone || undefined);
     setNotifySubmitted(true);
     addToast('Stok bildirimine kaydoldunuz. Ürün gelince haberdar edileceksiniz.', 'success');
   };
@@ -308,7 +357,7 @@ export default function ProductDetail() {
             </div>
 
             {/* Stock Notification */}
-            {(isLowStock || isOutOfStock) && !existingNotification && !notifySubmitted && (
+            {(isLowStock || isOutOfStock) && !notifySubmitted && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -383,7 +432,7 @@ export default function ProductDetail() {
             )}
 
             {/* Already subscribed */}
-            {(existingNotification || notifySubmitted) && (
+            {notifySubmitted && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -590,7 +639,7 @@ export default function ProductDetail() {
       <section className="max-w-[1280px] mx-auto px-6 pb-20">
         <h2 className="text-xl md:text-2xl font-bold text-aqua-secondary mb-6">Son Görüntüledikleriniz</h2>
         <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
-          {products.slice(0, 4).map((p) => (
+          {recentProducts.map((p) => (
             <Link
               key={p.id}
               to={`/urun/${p.slug}`}

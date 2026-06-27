@@ -12,6 +12,19 @@ dist
 dist-ssr
 *.local
 
+# Environment (never commit secrets)
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local
+server/.env
+server/.env.*
+
+# Server build output
+server/dist
+server/node_modules
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

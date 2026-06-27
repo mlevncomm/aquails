@@ -1,21 +1,95 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { ArrowLeft, Plus, X, Save, ImageIcon } from 'lucide-react';
+import { adminCreateProduct, adminGetCategories, type CategoryDto } from '@/services/productService';
+import { useToastStore } from '@/components/Toast';
 
 export default function AdminProductEditPage() {
-  const [specs, setSpecs] = useState([{ key: 'Garanti', value: '5 Yıl' }, { key: 'Boyutlar', value: '42 x 21 x 51 cm' }]);
-  const [saved, setSaved] = useState(false);
+  const [specs, setSpecs] = useState([{ key: '', value: '' }]);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [slug, setSlug] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [shortDescription, setShortDescription] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [oldPrice, setOldPrice] = useState('');
+  const [stock, setStock] = useState('0');
+  const [isActive, setIsActive] = useState(true);
+  const addToast = useToastStore((s) => s.add);
+
+  useEffect(() => {
+    let cancelled = false;
+    adminGetCategories()
+      .then((cats) => {
+        if (!cancelled) {
+          setCategories(cats);
+          if (cats.length > 0) setCategoryId(cats[0].id);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Kategoriler yüklenemedi.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
   const addSpec = () => setSpecs([...specs, { key: '', value: '' }]);
   const removeSpec = (i: number) => setSpecs(specs.filter((_, idx) => idx !== i));
   const updateSpec = (i: number, field: 'key' | 'value', val: string) => {
     const s = [...specs]; s[i][field] = val; setSpecs(s);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setSaving(true);
+    setError(null);
+    const specifications = specs.reduce<Record<string, string>>((acc, s) => {
+      if (s.key.trim()) acc[s.key.trim()] = s.value;
+      return acc;
+    }, {});
+
+    try {
+      await adminCreateProduct({
+        name,
+        slug,
+        categoryId,
+        shortDescription: shortDescription || undefined,
+        description,
+        price: Number(price),
+        oldPrice: oldPrice ? Number(oldPrice) : null,
+        stock: Number(stock),
+        images: [],
+        features: [],
+        specifications,
+        isActive,
+      });
+      addToast('Ürün başarıyla kaydedildi.', 'success');
+      setName('');
+      setSlug('');
+      setShortDescription('');
+      setDescription('');
+      setPrice('');
+      setOldPrice('');
+      setStock('0');
+      setSpecs([{ key: '', value: '' }]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Kayıt başarısız.';
+      setError(msg);
+      addToast(msg, 'error');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return <div className="text-center py-12 text-[#8B9DAF]">Yükleniyor...</div>;
+  }
 
   return (
       <>      <Link to="/admin/urunler" className="inline-flex items-center gap-1.5 text-sm text-[#8B9DAF] hover:text-white mb-5 transition-colors">
@@ -26,23 +100,25 @@ export default function AdminProductEditPage() {
         <h2 className="text-lg font-semibold text-[#0D2137]">Yeni Ürün Ekle</h2>
       </div>
 
-      {saved && <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-4 py-3 rounded-xl text-sm font-medium mb-5">Ürün başarıyla kaydedildi.</div>}
+      {error && <div className="flex items-center gap-2 bg-red-500/10 text-red-400 px-4 py-3 rounded-xl text-sm font-medium mb-5">{error}</div>}
 
       <form onSubmit={handleSave} className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-5">
           <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6 space-y-4">
             <h3 className="text-sm font-semibold text-[#0D2137]">Temel Bilgiler</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div><label className="text-xs text-[#8B9DAF] mb-1 block">Ürün Adı</label><input required defaultValue="Aquails PurePro 7 Aşamalı" className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
-              <div><label className="text-xs text-[#8B9DAF] mb-1 block">Slug</label><input required defaultValue="aquails-purepro-7-asamali" className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
-              <div><label className="text-xs text-[#8B9DAF] mb-1 block">Kategori</label><select className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl bg-white"><option>Ev Tipi</option><option>Tezgah Altı</option><option>Endüstriyel</option><option>Filtre Seti</option><option>Yedek Parça</option></select></div>
-              <div><label className="text-xs text-[#8B9DAF] mb-1 block">SKU</label><input defaultValue="AQ-PUREPRO-7" className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
+              <div><label className="text-xs text-[#8B9DAF] mb-1 block">Ürün Adı</label><input required value={name} onChange={e => setName(e.target.value)} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
+              <div><label className="text-xs text-[#8B9DAF] mb-1 block">Slug</label><input required value={slug} onChange={e => setSlug(e.target.value)} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
+              <div><label className="text-xs text-[#8B9DAF] mb-1 block">Kategori</label>
+                <select required value={categoryId} onChange={e => setCategoryId(e.target.value)} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl bg-white">
+                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
             </div>
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block">Kısa Açıklama</label><input defaultValue="7 aşamalı RO teknolojisi ile en saf su." className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block">Uzun Açıklama</label><textarea rows={4} defaultValue="Aquails PurePro, en gelişmiş su arıtma teknolojisini evinize getiriyor..." className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8] resize-none" /></div>
+            <div><label className="text-xs text-[#8B9DAF] mb-1 block">Kısa Açıklama</label><input value={shortDescription} onChange={e => setShortDescription(e.target.value)} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
+            <div><label className="text-xs text-[#8B9DAF] mb-1 block">Uzun Açıklama</label><textarea required rows={4} value={description} onChange={e => setDescription(e.target.value)} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8] resize-none" /></div>
           </div>
 
-          {/* Specs */}
           <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-[#0D2137]">Teknik Özellikler</h3>
@@ -60,29 +136,27 @@ export default function AdminProductEditPage() {
           </div>
         </div>
 
-        {/* Right Sidebar */}
         <div className="space-y-5">
           <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6 space-y-4">
             <h3 className="text-sm font-semibold text-[#0D2137]">Fiyat & Stok</h3>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="text-xs text-[#8B9DAF] mb-1 block">Fiyat (₺)</label><input type="number" defaultValue="12900" className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl" /></div>
-              <div><label className="text-xs text-[#8B9DAF] mb-1 block">İndirimli (₺)</label><input type="number" defaultValue="15900" className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl" /></div>
-              <div><label className="text-xs text-[#8B9DAF] mb-1 block">Stok</label><input type="number" defaultValue="24" className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl" /></div>
-              <div><label className="text-xs text-[#8B9DAF] mb-1 block">Kritik Stok</label><input type="number" defaultValue="5" className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl" /></div>
+              <div><label className="text-xs text-[#8B9DAF] mb-1 block">Fiyat (₺)</label><input required type="number" min="0" value={price} onChange={e => setPrice(e.target.value)} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl" /></div>
+              <div><label className="text-xs text-[#8B9DAF] mb-1 block">İndirimli (₺)</label><input type="number" min="0" value={oldPrice} onChange={e => setOldPrice(e.target.value)} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl" /></div>
+              <div><label className="text-xs text-[#8B9DAF] mb-1 block">Stok</label><input required type="number" min="0" value={stock} onChange={e => setStock(e.target.value)} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl" /></div>
             </div>
-            <label className="flex items-center gap-2 text-sm text-[#5A6B7B]"><input type="checkbox" defaultChecked className="w-4 h-4 accent-[#1A73E8]" />Aktif</label>
+            <label className="flex items-center gap-2 text-sm text-[#5A6B7B]"><input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} className="w-4 h-4 accent-[#1A73E8]" />Aktif</label>
           </div>
 
           <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6">
             <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Ürün Görselleri</h3>
-            <div className="border-2 border-dashed border-[#D6E3F0] rounded-xl p-8 text-center hover:border-[#1A73E8] transition-colors cursor-pointer">
+            <div className="border-2 border-dashed border-[#D6E3F0] rounded-xl p-8 text-center">
               <ImageIcon className="w-8 h-8 text-[#D6E3F0] mx-auto mb-2" />
-              <p className="text-xs text-[#8B9DAF]">Görsel yüklemek için tıklayın</p>
+              <p className="text-xs text-[#8B9DAF]">Görsel yükleme yakında eklenecek</p>
             </div>
           </div>
 
-          <button type="submit" className="w-full flex items-center justify-center gap-2 bg-[#1A73E8] text-white py-3 rounded-xl font-semibold hover:bg-[#1557B0] transition-all">
-            <Save className="w-4 h-4" /> Kaydet
+          <button type="submit" disabled={saving} className="w-full flex items-center justify-center gap-2 bg-[#1A73E8] text-white py-3 rounded-xl font-semibold hover:bg-[#1557B0] transition-all disabled:opacity-60">
+            <Save className="w-4 h-4" /> {saving ? 'Kaydediliyor...' : 'Kaydet'}
           </button>
         </div>
       </form>

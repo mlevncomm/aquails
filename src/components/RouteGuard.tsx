@@ -18,9 +18,9 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     const isAdminRoute = ADMIN_ROUTES.some(r => path.startsWith(r));
 
     if (isCustomerRoute && !isAuthenticated) {
-      navigate('/giris', { replace: true });
+      navigate(`/giris?redirect=${encodeURIComponent(path)}`, { replace: true });
     } else if (isAdminRoute && !isAdmin) {
-      navigate('/', { replace: true });
+      navigate(`/giris?redirect=${encodeURIComponent(path)}`, { replace: true });
     }
   }, [location.pathname, isAuthenticated, isAdmin, hasHydrated, navigate]);
 

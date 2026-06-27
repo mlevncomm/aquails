@@ -23,9 +23,9 @@ interface NotificationState {
 }
 
 const DEFAULT_NOTIFICATIONS: Notification[] = [
-  { id: '1', title: 'Siparisiniz kargoya verildi', message: '#ORD-00123 numarali siparisiniz Yurtici Kargo ile yola cikti.', type: 'shipping', read: false, createdAt: new Date(Date.now() - 86400000).toISOString(), link: '/hesabim/siparisler' },
-  { id: '2', title: 'Filtre degisimi yaklasiyor', message: 'Su aritma cihazinizin sediment filtresi degisimi 15 gun icinde.', type: 'filter', read: false, createdAt: new Date(Date.now() - 172800000).toISOString(), link: '/filtre-aboneligi' },
-  { id: '3', title: 'Yeni kampanya basladi', message: 'Direkt akis cihazlarda %20 indirim firsatini kacirmayin!', type: 'campaign', read: true, createdAt: new Date(Date.now() - 259200000).toISOString(), link: '/kampanyalar' },
+  { id: '1', title: 'Siparişiniz kargoya verildi', message: '#ORD-00123 numaralı siparişiniz Yurtiçi Kargo ile yola çıktı.', type: 'shipping', read: false, createdAt: new Date(Date.now() - 86400000).toISOString(), link: '/hesabim/siparisler' },
+  { id: '2', title: 'Filtre değişimi yaklaşıyor', message: 'Su arıtma cihazınızın sediment filtresi değişimi 15 gün içinde.', type: 'filter', read: false, createdAt: new Date(Date.now() - 172800000).toISOString(), link: '/filtre-aboneligi' },
+  { id: '3', title: 'Yeni kampanya başladı', message: 'Direkt akış cihazlarda %20 indirim fırsatını kaçırmayın!', type: 'campaign', read: true, createdAt: new Date(Date.now() - 259200000).toISOString(), link: '/kampanyalar' },
 ];
 
 export const useNotificationStore = create<NotificationState>()(

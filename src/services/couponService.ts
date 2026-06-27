@@ -1,25 +1,54 @@
-export interface Coupon {
+import { apiClient } from '@/lib/apiClient';
+import { invokeFunction } from '@/lib/api';
+import { isSupabaseMode } from '@/lib/dataProvider';
+import { requireSupabase } from '@/lib/supabase';
+
+export interface CouponValidationResult {
   code: string;
-  type: 'percent' | 'fixed' | 'shipping';
-  value: number;
-  minOrder?: number;
+  type: 'PERCENT' | 'FIXED' | 'SHIPPING';
+  discount: number;
+  message: string;
 }
 
-const COUPONS: Coupon[] = [
-  { code: 'AQUAILS10', type: 'percent', value: 10, minOrder: 1000 },
-  { code: 'FILTRE250', type: 'fixed', value: 250, minOrder: 2000 },
-  { code: 'KARGO', type: 'shipping', value: 0, minOrder: 0 },
-];
+export async function validateCoupon(code: string, subtotal: number): Promise<CouponValidationResult> {
+  if (isSupabaseMode) {
+    return invokeFunction<CouponValidationResult>('validate-coupon', { code, subtotal });
+  }
+  return apiClient.post<CouponValidationResult>('/api/coupons/validate', { code, subtotal });
+}
 
-export function validateCoupon(code: string, subtotal: number): { valid: boolean; coupon?: Coupon; discount: number; message?: string } {
-  const c = COUPONS.find(cp => cp.code === code.toUpperCase());
-  if (!c) return { valid: false, discount: 0, message: 'Geçersiz kupon kodu.' };
-  if (c.minOrder && subtotal < c.minOrder) return { valid: false, discount: 0, message: `Minimum ${c.minOrder.toLocaleString('tr-TR')}₺ sipariş gerekli.` };
+export async function adminGetCoupons() {
+  if (isSupabaseMode) {
+    const { data, error } = await requireSupabase().from('coupons').select('*').order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  }
+  return apiClient.get<Array<Record<string, unknown>>>('/api/admin/coupons');
+}
 
-  let discount = 0;
-  if (c.type === 'percent') discount = Math.round(subtotal * c.value / 100);
-  else if (c.type === 'fixed') discount = c.value;
-  else if (c.type === 'shipping') discount = -1;
+export async function adminCreateCoupon(body: Record<string, unknown>) {
+  if (isSupabaseMode) {
+    const { data, error } = await requireSupabase().from('coupons').insert(body).select('*').single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+  return apiClient.post('/api/admin/coupons', body);
+}
 
-  return { valid: true, coupon: c, discount };
+export async function adminUpdateCoupon(id: string, body: Record<string, unknown>) {
+  if (isSupabaseMode) {
+    const { data, error } = await requireSupabase().from('coupons').update(body).eq('id', id).select('*').single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+  return apiClient.patch(`/api/admin/coupons/${id}`, body);
+}
+
+export async function adminDeleteCoupon(id: string) {
+  if (isSupabaseMode) {
+    const { data, error } = await requireSupabase().from('coupons').update({ is_active: false }).eq('id', id).select('*').single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+  return apiClient.delete(`/api/admin/coupons/${id}`);
 }
