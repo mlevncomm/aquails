@@ -1,6 +1,10 @@
 import { create } from 'zustand';
-import type { User } from '@/services/authService';
+import type { User, UserRole } from '@/services/authService';
 import { initAuth } from '@/services/authService';
+
+function isAdminRole(role?: UserRole): boolean {
+  return role === 'admin' || role === 'super_admin';
+}
 
 interface AuthStore {
   user: User | null;
@@ -21,7 +25,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({
       user,
       isAuthenticated: !!user,
-      isAdmin: user?.role === 'admin',
+      isAdmin: isAdminRole(user?.role),
     }),
   clearUser: () => set({ user: null, isAuthenticated: false, isAdmin: false }),
   setHydrated: () => set({ hasHydrated: true }),

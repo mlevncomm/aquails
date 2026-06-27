@@ -115,7 +115,7 @@ export async function getProductBySlug(slug: string, activeOnly = true) {
   });
 
   if (!product) {
-    throw new AppError('Product not found', 404, 'PRODUCT_NOT_FOUND');
+    throw new AppError('Ürün bulunamadı', 404, 'PRODUCT_NOT_FOUND');
   }
 
   return serializeProduct(product as ProductWithCategory);
@@ -128,7 +128,7 @@ export async function getProductById(id: string) {
   });
 
   if (!product) {
-    throw new AppError('Product not found', 404, 'PRODUCT_NOT_FOUND');
+    throw new AppError('Ürün bulunamadı', 404, 'PRODUCT_NOT_FOUND');
   }
 
   return serializeProduct(product as ProductWithCategory);
@@ -141,7 +141,7 @@ export async function getRelatedProducts(productId: string, limit = 4) {
   });
 
   if (!product) {
-    throw new AppError('Product not found', 404, 'PRODUCT_NOT_FOUND');
+    throw new AppError('Ürün bulunamadı', 404, 'PRODUCT_NOT_FOUND');
   }
 
   const related = await prisma.product.findMany({
@@ -161,12 +161,12 @@ export async function getRelatedProducts(productId: string, limit = 4) {
 export async function createProduct(input: CreateProductInput) {
   const category = await prisma.category.findUnique({ where: { id: input.categoryId } });
   if (!category) {
-    throw new AppError('Category not found', 404, 'CATEGORY_NOT_FOUND');
+    throw new AppError('Kategori bulunamadı', 404, 'CATEGORY_NOT_FOUND');
   }
 
   const existing = await prisma.product.findUnique({ where: { slug: input.slug } });
   if (existing) {
-    throw new AppError('Product slug already exists', 409, 'SLUG_ALREADY_EXISTS');
+    throw new AppError('Ürün adresi zaten mevcut', 409, 'SLUG_ALREADY_EXISTS');
   }
 
   const product = await prisma.product.create({
@@ -198,20 +198,20 @@ export async function createProduct(input: CreateProductInput) {
 export async function updateProduct(id: string, input: UpdateProductInput) {
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing) {
-    throw new AppError('Product not found', 404, 'PRODUCT_NOT_FOUND');
+    throw new AppError('Ürün bulunamadı', 404, 'PRODUCT_NOT_FOUND');
   }
 
   if (input.slug && input.slug !== existing.slug) {
     const slugTaken = await prisma.product.findUnique({ where: { slug: input.slug } });
     if (slugTaken) {
-      throw new AppError('Product slug already exists', 409, 'SLUG_ALREADY_EXISTS');
+      throw new AppError('Ürün adresi zaten mevcut', 409, 'SLUG_ALREADY_EXISTS');
     }
   }
 
   if (input.categoryId) {
     const category = await prisma.category.findUnique({ where: { id: input.categoryId } });
     if (!category) {
-      throw new AppError('Category not found', 404, 'CATEGORY_NOT_FOUND');
+      throw new AppError('Kategori bulunamadı', 404, 'CATEGORY_NOT_FOUND');
     }
   }
 
@@ -231,7 +231,7 @@ export async function updateProduct(id: string, input: UpdateProductInput) {
 export async function softDeleteProduct(id: string) {
   const existing = await prisma.product.findUnique({ where: { id } });
   if (!existing) {
-    throw new AppError('Product not found', 404, 'PRODUCT_NOT_FOUND');
+    throw new AppError('Ürün bulunamadı', 404, 'PRODUCT_NOT_FOUND');
   }
 
   const product = await prisma.product.update({

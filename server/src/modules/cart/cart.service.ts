@@ -18,7 +18,7 @@ export interface CartResponse {
 function getCartOwner(userId?: string, sessionId?: string) {
   if (userId) return { userId, sessionId: undefined as string | undefined };
   if (sessionId) return { userId: undefined as string | undefined, sessionId };
-  throw new AppError('Cart session required', 400, 'CART_SESSION_REQUIRED');
+  throw new AppError('Sepet oturumu gerekli', 400, 'CART_SESSION_REQUIRED');
 }
 
 async function loadCartItems(userId?: string, sessionId?: string) {
@@ -72,7 +72,7 @@ export async function addCartItem(
   });
 
   if (!product) {
-    throw new AppError('Product not found', 404, 'PRODUCT_NOT_FOUND');
+    throw new AppError('Ürün bulunamadı', 404, 'PRODUCT_NOT_FOUND');
   }
 
   const existing = userId
@@ -85,7 +85,7 @@ export async function addCartItem(
 
   const totalQuantity = (existing?.quantity ?? 0) + quantity;
   if (product.stock < totalQuantity) {
-    throw new AppError('Insufficient stock', 400, 'INSUFFICIENT_STOCK');
+    throw new AppError('Yetersiz stok', 400, 'INSUFFICIENT_STOCK');
   }
 
   if (userId) {
@@ -119,22 +119,22 @@ export async function updateCartItem(
   });
 
   if (!item) {
-    throw new AppError('Cart item not found', 404, 'CART_ITEM_NOT_FOUND');
+    throw new AppError('Sepet öğesi bulunamadı', 404, 'CART_ITEM_NOT_FOUND');
   }
 
   if (userId && item.userId !== userId) {
-    throw new AppError('Forbidden', 403, 'FORBIDDEN');
+    throw new AppError('Erişim engellendi', 403, 'FORBIDDEN');
   }
   if (!userId && item.sessionId !== sessionId) {
-    throw new AppError('Forbidden', 403, 'FORBIDDEN');
+    throw new AppError('Erişim engellendi', 403, 'FORBIDDEN');
   }
 
   if (quantity < 1) {
-    throw new AppError('Quantity must be at least 1', 400, 'VALIDATION_ERROR');
+    throw new AppError('Adet en az 1 olmalıdır', 400, 'VALIDATION_ERROR');
   }
 
   if (item.product.stock < quantity) {
-    throw new AppError('Insufficient stock', 400, 'INSUFFICIENT_STOCK');
+    throw new AppError('Yetersiz stok', 400, 'INSUFFICIENT_STOCK');
   }
 
   await prisma.cartItem.update({ where: { id: itemId }, data: { quantity } });
@@ -150,14 +150,14 @@ export async function removeCartItem(
 
   const item = await prisma.cartItem.findUnique({ where: { id: itemId } });
   if (!item) {
-    throw new AppError('Cart item not found', 404, 'CART_ITEM_NOT_FOUND');
+    throw new AppError('Sepet öğesi bulunamadı', 404, 'CART_ITEM_NOT_FOUND');
   }
 
   if (userId && item.userId !== userId) {
-    throw new AppError('Forbidden', 403, 'FORBIDDEN');
+    throw new AppError('Erişim engellendi', 403, 'FORBIDDEN');
   }
   if (!userId && item.sessionId !== sessionId) {
-    throw new AppError('Forbidden', 403, 'FORBIDDEN');
+    throw new AppError('Erişim engellendi', 403, 'FORBIDDEN');
   }
 
   await prisma.cartItem.delete({ where: { id: itemId } });
@@ -189,7 +189,7 @@ export async function mergeGuestCart(userId: string, sessionId: string): Promise
         (await tx.product.findUnique({ where: { id: guestItem.productId } }));
 
       if (!product || !product.isActive || product.stock < mergedQuantity) {
-        throw new AppError('Insufficient stock', 400, 'INSUFFICIENT_STOCK');
+        throw new AppError('Yetersiz stok', 400, 'INSUFFICIENT_STOCK');
       }
 
       if (existing) {

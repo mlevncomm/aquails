@@ -255,11 +255,11 @@ export default function Shop() {
   );
 
   const categoryHero: Record<string, { title: string; desc: string }> = {
-    'su-aritma-cihazlari': { title: 'Su Aritma Cihazlari', desc: 'Eviniz ve is yeriniz icin yuksek performansli, uzun omurlu Aquails su aritma cozumlerini kesfedin.' },
-    'direkt-akis-su-aritma': { title: 'Direkt Akis Su Aritma', desc: 'Tanksiz modern sistemlerle aninda temiz su. En yeni teknoloji direkt akis cihazlari.' },
-    'filtreler': { title: 'Filtreler', desc: 'Cihazinizin performansini koruyan, duzenli degisim icin uygun Aquails filtre cozumleri.' },
-    'sebiller': { title: 'Sebiller', desc: 'Sicak ve soguk su secenekli modern sebil modelleri.' },
-    'aksesuarlar': { title: 'Aksesuarlar', desc: 'Su aritma sistemlerinizi tamamlayici aksesuarlar ve yedek parcalar.' },
+    'su-aritma-cihazlari': { title: 'Su Arıtma Cihazları', desc: 'Eviniz ve iş yeriniz için yüksek performanslı, uzun ömürlü Aquails su arıtma çözümlerini keşfedin.' },
+    'direkt-akis-su-aritma': { title: 'Direkt Akış Su Arıtma', desc: 'Tanksız modern sistemlerle anında temiz su. En yeni teknoloji direkt akış cihazları.' },
+    'filtreler': { title: 'Filtreler', desc: 'Cihazınızın performansını koruyan, düzenli değişim için uygun Aquails filtre çözümleri.' },
+    'sebiller': { title: 'Sebiller', desc: 'Sıcak ve soğuk su seçenekli modern sebil modelleri.' },
+    'aksesuarlar': { title: 'Aksesuarlar', desc: 'Su arıtma sistemlerinizi tamamlayıcı aksesuarlar ve yedek parcalar.' },
   };
   const heroInfo = urlCategoryId && categoryHero[urlCategoryId] ? categoryHero[urlCategoryId] : null;
 
@@ -295,13 +295,13 @@ export default function Shop() {
               {heroInfo ? (
                 <p className="text-sm text-aqua-text-muted mt-2 max-w-lg leading-relaxed">{heroInfo.desc}</p>
               ) : activeCategory ? (
-                <p className="text-sm text-aqua-text-muted mt-1">{activeCategory.productCount} urun</p>
+                <p className="text-sm text-aqua-text-muted mt-1">{activeCategory.productCount} ürün</p>
               ) : (
-                <p className="text-sm text-aqua-text-muted mt-2 max-w-lg leading-relaxed">Su aritma cihazlari, filtre setleri, aksesuarlar ve servis cozumlerini tek yerden kesfedin.</p>
+                <p className="text-sm text-aqua-text-muted mt-2 max-w-lg leading-relaxed">Su arıtma cihazları, filtre setleri, aksesuarlar ve servis çözümlerini tek yerden keşfedin.</p>
               )}
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-[13px] text-aqua-text-muted">{filteredProducts.length} urun bulundu</span>
+              <span className="text-[13px] text-aqua-text-muted">{filteredProducts.length} ürün bulundu</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}

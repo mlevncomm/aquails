@@ -60,7 +60,7 @@ async function generateOrderNumber(): Promise<string> {
     const existing = await prisma.order.findUnique({ where: { orderNumber } });
     if (!existing) return orderNumber;
   }
-  throw new AppError('Could not generate order number', 500, 'INTERNAL_ERROR');
+  throw new AppError('Sipariş numarası oluşturulamadı', 500, 'INTERNAL_ERROR');
 }
 
 function serializeOrderItem(item: {
@@ -160,7 +160,7 @@ async function resolveOrderItems(
 ) {
   if (useCart) {
     if (!userId && !sessionId?.trim()) {
-      throw new AppError('Cart session required', 400, 'CART_SESSION_REQUIRED');
+      throw new AppError('Sepet oturumu gerekli', 400, 'CART_SESSION_REQUIRED');
     }
 
     const cartItems = await prisma.cartItem.findMany({
@@ -169,7 +169,7 @@ async function resolveOrderItems(
     });
 
     if (cartItems.length === 0) {
-      throw new AppError('Cart is empty', 400, 'CART_EMPTY');
+      throw new AppError('Sepet boş', 400, 'CART_EMPTY');
     }
 
     return cartItems.map((item) => ({
@@ -180,7 +180,7 @@ async function resolveOrderItems(
   }
 
   if (!inputItems?.length) {
-    throw new AppError('Order items required', 400, 'VALIDATION_ERROR');
+    throw new AppError('Sipariş kalemleri gerekli', 400, 'VALIDATION_ERROR');
   }
 
   const products = await Promise.all(
@@ -189,7 +189,7 @@ async function resolveOrderItems(
         where: { id: item.productId, isActive: true },
       });
       if (!product) {
-        throw new AppError(`Product not found: ${item.productId}`, 404, 'PRODUCT_NOT_FOUND');
+        throw new AppError(`Ürün bulunamadı: ${item.productId}`, 404, 'PRODUCT_NOT_FOUND');
       }
       return { productId: item.productId, quantity: item.quantity, product };
     }),
@@ -211,7 +211,7 @@ export async function createOrder(
 
   for (const item of lineItems) {
     if (item.product.stock < item.quantity) {
-      throw new AppError(`Insufficient stock for ${item.product.name}`, 400, 'INSUFFICIENT_STOCK');
+      throw new AppError(`Yetersiz stok: ${item.product.name}`, 400, 'INSUFFICIENT_STOCK');
     }
   }
 
@@ -247,7 +247,7 @@ export async function createOrder(
         data: { stock: { decrement: item.quantity } },
       });
       if (updated.count === 0) {
-        throw new AppError(`Insufficient stock for ${item.product.name}`, 400, 'INSUFFICIENT_STOCK');
+        throw new AppError(`Yetersiz stok: ${item.product.name}`, 400, 'INSUFFICIENT_STOCK');
       }
     }
 
@@ -321,15 +321,15 @@ export async function getOrderById(id: string, userId?: string, isAdmin = false)
   });
 
   if (!order) {
-    throw new AppError('Order not found', 404, 'ORDER_NOT_FOUND');
+    throw new AppError('Sipariş bulunamadı', 404, 'ORDER_NOT_FOUND');
   }
 
   if (!isAdmin && userId && order.userId !== userId) {
-    throw new AppError('Forbidden', 403, 'FORBIDDEN');
+    throw new AppError('Erişim engellendi', 403, 'FORBIDDEN');
   }
 
   if (!isAdmin && !userId) {
-    throw new AppError('Authentication required', 401, 'UNAUTHORIZED');
+    throw new AppError('Kimlik doğrulama gerekli', 401, 'UNAUTHORIZED');
   }
 
   return serializeOrder(order as Parameters<typeof serializeOrder>[0]);
@@ -338,15 +338,15 @@ export async function getOrderById(id: string, userId?: string, isAdmin = false)
 export async function cancelOrder(id: string, userId?: string, isAdmin = false) {
   const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
   if (!order) {
-    throw new AppError('Order not found', 404, 'ORDER_NOT_FOUND');
+    throw new AppError('Sipariş bulunamadı', 404, 'ORDER_NOT_FOUND');
   }
 
   if (!isAdmin && order.userId !== userId) {
-    throw new AppError('Forbidden', 403, 'FORBIDDEN');
+    throw new AppError('Erişim engellendi', 403, 'FORBIDDEN');
   }
 
   if (order.status === 'CANCELLED' || order.status === 'DELIVERED') {
-    throw new AppError('Order cannot be cancelled', 400, 'ORDER_NOT_CANCELLABLE');
+    throw new AppError('Sipariş iptal edilemez', 400, 'ORDER_NOT_CANCELLABLE');
   }
 
   const updated = await prisma.$transaction(async (tx) => {

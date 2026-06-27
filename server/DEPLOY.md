@@ -1,15 +1,18 @@
-# Supabase + Vercel Deployment
+# Legacy Express Deployment
 
-Aquails uses **Supabase** for managed PostgreSQL and **Vercel** for hosting.
+> **Not:** Production varsayılanı artık **Supabase + Vercel** mimarisidir (`VITE_DATA_PROVIDER=supabase`).
+> Bu doküman yalnızca parallel/legacy Express modu (`VITE_DATA_PROVIDER=express`) için geçerlidir.
 
-- **Database:** Supabase Postgres (Prisma ORM)
-- **Auth:** Custom JWT in `server/` (FAZ 3) — not Supabase Auth
+Aquails legacy modda Express + Prisma API kullanır.
+
+- **Database:** Supabase Postgres veya harici Postgres (Prisma)
+- **Auth:** Custom JWT in `server/`
 - **Frontend:** Vite + React → Vercel (repo root)
-- **API:** Express → Vercel (Root Directory: `server`)
+- **API:** Express → ayrı deploy veya `npm run dev:server`
 
 ---
 
-## 1. Supabase project
+## 1. Supabase project (Postgres only — legacy mode)
 
 1. Create a project at [supabase.com/dashboard](https://supabase.com/dashboard)
 2. Open **Project Settings → Database**

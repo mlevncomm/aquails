@@ -14,6 +14,7 @@ import { validateCoupon } from '@/services/couponService';
 import { createOrder } from '@/services/orderService';
 import { useToastStore } from '@/components/Toast';
 import { ApiError } from '@/lib/apiClient';
+import { SupabaseApiError } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 const steps = [
@@ -35,7 +36,7 @@ const shippingMethods = [
 ];
 
 export default function Checkout() {
-  const { items, getSubtotal } = useCartStore();
+  const { items, getSubtotal, clearCart } = useCartStore();
   const addToast = useToastStore((s) => s.add);
   const [currentStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState('');
@@ -148,9 +149,15 @@ export default function Checkout() {
         sessionId: localStorage.getItem('aquails_cart_session') ?? undefined,
       });
       setOrderNumber(order.orderNumber);
+      await clearCart();
       setIsCompleted(true);
     } catch (err) {
-      addToast(err instanceof ApiError ? err.message : 'Sipariş oluşturulamadı.', 'error');
+      addToast(
+        err instanceof ApiError || err instanceof SupabaseApiError
+          ? err.message
+          : 'Sipariş oluşturulamadı.',
+        'error',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -389,7 +396,7 @@ export default function Checkout() {
                   <div className="w-4 h-4 rounded bg-aqua-primary border border-aqua-primary flex items-center justify-center">
                     <Check className="w-3 h-3 text-white" />
                   </div>
-                  <span className="text-sm text-aqua-text-secondary">Ucretsiz profesyonel kurulum istiyorum</span>
+                  <span className="text-sm text-aqua-text-secondary">Ücretsiz profesyonel kurulum istiyorum</span>
                 </label>
 
                 {/* Installation Slot Selection */}
@@ -410,7 +417,7 @@ export default function Checkout() {
                       {slotsLoading ? (
                         <p className="text-xs text-aqua-text-muted col-span-2">Slotlar yükleniyor...</p>
                       ) : availableSlots.filter(s => s.available).length === 0 ? (
-                        <p className="text-xs text-aqua-text-muted col-span-2">Bu tarihte musait slot bulunmuyor. Baska tarih secin.</p>
+                        <p className="text-xs text-aqua-text-muted col-span-2">Bu tarihte müsait slot bulunmuyor. Başka tarih seçin.</p>
                       ) : (
                         availableSlots.filter(s => s.available).map((slot) => (
                           <button

@@ -45,7 +45,7 @@ export async function me(
 }
 
 export function logout(_req: Request, res: Response): void {
-  sendSuccess(res, { message: 'Logged out successfully' });
+  sendSuccess(res, { message: 'Başarıyla çıkış yapıldı' });
 }
 
 export async function forgotPassword(

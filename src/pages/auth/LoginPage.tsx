@@ -70,7 +70,7 @@ export default function LoginPage() {
             </button>
 
             <button type="button" onClick={() => { setEmail('admin@aquails.com'); setPassword('admin123'); }} className="w-full border border-[#E8F0FE] text-[#5A6B7B] py-2 rounded-full text-xs font-medium hover:border-[#1A73E8] hover:text-[#1A73E8] transition-all">
-              Google ile Giriş Yap (Mock)
+              Google ile Giriş Yap (Deneme)
             </button>
           </form>
 

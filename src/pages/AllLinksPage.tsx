@@ -16,7 +16,7 @@ const linkGroups = [
     title: 'Hizli Baglantilar',
     links: [
       { label: 'WhatsApp Destek', href: 'https://wa.me/905321234567', icon: MessageCircle, external: true },
-      { label: 'Urunleri Incele', href: '/urunler', icon: ShoppingBag, external: false },
+      { label: 'Ürünleri İncele', href: '/urunler', icon: ShoppingBag, external: false },
       { label: 'Urun Secim Sihirbazi', href: '/urun-secim-sihirbazi', icon: Sparkles, external: false },
       { label: 'Kampanyalar', href: '/kampanyalar', icon: Gift, external: false },
       { label: 'Servis Randevusu', href: '/servis-randevusu', icon: Wrench, external: false },
@@ -30,23 +30,23 @@ const linkGroups = [
       { label: 'Su Kalitesi Testi', href: '/su-kalitesi-testi', icon: FlaskConical, external: false },
       { label: 'Filtre Secim Rehberi', href: '/filtre-secim-rehberi', icon: Filter, external: false },
       { label: 'Servis Agimiz', href: '/servis-agimiz', icon: MapPin, external: false },
-      { label: 'Siparis Takip', href: '/siparis-takip', icon: Truck, external: false },
-      { label: 'Iletisim', href: '/iletisim', icon: Phone, external: false },
+      { label: 'Sipariş Takip', href: '/siparis-takip', icon: Truck, external: false },
+      { label: 'İletişim', href: '/iletisim', icon: Phone, external: false },
       { label: 'Instagram', href: 'https://instagram.com/aquails', icon: Instagram, external: true },
     ],
   },
 ];
 
 const badges = [
-  { icon: ShieldCheck, label: 'Guvenli Alisveris' },
-  { icon: Headphones, label: 'Kurulum Destegi' },
+  { icon: ShieldCheck, label: 'Güvenli Alışveriş' },
+  { icon: Headphones, label: 'Kurulum Desteği' },
   { icon: RefreshCw, label: 'Filtre Hatirlama' },
 ];
 
 const trustItems = [
-  { icon: Award, value: '10.000+', label: 'Mutlu Musteri' },
+  { icon: Award, value: '10.000+', label: 'Mutlu Müşteri' },
   { icon: ShieldCheck, value: '2 Yil', label: 'Garanti' },
-  { icon: CreditCard, value: 'Guvenli', label: 'Odeme' },
+  { icon: CreditCard, value: 'Güvenli', label: 'Odeme' },
   { icon: Headphones, value: 'Yetkili', label: 'Servis Destegi' },
 ];
 
@@ -124,10 +124,10 @@ export default function AllLinksPage() {
           </div>
           <h1 className="text-xl font-bold text-[#0D2137]">aquails</h1>
           <p className="text-sm font-semibold text-[#1A73E8] mt-1">
-            Daha Temiz Su, Daha Akilli Teknoloji
+            Daha Temiz Su, Daha Akıllı Teknoloji
           </p>
           <p className="text-xs text-[#5A6B7B] mt-2 leading-relaxed max-w-xs mx-auto">
-            Su aritma cihazlari, filtre aboneligi, servis randevusu ve kampanyalarimize tek yerden ulasin.
+            Su arıtma cihazları, filtre aboneliği, servis randevusu ve kampanyalarımıza tek yerden ulaşın.
           </p>
 
           {/* Badges */}
@@ -238,7 +238,7 @@ export default function AllLinksPage() {
           <div className="relative">
             <p className="text-[10px] font-bold text-white/50 tracking-[0.15em] uppercase">Instagram\'a Ozel Firsat</p>
             <h3 className="text-base font-bold mt-1">%10 Indirim</h3>
-            <p className="text-xs text-white/70 mt-1">AQUAILS10 kodu ile secili urunlerde gecerli.</p>
+            <p className="text-xs text-white/70 mt-1">AQUAILS10 kodu ile secili ürünlerde gecerli.</p>
             <div className="flex items-center gap-2 mt-4">
               <button
                 onClick={handleCopyCoupon}

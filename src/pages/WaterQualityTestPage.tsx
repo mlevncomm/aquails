@@ -10,19 +10,19 @@ import { analyzeTDS, getEstimatedTDSForCity, type TDSInput, type TDSResult } fro
 import { SEO } from '@/components/SEO';
 
 
-const cities = ['Istanbul', 'Ankara', 'Izmir', 'Antalya', 'Bursa', 'Kocaeli', 'Konya', 'Adana', 'Gaziantep', 'Kayseri', 'Samsun', 'Trabzon', 'Eskisehir', 'Mersin'];
+const cities = ['İstanbul', 'Ankara', 'İzmir', 'Antalya', 'Bursa', 'Kocaeli', 'Konya', 'Adana', 'Gaziantep', 'Kayseri', 'Samsun', 'Trabzon', 'Eskişehir', 'Mersin'];
 
 const usagePurposes = [
-  { value: 'icme', label: 'Icme suyu' },
-  { value: 'yemek', label: 'Yemek/cay/kahve' },
-  { value: 'bebek', label: 'Bebek/cocuk icin' },
-  { value: 'isyeri', label: 'Is yeri kullanimi' },
+  { value: 'icme', label: 'İçme suyu' },
+  { value: 'yemek', label: 'Yemek/çay/kahve' },
+  { value: 'bebek', label: 'Bebek/çocuk için' },
+  { value: 'isyeri', label: 'İş yeri kullanımı' },
 ];
 
 const waterIssues = [
-  { value: 'kirec', label: 'Kirec' },
+  { value: 'kirec', label: 'Kireç' },
   { value: 'koku', label: 'Koku' },
-  { value: 'tat', label: 'Tat bozuklugu' },
+  { value: 'tat', label: 'Tat bozukluğu' },
   { value: 'tortu', label: 'Tortu' },
 ];
 
@@ -31,7 +31,7 @@ export default function WaterQualityTestPage() {
   const [result, setResult] = useState<TDSResult | null>(null);
   const [form, setForm] = useState<TDSInput>({
     tdsValue: 0,
-    city: 'Istanbul',
+    city: 'İstanbul',
     usagePurpose: 'icme',
     waterIssues: [],
   });
@@ -72,8 +72,8 @@ export default function WaterQualityTestPage() {
           <div className="w-14 h-14 bg-white rounded-2xl shadow-md mx-auto mb-4 flex items-center justify-center">
             <FlaskConical className="w-7 h-7 text-[#1A73E8]" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#0D2137]">Suyunuzun Kalitesini Ogrenin</h1>
-          <p className="text-sm text-[#5A6B7B] mt-2 max-w-lg mx-auto">TDS degeri ve kullanim ihtiyaciniza gore size en uygun su aritma cozumunu onerelim.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#0D2137]">Suyunuzun Kalitesini Öğrenin</h1>
+          <p className="text-sm text-[#5A6B7B] mt-2 max-w-lg mx-auto">TDS değeri ve kullanım ihtiyacınıza göre size en uygun su arıtma çözümünü önerelim.</p>
         </div>
       </section>
 
@@ -90,7 +90,7 @@ export default function WaterQualityTestPage() {
             >
               {/* TDS Value */}
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">TDS Degeri (ppm) *</label>
+                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">TDS Değeri (ppm) *</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
@@ -98,7 +98,7 @@ export default function WaterQualityTestPage() {
                     max="2000"
                     value={form.tdsValue || ''}
                     onChange={e => setForm({ ...form, tdsValue: Number(e.target.value) })}
-                    placeholder="Orn: 180"
+                    placeholder="Örn: 180"
                     className="flex-1 px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
                   />
                   {form.tdsValue > 0 && (
@@ -107,7 +107,7 @@ export default function WaterQualityTestPage() {
                     </div>
                   )}
                 </div>
-                <p className="text-[11px] text-[#8B9DAF] mt-1">TDS olceriniz yoksa sehir secerek tahmini deger alabilirsiniz.</p>
+                <p className="text-[11px] text-[#8B9DAF] mt-1">TDS ölçeriniz yoksa şehir seçerek tahmini değer alabilirsiniz.</p>
               </div>
 
               {/* City */}
@@ -121,13 +121,13 @@ export default function WaterQualityTestPage() {
                   {cities.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
                 {form.tdsValue > 0 && (
-                  <p className="text-[11px] text-[#8B9DAF] mt-1">{form.city} icin tahmini TDS: ~{getEstimatedTDSForCity(form.city)} ppm</p>
+                  <p className="text-[11px] text-[#8B9DAF] mt-1">{form.city} için tahmini TDS: ~{getEstimatedTDSForCity(form.city)} ppm</p>
                 )}
               </div>
 
               {/* Usage Purpose */}
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Kullanim Amaci</label>
+                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Kullanım Amacı</label>
                 <div className="grid grid-cols-2 gap-2">
                   {usagePurposes.map(p => (
                     <button
@@ -148,7 +148,7 @@ export default function WaterQualityTestPage() {
 
               {/* Water Issues */}
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Musluk Suyunda Sorun Var Mi?</label>
+                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Musluk Suyunda Sorun Var mı?</label>
                 <div className="flex flex-wrap gap-2">
                   {waterIssues.map(i => (
                     <button
@@ -173,14 +173,14 @@ export default function WaterQualityTestPage() {
                         : 'border-[#E8F0FE] text-[#5A6B7B]'
                     }`}
                   >
-                    Emin degilim
+                    Emin değilim
                   </button>
                 </div>
               </div>
 
               {/* TDS Scale */}
               <div className="bg-[#F8FBFF] rounded-xl p-4">
-                <p className="text-xs font-medium text-[#5A6B7B] mb-2">TDS Degeri Olcegi</p>
+                <p className="text-xs font-medium text-[#5A6B7B] mb-2">TDS Değeri Ölçeği</p>
                 <div className="flex h-3 rounded-full overflow-hidden">
                   <div className="flex-1 bg-[#4FC3F7]" />
                   <div className="flex-1 bg-[#00C9A7]" />
@@ -188,10 +188,10 @@ export default function WaterQualityTestPage() {
                   <div className="flex-1 bg-[#E85454]" />
                 </div>
                 <div className="flex justify-between text-[10px] text-[#8B9DAF] mt-1">
-                  <span>0-50 Dusuk</span>
+                  <span>0-50 Düşük</span>
                   <span>50-150 Ideal</span>
                   <span>150-300 Orta</span>
-                  <span>300+ Yuksek</span>
+                  <span>300+ Yüksek</span>
                 </div>
               </div>
 
@@ -220,13 +220,13 @@ export default function WaterQualityTestPage() {
                     <h3 className="text-lg font-bold text-[#0D2137]">{result.label}</h3>
                     <p className="text-sm text-[#5A6B7B] mt-2">{result.description}</p>
                     <div className="mt-4 inline-flex items-center gap-2 bg-[#F0F6FF] text-[#1A73E8] text-xs font-semibold px-4 py-2 rounded-full">
-                      Onerilen: {result.recommendedDeviceType}
+                      Önerilen: {result.recommendedDeviceType}
                     </div>
                   </div>
 
                   {/* Tips */}
                   <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
-                    <h4 className="text-sm font-semibold text-[#0D2137] mb-3">Oneriler</h4>
+                    <h4 className="text-sm font-semibold text-[#0D2137] mb-3">Öneriler</h4>
                     <div className="space-y-2">
                       {result.tips.map((t, i) => (
                         <div key={i} className="flex items-start gap-2 text-sm text-[#5A6B7B]">
@@ -240,7 +240,7 @@ export default function WaterQualityTestPage() {
                   {/* Products */}
                   {result.recommendedProducts.length > 0 && (
                     <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
-                      <h4 className="text-sm font-semibold text-[#0D2137] mb-3">Onerilen Urunler</h4>
+                      <h4 className="text-sm font-semibold text-[#0D2137] mb-3">Önerilen Ürünler</h4>
                       <div className="space-y-3">
                         {result.recommendedProducts.map(p => (
                           <Link

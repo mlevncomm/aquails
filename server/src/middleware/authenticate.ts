@@ -12,13 +12,13 @@ export async function authenticate(
     const authHeader = req.headers.authorization;
 
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new AppError('Authentication required', 401, 'UNAUTHORIZED');
+      throw new AppError('Kimlik doğrulama gerekli', 401, 'UNAUTHORIZED');
     }
 
     const token = authHeader.slice(7).trim();
 
     if (!token) {
-      throw new AppError('Authentication required', 401, 'UNAUTHORIZED');
+      throw new AppError('Kimlik doğrulama gerekli', 401, 'UNAUTHORIZED');
     }
 
     const payload = verifyToken(token);

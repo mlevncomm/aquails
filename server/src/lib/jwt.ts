@@ -11,7 +11,7 @@ export interface JwtPayload {
 function getJwtSecret(): string {
   if (!env.JWT_SECRET) {
     throw new AppError(
-      'Authentication is not configured',
+      'Kimlik doğrulama yapılandırılmamış',
       503,
       'AUTH_NOT_CONFIGURED',
     );
@@ -37,7 +37,7 @@ export function verifyToken(token: string): JwtPayload {
       typeof decoded.email !== 'string' ||
       (decoded.role !== 'customer' && decoded.role !== 'admin')
     ) {
-      throw new AppError('Invalid token', 401, 'UNAUTHORIZED');
+      throw new AppError('Geçersiz token', 401, 'UNAUTHORIZED');
     }
 
     return {
@@ -50,6 +50,6 @@ export function verifyToken(token: string): JwtPayload {
       throw error;
     }
 
-    throw new AppError('Invalid token', 401, 'UNAUTHORIZED');
+    throw new AppError('Geçersiz token', 401, 'UNAUTHORIZED');
   }
 }

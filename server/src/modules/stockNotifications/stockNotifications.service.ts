@@ -33,7 +33,7 @@ function serializeNotification(notification: {
 export async function createStockNotification(input: z.infer<typeof createStockNotificationSchema>) {
   const product = await prisma.product.findUnique({ where: { id: input.productId } });
   if (!product) {
-    throw new AppError('Product not found', 404, 'PRODUCT_NOT_FOUND');
+    throw new AppError('Ürün bulunamadı', 404, 'PRODUCT_NOT_FOUND');
   }
 
   const existing = await prisma.stockNotification.findFirst({
@@ -45,7 +45,7 @@ export async function createStockNotification(input: z.infer<typeof createStockN
   });
 
   if (existing) {
-    throw new AppError('Notification already requested', 409, 'NOTIFICATION_ALREADY_EXISTS');
+    throw new AppError('Stok bildirimi zaten talep edildi', 409, 'NOTIFICATION_ALREADY_EXISTS');
   }
 
   const notification = await prisma.stockNotification.create({

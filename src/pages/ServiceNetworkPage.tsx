@@ -9,23 +9,23 @@ import { SEO } from '@/components/SEO';
 
 
 const cities = [
-  { name: 'Istanbul', sameDay: true, avgTime: '2 saat', phone: '0212 123 45 67' },
+  { name: 'İstanbul', sameDay: true, avgTime: '2 saat', phone: '0212 123 45 67' },
   { name: 'Ankara', sameDay: true, avgTime: '3 saat', phone: '0312 123 45 67' },
-  { name: 'Izmir', sameDay: true, avgTime: '3 saat', phone: '0232 123 45 67' },
-  { name: 'Antalya', sameDay: false, avgTime: '1 gun', phone: '0242 123 45 67' },
+  { name: 'İzmir', sameDay: true, avgTime: '3 saat', phone: '0232 123 45 67' },
+  { name: 'Antalya', sameDay: false, avgTime: '1 gün', phone: '0242 123 45 67' },
   { name: 'Bursa', sameDay: true, avgTime: '4 saat', phone: '0224 123 45 67' },
   { name: 'Kocaeli', sameDay: true, avgTime: '3 saat', phone: '0262 123 45 67' },
-  { name: 'Konya', sameDay: false, avgTime: '1 gun', phone: '0332 123 45 67' },
-  { name: 'Adana', sameDay: false, avgTime: '1 gun', phone: '0322 123 45 67' },
-  { name: 'Gaziantep', sameDay: false, avgTime: '1-2 gun', phone: '0342 123 45 67' },
-  { name: 'Kayseri', sameDay: false, avgTime: '1 gun', phone: '0352 123 45 67' },
+  { name: 'Konya', sameDay: false, avgTime: '1 gün', phone: '0332 123 45 67' },
+  { name: 'Adana', sameDay: false, avgTime: '1 gün', phone: '0322 123 45 67' },
+  { name: 'Gaziantep', sameDay: false, avgTime: '1-2 gün', phone: '0342 123 45 67' },
+  { name: 'Kayseri', sameDay: false, avgTime: '1 gün', phone: '0352 123 45 67' },
 ];
 
 const processSteps = [
-  { step: '1', title: 'Randevu Al', desc: 'Online veya telefon ile servis talebi olusturun.' },
-  { step: '2', title: 'On Inceleme', desc: 'Teknisyen su hatti ve alani inceler.' },
-  { step: '3', title: 'Kurulum', desc: 'Ortalama 45-60 dakikada kurulum tamamlanir.' },
-  { step: '4', title: 'Test', desc: 'Cihaz test edilir, kullanim egitimi verilir.' },
+  { step: '1', title: 'Randevu Al', desc: 'Online veya telefon ile servis talebi oluşturun.' },
+  { step: '2', title: 'Ön İnceleme', desc: 'Teknisyen su hattı ve alanı inceler.' },
+  { step: '3', title: 'Kurulum', desc: 'Ortalama 45-60 dakikada kurulum tamamlanır.' },
+  { step: '4', title: 'Test', desc: 'Cihaz test edilir, kullanım eğitimi verilir.' },
 ];
 
 export default function ServiceNetworkPage() {
@@ -45,8 +45,8 @@ export default function ServiceNetworkPage() {
           <div className="absolute top-10 right-20 w-64 h-64 bg-[#1A73E8] rounded-full blur-3xl" />
         </div>
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 relative text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Aquails Servis ve Kurulum Agi</h1>
-          <p className="text-sm text-white/70 mt-2 max-w-lg mx-auto">Kurulum, filtre degisimi ve bakim hizmetlerinde size en yakin destek noktasiyla yaninizdayiz.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-white">Aquails Servis ve Kurulum Ağı</h1>
+          <p className="text-sm text-white/70 mt-2 max-w-lg mx-auto">Kurulum, filtre değişimi ve bakım hizmetlerinde size en yakın destek noktasıyla yanınızdayız.</p>
         </div>
       </section>
 
@@ -54,10 +54,10 @@ export default function ServiceNetworkPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
           {[
-            { icon: MapPin, label: '81 Il', desc: 'Tum Turkiye' },
-            { icon: Clock, label: 'Ayni Gun', desc: 'Buyuk sehirlerde' },
+            { icon: MapPin, label: '81 İl', desc: 'Tüm Türkiye' },
+            { icon: Clock, label: 'Aynı Gün', desc: 'Büyük şehirlerde' },
             { icon: Wrench, label: '500+', desc: 'Yetkili servis' },
-            { icon: Users, label: '10.000+', desc: 'Mutlu musteri' },
+            { icon: Users, label: '10.000+', desc: 'Mutlu müşteri' },
           ].map(s => (
             <div key={s.label} className="bg-white border border-[#E8F0FE] rounded-2xl p-5 text-center">
               <s.icon className="w-6 h-6 text-[#1A73E8] mx-auto mb-2" />
@@ -69,7 +69,7 @@ export default function ServiceNetworkPage() {
 
         {/* City Selection */}
         <ScrollReveal className="mb-12">
-          <h2 className="text-xl font-bold text-[#0D2137] mb-4">Sehir Secin</h2>
+          <h2 className="text-xl font-bold text-[#0D2137] mb-4">Şehir Seçin</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
             {cities.map(c => (
               <button
@@ -101,7 +101,7 @@ export default function ServiceNetworkPage() {
                 <div className="flex items-center gap-2 mt-2">
                   {city.sameDay ? (
                     <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-600 text-xs font-medium px-2.5 py-1 rounded-full">
-                      <CheckCircle className="w-3 h-3" /> Ayni gun servis
+                      <CheckCircle className="w-3 h-3" /> Aynı gün servis
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-600 text-xs font-medium px-2.5 py-1 rounded-full">
@@ -112,7 +112,7 @@ export default function ServiceNetworkPage() {
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-center">
-                  <p className="text-xs text-[#8B9DAF]">Ort. Yanit</p>
+                  <p className="text-xs text-[#8B9DAF]">Ort. Yanıt</p>
                   <p className="text-sm font-semibold text-[#0D2137]">{city.avgTime}</p>
                 </div>
                 <div className="text-center">
@@ -134,7 +134,7 @@ export default function ServiceNetworkPage() {
 
         {/* Process Steps */}
         <ScrollReveal className="mb-12">
-          <h2 className="text-xl font-bold text-[#0D2137] mb-6 text-center">Kurulum Sureci</h2>
+          <h2 className="text-xl font-bold text-[#0D2137] mb-6 text-center">Kurulum Süreci</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {processSteps.map(s => (
               <div key={s.step} className="bg-white border border-[#E8F0FE] rounded-2xl p-5 text-center">

@@ -84,12 +84,12 @@ export async function bookSlot(input: z.infer<typeof bookSlotSchema>) {
   });
 
   if (updated.count === 0) {
-    throw new AppError('Slot not available', 400, 'SLOT_NOT_AVAILABLE');
+    throw new AppError('Randevu saati müsait değil', 400, 'SLOT_NOT_AVAILABLE');
   }
 
   const slot = await prisma.serviceSlot.findUnique({ where: { id: input.slotId } });
   if (!slot) {
-    throw new AppError('Slot not available', 400, 'SLOT_NOT_AVAILABLE');
+    throw new AppError('Randevu saati müsait değil', 400, 'SLOT_NOT_AVAILABLE');
   }
 
   return serializeSlot(slot);
@@ -118,7 +118,7 @@ export async function bookSlotInTransaction(
   });
 
   if (updated.count === 0) {
-    throw new AppError('Slot not available', 400, 'SLOT_NOT_AVAILABLE');
+    throw new AppError('Randevu saati müsait değil', 400, 'SLOT_NOT_AVAILABLE');
   }
 }
 

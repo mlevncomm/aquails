@@ -11,7 +11,7 @@ import { logout as logoutService } from '@/services/authService';
 import { useNotificationStore } from '@/stores/notificationStore';
 
 const menuItems = [
-  { label: 'Dashboard', href: '/hesabim', icon: LayoutDashboard },
+  { label: 'Gösterge Paneli', href: '/hesabim', icon: LayoutDashboard },
   { label: 'Siparişlerim', href: '/hesabim/siparisler', icon: ShoppingBag },
   { label: 'Adreslerim', href: '/hesabim/adresler', icon: MapPin },
   { label: 'Profilim', href: '/hesabim/profil', icon: User },
@@ -46,7 +46,7 @@ export function CustomerLayout() {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
   }
 
-  const currentPageTitle = menuItems.find((m) => m.href === location.pathname)?.label || 'Dashboard';
+  const currentPageTitle = menuItems.find((m) => m.href === location.pathname)?.label || 'Gösterge Paneli';
 
   return (
     <div className="min-h-[100dvh] flex bg-[#F0F6FF]">

@@ -87,7 +87,7 @@ export async function getUserById(userId: string): Promise<PublicUser> {
   });
 
   if (!user) {
-    throw new AppError('User not found', 401, 'UNAUTHORIZED');
+    throw new AppError('Kullanıcı bulunamadı', 401, 'UNAUTHORIZED');
   }
 
   return toPublicUser(user);
@@ -113,14 +113,14 @@ export async function forgotPassword(input: ForgotPasswordInput) {
 
     if (env.NODE_ENV === 'development') {
       return {
-        message: 'If the email exists, reset instructions have been sent.',
+        message: 'E-posta kayıtlıysa sıfırlama talimatları gönderildi.',
         devResetToken: rawToken,
       };
     }
   }
 
   return {
-    message: 'If the email exists, reset instructions have been sent.',
+    message: 'E-posta kayıtlıysa sıfırlama talimatları gönderildi.',
   };
 }
 
@@ -140,7 +140,7 @@ export async function resetPassword(input: ResetPasswordInput) {
   }
 
   if (!matchedToken) {
-    throw new AppError('Invalid or expired reset token', 400, 'INVALID_RESET_TOKEN');
+    throw new AppError('Geçersiz veya süresi dolmuş sıfırlama bağlantısı', 400, 'INVALID_RESET_TOKEN');
   }
 
   const passwordHash = await hashPassword(input.password);
@@ -152,5 +152,5 @@ export async function resetPassword(input: ResetPasswordInput) {
     prisma.passwordResetToken.deleteMany({ where: { userId: matchedToken.userId } }),
   ]);
 
-  return { message: 'Password updated successfully' };
+  return { message: 'Şifre başarıyla güncellendi' };
 }

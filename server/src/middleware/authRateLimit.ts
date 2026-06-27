@@ -14,7 +14,7 @@ export const loginRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: createRateLimitHandler(
-    'Too many login attempts. Please try again later.',
+    'Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin.',
   ),
 });
 
@@ -24,6 +24,6 @@ export const registerRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: createRateLimitHandler(
-    'Too many registration attempts. Please try again later.',
+    'Çok fazla kayıt denemesi. Lütfen daha sonra tekrar deneyin.',
   ),
 });

@@ -25,7 +25,7 @@ export function errorHandler(
 
     return sendError(
       res,
-      'Validation failed',
+      'Doğrulama başarısız',
       'VALIDATION_ERROR',
       400,
       details,
@@ -39,10 +39,10 @@ export function errorHandler(
   return sendError(
     res,
     env.NODE_ENV === 'production'
-      ? 'An unexpected error occurred'
+      ? 'Beklenmeyen bir hata oluştu'
       : err instanceof Error
         ? err.message
-        : 'An unexpected error occurred',
+        : 'Beklenmeyen bir hata oluştu',
     'INTERNAL_ERROR',
     500,
   );

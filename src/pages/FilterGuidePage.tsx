@@ -13,11 +13,11 @@ const deviceModels = [
 ];
 
 const needs = [
-  { value: 'tatlandirici', label: 'Tatlandirici filtre' },
+  { value: 'tatlandirici', label: 'Tatlandırıcı filtre' },
   { value: 'membran', label: 'Membran filtre' },
   { value: 'mineral', label: 'Mineral filtre' },
   { value: '5li-set', label: '5\'li filtre seti' },
-  { value: 'emin-degilim', label: 'Emin degilim' },
+  { value: 'emin-degilim', label: 'Emin değilim' },
 ];
 
 export default function FilterGuidePage() {
@@ -47,8 +47,8 @@ export default function FilterGuidePage() {
           <div className="w-14 h-14 bg-white rounded-2xl shadow-md mx-auto mb-4 flex items-center justify-center">
             <Filter className="w-7 h-7 text-[#1A73E8]" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#0D2137]">Cihaziniza Uygun Filtreyi Bulun</h1>
-          <p className="text-sm text-[#5A6B7B] mt-2 max-w-lg mx-auto">Cihaz modelinizi ve ihtiyacinizi secin, uyumlu filtreleri gorun.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#0D2137]">Cihazınıza Uygun Filtreyi Bulun</h1>
+          <p className="text-sm text-[#5A6B7B] mt-2 max-w-lg mx-auto">Cihaz modelinizi ve ihtiyacınızı seçin, uyumlu filtreleri görün.</p>
         </div>
       </section>
 
@@ -77,7 +77,7 @@ export default function FilterGuidePage() {
               )}
               {step === 1 && (
                 <>
-                  <h2 className="text-lg font-bold text-[#0D2137] mb-4">Kullanim Suresi (Ay)</h2>
+                  <h2 className="text-lg font-bold text-[#0D2137] mb-4">Kullanım Süresi (Ay)</h2>
                   <input
                     type="range"
                     min="1"
@@ -114,7 +114,7 @@ export default function FilterGuidePage() {
                 disabled={step === 0 && !deviceModel || step === 2 && !need}
                 className="w-full flex items-center justify-center gap-2 bg-[#1A73E8] text-white py-3 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all disabled:opacity-50 mt-6"
               >
-                {step === 2 ? 'Sonuclari Gor' : 'Devam Et'} <ArrowRight className="w-4 h-4" />
+                {step === 2 ? 'Sonuçları Gör' : 'Devam Et'} <ArrowRight className="w-4 h-4" />
               </button>
             </motion.div>
           ) : (
@@ -129,7 +129,7 @@ export default function FilterGuidePage() {
                   <CheckCircle className="w-6 h-6 text-emerald-500" />
                 </div>
                 <h2 className="text-lg font-bold text-[#0D2137]">Uyumlu Filtreler</h2>
-                <p className="text-sm text-[#5A6B7B]">{deviceModel} icin oneriler</p>
+                <p className="text-sm text-[#5A6B7B]">{deviceModel} için öneriler</p>
               </div>
 
               {filterProducts.map(p => (
@@ -149,7 +149,7 @@ export default function FilterGuidePage() {
 
               <div className="flex flex-wrap gap-2 mt-4">
                 <Link to="/filtre-aboneligi" className="flex items-center gap-1.5 bg-[#1A73E8] text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-[#1557B0] transition-all">
-                  <RefreshCw className="w-3 h-3" /> Filtre Aboneligi
+                  <RefreshCw className="w-3 h-3" /> Filtre Aboneliği
                 </Link>
                 <Link to="/filtre-hesaplayici" className="flex items-center gap-1.5 border border-[#E8F0FE] text-[#5A6B7B] text-xs font-medium px-4 py-2 rounded-full hover:border-[#1A73E8] hover:text-[#1A73E8] transition-all">
                   <Droplet className="w-3 h-3" /> Hesaplayici

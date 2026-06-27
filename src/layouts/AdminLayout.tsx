@@ -18,7 +18,7 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { label: 'Gösterge Paneli', href: '/admin', icon: LayoutDashboard },
   {
     label: 'Ürün Yönetimi',
     href: '/admin/urunler',
@@ -46,7 +46,7 @@ const menuItems: MenuItem[] = [
   { label: 'Yorumlar', href: '/admin/yorumlar', icon: Star },
   { label: 'Sorular', href: '/admin/sorular', icon: HelpCircle },
   { label: 'Sadakat', href: '/admin/sadakat', icon: Award },
-  { label: 'Terk Edilmis Sepetler', href: '/admin/terk-edilmis-sepetler', icon: ShoppingCart },
+  { label: 'Terk Edilmiş Sepetler', href: '/admin/terk-edilmis-sepetler', icon: ShoppingCart },
   {
     label: 'Servis',
     href: '/admin/servis-talepleri',
@@ -59,7 +59,7 @@ const menuItems: MenuItem[] = [
   { label: 'Filtre Takibi', href: '/admin/filtre-takibi', icon: Filter },
   { label: 'Abonelikler', href: '/admin/abonelikler', icon: RefreshCw },
   { label: 'Raporlar', href: '/admin/raporlar', icon: FileText },
-  { label: 'Link Sayfasi', href: '/admin/linkler', icon: Link2 },
+  { label: 'Link Sayfası', href: '/admin/linkler', icon: Link2 },
   { label: 'Ayarlar', href: '/admin/ayarlar', icon: Settings },
 ];
 

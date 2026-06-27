@@ -45,7 +45,7 @@ export async function getCategoryBySlug(slug: string, activeOnly = true) {
   });
 
   if (!category) {
-    throw new AppError('Category not found', 404, 'CATEGORY_NOT_FOUND');
+    throw new AppError('Kategori bulunamadı', 404, 'CATEGORY_NOT_FOUND');
   }
 
   const productCount = await prisma.product.count({
@@ -58,7 +58,7 @@ export async function getCategoryBySlug(slug: string, activeOnly = true) {
 export async function createCategory(input: CreateCategoryInput) {
   const existing = await prisma.category.findUnique({ where: { slug: input.slug } });
   if (existing) {
-    throw new AppError('Category slug already exists', 409, 'SLUG_ALREADY_EXISTS');
+    throw new AppError('Kategori adresi zaten mevcut', 409, 'SLUG_ALREADY_EXISTS');
   }
 
   const category = await prisma.category.create({ data: input });
@@ -68,13 +68,13 @@ export async function createCategory(input: CreateCategoryInput) {
 export async function updateCategory(id: string, input: UpdateCategoryInput) {
   const existing = await prisma.category.findUnique({ where: { id } });
   if (!existing) {
-    throw new AppError('Category not found', 404, 'CATEGORY_NOT_FOUND');
+    throw new AppError('Kategori bulunamadı', 404, 'CATEGORY_NOT_FOUND');
   }
 
   if (input.slug && input.slug !== existing.slug) {
     const slugTaken = await prisma.category.findUnique({ where: { slug: input.slug } });
     if (slugTaken) {
-      throw new AppError('Category slug already exists', 409, 'SLUG_ALREADY_EXISTS');
+      throw new AppError('Kategori adresi zaten mevcut', 409, 'SLUG_ALREADY_EXISTS');
     }
   }
 
@@ -88,7 +88,7 @@ export async function updateCategory(id: string, input: UpdateCategoryInput) {
 export async function softDeleteCategory(id: string) {
   const existing = await prisma.category.findUnique({ where: { id } });
   if (!existing) {
-    throw new AppError('Category not found', 404, 'CATEGORY_NOT_FOUND');
+    throw new AppError('Kategori bulunamadı', 404, 'CATEGORY_NOT_FOUND');
   }
 
   const category = await prisma.category.update({

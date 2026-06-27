@@ -130,7 +130,7 @@ export async function listCoupons() {
 export async function createCoupon(input: z.infer<typeof createCouponSchema>) {
   const existing = await prisma.coupon.findUnique({ where: { code: input.code } });
   if (existing) {
-    throw new AppError('Coupon code already exists', 409, 'CODE_ALREADY_EXISTS');
+    throw new AppError('Kupon kodu zaten mevcut', 409, 'CODE_ALREADY_EXISTS');
   }
 
   const coupon = await prisma.coupon.create({ data: input });
@@ -140,7 +140,7 @@ export async function createCoupon(input: z.infer<typeof createCouponSchema>) {
 export async function updateCoupon(id: string, input: z.infer<typeof updateCouponSchema>) {
   const existing = await prisma.coupon.findUnique({ where: { id } });
   if (!existing) {
-    throw new AppError('Coupon not found', 404, 'COUPON_NOT_FOUND');
+    throw new AppError('Kupon bulunamadı', 404, 'COUPON_NOT_FOUND');
   }
 
   const coupon = await prisma.coupon.update({ where: { id }, data: input });
@@ -150,7 +150,7 @@ export async function updateCoupon(id: string, input: z.infer<typeof updateCoupo
 export async function deleteCoupon(id: string) {
   const existing = await prisma.coupon.findUnique({ where: { id } });
   if (!existing) {
-    throw new AppError('Coupon not found', 404, 'COUPON_NOT_FOUND');
+    throw new AppError('Kupon bulunamadı', 404, 'COUPON_NOT_FOUND');
   }
 
   await prisma.coupon.delete({ where: { id } });

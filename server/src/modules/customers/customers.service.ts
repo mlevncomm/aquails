@@ -42,7 +42,7 @@ function serializeAddress(address: {
 export async function getProfile(userId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {
-    throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    throw new AppError('Kullanıcı bulunamadı', 404, 'USER_NOT_FOUND');
   }
   return { user: toPublicUser(user) };
 }
@@ -79,7 +79,7 @@ export async function updateAddress(
 ) {
   const existing = await prisma.address.findFirst({ where: { id: addressId, userId } });
   if (!existing) {
-    throw new AppError('Address not found', 404, 'ADDRESS_NOT_FOUND');
+    throw new AppError('Adres bulunamadı', 404, 'ADDRESS_NOT_FOUND');
   }
 
   if (input.isDefault) {
@@ -93,7 +93,7 @@ export async function updateAddress(
 export async function deleteAddress(userId: string, addressId: string) {
   const existing = await prisma.address.findFirst({ where: { id: addressId, userId } });
   if (!existing) {
-    throw new AppError('Address not found', 404, 'ADDRESS_NOT_FOUND');
+    throw new AppError('Adres bulunamadı', 404, 'ADDRESS_NOT_FOUND');
   }
 
   await prisma.address.delete({ where: { id: addressId } });
