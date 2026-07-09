@@ -45,23 +45,82 @@ npm run dev
 
 Uygulama `http://localhost:3000` adresinde çalışır.
 
-### Ortam Değişkenleri
+### Ortam Değişkenleri (Frontend)
 
-| Değişken | Açıklama |
-|----------|----------|
-| `VITE_SUPABASE_URL` | Supabase proje URL'i |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon (public) key |
+| Değişken | Açıklama | Nerede |
+|----------|----------|--------|
+| `VITE_SUPABASE_URL` | Supabase proje URL'i | `.env`, Vercel |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon (public) key | `.env`, Vercel |
 
-> **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` asla frontend'e veya `VITE_*` env'e konmamalıdır. Yalnızca Edge Functions / CI ortamında kullanın.
+> **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` **asla** frontend'e, `VITE_*` env'e veya Vercel **public** environment variables içine konmamalıdır.
 
-### Supabase veritabanı
+### Supabase CLI Kurulumu
+
+[Supabase CLI](https://supabase.com/docs/guides/cli) kurulu olmalıdır.
 
 ```bash
-# Supabase CLI ile (önerilen)
-supabase link --project-ref <your-ref>
-supabase db push          # migrations uygula
-psql $DATABASE_URL -f supabase/seed.sql   # örnek seed
+# 1. Supabase hesabına giriş
+supabase login
+
+# 2. Remote projeyi bağla (Dashboard → Project Settings → General → Reference ID)
+supabase link --project-ref <project-ref>
+
+# 3. Migration'ları önce dry-run ile kontrol et
+supabase db push --dry-run
+
+# 4. Migration'ları remote veritabanına uygula
+supabase db push
 ```
+
+#### Seed verisi
+
+`supabase/config.toml` içinde seed tanımlıdır:
+
+```toml
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+```
+
+**Remote (staging / ilk kurulum):**
+
+```bash
+# config.toml seed desteği ile (migration ile birlikte)
+supabase db push --include-seed
+```
+
+> `--include-seed` seed dosyalarını hash ile takip eder; değişmeyen seed'ler tekrar çalıştırılmayabilir. İlk kurulumda veya seed güncellediğinizde kullanın.
+
+**Alternatif yöntemler:**
+
+```bash
+# Supabase Dashboard → SQL Editor → supabase/seed.sql içeriğini yapıştırıp çalıştırın
+
+# veya doğrudan psql ile
+psql "$DATABASE_URL" -f supabase/seed.sql
+```
+
+**Local geliştirme:**
+
+```bash
+# Local Supabase stack (API, DB, Studio, Edge Runtime)
+supabase start
+
+# Migration + seed ile local DB'yi sıfırla
+supabase db reset
+
+# Edge Functions local serve
+supabase functions serve
+```
+
+Local servis portları (`supabase/config.toml`):
+
+| Servis | Port |
+|--------|------|
+| API | 54321 |
+| Database | 54322 |
+| Studio | 54323 |
+| Inbucket (e-posta test) | 54324 |
 
 Migration dosyası: `supabase/migrations/20260709160000_initial_schema.sql`
 
@@ -71,10 +130,43 @@ Migration dosyası: `supabase/migrations/20260709160000_initial_schema.sql`
 2. Framework: **Vite**
 3. Build command: `npm run build`
 4. Output directory: `dist`
-5. Environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+5. **Environment Variables** (Vercel → Settings → Environment Variables):
+
+| Değişken | Ortam | Public? |
+|----------|-------|---------|
+| `VITE_SUPABASE_URL` | Production, Preview, Development | Evet (build-time) |
+| `VITE_SUPABASE_ANON_KEY` | Production, Preview, Development | Evet (build-time) |
+
+**Vercel'e EKLENMEYECEK değişkenler:**
+
+| Değişken | Nerede tutulmalı |
+|----------|------------------|
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Edge Function secrets |
+| `IYZICO_API_KEY` | Supabase Edge Function secrets |
+| `IYZICO_SECRET_KEY` | Supabase Edge Function secrets |
+| `PAYTR_MERCHANT_ID` | Supabase Edge Function secrets |
+| `PAYTR_MERCHANT_KEY` | Supabase Edge Function secrets |
+| `PAYTR_MERCHANT_SALT` | Supabase Edge Function secrets |
+
 6. `vercel.json` SPA fallback rewrite'ları içerir
 
 > Uygulama şu an `HashRouter` kullanır (`/#/urunler`). Vercel rewrite'ları BrowserRouter'a geçiş için hazırdır.
+
+### Supabase Edge Function Secrets
+
+Ödeme entegrasyonu için secret'lar **yalnızca** Supabase tarafında tanımlanır:
+
+```bash
+# Örnek (ileride ödeme entegrasyonu)
+supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+supabase secrets set IYZICO_API_KEY=your-iyzico-api-key
+supabase secrets set IYZICO_SECRET_KEY=your-iyzico-secret
+supabase secrets set PAYTR_MERCHANT_ID=your-merchant-id
+supabase secrets set PAYTR_MERCHANT_KEY=your-merchant-key
+supabase secrets set PAYTR_MERCHANT_SALT=your-merchant-salt
+```
+
+Bu secret'lar Edge Functions içinde `Deno.env.get('...')` ile okunur; frontend veya Vercel public env'e yazılmaz.
 
 ## Veri Katmanı (Geçiş Dönemi)
 
@@ -109,6 +201,7 @@ src/
   stores/               # Zustand state
   types/database.ts     # Supabase row types
 supabase/
+  config.toml           # Supabase CLI config
   migrations/           # Postgres schema + RLS
   seed.sql              # Örnek kategori/ürün seed
   functions/            # Edge Function placeholders
