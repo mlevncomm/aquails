@@ -331,14 +331,14 @@ export default function Checkout() {
                   <div className="w-4 h-4 rounded bg-aqua-primary border border-aqua-primary flex items-center justify-center">
                     <Check className="w-3 h-3 text-white" />
                   </div>
-                  <span className="text-sm text-aqua-text-secondary">Ucretsiz profesyonel kurulum istiyorum</span>
+                  <span className="text-sm text-aqua-text-secondary">Ücretsiz profesyonel kurulum istiyorum</span>
                 </label>
 
                 {/* Installation Slot Selection */}
                 <div className="mt-5 pt-5 border-t border-aqua-border-light">
                   <h4 className="text-sm font-semibold text-aqua-secondary flex items-center gap-2 mb-3">
                     <Calendar className="w-4 h-4 text-aqua-primary" />
-                    Kurulum Tarihi ve Saati Secin
+                    Kurulum Tarihi ve Saati Seçin
                   </h4>
                   <input
                     type="date"
@@ -356,7 +356,7 @@ export default function Checkout() {
                   {selectedDate && (
                     <div className="grid grid-cols-2 gap-2">
                       {availableSlots.filter(s => s.available).length === 0 ? (
-                        <p className="text-xs text-aqua-text-muted col-span-2">Bu tarihte musait slot bulunmuyor. Baska tarih secin.</p>
+                        <p className="text-xs text-aqua-text-muted col-span-2">Bu tarihte müsait slot bulunmuyor. Başka tarih seçin.</p>
                       ) : (
                         availableSlots.filter(s => s.available).map((slot) => (
                           <button

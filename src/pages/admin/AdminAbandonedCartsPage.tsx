@@ -12,13 +12,13 @@ export default function AdminAbandonedCartsPage() {
 
   const handleSendReminder = (id: string) => {
     sendReminder(id);
-    addToast('Hatirlatici gonderildi.', 'success');
+    addToast('Hatırlatıcı gönderildi.', 'success');
     refresh();
   };
 
   const handleConvert = (id: string) => {
     markConverted(id);
-    addToast('Donusturuldu olarak isaretlendi.', 'success');
+    addToast('Dönüştürüldü olarak işaretlendi.', 'success');
     refresh();
   };
 
@@ -35,20 +35,20 @@ export default function AdminAbandonedCartsPage() {
 
   const statusLabel: Record<string, string> = {
     new: 'Yeni',
-    'reminder-sent': 'Hatirlatici Gonderildi',
-    converted: 'Donustu',
+    'reminder-sent': 'Hatırlatıcı Gönderildi',
+    converted: 'Dönüştü',
   };
 
   return (
     <div className="p-4 md:p-6">
       <h1 className="text-xl md:text-2xl font-bold text-[#0D2137] mb-1">Terk Edilmis Sepetler</h1>
-      <p className="text-sm text-[#8B9DAF] mb-6">Sepeti terk eden musterileri takip edin, hatirlatici gonderin.</p>
+      <p className="text-sm text-[#8B9DAF] mb-6">Sepeti terk eden müşterileri takip edin, hatırlatıcı gönderin.</p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
           { label: 'Toplam', value: stats.total },
           { label: 'Yeni', value: stats.new },
-          { label: 'Hatirlatici', value: stats.reminderSent },
+          { label: 'Hatırlatıcı', value: stats.reminderSent },
           { label: 'Donusum', value: stats.converted },
         ].map(s => (
           <div key={s.label} className="bg-white border border-[#E8F0FE] rounded-xl p-4">
@@ -63,17 +63,17 @@ export default function AdminAbandonedCartsPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#E8F0FE]">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Musteri</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Urunler</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Müşteri</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Ürünler</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Tutar</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Son Aktivite</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Durum</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Islem</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-[#8B9DAF]">İşlem</th>
               </tr>
             </thead>
             <tbody>
               {carts.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-8 text-sm text-[#8B9DAF]">Terk edilmis sepet bulunmuyor.</td></tr>
+                <tr><td colSpan={6} className="text-center py-8 text-sm text-[#8B9DAF]">Terk edilmiş sepet bulunmuyor.</td></tr>
               ) : carts.map(c => (
                 <tr key={c.id} className="border-b border-[#F0F6FF] last:border-0">
                   <td className="px-4 py-3 text-sm font-medium text-[#0D2137]">{c.customerName}</td>
@@ -84,10 +84,10 @@ export default function AdminAbandonedCartsPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
                       {c.status === 'new' && (
-                        <button onClick={() => handleSendReminder(c.id)} className="p-1.5 rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8] transition-all" title="Hatirlatici gonder"><Send className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => handleSendReminder(c.id)} className="p-1.5 rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8] transition-all" title="Hatırlatıcı gönder"><Send className="w-3.5 h-3.5" /></button>
                       )}
                       {c.status !== 'converted' && (
-                        <button onClick={() => handleConvert(c.id)} className="p-1.5 rounded-lg hover:bg-emerald-50 text-[#8B9DAF] hover:text-emerald-500 transition-all" title="Donustur"><RotateCcw className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => handleConvert(c.id)} className="p-1.5 rounded-lg hover:bg-emerald-50 text-[#8B9DAF] hover:text-emerald-500 transition-all" title="Dönüştür"><RotateCcw className="w-3.5 h-3.5" /></button>
                       )}
                       <button onClick={() => handleDelete(c.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-[#8B9DAF] hover:text-red-500 transition-all" title="Sil"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>

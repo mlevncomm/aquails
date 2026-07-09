@@ -11,26 +11,26 @@ export default function CustomerReferralPage() {
   const handleCopy = () => {
     navigator.clipboard?.writeText(data.link);
     setCopied(true);
-    addToast('Referans linki kopyalandi!', 'success');
+    addToast('Referans linki kopyalandı!', 'success');
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleShareWhatsApp = () => {
-    const msg = `Aquails'ten su aritma cihazi almak icin bu linki kullan, %10 indirim kazan! ${data.link}`;
+    const msg = `Aquails'ten su arıtma cihazı almak için bu linki kullan, %10 indirim kazan! ${data.link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   return (
     <div className="p-4 md:p-6">
-      <h1 className="text-xl md:text-2xl font-bold text-[#0D2137] mb-1">Arkadas Davet Et</h1>
-      <p className="text-sm text-[#8B9DAF] mb-6">Arkadaslarinizi davet edin, her ikisinin de kazanmasini saglayin.</p>
+      <h1 className="text-xl md:text-2xl font-bold text-[#0D2137] mb-1">Arkadaş Davet Et</h1>
+      <p className="text-sm text-[#8B9DAF] mb-6">Arkadaşlarınızı davet edin, her ikisinin de kazanmasını sağlayın.</p>
 
       <div className="bg-gradient-to-br from-[#1A73E8] to-[#1557B0] rounded-2xl p-6 text-white mb-6">
         <div className="flex items-center gap-3 mb-4">
           <Gift className="w-8 h-8" />
           <div>
             <p className="text-sm font-semibold">Davet Et, Kazan</p>
-            <p className="text-xs text-white/70">Arkadasin %10 indirim kazanir, sen 250₺ kupon.</p>
+            <p className="text-xs text-white/70">Arkadaşın %10 indirim kazanır, sen 250₺ kupon.</p>
           </div>
         </div>
         <div className="flex items-center gap-2 bg-white/15 rounded-xl p-3">
@@ -61,7 +61,7 @@ export default function CustomerReferralPage() {
 
       {data.history.length > 0 && (
         <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
-          <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Davet Gecmisi</h3>
+          <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Davet Geçmişi</h3>
           <div className="space-y-2">
             {data.history.map((h, i) => (
               <div key={i} className="flex items-center justify-between p-3 bg-[#F8FBFF] rounded-xl">

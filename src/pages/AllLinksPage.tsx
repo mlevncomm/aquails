@@ -13,41 +13,41 @@ import { SEO } from '@/components/SEO';
 
 const linkGroups = [
   {
-    title: 'Hizli Baglantilar',
+    title: 'Hızlı Bağlantılar',
     links: [
       { label: 'WhatsApp Destek', href: 'https://wa.me/905321234567', icon: MessageCircle, external: true },
-      { label: 'Urunleri Incele', href: '/urunler', icon: ShoppingBag, external: false },
-      { label: 'Urun Secim Sihirbazi', href: '/urun-secim-sihirbazi', icon: Sparkles, external: false },
+      { label: 'Ürünleri İncele', href: '/urunler', icon: ShoppingBag, external: false },
+      { label: 'Ürün Seçim Sihirbazı', href: '/urun-secim-sihirbazi', icon: Sparkles, external: false },
       { label: 'Kampanyalar', href: '/kampanyalar', icon: Gift, external: false },
       { label: 'Servis Randevusu', href: '/servis-randevusu', icon: Wrench, external: false },
-      { label: 'Filtre Hesaplayici', href: '/filtre-hesaplayici', icon: Calculator, external: false },
+      { label: 'Filtre Hesaplayıcı', href: '/filtre-hesaplayici', icon: Calculator, external: false },
     ],
   },
   {
-    title: 'Diger',
+    title: 'Diğer',
     links: [
       { label: 'Filtre Setleri', href: '/urunler?kategori=filtreler', icon: Filter, external: false },
       { label: 'Su Kalitesi Testi', href: '/su-kalitesi-testi', icon: FlaskConical, external: false },
-      { label: 'Filtre Secim Rehberi', href: '/filtre-secim-rehberi', icon: Filter, external: false },
-      { label: 'Servis Agimiz', href: '/servis-agimiz', icon: MapPin, external: false },
-      { label: 'Siparis Takip', href: '/siparis-takip', icon: Truck, external: false },
-      { label: 'Iletisim', href: '/iletisim', icon: Phone, external: false },
+      { label: 'Filtre Seçim Rehberi', href: '/filtre-secim-rehberi', icon: Filter, external: false },
+      { label: 'Servis Ağımız', href: '/servis-agimiz', icon: MapPin, external: false },
+      { label: 'Sipariş Takip', href: '/siparis-takip', icon: Truck, external: false },
+      { label: 'İletişim', href: '/iletisim', icon: Phone, external: false },
       { label: 'Instagram', href: 'https://instagram.com/aquails', icon: Instagram, external: true },
     ],
   },
 ];
 
 const badges = [
-  { icon: ShieldCheck, label: 'Guvenli Alisveris' },
-  { icon: Headphones, label: 'Kurulum Destegi' },
-  { icon: RefreshCw, label: 'Filtre Hatirlama' },
+  { icon: ShieldCheck, label: 'Güvenli Alışveriş' },
+  { icon: Headphones, label: 'Kurulum Desteği' },
+  { icon: RefreshCw, label: 'Filtre Hatırlama' },
 ];
 
 const trustItems = [
-  { icon: Award, value: '10.000+', label: 'Mutlu Musteri' },
-  { icon: ShieldCheck, value: '2 Yil', label: 'Garanti' },
-  { icon: CreditCard, value: 'Guvenli', label: 'Odeme' },
-  { icon: Headphones, value: 'Yetkili', label: 'Servis Destegi' },
+  { icon: Award, value: '10.000+', label: 'Mutlu Müşteri' },
+  { icon: ShieldCheck, value: '2 Yıl', label: 'Garanti' },
+  { icon: CreditCard, value: 'Güvenli', label: 'Ödeme' },
+  { icon: Headphones, value: 'Yetkili', label: 'Servis Desteği' },
 ];
 
 const featuredProducts = [
@@ -79,14 +79,14 @@ export default function AllLinksPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    document.title = 'Aquails | Tum Baglantilar';
+    document.title = 'Aquails | Tüm Bağlantılar';
     window.scrollTo(0, 0);
   }, []);
 
   const handleCopyCoupon = () => {
     navigator.clipboard?.writeText('AQUAILS10');
     setCopied(true);
-    addToast('Kupon kodu kopyalandi!', 'success');
+    addToast('Kupon kodu kopyalandı!', 'success');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -124,10 +124,10 @@ export default function AllLinksPage() {
           </div>
           <h1 className="text-xl font-bold text-[#0D2137]">aquails</h1>
           <p className="text-sm font-semibold text-[#1A73E8] mt-1">
-            Daha Temiz Su, Daha Akilli Teknoloji
+            Daha Temiz Su, Daha Akıllı Teknoloji
           </p>
           <p className="text-xs text-[#5A6B7B] mt-2 leading-relaxed max-w-xs mx-auto">
-            Su aritma cihazlari, filtre aboneligi, servis randevusu ve kampanyalarimize tek yerden ulasin.
+            Su arıtma cihazları, filtre aboneliği, servis randevusu ve kampanyalarımıza tek yerden ulaşın.
           </p>
 
           {/* Badges */}
@@ -204,7 +204,7 @@ export default function AllLinksPage() {
           transition={{ delay: 0.6 }}
           className="mt-8"
         >
-          <h3 className="text-xs font-semibold text-[#8B9DAF] tracking-[0.15em] uppercase text-center mb-4">One Cikanlar</h3>
+          <h3 className="text-xs font-semibold text-[#8B9DAF] tracking-[0.15em] uppercase text-center mb-4">Öne Çıkanlar</h3>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
             {featuredProducts.map((p, i) => (
               <Link
@@ -238,7 +238,7 @@ export default function AllLinksPage() {
           <div className="relative">
             <p className="text-[10px] font-bold text-white/50 tracking-[0.15em] uppercase">Instagram\'a Ozel Firsat</p>
             <h3 className="text-base font-bold mt-1">%10 Indirim</h3>
-            <p className="text-xs text-white/70 mt-1">AQUAILS10 kodu ile secili urunlerde gecerli.</p>
+            <p className="text-xs text-white/70 mt-1">AQUAILS10 kodu ile seçili ürünlerde geçerli.</p>
             <div className="flex items-center gap-2 mt-4">
               <button
                 onClick={handleCopyCoupon}
@@ -295,7 +295,7 @@ export default function AllLinksPage() {
             ))}
           </div>
           <p className="text-[10px] text-[#8B9DAF] text-center mt-4">
-            &copy; 2026 Aquails. Tum haklari saklidir.
+            &copy; 2026 Aquails. Tüm hakları saklıdır.
           </p>
         </motion.div>
       </div>

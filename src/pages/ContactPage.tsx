@@ -155,7 +155,7 @@ export default function ContactPage() {
                         <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Konu</label>
                         <select value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]">
                           <option>Genel Bilgi</option>
-                          <option>Urun Destegi</option>
+                          <option>Ürün Desteği</option>
                           <option>Servis Talebi</option>
                           <option>Is Birligi</option>
                           <option>Sikayet/Oneri</option>
@@ -163,11 +163,11 @@ export default function ContactPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Mesajiniz *</label>
-                      <textarea required value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} rows={5} className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8] resize-none" placeholder="Mesajinizi buraya yazin..." />
+                      <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Mesajınız *</label>
+                      <textarea required value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} rows={5} className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8] resize-none" placeholder="Mesajınızı buraya yazın..." />
                     </div>
                     <button type="submit" className="flex items-center justify-center gap-2 w-full sm:w-auto bg-[#1A73E8] text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all">
-                      <Send className="w-4 h-4" /> Gonder
+                      <Send className="w-4 h-4" /> Gönder
                     </button>
                   </form>
                 </>
