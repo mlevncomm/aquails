@@ -21,7 +21,7 @@ export default function LoginPage() {
     setLoading(false);
     if (res.success && res.user) {
       addToast(`Hoş geldiniz, ${res.user.name}!`, 'success');
-      navigate(res.user.role === 'admin' ? '/admin' : '/hesabim', { replace: true });
+      navigate(res.user.role === 'admin' || res.user.role === 'super_admin' ? '/admin' : '/hesabim', { replace: true });
     } else {
       addToast(res.error || 'Giriş başarısız.', 'error');
     }
