@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Check, Lock, CreditCard, Building2, Truck, Shield, Lock as LockIcon,
@@ -11,6 +11,10 @@ import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { useCartStore } from '@/stores/cartStore';
 import { validateCoupon } from '@/services/couponService';
+import { saveOrder, generateOrderNo } from '@/services/orderService';
+import type { CustomerOrder } from '@/services/orderService';
+import { completeAbandonedCart, syncAbandonedCart } from '@/services/abandonedCartService';
+import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/components/Toast';
 import { cn } from '@/lib/utils';
 
@@ -34,8 +38,16 @@ const shippingMethods = [
   { id: 'same', label: 'Aynı Gün Teslimat', desc: 'Bugün teslimat (İstanbul)', price: 99, priceLabel: '99₺' },
 ];
 
+const paymentMethodLabels: Record<string, string> = {
+  card: 'Kredi Kartı',
+  transfer: 'Havale/EFT',
+  cod: 'Kapıda Ödeme',
+};
+
 export default function Checkout() {
-  const { items, getSubtotal } = useCartStore();
+  const navigate = useNavigate();
+  const { items, getSubtotal, clearCart } = useCartStore();
+  const user = useAuthStore((s) => s.user);
   const addToast = useToastStore((s) => s.add);
   const [currentStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState('');
@@ -44,6 +56,7 @@ export default function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [isCompleted, setIsCompleted] = useState(false);
+  const [completedOrderNo, setCompletedOrderNo] = useState('');
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number; type: string } | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
@@ -56,6 +69,57 @@ export default function Checkout() {
   const effectiveShipping = isFreeShipping ? 0 : shippingCost;
   const discount = couponDiscount > 0 ? couponDiscount : 0;
   const total = subtotal + effectiveShipping + codFee - discount;
+
+  useEffect(() => {
+    if (isCompleted) return;
+    if (items.length === 0) {
+      addToast('Sepetiniz boş. Ödeme sayfasına erişmek için önce ürün ekleyin.', 'error');
+      navigate('/sepet', { replace: true });
+      return;
+    }
+    syncAbandonedCart(
+      items.map((item) => ({
+        productId: item.product.id,
+        productName: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity,
+        image: item.product.images?.[0],
+      })),
+      user?.name ?? 'Misafir',
+      user?.email
+    );
+  }, [items, isCompleted, navigate, addToast, user?.name, user?.email]);
+
+  const handleCompleteOrder = () => {
+    if (!items.length) {
+      addToast('Sepetiniz boş.', 'error');
+      navigate('/sepet', { replace: true });
+      return;
+    }
+
+    const orderNo = generateOrderNo();
+    const order: CustomerOrder = {
+      id: Date.now().toString(),
+      orderNo,
+      date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }),
+      status: 'pending',
+      total,
+      items: items.map((item) => ({
+        name: item.product.name,
+        qty: item.quantity,
+        price: item.product.price,
+      })),
+      paymentMethod: paymentMethodLabels[paymentMethod] ?? paymentMethod,
+      shippingAddress: 'İstanbul',
+    };
+
+    saveOrder(order);
+    completeAbandonedCart();
+    clearCart();
+    setCompletedOrderNo(orderNo);
+    setIsCompleted(true);
+    addToast('Siparişiniz başarıyla oluşturuldu.', 'success');
+  };
 
   const handleApplyCoupon = () => {
     if (!couponCode.trim()) { addToast('Kupon kodu girin.', 'error'); return; }
@@ -111,7 +175,7 @@ export default function Checkout() {
             className="mt-4"
           >
             <span className="inline-block bg-aqua-primary/10 text-aqua-primary font-semibold px-4 py-2 rounded-lg">
-              Sipariş No: AQ-2025-1847
+              Sipariş No: {completedOrderNo}
             </span>
           </motion.div>
           <motion.p
@@ -538,7 +602,7 @@ export default function Checkout() {
               </div>
 
               <button
-                onClick={() => setIsCompleted(true)}
+                onClick={handleCompleteOrder}
                 className="flex items-center justify-center gap-2 w-full bg-aqua-primary text-white py-4 rounded-full font-semibold hover:bg-aqua-primary-dark hover:shadow-primary transition-all mt-4"
               >
                 <Lock className="w-4 h-4" />
