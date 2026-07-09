@@ -149,6 +149,7 @@ export default function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/urunler" element={<AdminProductsPage />} />
           <Route path="/admin/urunler/ekle" element={<AdminProductEditPage />} />
+          <Route path="/admin/urunler/:id" element={<AdminProductEditPage />} />
           <Route path="/admin/kategoriler" element={<AdminCategoriesPage />} />
           <Route path="/admin/siparisler" element={<AdminOrdersPage />} />
           <Route path="/admin/siparisler/:id" element={<AdminOrderDetailPage />} />

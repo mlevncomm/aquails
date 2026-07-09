@@ -61,7 +61,7 @@ export default function AdminProductsPage() {
                   <td className="px-4 py-3 text-sm text-[#E85454]">{p.oldPrice ? `${p.oldPrice.toLocaleString('tr-TR')}₺` : '-'}</td>
                   <td className="px-4 py-3 text-sm text-[#0D2137]">{p.stock}</td>
                   <td className="px-4 py-3"><StatusBadge status={p.stock <= 5 ? 'low' : 'active'} /></td>
-                  <td className="px-4 py-3"><div className="flex gap-1"><button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8]"><Pencil className="w-3.5 h-3.5" /></button><button onClick={() => remove(p.id)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-[#8B9DAF] hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button></div></td>
+                  <td className="px-4 py-3"><div className="flex gap-1"><Link to={`/admin/urunler/${p.id}`} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8]"><Pencil className="w-3.5 h-3.5" /></Link><button onClick={() => remove(p.id)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-[#8B9DAF] hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button></div></td>
                 </tr>
               ))}
             </tbody>

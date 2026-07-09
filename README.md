@@ -1,73 +1,72 @@
-# React + TypeScript + Vite
+# Aquails
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aquails, su arıtma cihazları ve yedek parçaları için geliştirilmiş bir e-ticaret platformudur. Proje React 19, TypeScript, Vite ve Tailwind CSS ile oluşturulmuştur.
 
-Currently, two official plugins are available:
+## Özellikler
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Ürün kataloğu, sepet, ödeme akışı ve müşteri paneli
+- Admin paneli (ürünler, siparişler, kuponlar, blog, raporlar)
+- Favoriler, karşılaştırma, filtre takibi, abonelik ve sadakat modülleri
+- SEO, Schema.org ve PWA manifest desteği
 
-## React Compiler
+## Mevcut Mimari (Mock / localStorage)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Backend henüz yoktur. Veriler geçici olarak şu kaynaklardan gelir:
 
-## Expanding the ESLint configuration
+| Katman | Kaynak |
+|--------|--------|
+| Ürünler | `src/data/products.ts` (statik) |
+| Sepet | Zustand + `localStorage` (`aquails_cart`) |
+| Siparişler | `localStorage` (`aquails_orders`) |
+| Kimlik doğrulama | Mock kullanıcılar (`authService.ts`) |
+| Terk edilmiş sepet | `localStorage` (`abandoned-carts`) |
+| Ürün soruları | `localStorage` (`product-questions`) |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Backend entegrasyonu için yol haritası: `docs/backend-roadmap.md`
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Demo Giriş Bilgileri
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+| Rol | E-posta | Şifre |
+|-----|---------|-------|
+| Müşteri | `ahmet@email.com` | `123456` |
+| Admin | `admin@aquails.com` | `admin123` |
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Kurulum
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Uygulama varsayılan olarak `http://localhost:3000` adresinde çalışır.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Scriptler
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Komut | Açıklama |
+|-------|----------|
+| `npm run dev` | Geliştirme sunucusu |
+| `npm run build` | Production build |
+| `npm run preview` | Build önizleme |
+| `npm run lint` | ESLint kontrolü |
+
+## Proje Yapısı
+
 ```
+src/
+  components/   # UI bileşenleri
+  data/         # Statik ürün ve mock veriler
+  layouts/      # Sayfa düzenleri
+  pages/        # Rota sayfaları
+  services/     # İş mantığı (mock/localStorage)
+  stores/       # Zustand state yönetimi
+  types/        # TypeScript tipleri
+docs/
+  backend-roadmap.md
+```
+
+## Teknolojiler
+
+- React 19 + TypeScript
+- Vite 7
+- Tailwind CSS 3 + shadcn/ui
+- Zustand, React Router 7, Framer Motion

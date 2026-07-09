@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart, ShoppingCart, Zap, Check, ChevronRight,
   Shield, Truck, Wrench, Star, ThumbsUp,
-  MessageCircle, Bell, Mail, Phone, Send, AlertCircle
+  MessageCircle, Bell, Mail, Phone, Send, AlertCircle, HelpCircle
 } from 'lucide-react';
 import { openWhatsApp, getProductInquiryMessage } from '@/services/whatsappService';
 import { requestNotification, getNotifications } from '@/services/stockNotificationService';
@@ -17,7 +17,9 @@ import { QuantitySelector } from '@/components/QuantitySelector';
 import { SEO } from '@/components/SEO';
 import { getProductSchema, getBreadcrumbSchema } from '@/components/SchemaOrg';
 import { getProductBySlug, getRelatedProducts, products } from '@/data';
+import { askQuestion, getPublicQuestionsForProduct } from '@/services/productQuestionService';
 import { useCartStore } from '@/stores/cartStore';
+import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
 
 const tabs = [
@@ -25,6 +27,7 @@ const tabs = [
   { id: 'specs', label: 'Teknik Özellikler' },
   { id: 'shipping', label: 'Kargo ve Kurulum' },
   { id: 'reviews', label: 'Yorumlar' },
+  { id: 'questions', label: 'Soru & Cevap' },
 ];
 
 const reviews = [
@@ -37,11 +40,16 @@ export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const product = getProductBySlug(slug || '');
   const { addItem, openDrawer } = useCartStore();
+  const user = useAuthStore((s) => s.user);
   const addToast = useToastStore(s => s.add);
   const [quantity, setQuantity] = useState(1);
   const [isFavorited, setIsFavorited] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
   const [activeImage, setActiveImage] = useState(0);
+
+  const [questionName, setQuestionName] = useState('');
+  const [questionText, setQuestionText] = useState('');
+  const [questionSubmitted, setQuestionSubmitted] = useState(false);
 
   // Stock notification state
   const [showNotifyForm, setShowNotifyForm] = useState(false);
@@ -93,6 +101,7 @@ export default function ProductDetail() {
   ]);
 
   const relatedProducts = getRelatedProducts(product.id, 4);
+  const publicQuestions = getPublicQuestionsForProduct(product.id);
 
   const handleAddToCart = () => {
     addItem(product, quantity);
@@ -115,6 +124,24 @@ export default function ProductDetail() {
     requestNotification(product.id, product.name, notifyEmail, notifyPhone || undefined);
     setNotifySubmitted(true);
     addToast('Stok bildirimine kaydoldunuz. Ürün gelince haberdar edileceksiniz.', 'success');
+  };
+
+  const handleQuestionSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = questionName.trim() || user?.name || '';
+    const text = questionText.trim();
+    if (!name) {
+      addToast('Lütfen adınızı girin.', 'error');
+      return;
+    }
+    if (!text) {
+      addToast('Lütfen sorunuzu yazın.', 'error');
+      return;
+    }
+    askQuestion(product.id, product.name, name, text);
+    setQuestionText('');
+    setQuestionSubmitted(true);
+    addToast('Sorunuz alındı. Cevaplandığında burada görünecek.', 'success');
   };
 
   const productImages = product.images && product.images.length > 0
@@ -436,6 +463,7 @@ export default function ProductDetail() {
               >
                 {tab.label}
                 {tab.id === 'reviews' && ` (${product.reviewCount})`}
+                {tab.id === 'questions' && publicQuestions.length > 0 && ` (${publicQuestions.length})`}
               </button>
             ))}
           </div>
@@ -565,6 +593,83 @@ export default function ProductDetail() {
                       </div>
                     ))}
                   </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'questions' && (
+                <motion.div
+                  key="questions"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="bg-aqua-bg border border-aqua-border-light rounded-xl p-5">
+                    <h4 className="text-sm font-semibold text-aqua-secondary flex items-center gap-2 mb-3">
+                      <HelpCircle className="w-4 h-4 text-aqua-primary" />
+                      Soru Sor
+                    </h4>
+                    {questionSubmitted ? (
+                      <p className="text-sm text-aqua-text-secondary">
+                        Sorunuz başarıyla gönderildi. Admin onayından sonra cevap burada yayınlanacaktır.
+                      </p>
+                    ) : (
+                      <form onSubmit={handleQuestionSubmit} className="space-y-3">
+                        <input
+                          type="text"
+                          value={questionName}
+                          onChange={(e) => setQuestionName(e.target.value)}
+                          placeholder={user?.name ? user.name : 'Adınız Soyadınız'}
+                          className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary bg-white"
+                        />
+                        <textarea
+                          value={questionText}
+                          onChange={(e) => setQuestionText(e.target.value)}
+                          placeholder="Ürün hakkında sorunuzu yazın..."
+                          rows={3}
+                          className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary bg-white resize-none"
+                        />
+                        <button
+                          type="submit"
+                          className="inline-flex items-center gap-2 bg-aqua-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-aqua-primary-dark transition-all"
+                        >
+                          <Send className="w-4 h-4" />
+                          Soruyu Gönder
+                        </button>
+                      </form>
+                    )}
+                  </div>
+
+                  {publicQuestions.length > 0 ? (
+                    <div className="space-y-4">
+                      {publicQuestions.map((q) => (
+                        <div key={q.id} className="border-b border-aqua-bg pb-4 last:border-0">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-aqua-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-xs font-bold text-aqua-primary">{q.customerName[0]}</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-aqua-secondary">{q.customerName}</p>
+                              <p className="text-sm text-aqua-text-secondary mt-1">{q.question}</p>
+                              {q.answer && (
+                                <div className="mt-3 bg-aqua-bg rounded-xl p-3">
+                                  <p className="text-xs font-medium text-aqua-primary mb-1 flex items-center gap-1">
+                                    <MessageCircle className="w-3.5 h-3.5" />
+                                    Aquails Cevabı
+                                  </p>
+                                  <p className="text-sm text-aqua-text-secondary">{q.answer}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-aqua-text-muted text-center py-4">
+                      Henüz yayınlanmış soru-cevap bulunmuyor. İlk soruyu siz sorun!
+                    </p>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

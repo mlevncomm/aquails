@@ -1,6 +1,24 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CartItem, Product } from '@/types';
+import { syncAbandonedCart } from '@/services/abandonedCartService';
+import { useAuthStore } from '@/stores/authStore';
+
+function trackAbandonedCartFromStore(items: CartItem[]): void {
+  if (!items.length) return;
+  const user = useAuthStore.getState().user;
+  syncAbandonedCart(
+    items.map((item) => ({
+      productId: item.product.id,
+      productName: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      image: item.product.images?.[0],
+    })),
+    user?.name ?? 'Misafir',
+    user?.email
+  );
+}
 
 interface CartStore {
   items: CartItem[];
@@ -26,23 +44,24 @@ export const useCartStore = create<CartStore>()(
       addItem: (product, quantity = 1) => {
         set((state) => {
           const existingItem = state.items.find((item) => item.product.id === product.id);
-          if (existingItem) {
-            return {
-              items: state.items.map((item) =>
+          const nextItems = existingItem
+            ? state.items.map((item) =>
                 item.product.id === product.id
                   ? { ...item, quantity: item.quantity + quantity }
                   : item
-              ),
-            };
-          }
-          return { items: [...state.items, { product, quantity }] };
+              )
+            : [...state.items, { product, quantity }];
+          trackAbandonedCartFromStore(nextItems);
+          return { items: nextItems };
         });
       },
 
       removeItem: (productId) => {
-        set((state) => ({
-          items: state.items.filter((item) => item.product.id !== productId),
-        }));
+        set((state) => {
+          const nextItems = state.items.filter((item) => item.product.id !== productId);
+          trackAbandonedCartFromStore(nextItems);
+          return { items: nextItems };
+        });
       },
 
       updateQuantity: (productId, quantity) => {
@@ -50,11 +69,13 @@ export const useCartStore = create<CartStore>()(
           get().removeItem(productId);
           return;
         }
-        set((state) => ({
-          items: state.items.map((item) =>
+        set((state) => {
+          const nextItems = state.items.map((item) =>
             item.product.id === productId ? { ...item, quantity } : item
-          ),
-        }));
+          );
+          trackAbandonedCartFromStore(nextItems);
+          return { items: nextItems };
+        });
       },
 
       clearCart: () => set({ items: [] }),
