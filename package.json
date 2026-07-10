@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "db:push": "supabase db push --db-url \"$DIRECT_URL\" --yes",
-    "db:seed": "node scripts/db-seed.mjs"
+    "db:seed": "node scripts/db-seed.mjs",
+    "catalog:import": "node scripts/import-ortimax.mjs",
+    "admin:create": "node scripts/create-admin.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

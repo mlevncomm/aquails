@@ -1,16 +1,19 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { Search, SlidersHorizontal, LayoutGrid, List, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageLayout } from '@/layouts/PageLayout';
 import { StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
 import { ProductCard } from '@/components/ProductCard';
-import { products, categories } from '@/data';
+import { ProductGridSkeleton } from '@/components/Skeleton';
+import { useCatalog } from '@/hooks/useCatalog';
 import { cn } from '@/lib/utils';
 import { SEO } from '@/components/SEO';
 
+const PAGE_SIZE = 12;
 
-const brands = ['Aquails', 'PurePro', 'Compact', 'Business', 'Mineral Plus'];
+
+const brands = ['Aquails'];
 const stockOptions = [
   { label: 'Tümü', value: 'all' },
   { label: 'Stokta Var', value: 'in' },
@@ -27,28 +30,34 @@ const sortOptions = [
 ];
 
 export default function Shop() {
+  const { products, categories, loading, error } = useCatalog();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlCategoryId = searchParams.get('kategori');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
+  const maxPrice = useMemo(() => Math.max(...products.map((p) => p.price), 150000), [products]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 150000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [stockStatus, setStockStatus] = useState('all');
   const [sortBy, setSortBy] = useState('default');
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [gridView, setGridView] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Sync URL category param with filter state
+  useEffect(() => {
+    if (products.length > 0) {
+      const max = Math.max(...products.map((p) => p.price));
+      setPriceRange([0, max]);
+    }
+  }, [products]);
+
   useEffect(() => {
     if (urlCategoryId) {
-      const cat = categories.find(c => c.id === urlCategoryId);
-      if (cat && !selectedCategories.includes(cat.name)) {
-        setSelectedCategories([cat.name]);
-      }
-    } else if (selectedCategories.length > 0 && !urlCategoryId) {
-      // Clear if URL has no category but state does (on direct nav to /urunler)
-      // Only clear if we just arrived (check if it was set from URL)
+      setSelectedCategories([urlCategoryId]);
+    } else {
+      setSelectedCategories([]);
     }
+    setCurrentPage(1);
   }, [urlCategoryId]);
 
   // Get active category info for display
@@ -57,9 +66,9 @@ export default function Shop() {
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
-    // Category filter
+    // Category filter (by slug)
     if (selectedCategories.length > 0) {
-      result = result.filter((p) => selectedCategories.includes(p.category));
+      result = result.filter((p) => selectedCategories.includes(p.categorySlug));
     }
 
     // Price filter
@@ -92,15 +101,41 @@ export default function Shop() {
       case 'rated':
         result.sort((a, b) => b.rating - a.rating);
         break;
+      case 'bestseller':
+        result.sort((a, b) => b.reviewCount - a.reviewCount);
+        break;
+      case 'newest':
+        result.sort((a, b) => b.reviewCount - a.reviewCount);
+        break;
     }
 
     return result;
+  }, [products, selectedCategories, priceRange, selectedBrands, stockStatus, sortBy, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
   }, [selectedCategories, priceRange, selectedBrands, stockStatus, sortBy, searchQuery]);
 
+  const syncCategoryUrl = useCallback((cats: string[]) => {
+    if (cats.length === 1) {
+      setSearchParams({ kategori: cats[0] });
+    } else {
+      setSearchParams({});
+    }
+  }, [setSearchParams]);
+
   const toggleCategory = (cat: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    );
+    setSelectedCategories((prev) => {
+      const next = prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat];
+      syncCategoryUrl(next);
+      return next;
+    });
   };
 
   const toggleBrand = (brand: string) => {
@@ -111,16 +146,15 @@ export default function Shop() {
 
   const clearFilters = () => {
     setSelectedCategories([]);
-    setPriceRange([0, 50000]);
+    setPriceRange([0, maxPrice]);
     setSelectedBrands([]);
     setStockStatus('all');
     setSearchQuery('');
-    if (urlCategoryId) {
-      setSearchParams({});
-    }
+    setSearchParams({});
+    setCurrentPage(1);
   };
 
-  const hasActiveFilters = selectedCategories.length > 0 || priceRange[1] < 50000 || selectedBrands.length > 0 || stockStatus !== 'all' || !!urlCategoryId;
+  const hasActiveFilters = selectedCategories.length > 0 || priceRange[1] < maxPrice || selectedBrands.length > 0 || stockStatus !== 'all' || !!searchQuery;
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -132,15 +166,15 @@ export default function Shop() {
             <label key={cat.id} className="flex items-center justify-between cursor-pointer group">
               <div className="flex items-center gap-2.5">
                 <div
-                  onClick={() => toggleCategory(cat.name)}
+                  onClick={() => toggleCategory(cat.id)}
                   className={cn(
                     'w-4 h-4 rounded border flex items-center justify-center transition-all',
-                    selectedCategories.includes(cat.name)
+                    selectedCategories.includes(cat.id)
                       ? 'bg-aqua-primary border-aqua-primary'
                       : 'border-aqua-border group-hover:border-aqua-primary'
                   )}
                 >
-                  {selectedCategories.includes(cat.name) && <Check className="w-3 h-3 text-white" />}
+                  {selectedCategories.includes(cat.id) && <Check className="w-3 h-3 text-white" />}
                 </div>
                 <span className="text-sm text-aqua-text-secondary">{cat.name}</span>
               </div>
@@ -226,11 +260,10 @@ export default function Shop() {
   );
 
   const categoryHero: Record<string, { title: string; desc: string }> = {
-    'su-aritma-cihazlari': { title: 'Su Arıtma Cihazları', desc: 'Eviniz ve iş yeriniz için yüksek performanslı, uzun ömürlü Aquails su arıtma çözümlerini keşfedin.' },
-    'direkt-akis-su-aritma': { title: 'Direkt Akış Su Arıtma', desc: 'Tanksız modern sistemlerle anında temiz su. En yeni teknoloji direkt akış cihazları.' },
-    'filtreler': { title: 'Filtreler', desc: 'Cihazınızın performansını koruyan, düzenli değişim için uygun Aquails filtre çözümleri.' },
-    'sebiller': { title: 'Sebiller', desc: 'Sıcak ve soğuk su seçenekli modern sebil modelleri.' },
-    'aksesuarlar': { title: 'Aksesuarlar', desc: 'Su arıtma sistemlerinizi tamamlayıcı aksesuarlar ve yedek parçalar.' },
+    'su-aritma': {
+      title: 'Su Arıtma Cihazları',
+      desc: 'Eviniz ve iş yeriniz için yüksek performanslı, uzun ömürlü Aquails su arıtma çözümlerini keşfedin.',
+    },
   };
   const heroInfo = urlCategoryId && categoryHero[urlCategoryId] ? categoryHero[urlCategoryId] : null;
 
@@ -365,15 +398,24 @@ export default function Shop() {
             {/* Active filter chips */}
             {(selectedCategories.length > 0 || urlCategoryId) && (
               <div className="flex flex-wrap gap-2 mb-4">
-                {selectedCategories.map(cat => (
-                  <span key={cat} className="inline-flex items-center gap-1.5 bg-aqua-primary/10 text-aqua-primary text-xs font-medium px-3 py-1.5 rounded-full">
-                    {cat}
-                    <button onClick={() => { toggleCategory(cat); if (urlCategoryId) setSearchParams({}); }} className="hover:text-aqua-danger"><X className="w-3 h-3" /></button>
+                {selectedCategories.map((catSlug) => {
+                  const cat = categories.find((c) => c.id === catSlug);
+                  return (
+                  <span key={catSlug} className="inline-flex items-center gap-1.5 bg-aqua-primary/10 text-aqua-primary text-xs font-medium px-3 py-1.5 rounded-full">
+                    {cat?.name ?? catSlug}
+                    <button onClick={() => { toggleCategory(catSlug); }} className="hover:text-aqua-danger"><X className="w-3 h-3" /></button>
                   </span>
-                ))}
+                  );
+                })}
               </div>
             )}
-            {filteredProducts.length === 0 ? (
+            {loading ? (
+              <ProductGridSkeleton count={6} />
+            ) : error ? (
+              <div className="text-center py-20">
+                <p className="text-lg font-semibold text-aqua-text-muted">{error}</p>
+              </div>
+            ) : filteredProducts.length === 0 ? (
               <div className="text-center py-20">
                 <Search className="w-16 h-16 text-aqua-border mx-auto mb-4" />
                 <p className="text-lg font-semibold text-aqua-text-muted">Ürün bulunamadı</p>
@@ -390,7 +432,7 @@ export default function Shop() {
                 )}
                 staggerDelay={0.06}
               >
-                {filteredProducts.map((product) => (
+                {paginatedProducts.map((product) => (
                   <StaggerItem key={product.id}>
                     <ProductCard product={product} />
                   </StaggerItem>
@@ -399,17 +441,22 @@ export default function Shop() {
             )}
 
             {/* Pagination */}
-            {filteredProducts.length > 0 && (
+            {filteredProducts.length > 0 && totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-10">
-                <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-aqua-border text-aqua-text-secondary hover:bg-aqua-bg transition-colors">
+                <button
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="w-10 h-10 flex items-center justify-center rounded-lg border border-aqua-border text-aqua-text-secondary hover:bg-aqua-bg transition-colors disabled:opacity-40"
+                >
                   <span className="text-sm">&lsaquo;</span>
                 </button>
-                {[1, 2, 3].map((page) => (
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
+                    onClick={() => setCurrentPage(page)}
                     className={cn(
                       'w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors',
-                      page === 1
+                      page === currentPage
                         ? 'bg-aqua-primary text-white border border-aqua-primary'
                         : 'border border-aqua-border text-aqua-text-secondary hover:bg-aqua-bg'
                     )}
@@ -417,11 +464,15 @@ export default function Shop() {
                     {page}
                   </button>
                 ))}
-                <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-aqua-border text-aqua-text-secondary hover:bg-aqua-bg transition-colors">
+                <button
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="w-10 h-10 flex items-center justify-center rounded-lg border border-aqua-border text-aqua-text-secondary hover:bg-aqua-bg transition-colors disabled:opacity-40"
+                >
                   <span className="text-sm">&rsaquo;</span>
                 </button>
                 <span className="text-[13px] text-aqua-text-muted ml-4">
-                  1 - {filteredProducts.length} / {filteredProducts.length} ürün
+                  {(currentPage - 1) * PAGE_SIZE + 1} - {Math.min(currentPage * PAGE_SIZE, filteredProducts.length)} / {filteredProducts.length} ürün
                 </span>
               </div>
             )}

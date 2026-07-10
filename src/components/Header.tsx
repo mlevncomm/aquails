@@ -13,7 +13,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
 import { useCompareStore } from '@/stores/compareStore';
 import { logout } from '@/services/authService';
-import { categories } from '@/data';
+import { categories as staticCategories } from '@/data';
+import { useCatalog } from '@/hooks/useCatalog';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -32,6 +33,8 @@ const navLinks = [
 ];
 
 export function Header() {
+  const { categories: loadedCategories } = useCatalog();
+  const categories = loadedCategories.length > 0 ? loadedCategories : staticCategories;
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);

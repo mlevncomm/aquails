@@ -19,17 +19,25 @@ function getCategoryName(relation: DbCategory | DbCategory[] | null): string {
   return relation.name;
 }
 
+function getCategorySlug(relation: DbCategory | DbCategory[] | null): string {
+  if (!relation) return '';
+  if (Array.isArray(relation)) return relation[0]?.slug ?? '';
+  return relation.slug;
+}
+
 function mapDbProduct(row: ProductWithRelations): Product {
   const images = (row.product_images ?? [])
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((img) => img.url);
   const categoryName = getCategoryName(row.categories);
+  const categorySlug = getCategorySlug(row.categories);
 
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
     category: categoryName,
+    categorySlug,
     subcategory: categoryName,
     description: row.description,
     shortDescription: row.short_description,

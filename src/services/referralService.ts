@@ -12,7 +12,7 @@ export function getReferralData(): ReferralData {
   const code = 'AQUAILS' + Math.floor(100 + Math.random() * 900);
   return {
     code,
-    link: `${window.location.origin}/#/kayit-ol?ref=${code}`,
+    link: `${window.location.origin}/kayit-ol?ref=${code}`,
     invitedCount: 0,
     earnedCoupons: [],
     history: [],
