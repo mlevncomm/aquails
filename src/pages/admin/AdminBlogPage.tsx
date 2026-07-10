@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Eye, BookOpen } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, BookOpen, Loader2 } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
-import { getBlogPosts, toggleBlogStatus, deleteBlogPost, type BlogPostListItem } from '@/services/blogService';
+import { getBlogPosts, toggleBlogStatus, deleteBlogPost, createBlogPost, type BlogPostListItem } from '@/services/blogService';
+import { AdminPageHeader, AdminCard, AdminInput, AdminLabel, AdminButton, AdminTableWrap } from '@/components/admin/admin-ui';
 
 export default function AdminBlogPage() {
   const [posts, setPosts] = useState<BlogPostListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ title: '', category: 'Genel', content: '' });
   const addToast = useToastStore((s) => s.add);
 
   const load = useCallback(async () => {
@@ -14,9 +17,7 @@ export default function AdminBlogPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
   const remove = async (id: string) => {
     const result = await deleteBlogPost(id);
@@ -34,17 +35,52 @@ export default function AdminBlogPage() {
     }
   };
 
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await createBlogPost(form);
+    if (result.success) {
+      addToast('Yazı oluşturuldu (taslak).', 'success');
+      setShowForm(false);
+      setForm({ title: '', category: 'Genel', content: '' });
+      void load();
+    } else {
+      addToast(result.error ?? 'Oluşturulamadı.', 'error');
+    }
+  };
+
   return (
     <>
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-semibold text-[#0D2137]">Blog Yönetimi</h2>
-        <button className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0]">
-          <Plus className="w-4 h-4" /> Yeni Yazı
-        </button>
-      </div>
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
+      <AdminPageHeader
+        title="Blog Yönetimi"
+        action={
+          <AdminButton onClick={() => setShowForm(true)}>
+            <Plus className="w-4 h-4" /> Yeni Yazı
+          </AdminButton>
+        }
+      />
+
+      {showForm && (
+        <AdminCard className="mb-6">
+          <form onSubmit={(e) => void handleCreate(e)} className="space-y-4 max-w-xl">
+            <div>
+              <AdminLabel>Başlık</AdminLabel>
+              <AdminInput required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            </div>
+            <div>
+              <AdminLabel>Kategori</AdminLabel>
+              <AdminInput value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+            </div>
+            <div className="flex gap-2">
+              <AdminButton type="submit">Oluştur</AdminButton>
+              <AdminButton type="button" variant="ghost" onClick={() => setShowForm(false)}>İptal</AdminButton>
+            </div>
+          </form>
+        </AdminCard>
+      )}
+
+      <AdminTableWrap>
         {loading ? (
-          <div className="text-center py-12 text-sm text-[#8B9DAF]">Yükleniyor...</div>
+          <div className="py-12 text-center text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -102,9 +138,9 @@ export default function AdminBlogPage() {
           </div>
         )}
         {!loading && posts.length === 0 && (
-          <div className="text-center py-8 text-sm text-[#8B9DAF]">Henüz blog yazısı yok</div>
+          <div className="text-center py-8 text-sm text-slate-400">Henüz blog yazısı yok</div>
         )}
-      </div>
+      </AdminTableWrap>
     </>
   );
 }

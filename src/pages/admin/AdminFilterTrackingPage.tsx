@@ -1,42 +1,58 @@
-import { Bell, BellOff } from 'lucide-react';
-import { filterStatuses } from '@/data/orders';
+import { useState, useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
+import { getServiceRequests } from '@/services/serviceRequestService';
+import type { AdminServiceRequest } from '@/services/serviceRequestService';
+import { AdminPageHeader, AdminTableWrap, AdminEmpty } from '@/components/admin/admin-ui';
 
 export default function AdminFilterTrackingPage() {
+  const [requests, setRequests] = useState<AdminServiceRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    void getServiceRequests().then((all) => {
+      setRequests(all.filter((r) => r.type === 'Filtre Değişimi'));
+      setLoading(false);
+    });
+  }, []);
+
   return (
-      <>      <h2 className="text-lg font-semibold text-[#0D2137] mb-5">Filtre Değişim Takipleri</h2>
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
+    <>
+      <AdminPageHeader
+        title="Filtre Değişim Takipleri"
+        description="Filtre değişim servis talepleri"
+      />
+
+      <AdminTableWrap>
+        {loading ? (
+          <div className="py-12 text-center text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+        ) : (
           <table className="w-full">
-            <thead><tr className="bg-[#F8FBFF]">{['Cihaz', 'Filtre', 'Son Değişim', 'Sonraki', 'Kalan', 'Hatırlatma', 'İşlem'].map(h => <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-[#8B9DAF] uppercase whitespace-nowrap">{h}</th>)}</tr></thead>
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-100">
+                {['Müşteri', 'Cihaz', 'Adres', 'Tarih', 'Durum', 'Teknisyen'].map((h) => (
+                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
             <tbody>
-              {filterStatuses.map((f, i) => (
-                <tr key={i} className="border-b border-[#F0F6FF] last:border-0 hover:bg-[#F8FBFF]/50">
-                  <td className="px-4 py-3 text-sm font-medium text-[#0D2137]">{f.deviceName}</td>
-                  <td className="px-4 py-3 text-sm text-[#5A6B7B]">{f.filterName}</td>
-                  <td className="px-4 py-3 text-sm text-[#5A6B7B]">15 Nis 2025</td>
-                  <td className="px-4 py-3 text-sm text-[#5A6B7B]">15 Eki 2025</td>
+              {requests.length === 0 ? (
+                <tr><td colSpan={6}><AdminEmpty message="Filtre değişim talebi bulunamadı" /></td></tr>
+              ) : requests.map((f) => (
+                <tr key={f.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50">
+                  <td className="px-4 py-3 text-sm font-medium text-slate-800">{f.customer}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{f.device}</td>
+                  <td className="px-4 py-3 text-sm text-slate-500 max-w-[200px] truncate">{f.address}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{f.date}</td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-1.5 bg-[#E8F0FE] rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full ${f.percentRemaining > 80 ? 'bg-emerald-400' : f.percentRemaining > 30 ? 'bg-amber-400' : 'bg-red-400'}`} style={{ width: `${f.percentRemaining}%` }} />
-                      </div>
-                      <span className={`text-xs font-semibold ${f.daysRemaining <= 30 ? 'text-red-500' : 'text-[#0D2137]'}`}>{f.daysRemaining} gün</span>
-                    </div>
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-sky-50 text-sky-700">{f.status}</span>
                   </td>
-                  <td className="px-4 py-3">
-                    <button className={`w-8 h-8 flex items-center justify-center rounded-lg ${f.daysRemaining <= 30 ? 'bg-[#EBF3FF] text-[#1A73E8]' : 'bg-gray-100 text-gray-400'}`}>
-                      {f.daysRemaining <= 30 ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
-                    </button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button className="text-xs bg-[#1A73E8] text-white px-3 py-1.5 rounded-lg hover:bg-[#1557B0] transition-all">Hatırlatma Gönder</button>
-                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-500">{f.tech || '—'}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-      </>
+        )}
+      </AdminTableWrap>
+    </>
   );
 }

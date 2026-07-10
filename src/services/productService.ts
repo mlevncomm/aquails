@@ -148,6 +148,113 @@ export async function searchProducts(query: string): Promise<Product[]> {
   );
 }
 
+export interface AdminProductForm {
+  name: string;
+  slug: string;
+  categoryId: string;
+  sku?: string;
+  shortDescription: string;
+  description: string;
+  price: number;
+  oldPrice?: number | null;
+  stock: number;
+  isActive: boolean;
+  specifications: Record<string, string>;
+}
+
+export async function getAdminProductById(id: string): Promise<(Product & { categoryId?: string; sku?: string; isActive?: boolean }) | null> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from('products')
+    .select(`${PRODUCT_SELECT}`)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  const row = data as unknown as ProductWithRelations & { category_id?: string; sku?: string; is_active?: boolean };
+  const product = mapDbProduct(row);
+  return {
+    ...product,
+    categoryId: row.category_id,
+    sku: row.sku ?? undefined,
+  };
+}
+
+export async function updateProduct(
+  id: string,
+  input: AdminProductForm,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  const { error } = await supabase
+    .from('products')
+    .update({
+      name: input.name,
+      slug: input.slug,
+      category_id: input.categoryId,
+      sku: input.sku || `AQ-${input.slug}`,
+      short_description: input.shortDescription,
+      description: input.description,
+      price: input.price,
+      old_price: input.oldPrice ?? null,
+      stock: input.stock,
+      is_active: input.isActive,
+      specifications: input.specifications,
+    })
+    .eq('id', id);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+export async function createProduct(
+  input: AdminProductForm,
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  if (!input.categoryId) return { success: false, error: 'Kategori seçilmelidir.' };
+
+  const { data, error } = await supabase
+    .from('products')
+    .insert({
+      name: input.name,
+      slug: input.slug,
+      category_id: input.categoryId,
+      sku: input.sku || `AQ-${input.slug}`,
+      short_description: input.shortDescription,
+      description: input.description,
+      price: input.price,
+      old_price: input.oldPrice ?? null,
+      stock: input.stock,
+      is_active: input.isActive,
+      specifications: input.specifications,
+      rating: 0,
+      review_count: 0,
+    })
+    .select('id')
+    .single();
+
+  if (error || !data) return { success: false, error: error?.message ?? 'Ürün oluşturulamadı.' };
+  return { success: true, id: data.id };
+}
+
+export async function getCategoryOptions(): Promise<{ id: string; name: string; slug: string }[]> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+
+  const { data } = await supabase
+    .from('categories')
+    .select('id, name, slug')
+    .eq('is_active', true)
+    .order('sort_order');
+
+  return data ?? [];
+}
+
 export async function getCategories(): Promise<Category[]> {
   const supabase = getSupabaseOrNull();
   if (!supabase) {
