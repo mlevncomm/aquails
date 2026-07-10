@@ -51,6 +51,10 @@ Uygulama `http://localhost:3000` adresinde çalışır.
 |----------|----------|--------|
 | `VITE_SUPABASE_URL` | Supabase proje URL'i | `.env`, Vercel |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon (public) key | `.env`, Vercel |
+| `DATABASE_URL` | Pooler (transaction mode, port 6543) | `.env` only — **commit etmeyin** |
+| `DIRECT_URL` | Pooler (session mode, port 5432) | `.env` only — migration için |
+
+> **Proje ref:** `lumwisbjvlggtdjcahtj` → `https://lumwisbjvlggtdjcahtj.supabase.co`
 
 > **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` **asla** frontend'e, `VITE_*` env'e veya Vercel **public** environment variables içine konmamalıdır.
 
@@ -62,14 +66,22 @@ Uygulama `http://localhost:3000` adresinde çalışır.
 # 1. Supabase hesabına giriş
 supabase login
 
-# 2. Remote projeyi bağla (Dashboard → Project Settings → General → Reference ID)
-supabase link --project-ref <project-ref>
+# 2. Remote projeyi bağla
+supabase link --project-ref lumwisbjvlggtdjcahtj
 
-# 3. Migration'ları önce dry-run ile kontrol et
-supabase db push --dry-run
+# 3. .env dosyasına DIRECT_URL ekleyin (bkz. .env.example)
 
 # 4. Migration'ları remote veritabanına uygula
-supabase db push
+npm run db:push
+
+# 5. Seed verisini yükle
+npm run db:seed
+```
+
+**Alternatif (Supabase CLI doğrudan):**
+
+```bash
+supabase db push --db-url "$DIRECT_URL" --yes
 ```
 
 #### Seed verisi
@@ -85,11 +97,8 @@ sql_paths = ["./seed.sql"]
 **Remote (staging / ilk kurulum):**
 
 ```bash
-# config.toml seed desteği ile (migration ile birlikte)
-supabase db push --include-seed
+npm run db:seed
 ```
-
-> `--include-seed` seed dosyalarını hash ile takip eder; değişmeyen seed'ler tekrar çalıştırılmayabilir. İlk kurulumda veya seed güncellediğinizde kullanın.
 
 **Alternatif yöntemler:**
 
@@ -123,6 +132,10 @@ Local servis portları (`supabase/config.toml`):
 | Inbucket (e-posta test) | 54324 |
 
 Migration dosyası: `supabase/migrations/20260709160000_initial_schema.sql`
+
+**Oluşturulan tablolar (14):** `profiles`, `categories`, `products`, `product_images`, `addresses`, `carts`, `cart_items`, `orders`, `order_items`, `coupons`, `product_questions`, `reviews`, `service_requests`, `abandoned_carts` (+ RLS politikaları ve auth trigger).
+
+> `VITE_SUPABASE_ANON_KEY` değerini Supabase Dashboard → **Project Settings → API → anon public** alanından alıp `.env` ve Vercel'e ekleyin.
 
 ## Vercel Deploy
 

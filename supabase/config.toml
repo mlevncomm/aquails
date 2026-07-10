@@ -1,7 +1,7 @@
 # Aquails — Supabase CLI configuration
 # Docs: https://supabase.com/docs/guides/local-development/cli/config
 
-project_id = "aquails"
+project_id = "lumwisbjvlggtdjcahtj"
 
 [api]
 enabled = true
