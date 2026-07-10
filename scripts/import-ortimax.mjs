@@ -5,20 +5,11 @@
  */
 import { writeFileSync } from 'fs';
 import { createHash } from 'crypto';
+import { CATEGORY_CONFIG, classifyProduct } from './category-rules.mjs';
 
 const BASE_URL = 'https://ortimax.com.tr';
 
-const CATEGORY_CONFIG = [
-  {
-    handle: 'su-aritma',
-    name: 'Su Arıtma Cihazları',
-    icon: 'Droplet',
-    description: 'Ev ve iş yeri için profesyonel su arıtma cihazları ve sistemleri',
-    sort: 1,
-  },
-];
-
-const CATEGORY_PRIORITY = ['su-aritma'];
+const CATEGORY_PRIORITY = CATEGORY_CONFIG.map((c) => c.slug);
 
 function rebrand(text) {
   if (!text) return text;
@@ -138,24 +129,10 @@ async function main() {
     productCollections.set(p.id, ['su-aritma']);
   }
 
-  const categoryByHandle = Object.fromEntries(CATEGORY_CONFIG.map((c) => [c.handle, c]));
-  const categoryProductCounts = Object.fromEntries(CATEGORY_CONFIG.map((c) => [c.handle, 0]));
+  const categoryBySlug = Object.fromEntries(CATEGORY_CONFIG.map((c) => [c.slug, c]));
+  const categoryProductCounts = Object.fromEntries(CATEGORY_CONFIG.map((c) => [c.slug, 0]));
 
   const catalogProducts = allProducts.map((p) => {
-    const handles = productCollections.get(p.id) || [];
-    let categoryHandle = CATEGORY_PRIORITY.find((h) => handles.includes(h));
-    if (!categoryHandle) {
-      const tag = (p.tags?.[0] || p.product_type || '').toLowerCase();
-      if (tag.includes('filtre')) categoryHandle = 'filtreler';
-      else if (tag.includes('su arıtma') || tag.includes('su aritma')) categoryHandle = 'su-aritma';
-      else if (tag.includes('tens')) categoryHandle = 'tens-cihazi';
-      else if (tag.includes('temizlik') || tag.includes('süpürge')) categoryHandle = 'ev-temizligi';
-      else if (tag.includes('ev gereç')) categoryHandle = 'ev-gerecleri';
-      else categoryHandle = 'su-aritma';
-    }
-
-    const category = categoryByHandle[categoryHandle];
-    categoryProductCounts[categoryHandle]++;
 
     const variant = p.variants?.[0] || {};
     const price = Math.round(parseFloat(variant.price || '0'));
@@ -174,6 +151,10 @@ async function main() {
       .replace(/ort[iİ]max/gi, 'aquails')
       .replace(/orti-max/gi, 'aquails');
     const slug = normalizeSlug(rawSlug);
+    const productName = rebrand(p.title);
+    const categorySlug = classifyProduct(slug, productName);
+    const category = categoryBySlug[categorySlug] ?? CATEGORY_CONFIG[0];
+    categoryProductCounts[categorySlug] = (categoryProductCounts[categorySlug] || 0) + 1;
 
     let badge;
     if (discountPercent && discountPercent >= 10) badge = 'discount';
@@ -190,9 +171,9 @@ async function main() {
     return {
       id: String(p.id),
       slug,
-      name: rebrand(p.title),
+      name: productName,
       category: category.name,
-      categorySlug: category.handle,
+      categorySlug: category.slug,
       subcategory: category.name,
       description: description || rebrand(p.title),
       shortDescription: shortDescription || rebrand(p.title),
@@ -210,10 +191,10 @@ async function main() {
   });
 
   const categories = CATEGORY_CONFIG.map((c) => ({
-    id: c.handle,
+    id: c.slug,
     name: c.name,
-    description: c.description,
-    productCount: categoryProductCounts[c.handle] || 0,
+    description: `${c.name} kategorisi`,
+    productCount: categoryProductCounts[c.slug] || 0,
     icon: c.icon,
   }));
 
@@ -274,7 +255,7 @@ export const packages = [
 
   // Write seed SQL
   const categoryUuids = Object.fromEntries(
-    CATEGORY_CONFIG.map((c) => [c.handle, stableUuid('category', c.handle)])
+    CATEGORY_CONFIG.map((c) => [c.slug, stableUuid('category', c.slug)])
   );
 
   const sqlLines = [
@@ -290,7 +271,7 @@ export const packages = [
 
   const catValues = CATEGORY_CONFIG.map(
     (c) =>
-      `  ('${categoryUuids[c.handle]}', '${escapeSql(c.name)}', '${c.handle}', '${c.icon}', '${escapeSql(c.description)}', ${c.sort}, TRUE)`
+      `  ('${categoryUuids[c.slug]}', '${escapeSql(c.name)}', '${c.slug}', '${c.icon}', '${escapeSql(c.name)}', ${c.sortOrder}, TRUE)`
   );
   sqlLines.push(catValues.join(',\n') + ';');
   sqlLines.push('');
@@ -303,7 +284,7 @@ export const packages = [
 
   for (const p of catalogProducts) {
     const productUuid = stableUuid('product', p.slug);
-    const catUuid = categoryUuids[p.categorySlug || CATEGORY_CONFIG.find((c) => c.name === p.category)?.handle];
+    const catUuid = categoryUuids[p.categorySlug || CATEGORY_CONFIG.find((c) => c.name === p.category)?.slug];
     const sku = `AQ-${p.id}`;
     const featuresJson = JSON.stringify(p.features).replace(/'/g, "''");
     const specsJson = JSON.stringify(p.specifications).replace(/'/g, "''");

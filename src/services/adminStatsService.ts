@@ -146,6 +146,69 @@ export async function getLowStockProducts(): Promise<{ id: string; name: string;
   return data ?? [];
 }
 
+export interface CategoryBreakdown {
+  name: string;
+  count: number;
+  percent: number;
+}
+
+export async function getReportStats(range: 'day' | 'week' | 'month' | 'year' = 'month') {
+  const supabase = getSupabaseOrNull();
+  const empty = {
+    totalSales: 0,
+    orderCount: 0,
+    newCustomers: 0,
+    avgBasket: 0,
+    categoryBreakdown: [] as CategoryBreakdown[],
+    dailySales: [] as { label: string; amount: number }[],
+  };
+  if (!supabase) return empty;
+
+  const now = new Date();
+  const start = new Date(now);
+  if (range === 'day') start.setHours(0, 0, 0, 0);
+  else if (range === 'week') start.setDate(now.getDate() - 7);
+  else if (range === 'month') start.setDate(1);
+  else start.setMonth(0, 1);
+  start.setHours(0, 0, 0, 0);
+
+  const [{ data: orders }, { count: newCustomers }] = await Promise.all([
+    supabase.from('orders').select('total, created_at').gte('created_at', start.toISOString()),
+    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'customer').gte('created_at', start.toISOString()),
+  ]);
+
+  const orderList = orders ?? [];
+  const totalSales = orderList.reduce((s, o) => s + Number(o.total), 0);
+  const orderCount = orderList.length;
+  const avgBasket = orderCount ? Math.round(totalSales / orderCount) : 0;
+
+  const { data: products } = await supabase
+    .from('products')
+    .select('category_id');
+
+  const { data: categories } = await supabase.from('categories').select('id, name');
+
+  const nameById = Object.fromEntries((categories ?? []).map((c) => [c.id, c.name]));
+  const catCounts: Record<string, number> = {};
+  for (const p of products ?? []) {
+    const name = p.category_id ? nameById[p.category_id] : undefined;
+    if (name) catCounts[name] = (catCounts[name] ?? 0) + 1;
+  }
+  const totalProducts = Object.values(catCounts).reduce((a, b) => a + b, 0) || 1;
+  const categoryBreakdown = Object.entries(catCounts)
+    .map(([name, count]) => ({ name, count, percent: Math.round((count / totalProducts) * 100) }))
+    .sort((a, b) => b.count - a.count);
+
+  const dailyMap: Record<string, number> = {};
+  for (const o of orderList) {
+    const d = new Date(o.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+    dailyMap[d] = (dailyMap[d] ?? 0) + Number(o.total);
+  }
+  const dailySales = Object.entries(dailyMap).map(([label, amount]) => ({ label, amount }));
+
+  return { totalSales, orderCount, newCustomers: newCustomers ?? 0, avgBasket, categoryBreakdown, dailySales };
+}
+
 export async function getRecentOrders(limit = 5) {
   const supabase = getSupabaseOrNull();
   if (!supabase) return [];
