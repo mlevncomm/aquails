@@ -47,14 +47,16 @@ export function CustomerLayout() {
   };
 
   // Mobil menü açıkken sayfa scroll'unu engelle
-  if (typeof document !== 'undefined') {
+  useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
-  }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
+  const profileInitial = (user?.name || 'A')[0];
   const currentPageTitle = menuItems.find((m) => m.href === location.pathname)?.label || 'Dashboard';
 
   return (
-    <div className="min-h-[100dvh] flex bg-[#F0F6FF]">
+    <div className="min-h-[100dvh] flex bg-[#F0F6FF] overflow-x-hidden">
       {/* Mobil Overlay - Sidebar arkası karartma */}
       {mobileOpen && (
         <div
@@ -86,13 +88,17 @@ export function CustomerLayout() {
         </div>
 
         {/* User Summary */}
-        <div className="p-4 mx-4 mt-4 bg-[#F8FBFF] rounded-xl">
+        <Link
+          to="/hesabim/profil"
+          onClick={() => setMobileOpen(false)}
+          className="block p-4 mx-4 mt-4 bg-[#F8FBFF] rounded-xl hover:bg-[#F0F6FF] transition-colors"
+        >
           <div className="w-12 h-12 bg-[#1A73E8] rounded-full flex items-center justify-center mx-auto">
-            <span className="text-lg font-bold text-white">{(user?.name || 'A')[0]}</span>
+            <span className="text-lg font-bold text-white">{profileInitial}</span>
           </div>
           <p className="text-sm font-semibold text-[#0D2137] text-center mt-3 truncate">{user?.name || 'Ahmet Yılmaz'}</p>
           <p className="text-xs text-[#8B9DAF] text-center truncate">{user?.email || 'ahmet@email.com'}</p>
-        </div>
+        </Link>
 
         {/* Menu */}
         <nav className="flex-1 p-3 space-y-0.5 mt-2 overflow-y-auto">
@@ -134,16 +140,24 @@ export function CustomerLayout() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header - Responsive */}
         <header className="h-14 bg-white/80 backdrop-blur-md border-b border-[#E8F0FE] flex items-center justify-between px-3 sm:px-4 lg:px-6 sticky top-0 z-30">
-          {/* Left: Menu Button + Title */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Left: Menu + Profile + Title */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-[#F0F6FF] text-[#5A6B7B] transition-colors"
+              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-[#F0F6FF] text-[#5A6B7B] transition-colors flex-shrink-0"
               aria-label="Menüyü aç"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h2 className="text-sm sm:text-base font-semibold text-[#0D2137] truncate">
+            <Link
+              to="/hesabim/profil"
+              className="w-9 h-9 bg-[#1A73E8] rounded-full flex items-center justify-center flex-shrink-0 hover:ring-2 hover:ring-[#1A73E8]/30 transition-all"
+              aria-label="Profilim"
+              title="Profilim"
+            >
+              <span className="text-sm font-bold text-white">{profileInitial}</span>
+            </Link>
+            <h2 className="text-sm sm:text-base font-semibold text-[#0D2137] truncate min-w-0">
               {currentPageTitle}
             </h2>
           </div>
@@ -172,7 +186,7 @@ export function CustomerLayout() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto w-full bg-[#F7FAFF] relative">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto overflow-x-hidden w-full bg-[#F7FAFF] relative min-w-0">
           {/* Subtle background decoration */}
           <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#1A73E8]/[0.02] rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[250px] h-[250px] bg-[#4FC3F7]/[0.025] rounded-full blur-3xl pointer-events-none" />

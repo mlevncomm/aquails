@@ -70,3 +70,27 @@ export function calcVatAmount(grossPrice: number, taxRate: number, includesVat: 
   const vat = grossPrice * (taxRate / 100);
   return { net: grossPrice, vat, gross: grossPrice + vat };
 }
+
+export interface OrderTotalsInput {
+  subtotal: number;
+  shipping: number;
+  codFee?: number;
+  discount?: number;
+  taxRate: number;
+  priceIncludesVat: boolean;
+}
+
+export interface OrderTotalsResult extends OrderTotalsInput {
+  net: number;
+  vat: number;
+  gross: number;
+}
+
+export function calcOrderTotals(input: OrderTotalsInput): OrderTotalsResult {
+  const base = Math.max(
+    0,
+    input.subtotal + input.shipping + (input.codFee ?? 0) - (input.discount ?? 0),
+  );
+  const { net, vat, gross } = calcVatAmount(base, input.taxRate, input.priceIncludesVat);
+  return { ...input, codFee: input.codFee ?? 0, discount: input.discount ?? 0, net, vat, gross };
+}

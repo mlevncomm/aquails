@@ -18,7 +18,8 @@ import { useToastStore } from '@/components/Toast';
 import { getAddresses, type Address } from '@/services/addressService';
 import { getPaytrPublicStatus, getBankAccounts, isPaytrConfigured } from '@/services/settingsService';
 import { initPaytrPayment, buildPaytrBasket, formatPaymentAmountKurus } from '@/services/paymentService';
-import { getShippingConfig } from '@/services/shippingService';
+import { getShippingConfig, getTaxConfig, calcOrderTotals, type TaxConfig } from '@/services/shippingService';
+import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
 import { cn } from '@/lib/utils';
 
 const steps = [
@@ -81,6 +82,7 @@ export default function Checkout() {
   const [showBankInfo, setShowBankInfo] = useState(false);
   const [shippingMethods, setShippingMethods] = useState<{ id: string; label: string; desc: string; price: number; priceLabel: string }[]>([]);
   const [codFeeSetting, setCodFeeSetting] = useState(150);
+  const [taxConfig, setTaxConfig] = useState<TaxConfig>({ rate: 20, displayInCheckout: true, priceIncludesVat: true });
 
   const [contact, setContact] = useState<ContactForm>({
     name: user?.name ?? '',
@@ -104,7 +106,15 @@ export default function Checkout() {
   const isFreeShipping = appliedCoupon?.type === 'shipping';
   const effectiveShipping = isFreeShipping ? 0 : shippingCost;
   const discount = couponDiscount > 0 ? couponDiscount : 0;
-  const total = subtotal + effectiveShipping + codFee - discount;
+  const orderTotals = calcOrderTotals({
+    subtotal,
+    shipping: effectiveShipping,
+    codFee,
+    discount,
+    taxRate: taxConfig.rate,
+    priceIncludesVat: taxConfig.priceIncludesVat,
+  });
+  const total = orderTotals.gross;
 
   useEffect(() => {
     void getPaytrPublicStatus().then((s) => setPaytrEnabled(isPaytrConfigured(s)));
@@ -122,6 +132,7 @@ export default function Checkout() {
       );
       if (cfg.methods[0]) setShippingMethod(cfg.methods[0].id);
     });
+    void getTaxConfig().then(setTaxConfig);
   }, []);
 
   useEffect(() => {
@@ -412,9 +423,9 @@ export default function Checkout() {
         )}
       </AnimatePresence>
 
-      <div className="bg-white border-b border-aqua-border-light py-6">
-        <div className="max-w-[1080px] mx-auto px-6">
-          <div className="flex items-center justify-center gap-0">
+      <div className="bg-white border-b border-aqua-border-light py-4 sm:py-6 overflow-x-hidden">
+        <div className="max-w-[1080px] mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-center gap-0 overflow-x-auto">
             {steps.map((step, index) => (
               <div key={step.label} className="flex items-center">
                 <div className="flex items-center gap-2">
@@ -439,8 +450,8 @@ export default function Checkout() {
         </div>
       </div>
 
-      <div className="max-w-[1080px] mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8">
+      <div className="max-w-[1080px] mx-auto px-4 sm:px-6 py-6 sm:py-8 overflow-x-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6 lg:gap-8 min-w-0">
           <div className="space-y-5">
             <ScrollReveal>
               <div className="bg-white border border-aqua-border-light rounded-2xl p-6">
@@ -647,17 +658,13 @@ export default function Checkout() {
               </div>
 
               <div className="space-y-2.5 pt-3 border-t border-aqua-border-light">
-                <div className="flex justify-between text-sm"><span>Ara Toplam</span><span>{subtotal.toLocaleString('tr-TR')}₺</span></div>
-                <div className="flex justify-between text-sm">
-                  <span>Kargo</span>
-                  <span className={effectiveShipping === 0 ? 'text-aqua-success' : ''}>{effectiveShipping === 0 ? 'Ücretsiz' : `${effectiveShipping}₺`}</span>
-                </div>
-                {codFee > 0 && <div className="flex justify-between text-sm"><span>Kapıda Ödeme</span><span>+{codFee}₺</span></div>}
-                {discount > 0 && <div className="flex justify-between text-sm text-aqua-success"><span>İndirim</span><span>-{discount.toLocaleString('tr-TR')}₺</span></div>}
-                <div className="flex justify-between text-base font-semibold pt-2 border-t">
-                  <span>Genel Toplam</span>
-                  <span className="text-xl font-bold">{total.toLocaleString('tr-TR')}₺</span>
-                </div>
+                <OrderPriceBreakdown
+                  subtotal={subtotal}
+                  shipping={effectiveShipping}
+                  codFee={codFee}
+                  discount={discount}
+                  taxConfig={taxConfig}
+                />
               </div>
 
               <button

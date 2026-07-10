@@ -7,10 +7,10 @@ interface PageLayoutProps {
 
 export function PageLayout({ children, variant = 'default' }: PageLayoutProps) {
   const bgClasses: Record<string, string> = {
-    default: 'bg-[#F7FAFF] min-h-screen',
-    blue: 'bg-gradient-to-b from-[#EEF6FF] to-[#F7FAFF] min-h-screen',
-    gradient: 'bg-gradient-to-br from-[#E6F2FF] via-[#F5FAFF] to-[#EBF8FF] min-h-screen',
-    tech: 'bg-[#F7FAFF] min-h-screen relative overflow-hidden',
+    default: 'bg-[#F7FAFF] min-h-screen overflow-x-hidden',
+    blue: 'bg-gradient-to-b from-[#EEF6FF] to-[#F7FAFF] min-h-screen overflow-x-hidden',
+    gradient: 'bg-gradient-to-br from-[#E6F2FF] via-[#F5FAFF] to-[#EBF8FF] min-h-screen overflow-x-hidden',
+    tech: 'bg-[#F7FAFF] min-h-screen relative overflow-x-hidden',
   };
 
   return (

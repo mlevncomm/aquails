@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingCart, ArrowRight, Check, Minus, Plus, Trash2,
@@ -11,15 +12,37 @@ import { useCartStore } from '@/stores/cartStore';
 import { getSmartRecommendations } from '@/services/smartCartService';
 import { openWhatsApp, getCartOrderMessage } from '@/services/whatsappService';
 import { SEO } from '@/components/SEO';
+import { getShippingConfig, getTaxConfig, calcOrderTotals, type TaxConfig } from '@/services/shippingService';
+import { getSiteSettings } from '@/services/settingsService';
+import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
 
 
 export default function Cart() {
   const { items, updateQuantity, removeItem, getSubtotal } = useCartStore();
   const subtotal = getSubtotal();
-  const shipping = subtotal >= 1500 ? 0 : 49;
+  const [shippingCost, setShippingCost] = useState(49);
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(1500);
+  const [taxConfig, setTaxConfig] = useState<TaxConfig>({ rate: 20, displayInCheckout: true, priceIncludesVat: true });
+
+  useEffect(() => {
+    void getShippingConfig().then((cfg) => {
+      const standard = cfg.methods.find((m) => m.id === 'standard') ?? cfg.methods[0];
+      if (standard) setShippingCost(standard.price);
+    });
+    void getSiteSettings().then((s) => setFreeShippingThreshold(s.freeShippingThreshold));
+    void getTaxConfig().then(setTaxConfig);
+  }, []);
+
+  const shipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
   const discount = 0;
-  const total = subtotal + shipping - discount;
-  const freeShippingThreshold = 1500;
+  const orderTotals = calcOrderTotals({
+    subtotal,
+    shipping,
+    discount,
+    taxRate: taxConfig.rate,
+    priceIncludesVat: taxConfig.priceIncludesVat,
+  });
+  const total = orderTotals.gross;
   const freeShippingProgress = Math.min(100, (subtotal / freeShippingThreshold) * 100);
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
 
@@ -45,7 +68,7 @@ export default function Cart() {
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 overflow-x-hidden">
         {items.length === 0 ? (
           /* Empty State */
           <motion.div
@@ -76,7 +99,7 @@ export default function Cart() {
             </div>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6 lg:gap-8 min-w-0">
             {/* Product List */}
             <ScrollReveal>
               <div className="bg-white/80 backdrop-blur-md border border-[#E8F0FE] rounded-2xl overflow-hidden shadow-aquails">
@@ -89,7 +112,7 @@ export default function Cart() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20, height: 0, paddingTop: 0, paddingBottom: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="flex items-center gap-4 px-5 py-5 border-b border-[#F0F6FF] last:border-0"
+                      className="flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 px-3 sm:px-5 py-4 sm:py-5 border-b border-[#F0F6FF] last:border-0 min-w-0"
                     >
                       {/* Image */}
                       <div className="w-20 h-20 bg-[#F8FBFF] rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden border border-[#E8F0FE]">
@@ -216,20 +239,13 @@ export default function Cart() {
                   <h3 className="text-lg font-bold text-[#0D2137] mb-5">Sipariş Özeti</h3>
 
                   <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#5A6B7B]">Ara Toplam</span>
-                      <span className="font-medium text-[#0D2137]">{subtotal.toLocaleString('tr-TR')} ₺</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#5A6B7B]">Kargo Bedeli</span>
-                      <span className={shipping === 0 ? 'text-emerald-600 font-medium' : 'font-medium text-[#0D2137]'}>
-                        {shipping === 0 ? 'Ücretsiz' : `${shipping} ₺`}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-base font-semibold pt-3 border-t border-[#F0F6FF]">
-                      <span className="text-[#0D2137]">Toplam</span>
-                      <span className="text-xl font-bold text-[#0D2137]">{total.toLocaleString('tr-TR')} ₺</span>
-                    </div>
+                    <OrderPriceBreakdown
+                      subtotal={subtotal}
+                      shipping={shipping}
+                      discount={discount}
+                      taxConfig={taxConfig}
+                      totalLabel="Toplam"
+                    />
                   </div>
 
                   {/* Security */}

@@ -91,8 +91,10 @@ export function AdminLayout() {
 
   const sidebarWidth = collapsed ? 'w-[72px]' : 'w-[260px]';
 
+  const profileInitial = (user?.name ?? 'A')[0];
+
   return (
-    <div className="min-h-[100dvh] flex bg-slate-50">
+    <div className="min-h-[100dvh] flex bg-slate-50 overflow-x-hidden">
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-slate-900/20 z-40 lg:hidden backdrop-blur-sm"
@@ -192,9 +194,13 @@ export function AdminLayout() {
         </nav>
 
         <div className="p-3 border-t border-slate-100">
-          <div className="flex items-center gap-3 px-3 py-2">
+          <Link
+            to="/admin/ayarlar"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors"
+          >
             <div className="w-9 h-9 bg-sky-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-semibold text-sky-700">{(user?.name ?? 'A')[0]}</span>
+              <span className="text-sm font-semibold text-sky-700">{profileInitial}</span>
             </div>
             {!collapsed && (
               <div className="min-w-0">
@@ -204,7 +210,7 @@ export function AdminLayout() {
                 </p>
               </div>
             )}
-          </div>
+          </Link>
           <button
             onClick={() => { logout(); navigate('/giris'); }}
             className="flex items-center gap-3 w-full px-3 py-2.5 mt-1 rounded-xl text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors min-h-[44px]"
@@ -224,22 +230,27 @@ export function AdminLayout() {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 bg-white/80 backdrop-blur border-b border-slate-200 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600"
+              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 text-slate-600 flex-shrink-0"
               aria-label="Menüyü aç"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h2 className="text-sm sm:text-base font-semibold text-slate-800">Yönetim Paneli</h2>
-          </div>
-          <div className="w-9 h-9 bg-sky-50 rounded-full flex items-center justify-center border border-sky-100">
-            <span className="text-sm font-semibold text-sky-700">{(user?.name ?? 'A')[0]}</span>
+            <Link
+              to="/admin/ayarlar"
+              className="w-9 h-9 bg-sky-50 rounded-full flex items-center justify-center border border-sky-100 flex-shrink-0 hover:ring-2 hover:ring-sky-200 transition-all"
+              aria-label="Profil ve Ayarlar"
+              title="Profil ve Ayarlar"
+            >
+              <span className="text-sm font-semibold text-sky-700">{profileInitial}</span>
+            </Link>
+            <h2 className="text-sm sm:text-base font-semibold text-slate-800 truncate min-w-0">Yönetim Paneli</h2>
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto w-full max-w-[1600px] mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto overflow-x-hidden w-full max-w-[1600px] mx-auto min-w-0">
           <Outlet />
         </main>
       </div>
