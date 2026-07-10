@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { SEO } from '@/components/SEO';
 
 
-const brands = ['Aquails', 'PurePro', 'Compact', 'Business', 'Mineral Plus'];
+const brands = ['Aquails'];
 const stockOptions = [
   { label: 'Tümü', value: 'all' },
   { label: 'Stokta Var', value: 'in' },
@@ -30,7 +30,7 @@ export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlCategoryId = searchParams.get('kategori');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 150000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [stockStatus, setStockStatus] = useState('all');
   const [sortBy, setSortBy] = useState('default');
@@ -41,13 +41,9 @@ export default function Shop() {
   // Sync URL category param with filter state
   useEffect(() => {
     if (urlCategoryId) {
-      const cat = categories.find(c => c.id === urlCategoryId);
-      if (cat && !selectedCategories.includes(cat.name)) {
-        setSelectedCategories([cat.name]);
+      if (!selectedCategories.includes(urlCategoryId)) {
+        setSelectedCategories([urlCategoryId]);
       }
-    } else if (selectedCategories.length > 0 && !urlCategoryId) {
-      // Clear if URL has no category but state does (on direct nav to /urunler)
-      // Only clear if we just arrived (check if it was set from URL)
     }
   }, [urlCategoryId]);
 
@@ -57,9 +53,9 @@ export default function Shop() {
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
-    // Category filter
+    // Category filter (by slug)
     if (selectedCategories.length > 0) {
-      result = result.filter((p) => selectedCategories.includes(p.category));
+      result = result.filter((p) => selectedCategories.includes(p.categorySlug));
     }
 
     // Price filter
@@ -111,7 +107,7 @@ export default function Shop() {
 
   const clearFilters = () => {
     setSelectedCategories([]);
-    setPriceRange([0, 50000]);
+    setPriceRange([0, 150000]);
     setSelectedBrands([]);
     setStockStatus('all');
     setSearchQuery('');
@@ -120,7 +116,7 @@ export default function Shop() {
     }
   };
 
-  const hasActiveFilters = selectedCategories.length > 0 || priceRange[1] < 50000 || selectedBrands.length > 0 || stockStatus !== 'all' || !!urlCategoryId;
+  const hasActiveFilters = selectedCategories.length > 0 || priceRange[1] < 150000 || selectedBrands.length > 0 || stockStatus !== 'all' || !!urlCategoryId;
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -132,15 +128,15 @@ export default function Shop() {
             <label key={cat.id} className="flex items-center justify-between cursor-pointer group">
               <div className="flex items-center gap-2.5">
                 <div
-                  onClick={() => toggleCategory(cat.name)}
+                  onClick={() => toggleCategory(cat.id)}
                   className={cn(
                     'w-4 h-4 rounded border flex items-center justify-center transition-all',
-                    selectedCategories.includes(cat.name)
+                    selectedCategories.includes(cat.id)
                       ? 'bg-aqua-primary border-aqua-primary'
                       : 'border-aqua-border group-hover:border-aqua-primary'
                   )}
                 >
-                  {selectedCategories.includes(cat.name) && <Check className="w-3 h-3 text-white" />}
+                  {selectedCategories.includes(cat.id) && <Check className="w-3 h-3 text-white" />}
                 </div>
                 <span className="text-sm text-aqua-text-secondary">{cat.name}</span>
               </div>
@@ -365,12 +361,15 @@ export default function Shop() {
             {/* Active filter chips */}
             {(selectedCategories.length > 0 || urlCategoryId) && (
               <div className="flex flex-wrap gap-2 mb-4">
-                {selectedCategories.map(cat => (
-                  <span key={cat} className="inline-flex items-center gap-1.5 bg-aqua-primary/10 text-aqua-primary text-xs font-medium px-3 py-1.5 rounded-full">
-                    {cat}
-                    <button onClick={() => { toggleCategory(cat); if (urlCategoryId) setSearchParams({}); }} className="hover:text-aqua-danger"><X className="w-3 h-3" /></button>
+                {selectedCategories.map((catSlug) => {
+                  const cat = categories.find((c) => c.id === catSlug);
+                  return (
+                  <span key={catSlug} className="inline-flex items-center gap-1.5 bg-aqua-primary/10 text-aqua-primary text-xs font-medium px-3 py-1.5 rounded-full">
+                    {cat?.name ?? catSlug}
+                    <button onClick={() => { toggleCategory(catSlug); if (urlCategoryId) setSearchParams({}); }} className="hover:text-aqua-danger"><X className="w-3 h-3" /></button>
                   </span>
-                ))}
+                  );
+                })}
               </div>
             )}
             {filteredProducts.length === 0 ? (

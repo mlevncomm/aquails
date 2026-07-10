@@ -52,23 +52,23 @@ const trustItems = [
 
 const featuredProducts = [
   {
-    name: 'Aquails Water Chef 600GPD',
-    price: 12499,
-    oldPrice: 14999,
+    name: 'Aquails EONAQUA PRO DİJİTAL SU ARITMA CİHAZI',
+    price: 85900,
+    oldPrice: 69950,
     image: '/images/products/su-aritma-cihazlari.jpg',
-    href: '/urunler?kategori=su-aritma-cihazlari',
+    href: '/urunler?kategori=su-aritma',
   },
   {
-    name: 'Aquails BlueDrop DirectFlow',
-    price: 13999,
-    oldPrice: 16999,
+    name: 'Aquails BLUEDROP DİREK AKIŞ SU ARITMA CİHAZI',
+    price: 95900,
+    oldPrice: null,
     image: '/images/products/direkt-akis-su-aritma.jpg',
-    href: '/urunler?kategori=direkt-akis-su-aritma',
+    href: '/urunler?kategori=su-aritma',
   },
   {
-    name: 'Aquails 5\'li Filtre Seti',
-    price: 1499,
-    oldPrice: 1899,
+    name: 'PRO INLINE FİLTRELER',
+    price: 2499,
+    oldPrice: 2980,
     image: '/images/products/filtreler.jpg',
     href: '/urunler?kategori=filtreler',
   },
@@ -219,7 +219,9 @@ export default function AllLinksPage() {
                   <p className="text-[11px] font-semibold text-[#0D2137] line-clamp-1">{p.name}</p>
                   <div className="flex items-center gap-1.5 mt-1">
                     <span className="text-xs font-bold text-[#1A73E8]">{p.price.toLocaleString('tr-TR')} ₺</span>
-                    <span className="text-[10px] text-[#8B9DAF] line-through">{p.oldPrice.toLocaleString('tr-TR')} ₺</span>
+                    {p.oldPrice != null && (
+                      <span className="text-[10px] text-[#8B9DAF] line-through">{p.oldPrice.toLocaleString('tr-TR')} ₺</span>
+                    )}
                   </div>
                 </div>
               </Link>
