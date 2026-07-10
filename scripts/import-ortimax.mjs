@@ -9,25 +9,16 @@ import { createHash } from 'crypto';
 const BASE_URL = 'https://ortimax.com.tr';
 
 const CATEGORY_CONFIG = [
-  { handle: 'su-aritma', name: 'Su Arıtma', icon: 'Droplet', description: 'Ev ve iş yeri için profesyonel su arıtma cihazları ve sistemleri', sort: 1 },
-  { handle: 'filtreler', name: 'Filtreler', icon: 'Filter', description: 'Su arıtma cihazları için yedek filtreler ve filtre setleri', sort: 2 },
-  { handle: 'elektrikli-ev-aletleri', name: 'Elektrikli Ev Aletleri', icon: 'ChefHat', description: 'Mutfak ve ev için elektrikli küçük ev aletleri', sort: 3 },
-  { handle: 'ev-temizligi', name: 'Ev Temizliği', icon: 'Sparkles', description: 'Ev temizliği için süpürge ve temizlik robotları', sort: 4 },
-  { handle: 'tens-cihazi', name: 'Tens Cihazı', icon: 'Activity', description: 'TENS cihazları ve sağlık ürünleri', sort: 5 },
-  { handle: 'ev-gerecleri', name: 'Ev Gereçleri', icon: 'Home', description: 'Mutfak ve ev gereçleri', sort: 6 },
-  { handle: 'su-aritma-aksesuarlari', name: 'Su Arıtma Aksesuarları', icon: 'Settings', description: 'Musluk, pompa ve su arıtma yedek parçaları', sort: 7 },
+  {
+    handle: 'su-aritma',
+    name: 'Su Arıtma Cihazları',
+    icon: 'Droplet',
+    description: 'Ev ve iş yeri için profesyonel su arıtma cihazları ve sistemleri',
+    sort: 1,
+  },
 ];
 
-// More specific categories first so shared products land in the right menu
-const CATEGORY_PRIORITY = [
-  'filtreler',
-  'su-aritma-aksesuarlari',
-  'elektrikli-ev-aletleri',
-  'ev-temizligi',
-  'tens-cihazi',
-  'ev-gerecleri',
-  'su-aritma',
-];
+const CATEGORY_PRIORITY = ['su-aritma'];
 
 function rebrand(text) {
   if (!text) return text;
@@ -139,16 +130,12 @@ async function fetchJson(path) {
 async function main() {
   console.log('Fetching Ortimax catalog...');
 
-  const { products: allProducts } = await fetchJson('/products.json?limit=250');
-  console.log(`Found ${allProducts.length} products`);
+  const { products: allProducts } = await fetchJson('/collections/su-aritma/products.json?limit=250');
+  console.log(`Found ${allProducts.length} su arıtma products`);
 
   const productCollections = new Map();
-  for (const handle of CATEGORY_PRIORITY) {
-    const { products } = await fetchJson(`/collections/${handle}/products.json?limit=250`);
-    for (const p of products || []) {
-      if (!productCollections.has(p.id)) productCollections.set(p.id, []);
-      productCollections.get(p.id).push(handle);
-    }
+  for (const p of allProducts) {
+    productCollections.set(p.id, ['su-aritma']);
   }
 
   const categoryByHandle = Object.fromEntries(CATEGORY_CONFIG.map((c) => [c.handle, c]));

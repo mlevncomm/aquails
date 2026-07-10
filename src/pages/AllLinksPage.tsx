@@ -26,7 +26,7 @@ const linkGroups = [
   {
     title: 'Diğer',
     links: [
-      { label: 'Filtre Setleri', href: '/urunler?kategori=filtreler', icon: Filter, external: false },
+      { label: 'Su Arıtma Cihazları', href: '/urunler?kategori=su-aritma', icon: Filter, external: false },
       { label: 'Su Kalitesi Testi', href: '/su-kalitesi-testi', icon: FlaskConical, external: false },
       { label: 'Filtre Seçim Rehberi', href: '/filtre-secim-rehberi', icon: Filter, external: false },
       { label: 'Servis Ağımız', href: '/servis-agimiz', icon: MapPin, external: false },
@@ -66,11 +66,11 @@ const featuredProducts = [
     href: '/urunler?kategori=su-aritma',
   },
   {
-    name: 'PRO INLINE FİLTRELER',
-    price: 2499,
-    oldPrice: 2980,
-    image: '/images/products/filtreler.jpg',
-    href: '/urunler?kategori=filtreler',
+    name: 'Aquails EONAQUA DİJİTAL SU ARITMA CİHAZI',
+    price: 65900,
+    oldPrice: null,
+    image: '/images/products/dijital-su-aritma.jpg',
+    href: '/urunler?kategori=su-aritma',
   },
 ];
 

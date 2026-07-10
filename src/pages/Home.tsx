@@ -74,12 +74,6 @@ const faqAnasayfa = [
 
 const categoryImages: Record<string, string> = {
   'su-aritma': '/images/products/su-aritma-cihazlari.jpg',
-  'filtreler': '/images/products/filtreler.jpg',
-  'elektrikli-ev-aletleri': '/images/products/aksesuarlar.jpg',
-  'ev-temizligi': '/images/products/sebiller.jpg',
-  'tens-cihazi': '/images/products/dijital-su-aritma.jpg',
-  'ev-gerecleri': '/images/products/aksesuarlar.jpg',
-  'su-aritma-aksesuarlari': '/images/products/filtreler.jpg',
 };
 
 export default function Home() {
@@ -90,7 +84,6 @@ export default function Home() {
     'cok-satanlar': products.filter(p => p.rating >= 4.5).slice(0, 4),
     'yeni-gelenler': products.filter(p => p.badge === 'new').slice(0, 4),
     'kampanyali': products.filter(p => p.discountPercent && p.discountPercent > 0).slice(0, 4),
-    'filtreler': products.filter(p => p.categorySlug === 'filtreler').slice(0, 4),
     'su-aritma': products.filter(p => p.categorySlug === 'su-aritma').slice(0, 4),
   };
 
@@ -220,8 +213,7 @@ export default function Home() {
               { key: 'cok-satanlar', label: 'Çok Satanlar' },
               { key: 'yeni-gelenler', label: 'Yeni Gelenler' },
               { key: 'kampanyali', label: 'Kampanyalı' },
-              { key: 'filtreler', label: 'Filtreler' },
-              { key: 'su-aritma', label: 'Su Arıtma' },
+              { key: 'su-aritma', label: 'Su Arıtma Cihazları' },
             ].map(t => (
               <button key={t.key} onClick={() => setActiveTab(t.key)} className={cn('px-4 py-2 rounded-full text-sm font-medium transition-all', activeTab === t.key ? 'bg-[#1A73E8] text-white' : 'bg-white text-[#5A6B7B] border border-[#E8F0FE] hover:border-[#1A73E8]')}>
                 {t.label}

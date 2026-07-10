@@ -25,7 +25,7 @@ const iconOptions = [
 const defaultLinks = [
   { id: '1', title: 'Ürünleri İncele', url: '/urunler', icon: 'ShoppingBag', active: true, featured: false, order: 1 },
   { id: '2', title: 'Su Arıtma Cihazları', url: '/urunler?kategori=su-aritma', icon: 'Droplet', active: true, featured: true, order: 2 },
-  { id: '3', title: 'Filtre Setleri', url: '/urunler?kategori=filtreler', icon: 'Filter', active: true, featured: false, order: 3 },
+  { id: '3', title: 'Su Arıtma Cihazları', url: '/urunler?kategori=su-aritma', icon: 'Droplet', active: true, featured: false, order: 3 },
   { id: '4', title: 'Kampanyalar', url: '/kampanyalar', icon: 'Gift', active: true, featured: false, order: 4 },
   { id: '5', title: 'Filtre Aboneliği', url: '/filtre-aboneligi', icon: 'RefreshCw', active: true, featured: false, order: 5 },
   { id: '6', title: 'Servis Randevusu Al', url: '/servis-randevusu', icon: 'Wrench', active: true, featured: true, order: 6 },
