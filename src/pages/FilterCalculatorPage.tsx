@@ -66,7 +66,7 @@ export default function FilterCalculatorPage() {
           <div className="w-14 h-14 bg-white rounded-2xl shadow-md mx-auto mb-4 flex items-center justify-center">
             <Calculator className="w-7 h-7 text-[#1A73E8]" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#0D2137]">Filtre Degisim Zamaninizi Hesaplayin</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#0D2137]">Filtre Değişim Zamanınızı Hesaplayın</h1>
           <p className="text-sm text-[#5A6B7B] mt-2 max-w-lg mx-auto">Cihaz modelinizi ve kullanım bilgilerinizi girin, bir sonraki filtre değişim tarihinizi öğrenin.</p>
         </div>
       </section>
@@ -112,9 +112,9 @@ export default function FilterCalculatorPage() {
                     onChange={e => setForm({ ...form, peopleCount: e.target.value })}
                     className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
                   >
-                    <option value="1-2">1-2 kisi</option>
-                    <option value="3-4">3-4 kisi</option>
-                    <option value="5+">5+ kisi</option>
+                    <option value="1-2">1-2 kişi</option>
+                    <option value="3-4">3-4 kişi</option>
+                    <option value="5+">5+ kişi</option>
                   </select>
                 </div>
                 <div>
@@ -124,7 +124,7 @@ export default function FilterCalculatorPage() {
                     onChange={e => setForm({ ...form, usageIntensity: e.target.value })}
                     className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
                   >
-                    <option value="low">Dusuk</option>
+                    <option value="low">Düşük</option>
                     <option value="medium">Orta</option>
                     <option value="high">Yüksek</option>
                   </select>
@@ -132,10 +132,10 @@ export default function FilterCalculatorPage() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Su Tadinda/Kokusunda Degisim Var Mi?</label>
+                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Su Tadında/Kokusunda Değişim Var Mı?</label>
                 <div className="flex gap-3">
                   {[
-                    { value: false, label: 'Hayir' },
+                    { value: false, label: 'Hayır' },
                     { value: true, label: 'Evet' },
                   ].map(opt => (
                     <button
@@ -155,11 +155,11 @@ export default function FilterCalculatorPage() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Filtre Filtre Hatırlatıcısı Oluşturulsun Mu?</label>
+                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Filtre Değişim Hatırlatıcısı Oluşturulsun Mu?</label>
                 <div className="flex gap-3">
                   {[
                     { value: true, label: 'Evet' },
-                    { value: false, label: 'Hayir' },
+                    { value: false, label: 'Hayır' },
                   ].map(opt => (
                     <button
                       key={String(opt.value)}

@@ -196,7 +196,7 @@ export default function Home() {
                     <div className="p-3 text-center">
                       <Icon className="w-4 h-4 text-[#1A73E8] mx-auto mb-1" />
                       <h3 className="text-xs font-semibold text-[#0D2137] group-hover:text-[#1A73E8] transition-colors">{cat.name}</h3>
-                      <p className="text-[10px] text-[#8B9DAF] mt-0.5">{cat.productCount} urun</p>
+                      <p className="text-[10px] text-[#8B9DAF] mt-0.5">{cat.productCount} ürün</p>
                     </div>
                   </Link>
                 </StaggerItem>
@@ -212,15 +212,15 @@ export default function Home() {
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
           <ScrollReveal className="text-center mb-10">
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Öne Çıkan Ürünler</span>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">En Cok Tercih Edilenler</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">En Çok Tercih Edilenler</h2>
           </ScrollReveal>
           <ScrollReveal className="flex justify-center flex-wrap gap-2 mb-10">
             {[
-              { key: 'cok-satanlar', label: 'Cok Satanlar' },
+              { key: 'cok-satanlar', label: 'Çok Satanlar' },
               { key: 'yeni-gelenler', label: 'Yeni Gelenler' },
-              { key: 'kampanyali', label: 'Kampanyali' },
+              { key: 'kampanyali', label: 'Kampanyalı' },
               { key: 'filtreler', label: 'Filtreler' },
-              { key: 'direkt-akis', label: 'Direkt Akis' },
+              { key: 'direkt-akis', label: 'Direkt Akış' },
             ].map(t => (
               <button key={t.key} onClick={() => setActiveTab(t.key)} className={cn('px-4 py-2 rounded-full text-sm font-medium transition-all', activeTab === t.key ? 'bg-[#1A73E8] text-white' : 'bg-white text-[#5A6B7B] border border-[#E8F0FE] hover:border-[#1A73E8]')}>
                 {t.label}
@@ -268,8 +268,8 @@ export default function Home() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#1A73E8]/[0.015] rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
           <ScrollReveal className="text-center mb-12">
-            <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Nasil Calisir?</span>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">3 Adimda Temiz Su</h2>
+            <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Nasıl Çalışır?</span>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">3 Adımda Temiz Su</h2>
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             <div className="hidden md:block absolute top-1/2 left-[16%] right-[16%] h-0.5 bg-[#E8F0FE] -translate-y-1/2 z-0" />
@@ -279,7 +279,7 @@ export default function Home() {
                   <div className="w-16 h-16 bg-white border-2 border-[#1A73E8] rounded-2xl flex items-center justify-center mx-auto shadow-md mb-5">
                     <s.icon className="w-7 h-7 text-[#1A73E8]" />
                   </div>
-                  <span className="text-xs font-bold text-[#1A73E8] bg-[#F0F6FF] px-3 py-1 rounded-full">Adim {s.step}</span>
+                  <span className="text-xs font-bold text-[#1A73E8] bg-[#F0F6FF] px-3 py-1 rounded-full">Adım {s.step}</span>
                   <h3 className="text-lg font-semibold text-[#0D2137] mt-4">{s.title}</h3>
                   <p className="text-sm text-[#5A6B7B] mt-2 leading-relaxed max-w-xs mx-auto">{s.desc}</p>
                 </div>
@@ -299,7 +299,7 @@ export default function Home() {
             </ScrollReveal>
             <ScrollReveal x={20} delay={0.1}>
               <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Filtre Aboneliği</span>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2 leading-tight">Filtre Degisim Tarihini Unutmayin</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2 leading-tight">Filtre Değişim Tarihini Unutmayın</h2>
               <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-4 leading-relaxed">
                 Filtre aboneliği ile 6 ayda veya 12 ayda bir otomatik filtre seti teslimatı alın. İndirimli fiyatlarla, kapınıza kadar teslim.
               </p>
@@ -318,7 +318,7 @@ export default function Home() {
               </div>
               <div className="flex flex-wrap gap-3 mt-8">
                 <Link to="/filtre-aboneligi" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all">Aboneliği İncele <ArrowRight className="w-4 h-4" /></Link>
-                <Link to="/servis-randevusu" className="inline-flex items-center gap-2 border border-[#E8F0FE] text-[#5A6B7B] px-6 py-3 rounded-full font-medium text-sm hover:border-[#1A73E8] hover:text-[#1A73E8] transition-all">Filtre Degisim Talebi</Link>
+                <Link to="/servis-randevusu" className="inline-flex items-center gap-2 border border-[#E8F0FE] text-[#5A6B7B] px-6 py-3 rounded-full font-medium text-sm hover:border-[#1A73E8] hover:text-[#1A73E8] transition-all">Filtre Değişim Talebi</Link>
               </div>
             </ScrollReveal>
           </div>
@@ -459,7 +459,7 @@ export default function Home() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#1A73E8]/[0.01] rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-[720px] mx-auto px-4 sm:px-6">
           <ScrollReveal className="text-center mb-10">
-            <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Sikca Sorulan Sorular</span>
+            <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Sıkça Sorulan Sorular</span>
             <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">Merak Ettikleriniz</h2>
           </ScrollReveal>
           <div className="space-y-3">
