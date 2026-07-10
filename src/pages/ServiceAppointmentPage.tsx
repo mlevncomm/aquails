@@ -8,23 +8,23 @@ import { SEO } from '@/components/SEO';
 
 
 const serviceTypes = [
-  { id: 'installation', label: 'Yeni Cihaz Kurulumu', icon: Package, desc: 'Satin aldiginiz cihazin profesyonel kurulumu' },
-  { id: 'filter', label: 'Filtre Degisimi', icon: Wrench, desc: 'Periyodik filtre degisimi hizmeti' },
-  { id: 'repair', label: 'Ariza Onarimi', icon: Wrench, desc: 'Teknik ariza tespiti ve onarim' },
-  { id: 'maintenance', label: 'Periyodik Bakim', icon: ShieldCheck, desc: 'Cihaz bakimi ve performans kontrolu' },
+  { id: 'installation', label: 'Yeni Cihaz Kurulumu', icon: Package, desc: 'Satın aldığınız cihazın profesyonel kurulumu' },
+  { id: 'filter', label: 'Filtre Değişimi', icon: Wrench, desc: 'Periyodik filtre değişimi hizmeti' },
+  { id: 'repair', label: 'Arıza Onarımı', icon: Wrench, desc: 'Teknik arıza tespiti ve onarım' },
+  { id: 'maintenance', label: 'Periyodik Bakım', icon: ShieldCheck, desc: 'Cihaz bakımı ve performans kontrolü' },
 ];
 
 const kurulumSureci = [
-  { step: '1', title: 'Randevu Al', desc: 'Online form veya telefon ile servis talebi olusturun.' },
-  { step: '2', title: 'Teknik Inceleme', desc: 'Ekibimiz su hatti ve kullanim alanini inceler.' },
+  { step: '1', title: 'Randevu Al', desc: 'Online form veya telefon ile servis talebi oluşturun.' },
+  { step: '2', title: 'Teknik İnceleme', desc: 'Ekibimiz su hattı ve kullanım alanını inceler.' },
   { step: '3', title: 'Profesyonel Kurulum', desc: 'Ortalama 45-60 dakikada kurulum tamamlanir.' },
-  { step: '4', title: 'Test ve Egitim', desc: 'Cihaz test edilir, kullanim hakkinda bilgi verilir.' },
+  { step: '4', title: 'Test ve Eğitim', desc: 'Cihaz test edilir, kullanım hakkında bilgi verilir.' },
 ];
 
 const serviceSss = [
-  { q: 'Servis ucretli mi?', a: 'Yeni cihaz kurulumu ucretsizdir. Filtre degisimi, bakim ve ariza onarim hizmetleri icin servis ucreti uygulanabilir.' },
-  { q: 'Randevu icin ne kadar beklerim?', a: 'Talebinize bagli olarak genellikle ayni gun veya 24 saat icinde randevu olusturulur.' },
-  { q: 'Garanti kapsami disindaki arizalar icin ne oluyor?', a: 'Garanti kapsami disindaki arizalar icin onceden fiyat bilgisi verilir, onayiniz alinarak islem yapilir.' },
+  { q: 'Servis ücretli mi?', a: 'Yeni cihaz kurulumu ücretsizdir. Filtre değişimi, bakım ve arıza onarım hizmetleri için servis ücreti uygulanabilir.' },
+  { q: 'Randevu için ne kadar beklerim?', a: 'Talebinize bağlı olarak genellikle aynı gün veya 24 saat içinde randevu oluşturulur.' },
+  { q: 'Garanti kapsamı dışındaki arızalar için ne oluyor?', a: 'Garanti kapsamı dışındaki arızalar için önceden fiyat bilgisi verilir, onayınız alınarak işlem yapılır.' },
 ];
 
 export default function ServiceAppointmentPage() {
@@ -36,11 +36,11 @@ export default function ServiceAppointmentPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.phone || !form.address) {
-      addToast('Lutfen zorunlu alanlari doldurun.', 'error');
+      addToast('Lütfen zorunlu alanları doldurun.', 'error');
       return;
     }
     setSubmitted(true);
-    addToast('Servis randevunuz olusturuldu! En kisa surede size donus yapacagiz.', 'success');
+    addToast('Servis randevunuz oluşturuldu! En kısa sürede size dönüş yapacağız.', 'success');
   };
 
   return (
@@ -61,7 +61,7 @@ export default function ServiceAppointmentPage() {
             <Link to="/" className="hover:text-white">Ana Sayfa</Link><span>/</span><span className="text-white/70">Servis Randevusu</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-white">Profesyonel Servis Hizmeti</h1>
-          <p className="text-sm text-white/70 mt-2 max-w-lg">Uzman ekibimiz kurulum, bakim ve ariza cozumleri icin yaninizda.</p>
+          <p className="text-sm text-white/70 mt-2 max-w-lg">Uzman ekibimiz kurulum, bakım ve arıza çözümleri için yanınızda.</p>
         </div>
       </section>
 
@@ -75,11 +75,11 @@ export default function ServiceAppointmentPage() {
                   <CheckCircle className="w-8 h-8 text-emerald-500" />
                 </div>
                 <h2 className="text-lg font-bold text-[#0D2137] mb-2">Randevunuz Alindi!</h2>
-                <p className="text-sm text-[#8B9DAF] mb-4">Servis ekibimiz 24 saat icinde size donus yapacaktir.</p>
+                <p className="text-sm text-[#8B9DAF] mb-4">Servis ekibimiz 24 saat içinde size dönüş yapacaktır.</p>
                 <p className="text-xs text-[#5A6B7B] bg-[#F8FBFF] rounded-xl p-3 inline-block">Randevu No: <strong>SR-{Date.now().toString().slice(-6)}</strong></p>
                 <div className="mt-6 flex justify-center gap-3">
                   <Link to="/" className="text-sm font-medium text-[#1A73E8] hover:underline">Ana Sayfaya Don</Link>
-                  <Link to="/urunler" className="text-sm font-medium text-[#1A73E8] hover:underline">Urunleri Incele</Link>
+                  <Link to="/urunler" className="text-sm font-medium text-[#1A73E8] hover:underline">Ürünleri İncele</Link>
                 </div>
               </div>
             ) : (
@@ -120,19 +120,19 @@ export default function ServiceAppointmentPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Cihaz Modeli</label>
-                    <input value={form.device} onChange={e => setForm({ ...form, device: e.target.value })} placeholder="Orn: Aquails Smart RO Pro" className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]" />
+                    <input value={form.device} onChange={e => setForm({ ...form, device: e.target.value })} placeholder="Örn: Aquails Smart RO Pro" className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]" />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Tercih Ettiginiz Tarih</label>
+                    <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Tercih Ettiğiniz Tarih</label>
                     <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Aciklama</label>
-                  <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={3} placeholder="Sorunuzu kisaca aciklayin..." className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8] resize-none" />
+                  <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Açıklama</label>
+                  <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={3} placeholder="Sorunuzu kısaca açıklayın..." className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8] resize-none" />
                 </div>
                 <button type="submit" className="flex items-center justify-center gap-2 w-full bg-[#1A73E8] text-white py-3 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all">
-                  <Calendar className="w-4 h-4" /> Randevu Olustur
+                  <Calendar className="w-4 h-4" /> Randevu Oluştur
                 </button>
               </form>
             )}
@@ -141,8 +141,8 @@ export default function ServiceAppointmentPage() {
           {/* Sidebar */}
           <div className="space-y-5">
             <div className="bg-gradient-to-br from-[#1A73E8] to-[#1557B0] rounded-2xl p-5 text-white">
-              <h3 className="text-base font-semibold mb-1">Hizli Destek</h3>
-              <p className="text-xs text-white/70 mb-3">Acil durumlar icin 7/24 telefon destegi</p>
+              <h3 className="text-base font-semibold mb-1">Hızlı Destek</h3>
+              <p className="text-xs text-white/70 mb-3">Acil durumlar için 7/24 telefon desteği</p>
               <a href="tel:08501234567" className="flex items-center gap-2 text-sm font-semibold"><Phone className="w-4 h-4" /> 0850 123 45 67</a>
             </div>
             <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
@@ -150,9 +150,9 @@ export default function ServiceAppointmentPage() {
               <div className="space-y-2.5">
                 {[
                   { icon: CheckCircle, label: 'Yeni cihaz kurulumu' },
-                  { icon: CheckCircle, label: 'Filtre degisimi' },
-                  { icon: CheckCircle, label: 'Ariza tespiti ve onarim' },
-                  { icon: CheckCircle, label: 'Periyodik bakim' },
+                  { icon: CheckCircle, label: 'Filtre değişimi' },
+                  { icon: CheckCircle, label: 'Arıza tespiti ve onarım' },
+                  { icon: CheckCircle, label: 'Periyodik bakım' },
                   { icon: CheckCircle, label: 'Bina girisi filtrasyon' },
                   { icon: CheckCircle, label: '7/24 teknik destek' },
                 ].map((item, i) => (

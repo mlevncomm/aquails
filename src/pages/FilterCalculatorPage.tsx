@@ -15,7 +15,7 @@ const deviceModels = [
   'Aquails Smart RO Pro', 'Aquails BlueDrop DirectFlow', 'Aquails Compact UnderSink',
   'Aquails WaterChef 600GPD', 'Aquails DirectFlow 400GPD', 'Aquails Premium 8 Stage',
   'Aquails Ultra Compact', 'Aquails Smart Digital RO', 'Aquails Office Pro',
-  'Diger',
+  'Diğer',
 ];
 
 export default function FilterCalculatorPage() {
@@ -35,7 +35,7 @@ export default function FilterCalculatorPage() {
   const handleCalculate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.deviceModel || !form.lastChangeDate) {
-      addToast('Lutfen cihaz modeli ve son degisim tarihini girin.', 'error');
+      addToast('Lütfen cihaz modeli ve son değişim tarihini girin.', 'error');
       return;
     }
     const res = calculateFilterChange(form);
@@ -43,7 +43,7 @@ export default function FilterCalculatorPage() {
     setSubmitted(true);
     if (form.createReminder && email) {
       saveFilterReminder({ ...form, email });
-      addToast('Filtre hatirlaticiniz olusturuldu!', 'success');
+      addToast('Filtre hatırlatıcınız oluşturuldu!', 'success');
     }
   };
 
@@ -67,7 +67,7 @@ export default function FilterCalculatorPage() {
             <Calculator className="w-7 h-7 text-[#1A73E8]" />
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-[#0D2137]">Filtre Degisim Zamaninizi Hesaplayin</h1>
-          <p className="text-sm text-[#5A6B7B] mt-2 max-w-lg mx-auto">Cihaz modelinizi ve kullanim bilgilerinizi girin, bir sonraki filtre degisim tarihinizi ogrenin.</p>
+          <p className="text-sm text-[#5A6B7B] mt-2 max-w-lg mx-auto">Cihaz modelinizi ve kullanım bilgilerinizi girin, bir sonraki filtre değişim tarihinizi öğrenin.</p>
         </div>
       </section>
 
@@ -89,13 +89,13 @@ export default function FilterCalculatorPage() {
                   onChange={e => setForm({ ...form, deviceModel: e.target.value })}
                   className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
                 >
-                  <option value="">Seciniz</option>
+                  <option value="">Seçiniz</option>
                   {deviceModels.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Son Filtre Degisimi Tarihi *</label>
+                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Son Filtre Değişimi Tarihi *</label>
                 <input
                   type="date"
                   value={form.lastChangeDate}
@@ -106,7 +106,7 @@ export default function FilterCalculatorPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Kac Kisi Kullaniyor?</label>
+                  <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Kaç Kişi Kullanıyor?</label>
                   <select
                     value={form.peopleCount}
                     onChange={e => setForm({ ...form, peopleCount: e.target.value })}
@@ -118,7 +118,7 @@ export default function FilterCalculatorPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Kullanim Yogunlugu</label>
+                  <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Kullanım Yoğunluğu</label>
                   <select
                     value={form.usageIntensity}
                     onChange={e => setForm({ ...form, usageIntensity: e.target.value })}
@@ -126,7 +126,7 @@ export default function FilterCalculatorPage() {
                   >
                     <option value="low">Dusuk</option>
                     <option value="medium">Orta</option>
-                    <option value="high">Yuksek</option>
+                    <option value="high">Yüksek</option>
                   </select>
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function FilterCalculatorPage() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Filtre Hatirlaticisi Olusturulsun Mu?</label>
+                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Filtre Filtre Hatırlatıcısı Oluşturulsun Mu?</label>
                 <div className="flex gap-3">
                   {[
                     { value: true, label: 'Evet' },
@@ -184,7 +184,7 @@ export default function FilterCalculatorPage() {
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    placeholder="Hatirlatici icin e-posta"
+                    placeholder="Hatırlatıcı için e-posta"
                     className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
                   />
                 </motion.div>
@@ -211,14 +211,14 @@ export default function FilterCalculatorPage() {
                     {(() => { const StatusIcon = statusConfig[result.status].icon; return <StatusIcon className={`w-12 h-12 ${statusConfig[result.status].iconColor} mx-auto mb-3`} />; })()}
                     <h3 className={`text-lg font-bold ${statusConfig[result.status].text}`}>{result.statusLabel}</h3>
                     <div className="mt-4">
-                      <p className="text-3xl font-bold text-[#0D2137]">{result.daysRemaining > 0 ? `${result.daysRemaining} gun` : `${Math.abs(result.daysRemaining)} gun gecikme`}</p>
-                      <p className="text-xs text-[#8B9DAF] mt-1">Sonraki onerilen degisim: {result.nextChangeDate.toLocaleDateString('tr-TR')}</p>
+                      <p className="text-3xl font-bold text-[#0D2137]">{result.daysRemaining > 0 ? `${result.daysRemaining} gün` : `${Math.abs(result.daysRemaining)} gün gecikme`}</p>
+                      <p className="text-xs text-[#8B9DAF] mt-1">Sonraki önerilen değişim: {result.nextChangeDate.toLocaleDateString('tr-TR')}</p>
                     </div>
                   </div>
 
                   {/* Recommended Filters */}
                   <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
-                    <h4 className="text-sm font-semibold text-[#0D2137] mb-3">Onerilen Filtreler</h4>
+                    <h4 className="text-sm font-semibold text-[#0D2137] mb-3">Önerilen Filtreler</h4>
                     <div className="space-y-2">
                       {result.recommendedFilters.map((f, i) => (
                         <div key={i} className="flex items-center gap-2 text-sm text-[#5A6B7B]">
@@ -231,7 +231,7 @@ export default function FilterCalculatorPage() {
                         <ShoppingCart className="w-3 h-3" /> Filtre Al
                       </Link>
                       <Link to="/filtre-aboneligi" className="flex items-center gap-1.5 border border-[#E8F0FE] text-[#5A6B7B] text-xs font-medium px-4 py-2 rounded-full hover:border-[#1A73E8] hover:text-[#1A73E8] transition-all">
-                        <RefreshCw className="w-3 h-3" /> Abonelik Olustur
+                        <RefreshCw className="w-3 h-3" /> Abonelik Oluştur
                       </Link>
                     </div>
                   </div>

@@ -117,7 +117,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <div className="flex flex-wrap gap-2 mb-5">
-                {['Ucretsiz Kestif', 'Kurulum Destegi', '2 Yil Garanti', 'Filtre Hatirlatma'].map(b => (
+                {['Ücretsiz Keşif', 'Kurulum Desteği', '2 Yıl Garanti', 'Filtre Hatırlatma'].map(b => (
                   <span key={b} className="inline-flex items-center gap-1 bg-white/70 backdrop-blur-sm text-[11px] font-medium text-[#1A73E8] px-2.5 py-1 rounded-full border border-[#E8F0FE]">
                     <Check className="w-3 h-3" />{b}
                   </span>
@@ -125,21 +125,21 @@ export default function Home() {
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#0D2137] leading-tight">
                 Daha Temiz Su,<br />
-                <span className="text-[#1A73E8]">Daha Akilli Teknoloji</span>
+                <span className="text-[#1A73E8]">Daha Akıllı Teknoloji</span>
               </h1>
               <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-5 leading-relaxed max-w-md">
-                Aquails, eviniz ve is yeriniz icin modern su aritma cihazlari, filtre cozumleri ve bakim hizmetlerini tek platformda sunar.
+                Aquails, eviniz ve iş yeriniz için modern su arıtma cihazları, filtre çözümleri ve bakım hizmetlerini tek platformda sunar.
               </p>
               <div className="flex flex-wrap gap-3 mt-8">
                 <Link to="/urunler" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all shadow-lg shadow-[#1A73E8]/20">
-                  Urunleri Incele <ArrowRight className="w-4 h-4" />
+                  Ürünleri İncele <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link to="/servis-randevusu" className="inline-flex items-center gap-2 border-2 border-[#1A73E8] text-[#1A73E8] px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#1A73E8] hover:text-white transition-all">
                   Servis Randevusu
                 </Link>
               </div>
               <div className="flex gap-6 sm:gap-8 mt-10">
-                {[{ v: '10.000+', l: 'Mutlu Musteri' }, { v: '500+', l: 'Servis Noktasi' }, { v: '%99', l: 'Memnuniyet' }].map(s => (
+                {[{ v: '10.000+', l: 'Mutlu Müşteri' }, { v: '500+', l: 'Servis Noktası' }, { v: '%99', l: 'Memnuniyet' }].map(s => (
                   <div key={s.l}><p className="text-xl sm:text-2xl font-bold text-[#0D2137]">{s.v}</p><p className="text-[11px] text-[#8B9DAF] mt-0.5">{s.l}</p></div>
                 ))}
               </div>
@@ -147,12 +147,12 @@ export default function Home() {
 
             <motion.div initial={{ opacity: 0, x: 40, scale: 0.95 }} animate={{ opacity: 1, x: 0, scale: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="relative">
               <div className="bg-white rounded-3xl shadow-xl p-3 sm:p-4 max-w-md mx-auto">
-                <img src="/images/hero-product.jpg" alt="Aquails Su Aritma Cihazi" className="w-full aspect-square object-cover rounded-2xl" />
+                <img src="/images/hero-product.jpg" alt="Aquails Su Arıtma Cihazı" className="w-full aspect-square object-cover rounded-2xl" />
               </div>
               <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-lg p-4 hidden md:block">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-[#00C9A7]/10 rounded-lg flex items-center justify-center"><ShieldCheck className="w-4 h-4 text-[#00C9A7]" /></div>
-                  <div><p className="text-xs font-semibold text-[#0D2137]">5 Yil Garanti</p><p className="text-[10px] text-[#8B9DAF]">Tam Kapsamli</p></div>
+                  <div><p className="text-xs font-semibold text-[#0D2137]">5 Yıl Garanti</p><p className="text-[10px] text-[#8B9DAF]">Tam Kapsamlı</p></div>
                 </div>
               </div>
             </motion.div>
@@ -180,8 +180,8 @@ export default function Home() {
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
           <ScrollReveal className="text-center mb-12">
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Kategoriler</span>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">Ihtiyaciniza Uygun Cozumler</h2>
-            <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-3 max-w-lg mx-auto">Modern su aritma teknolojileri, filtre sistemleri ve profesyonel hizmetler tek cati altinda.</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">İhtiyacınıza Uygun Çözümler</h2>
+            <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-3 max-w-lg mx-auto">Modern su arıtma teknolojileri, filtre sistemleri ve profesyonel hizmetler tek çatı altında.</p>
           </ScrollReveal>
           <StaggerContainer className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4" staggerDelay={0.06}>
             {shownCategories.map(cat => {
@@ -211,7 +211,7 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 w-[250px] h-[250px] bg-[#4FC3F7]/[0.02] rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
           <ScrollReveal className="text-center mb-10">
-            <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">One Cikan Urunler</span>
+            <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Öne Çıkan Ürünler</span>
             <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">En Cok Tercih Edilenler</h2>
           </ScrollReveal>
           <ScrollReveal className="flex justify-center flex-wrap gap-2 mb-10">
@@ -233,7 +233,7 @@ export default function Home() {
             ))}
           </StaggerContainer>
           <div className="text-center mt-10">
-            <Link to="/urunler" className="inline-flex items-center gap-2 text-sm font-semibold text-[#1A73E8] hover:underline">Tum Urunleri Gor <ArrowRight className="w-4 h-4" /></Link>
+            <Link to="/urunler" className="inline-flex items-center gap-2 text-sm font-semibold text-[#1A73E8] hover:underline">Tüm Ürünleri Gör <ArrowRight className="w-4 h-4" /></Link>
           </div>
         </div>
       </section>
@@ -245,7 +245,7 @@ export default function Home() {
           <ScrollReveal className="text-center mb-12">
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Neden Aquails?</span>
             <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">Fark Yaratan Teknoloji</h2>
-            <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-3 max-w-xl mx-auto">17 yillik deneyim ve en son teknoloji ile urettigimiz cozumler, ailenizin sagligini on planda tutar.</p>
+            <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-3 max-w-xl mx-auto">17 yıllık deneyim ve en son teknoloji ile ürettiğimiz çözümler, ailenizin sağlığını ön planda tutar.</p>
           </ScrollReveal>
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" staggerDelay={0.08}>
             {nedenAquails.map(f => (
@@ -301,13 +301,13 @@ export default function Home() {
               <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Filtre Aboneliği</span>
               <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2 leading-tight">Filtre Degisim Tarihini Unutmayin</h2>
               <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-4 leading-relaxed">
-                Filtre aboneligi ile 6 ayda veya 12 ayda bir otomatik filtre seti teslimati alin. Indirimli fiyatlarla, kapiniza kadar teslim.
+                Filtre aboneliği ile 6 ayda veya 12 ayda bir otomatik filtre seti teslimatı alın. İndirimli fiyatlarla, kapınıza kadar teslim.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-8">
                 {[
-                  { title: '6 Aylik', price: '1.499 ₺', desc: 'Yari yillik set' },
-                  { title: '12 Aylik', price: '2.699 ₺', desc: 'Yillik set (%10 indirimli)', highlight: true },
-                  { title: 'Premium', price: '4.499 ₺', desc: 'Bakim + filtre paketi', highlight: true },
+                  { title: '6 Aylık', price: '1.499 ₺', desc: 'Yarı yıllık set' },
+                  { title: '12 Aylık', price: '2.699 ₺', desc: 'Yıllık set (%10 indirimli)', highlight: true },
+                  { title: 'Premium', price: '4.499 ₺', desc: 'Bakım + filtre paketi', highlight: true },
                 ].map(p => (
                   <div key={p.title} className={cn('border rounded-2xl p-4 text-center', p.highlight ? 'border-[#1A73E8] bg-[#F0F6FF]' : 'border-[#E8F0FE]')}>
                     <p className="text-sm font-semibold text-[#0D2137]">{p.title}</p>
@@ -317,7 +317,7 @@ export default function Home() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-3 mt-8">
-                <Link to="/filtre-aboneligi" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all">Aboneligi Incele <ArrowRight className="w-4 h-4" /></Link>
+                <Link to="/filtre-aboneligi" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all">Aboneliği İncele <ArrowRight className="w-4 h-4" /></Link>
                 <Link to="/servis-randevusu" className="inline-flex items-center gap-2 border border-[#E8F0FE] text-[#5A6B7B] px-6 py-3 rounded-full font-medium text-sm hover:border-[#1A73E8] hover:text-[#1A73E8] transition-all">Filtre Degisim Talebi</Link>
               </div>
             </ScrollReveal>
@@ -333,13 +333,13 @@ export default function Home() {
             <ScrollReveal x={-20} className="order-2 lg:order-1">
               <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Servis & Kurulum</span>
               <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2 leading-tight">Profesyonel Kurulum, Kesintisiz Hizmet</h2>
-              <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-4 leading-relaxed">Uzman ekibimiz cihazinizin kurulumundan periyodik bakimina kadar her adimda yaninizda.</p>
+              <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-4 leading-relaxed">Uzman ekibimiz cihazınızın kurulumundan periyodik bakımına kadar her adımda yanınızda.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
                 {[
-                  { icon: Package, title: 'Yeni Cihaz Kurulumu', desc: 'Ucretsiz profesyonel montaj' },
-                  { icon: RefreshCw, title: 'Filtre Degisimi', desc: 'Hizli ve hijyenik degisim' },
-                  { icon: Wrench, title: 'Ariza/Bakim', desc: '7/24 teknik destek' },
-                  { icon: Building2, title: 'Bina Girisi Filtrasyon', desc: 'Endustriyel cozumler' },
+                  { icon: Package, title: 'Yeni Cihaz Kurulumu', desc: 'Ücretsiz profesyonel montaj' },
+                  { icon: RefreshCw, title: 'Filtre Değişimi', desc: 'Hızlı ve hijyenik değişim' },
+                  { icon: Wrench, title: 'Arıza/Bakım', desc: '7/24 teknik destek' },
+                  { icon: Building2, title: 'Bina Girişi Filtrasyon', desc: 'Endüstriyel çözümler' },
                 ].map(s => (
                   <div key={s.title} className="flex items-start gap-3 bg-white border border-[#E8F0FE] rounded-xl p-4">
                     <div className="w-9 h-9 bg-[#F0F6FF] rounded-lg flex items-center justify-center flex-shrink-0"><s.icon className="w-4 h-4 text-[#1A73E8]" /></div>
@@ -347,7 +347,7 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <Link to="/servis-randevusu" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all mt-8">Servis Randevusu Olustur <ArrowRight className="w-4 h-4" /></Link>
+              <Link to="/servis-randevusu" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all mt-8">Servis Randevusu Oluştur <ArrowRight className="w-4 h-4" /></Link>
             </ScrollReveal>
             <ScrollReveal x={20} delay={0.1} className="order-1 lg:order-2">
               <img src="/images/service-installation.jpg" alt="Servis Kurulum" className="rounded-2xl shadow-lg w-full object-cover aspect-video" loading="lazy" />
@@ -362,7 +362,7 @@ export default function Home() {
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
           <ScrollReveal className="text-center mb-12">
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Kampanyalar</span>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">Kacirilmayacak Firsatlar</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">Kaçırılmayacak Fırsatlar</h2>
           </ScrollReveal>
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-5" staggerDelay={0.1}>
             {kampanyalar.map(k => (
@@ -375,7 +375,7 @@ export default function Home() {
                     <p className="text-sm text-white/80 mt-1">{k.desc}</p>
                     <div className="flex items-center justify-between mt-4">
                       <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full">{k.code}</span>
-                      <Link to="/kampanyalar" className="text-white text-xs font-semibold flex items-center gap-1 hover:underline">Incele <ArrowRight className="w-3 h-3" /></Link>
+                      <Link to="/kampanyalar" className="text-white text-xs font-semibold flex items-center gap-1 hover:underline">İncele <ArrowRight className="w-3 h-3" /></Link>
                     </div>
                   </div>
                 </div>
@@ -390,8 +390,8 @@ export default function Home() {
         <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#1A73E8]/[0.02] rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
           <ScrollReveal className="text-center mb-12">
-            <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Musteri Yorumlari</span>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">10.000'den Fazla Mutlu Musteri</h2>
+            <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Müşteri Yorumları</span>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">10.000'den Fazla Mutlu Müşteri</h2>
             <div className="flex items-center justify-center gap-2 mt-3">
               <RatingStars rating={5} size="md" /><span className="font-bold text-lg text-[#0D2137] ml-2">4.9 / 5.0</span>
             </div>
@@ -428,9 +428,9 @@ export default function Home() {
           <ScrollReveal className="flex justify-between items-end mb-10">
             <div>
               <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Blog & Bilgi Merkezi</span>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">Su Aritma Rehberi</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">Su Arıtma Rehberi</h2>
             </div>
-            <Link to="/blog" className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-[#5A6B7B] hover:text-[#1A73E8] transition-colors">Tum Yazilar <ArrowRight className="w-4 h-4" /></Link>
+            <Link to="/blog" className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-[#5A6B7B] hover:text-[#1A73E8] transition-colors">Tüm Yazılar <ArrowRight className="w-4 h-4" /></Link>
           </ScrollReveal>
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6" staggerDelay={0.1}>
             {blogYazilar.map((b, i) => (
@@ -489,10 +489,10 @@ export default function Home() {
         </div>
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 text-center relative">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-            <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight">Eviniz icin Dogru Su Aritma<br />Sistemini Birlikte Secelim</h2>
-            <p className="text-sm sm:text-base text-white/70 mt-4 max-w-lg mx-auto">Uzman ekibimiz size en uygun cozumu sunmak icin hazir. Ucretsiz keşif randevusu alin veya urunlerimizi inceleyin.</p>
+            <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight">Eviniz için Doğru Su Arıtma<br />Sistemini Birlikte Seçelim</h2>
+            <p className="text-sm sm:text-base text-white/70 mt-4 max-w-lg mx-auto">Uzman ekibimiz size en uygun çözümü sunmak için hazır. Ücretsiz keşif randevusu alın veya ürünlerimizi inceleyin.</p>
             <div className="flex flex-wrap justify-center gap-3 mt-10">
-              <Link to="/urunler" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-8 py-4 rounded-full font-semibold hover:bg-[#1557B0] transition-all shadow-lg">Urunleri Incele <ArrowRight className="w-4 h-4" /></Link>
+              <Link to="/urunler" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-8 py-4 rounded-full font-semibold hover:bg-[#1557B0] transition-all shadow-lg">Ürünleri İncele <ArrowRight className="w-4 h-4" /></Link>
               <Link to="/servis-randevusu" className="inline-flex items-center gap-2 border-2 border-white/30 text-white px-8 py-4 rounded-full font-semibold hover:bg-white/10 transition-all">Servis Randevusu Al</Link>
             </div>
           </motion.div>

@@ -19,38 +19,38 @@ const steps = [
     key: 'place' as const,
     title: 'Kullanim yeri nedir?',
     options: [
-      { value: 'ev', label: 'Ev', icon: Home, desc: 'Ev icin su aritma cozumu' },
-      { value: 'ofis', label: 'Ofis', icon: Building2, desc: 'Ofis ve kurumsal kullanim' },
+      { value: 'ev', label: 'Ev', icon: Home, desc: 'Ev için su arıtma çözümü' },
+      { value: 'ofis', label: 'Ofis', icon: Building2, desc: 'Ofis ve kurumsal kullanım' },
       { value: 'isletme', label: 'Isletme', icon: Users, desc: 'Restoran, kafe, fabrika' },
       { value: 'bina', label: 'Bina girisi', icon: Building2, desc: 'Apartman ve site girisi' },
     ],
   },
   {
     key: 'people' as const,
-    title: 'Kac kisi kullanacak?',
+    title: 'Kaç kişi kullanacak?',
     options: [
       { value: '1-2', label: '1-2 kisi', icon: Users, desc: 'Bekar/cift' },
       { value: '3-4', label: '3-4 kisi', icon: Users, desc: 'Aile' },
       { value: '5+', label: '5+ kisi', icon: Users, desc: 'Genis aile' },
-      { value: 'yogun', label: 'Yogun kullanim', icon: Droplet, desc: 'Is yeri/yogun ihtiyac' },
+      { value: 'yogun', label: 'Yoğun kullanım', icon: Droplet, desc: 'İş yeri/yoğun ihtiyaç' },
     ],
   },
   {
     key: 'systemType' as const,
-    title: 'Hangi sistem tipi ilgini cekiyor?',
+    title: 'Hangi sistem tipi ilgini çekiyor?',
     options: [
       { value: 'tankli', label: 'Tankli klasik', icon: Droplet, desc: 'Geleneksel depolamali sistem' },
-      { value: 'direkt-akis', label: 'Tanksiz direkt akis', icon: Zap, desc: 'Aninda aritim, modern' },
-      { value: 'dijital', label: 'Dijital sistem', icon: Cpu, desc: 'Akilli sensor ve IoT' },
-      { value: 'emin-degilim', label: 'Emin degilim', icon: Sparkles, desc: 'Size en uygununu bulalim' },
+      { value: 'direkt-akis', label: 'Tanksız direkt akış', icon: Zap, desc: 'Anında arıtım, modern' },
+      { value: 'dijital', label: 'Dijital sistem', icon: Cpu, desc: 'Akıllı sensör ve IoT' },
+      { value: 'emin-degilim', label: 'Emin değilim', icon: Sparkles, desc: 'Size en uygununu bulalım' },
     ],
   },
   {
     key: 'priority' as const,
     title: 'Onceligin nedir?',
     options: [
-      { value: 'fiyat', label: 'Uygun fiyat', icon: Wallet, desc: 'Ekonomik cozum' },
-      { value: 'performans', label: 'Yuksek performans', icon: Zap, desc: 'En iyi aritim kalitesi' },
+      { value: 'fiyat', label: 'Uygun fiyat', icon: Wallet, desc: 'Ekonomik çözüm' },
+      { value: 'performans', label: 'Yüksek performans', icon: Zap, desc: 'En iyi arıtım kalitesi' },
       { value: 'mineral', label: 'Mineral destekli', icon: Droplet, desc: 'Saglikli mineral dengesi' },
       { value: 'sessiz', label: 'Sessiz calisma', icon: CheckCircle, desc: 'Gurultusuz sistem' },
     ],
@@ -62,23 +62,23 @@ const steps = [
       { value: '5000-10000', label: '5.000 - 10.000 ₺', icon: Wallet, desc: 'Giris seviyesi' },
       { value: '10000-20000', label: '10.000 - 20.000 ₺', icon: Wallet, desc: 'Orta seviye' },
       { value: '20000+', label: '20.000+ ₺', icon: Wallet, desc: 'Premium' },
-      { value: 'oner', label: 'Butceye gore oner', icon: Sparkles, desc: 'En uygun fiyat' },
+      { value: 'oner', label: 'Bütçeye göre öner', icon: Sparkles, desc: 'En uygun fiyat' },
     ],
   },
   {
     key: 'installation' as const,
     title: 'Kurulum dahil olsun mu?',
     options: [
-      { value: 'evet', label: 'Evet', icon: Wrench, desc: 'Ucretsiz kurulum' },
+      { value: 'evet', label: 'Evet', icon: Wrench, desc: 'Ücretsiz kurulum' },
       { value: 'hayir', label: 'Hayir', icon: CheckCircle, desc: 'Kendim kurarim' },
-      { value: 'aransin', label: 'Servis beni arasin', icon: PhoneIcon, desc: 'Bilgi almak istiyorum' },
+      { value: 'aransin', label: 'Servis beni arasın', icon: PhoneIcon, desc: 'Bilgi almak istiyorum' },
     ],
   },
   {
     key: 'subscription' as const,
-    title: 'Filtre aboneligi ister misin?',
+    title: 'Filtre aboneliği ister misin?',
     options: [
-      { value: 'evet', label: 'Evet', icon: RefreshCw, desc: 'Otomatik filtre hatirlama' },
+      { value: 'evet', label: 'Evet', icon: RefreshCw, desc: 'Otomatik filtre hatırlama' },
       { value: 'hayir', label: 'Hayir', icon: CheckCircle, desc: 'Sonra dusunurum' },
       { value: 'sonra', label: 'Sonra karar veririm', icon: Sparkles, desc: 'Simdi degil' },
     ],
@@ -113,7 +113,7 @@ export default function ProductWizardPage() {
       const recs = getRecommendations(answers);
       setRecommendations(recs);
       setCurrentStep(currentStep + 1);
-      addToast('Size ozel urun onerileri hazirlandi!', 'success');
+      addToast('Size özel ürün önerileri hazırlandı!', 'success');
     }
   };
 
@@ -138,8 +138,8 @@ export default function ProductWizardPage() {
           <div className="absolute top-10 right-20 w-64 h-64 bg-[#1A73E8] rounded-full blur-3xl" />
         </div>
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 relative text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Size En Uygun Su Aritma Cihazini Birlikte Secelim</h1>
-          <p className="text-sm text-white/70 mt-2 max-w-lg mx-auto">Birkac soruya cevap verin, eviniz veya is yeriniz icin en dogru Aquails sistemini onerelim.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-white">Size En Uygun Su Arıtma Cihazını Birlikte Seçelim</h1>
+          <p className="text-sm text-white/70 mt-2 max-w-lg mx-auto">Birkaç soruya cevap verin, eviniz veya iş yeriniz için en doğru Aquails sistemini önerelim.</p>
         </div>
       </section>
 
@@ -212,7 +212,7 @@ export default function ProductWizardPage() {
                   disabled={!isAnswered}
                   className="flex items-center gap-2 bg-[#1A73E8] text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {currentStep === steps.length - 1 ? 'Sonuclari Gor' : 'Devam Et'} <ArrowRight className="w-4 h-4" />
+                  {currentStep === steps.length - 1 ? 'Sonuçları Gör' : 'Devam Et'} <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </motion.div>
@@ -228,8 +228,8 @@ export default function ProductWizardPage() {
                 <div className="w-16 h-16 bg-[#F0F6FF] rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="w-8 h-8 text-[#1A73E8]" />
                 </div>
-                <h2 className="text-xl font-bold text-[#0D2137]">Size Ozel Onerilerimiz</h2>
-                <p className="text-sm text-[#5A6B7B] mt-2">Ihtiyaclariniza en uygun {recommendations?.length || 0} urun bulduk.</p>
+                <h2 className="text-xl font-bold text-[#0D2137]">Size Özel Önerilerimiz</h2>
+                <p className="text-sm text-[#5A6B7B] mt-2">İhtiyaclarınıza en uygun {recommendations?.length || 0} ürün bulduk.</p>
               </div>
 
               {recommendations?.map((rec, i) => (
@@ -261,7 +261,7 @@ export default function ProductWizardPage() {
                         </div>
                         <div className="flex flex-wrap gap-2 mt-3">
                           <Link to={`/urun/${rec.product.slug}`} className="flex items-center gap-1.5 bg-[#1A73E8] text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-[#1557B0] transition-all">
-                            <ShoppingCart className="w-3 h-3" /> Urunu Incele
+                            <ShoppingCart className="w-3 h-3" /> Ürünü İncele
                           </Link>
                           <button
                             onClick={() => openWhatsApp(getProductInquiryMessage(rec.product.name))}

@@ -13,10 +13,10 @@ export default function CustomerLoyaltyPage() {
   const handleConvert = () => {
     const coupon = convertPointsToCoupon(convertAmount);
     if (coupon) {
-      addToast(`${coupon.discount}₺ degerinde kupon olusturuldu: ${coupon.code}`, 'success');
+      addToast(`${coupon.discount}₺ değerinde kupon oluşturuldu: ${coupon.code}`, 'success');
       refresh();
     } else {
-      addToast('Yetersiz puan veya gecersiz miktar.', 'error');
+      addToast('Yetersiz puan veya geçersiz miktar.', 'error');
     }
   };
 
@@ -29,7 +29,7 @@ export default function CustomerLoyaltyPage() {
         <div className="bg-gradient-to-br from-[#1A73E8] to-[#1557B0] rounded-2xl p-6 text-white">
           <Award className="w-8 h-8 mb-3" />
           <p className="text-3xl font-bold">{data.availablePoints}</p>
-          <p className="text-xs text-white/70 mt-1">Kullanilabilir Puan</p>
+          <p className="text-xs text-white/70 mt-1">Kullanılabilir Puan</p>
         </div>
         <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6">
           <TrendingUp className="w-8 h-8 text-[#1A73E8] mb-3" />
@@ -67,7 +67,7 @@ export default function CustomerLoyaltyPage() {
 
       {/* Earn Rules */}
       <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5 mb-6">
-        <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Puan Kazanma Yollari</h3>
+        <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Puan Kazanma Yolları</h3>
         <div className="space-y-2">
           {EARN_RULES.map(rule => (
             <div key={rule.action} className="flex items-center justify-between p-3 bg-[#F8FBFF] rounded-xl">
@@ -80,7 +80,7 @@ export default function CustomerLoyaltyPage() {
 
       {/* History */}
       <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
-        <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Puan Gecmisi</h3>
+        <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Puan Geçmişi</h3>
         {data.transactions.length === 0 ? (
           <EmptyState
             icon={<History className="w-8 h-8" />}

@@ -9,7 +9,7 @@ import { useToastStore } from '@/components/Toast';
 import { cn } from '@/lib/utils';
 
 const iconOptions = [
-  { value: 'ShoppingBag', label: 'Alisveris', icon: ShoppingBag },
+  { value: 'ShoppingBag', label: 'Alışveriş', icon: ShoppingBag },
   { value: 'Droplet', label: 'Su', icon: Droplet },
   { value: 'Filter', label: 'Filtre', icon: Filter },
   { value: 'Gift', label: 'Hediye', icon: Gift },
@@ -23,16 +23,16 @@ const iconOptions = [
 ];
 
 const defaultLinks = [
-  { id: '1', title: 'Urunleri Incele', url: '/urunler', icon: 'ShoppingBag', active: true, featured: false, order: 1 },
-  { id: '2', title: 'En Cok Satan Su Aritma Cihazlari', url: '/urunler?kategori=su-aritma-cihazlari', icon: 'Droplet', active: true, featured: true, order: 2 },
+  { id: '1', title: 'Ürünleri İncele', url: '/urunler', icon: 'ShoppingBag', active: true, featured: false, order: 1 },
+  { id: '2', title: 'En Çok Satan Su Arıtma Cihazları', url: '/urunler?kategori=su-aritma-cihazlari', icon: 'Droplet', active: true, featured: true, order: 2 },
   { id: '3', title: 'Filtre Setleri', url: '/urunler?kategori=filtreler', icon: 'Filter', active: true, featured: false, order: 3 },
   { id: '4', title: 'Kampanyalar', url: '/kampanyalar', icon: 'Gift', active: true, featured: false, order: 4 },
-  { id: '5', title: 'Filtre Aboneligi', url: '/filtre-aboneligi', icon: 'RefreshCw', active: true, featured: false, order: 5 },
+  { id: '5', title: 'Filtre Aboneliği', url: '/filtre-aboneligi', icon: 'RefreshCw', active: true, featured: false, order: 5 },
   { id: '6', title: 'Servis Randevusu Al', url: '/servis-randevusu', icon: 'Wrench', active: true, featured: true, order: 6 },
-  { id: '7', title: 'Siparis Takip', url: '/siparis-takip', icon: 'Truck', active: true, featured: false, order: 7 },
+  { id: '7', title: 'Sipariş Takip', url: '/siparis-takip', icon: 'Truck', active: true, featured: false, order: 7 },
   { id: '8', title: 'WhatsApp Destek', url: 'https://wa.me/905321234567', icon: 'MessageCircle', active: true, featured: false, order: 8 },
   { id: '9', title: 'Instagram', url: 'https://instagram.com/aquails', icon: 'Instagram', active: true, featured: false, order: 9 },
-  { id: '10', title: 'Iletisim', url: '/iletisim', icon: 'Phone', active: true, featured: false, order: 10 },
+  { id: '10', title: 'İletişim', url: '/iletisim', icon: 'Phone', active: true, featured: false, order: 10 },
 ];
 
 interface LinkItem {
@@ -62,18 +62,18 @@ export default function AdminLinksPage() {
 
   const handleToggleActive = (id: string) => {
     setLinks(prev => prev.map(l => l.id === id ? { ...l, active: !l.active } : l));
-    addToast('Durum guncellendi', 'success');
+    addToast('Durum güncellendi', 'success');
   };
 
   const handleToggleFeatured = (id: string) => {
     setLinks(prev => prev.map(l => l.id === id ? { ...l, featured: !l.featured } : l));
-    addToast('One cikan durumu guncellendi', 'success');
+    addToast('Öne çıkan durumu güncellendi', 'success');
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Bu baglantiyi silmek istediginize emin misiniz?')) {
+    if (confirm('Bu bağlantıyı silmek istediğinize emin misiniz?')) {
       setLinks(prev => prev.filter(l => l.id !== id));
-      addToast('Baglanti silindi', 'success');
+      addToast('Bağlantı silindi', 'success');
     }
   };
 
@@ -85,18 +85,18 @@ export default function AdminLinksPage() {
 
   const handleSaveEdit = () => {
     if (!editForm?.title || !editForm?.url) {
-      addToast('Baslik ve URL zorunludur.', 'error');
+      addToast('Başlık ve URL zorunludur.', 'error');
       return;
     }
     setLinks(prev => prev.map(l => l.id === editForm.id ? editForm : l));
     setIsEditing(false);
     setEditForm(null);
-    addToast('Baglanti guncellendi', 'success');
+    addToast('Bağlantı güncellendi', 'success');
   };
 
   const handleAdd = () => {
     if (!newForm.title || !newForm.url) {
-      addToast('Baslik ve URL zorunludur.', 'error');
+      addToast('Başlık ve URL zorunludur.', 'error');
       return;
     }
     const newLink: LinkItem = {
@@ -111,7 +111,7 @@ export default function AdminLinksPage() {
     setLinks(prev => [...prev, newLink]);
     setShowAdd(false);
     setNewForm({ title: '', url: '', icon: 'ExternalLink', active: true, featured: false });
-    addToast('Yeni baglanti eklendi', 'success');
+    addToast('Yeni bağlantı eklendi', 'success');
   };
 
   const getIcon = (iconName: string) => {
@@ -133,11 +133,11 @@ export default function AdminLinksPage() {
             <span className="text-[#5A6B7B]">Link Sayfasi Yonetimi</span>
           </div>
           <h1 className="text-xl md:text-2xl font-bold text-[#0D2137]">Link Sayfasi Yonetimi</h1>
-          <p className="text-sm text-[#8B9DAF] mt-1">Instagram bio baglanti sayfasindaki linkleri yonetin.</p>
+          <p className="text-sm text-[#8B9DAF] mt-1">Instagram bio bağlantı sayfasındaki linkleri yönetin.</p>
         </div>
         <div className="flex items-center gap-3">
           <a href="/#/all-links" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-medium text-[#1A73E8] hover:underline">
-            <Eye className="w-4 h-4" /> Sayfayi Goruntule
+            <Eye className="w-4 h-4" /> Sayfayı Görüntüle
           </a>
           <button onClick={() => { setShowAdd(true); setIsEditing(false); }} className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1557B0] transition-all">
             <Plus className="w-4 h-4" /> Link Ekle
@@ -151,7 +151,7 @@ export default function AdminLinksPage() {
           { label: 'Toplam Link', value: links.length },
           { label: 'Aktif', value: activeCount },
           { label: 'Pasif', value: links.length - activeCount },
-          { label: 'One Cikan', value: links.filter(l => l.featured).length },
+          { label: 'Öne Çıkan', value: links.filter(l => l.featured).length },
         ].map(s => (
           <div key={s.label} className="bg-white border border-[#E8F0FE] rounded-xl p-4">
             <p className="text-xs text-[#8B9DAF]">{s.label}</p>
@@ -166,7 +166,7 @@ export default function AdminLinksPage() {
           <h3 className="text-sm font-semibold text-[#0D2137] mb-4">Yeni Link Ekle</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Baslik *</label>
+              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Başlık *</label>
               <input value={newForm.title} onChange={e => setNewForm({ ...newForm, title: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg focus:outline-none focus:border-[#1A73E8]" placeholder="Link basligi" />
             </div>
             <div>
@@ -193,7 +193,7 @@ export default function AdminLinksPage() {
           <h3 className="text-sm font-semibold text-[#0D2137] mb-4">Link Duzenle</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Baslik *</label>
+              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Başlık *</label>
               <input value={editForm.title} onChange={e => setEditForm({ ...editForm, title: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg focus:outline-none focus:border-[#1A73E8]" />
             </div>
             <div>
@@ -221,11 +221,11 @@ export default function AdminLinksPage() {
             <thead>
               <tr className="border-b border-[#E8F0FE]">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Sira</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Baslik</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Başlık</th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">URL</th>
                 <th className="text-center px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Aktif</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-[#8B9DAF]">One Cikan</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Islemler</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Öne Çıkan</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-[#8B9DAF]">İşlemler</th>
               </tr>
             </thead>
             <tbody>
@@ -279,8 +279,8 @@ export default function AdminLinksPage() {
         <Eye className="w-5 h-5 text-[#1A73E8] flex-shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-[#0D2137]">Onizleme</p>
-          <p className="text-xs text-[#5A6B7B] mt-1">Yaptiginiz degisiklikler aninda All Links sayfasina yansir. Sayfayi goruntule butonu ile kontrol edebilirsiniz.</p>
-          <p className="text-xs text-[#8B9DAF] mt-1">Not: Bu yonetim paneli localStorage uzerinde calisir. Tarayici verileri temizlenirse varsayilan ayarlara doner.</p>
+          <p className="text-xs text-[#5A6B7B] mt-1">Yaptığınız değişiklikler anında All Links sayfasına yansır. Sayfayı görüntüle butonu ile kontrol edebilirsiniz.</p>
+          <p className="text-xs text-[#8B9DAF] mt-1">Not: Bu yönetim paneli localStorage üzerinde çalışır. Tarayıcı verileri temizlenirse varsayılan ayarlara döner.</p>
         </div>
       </div>
     </div>

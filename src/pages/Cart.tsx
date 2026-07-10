@@ -38,9 +38,9 @@ export default function Cart() {
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#1A73E8]/[0.04] rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#4FC3F7]/[0.05] rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 relative">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#0D2137]">Alisveris Sepetim</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#0D2137]">Alışveriş Sepetim</h1>
           <p className="text-sm text-[#5A6B7B] mt-2">
-            {items.length === 0 ? 'Sepetiniz bos' : `Sepetinizde ${items.length} urun bulunuyor`}
+            {items.length === 0 ? 'Sepetiniz boş' : `Sepetinizde ${items.length} ürün bulunuyor`}
           </p>
         </div>
       </div>
@@ -56,16 +56,16 @@ export default function Cart() {
             <div className="w-24 h-24 bg-gradient-to-br from-[#F0F6FF] to-[#E8F0FE] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-aquails">
               <ShoppingCart className="w-12 h-12 text-[#1A73E8]/30" />
             </div>
-            <h2 className="text-xl font-bold text-[#0D2137] mb-2">Sepetiniz Henüz Bos</h2>
+            <h2 className="text-xl font-bold text-[#0D2137] mb-2">Sepetiniz Henüz Boş</h2>
             <p className="text-sm text-[#5A6B7B] leading-relaxed mb-6">
-              Su aritma cihazlari, filtre setleri ve aksesuarlarimizi kesfedin. Size en uygun urunleri sepetinize ekleyin.
+              Su arıtma cihazları, filtre setleri ve aksesuarlarımızı keşfedin. Size en uygun ürünleri sepetinize ekleyin.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 to="/urunler"
                 className="inline-flex items-center justify-center gap-2 bg-[#1A73E8] text-white px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all shadow-lg shadow-[#1A73E8]/20"
               >
-                <Package className="w-4 h-4" /> Urunleri Kesfet
+                <Package className="w-4 h-4" /> Ürünleri Keşfet
               </Link>
               <Link
                 to="/urun-secim-sihirbazi"
@@ -156,7 +156,7 @@ export default function Cart() {
                 <ScrollReveal className="mt-8">
                   <div className="flex items-center gap-2 mb-4">
                     <Sparkles className="w-4 h-4 text-[#1A73E8]" />
-                    <h3 className="text-sm font-semibold text-[#0D2137]">Bu Urunlerle Birlikte Onerilenler</h3>
+                    <h3 className="text-sm font-semibold text-[#0D2137]">Bu Ürünlerle Birlikte Önerilenler</h3>
                   </div>
                   <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-3" staggerDelay={0.08}>
                     {recommendations.slice(0, 4).map((p) => (
@@ -177,7 +177,7 @@ export default function Cart() {
                   <div className="bg-white/80 backdrop-blur-md border border-[#E8F0FE] rounded-2xl p-5 shadow-aquails">
                     <div className="flex items-center gap-2 mb-3">
                       <Truck className="w-4 h-4 text-[#1A73E8]" />
-                      <p className="text-sm font-semibold text-[#0D2137]">Ucretsiz Kargo</p>
+                      <p className="text-sm font-semibold text-[#0D2137]">Ücretsiz Kargo</p>
                     </div>
                     <div className="w-full h-2 bg-[#E8F0FE] rounded-full overflow-hidden">
                       <div
@@ -186,13 +186,13 @@ export default function Cart() {
                       />
                     </div>
                     <p className="text-xs text-[#8B9DAF] mt-2">
-                      Ucretsiz kargo icin <span className="font-semibold text-[#1A73E8]">{remainingForFreeShipping.toLocaleString('tr-TR')} ₺</span> daha urun ekleyin.
+                      Ücretsiz kargo için <span className="font-semibold text-[#1A73E8]">{remainingForFreeShipping.toLocaleString('tr-TR')} ₺</span> daha ürün ekleyin.
                     </p>
                   </div>
                 ) : (
                   <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
                     <Check className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                    <p className="text-sm font-medium text-emerald-700">Tebrikler! Kargonuz ucretsiz.</p>
+                    <p className="text-sm font-medium text-emerald-700">Tebrikler! Kargonuz ücretsiz.</p>
                   </div>
                 )}
 
@@ -213,7 +213,7 @@ export default function Cart() {
 
                 {/* Summary */}
                 <div className="bg-white/80 backdrop-blur-md border border-[#E8F0FE] rounded-2xl p-6 shadow-aquails">
-                  <h3 className="text-lg font-bold text-[#0D2137] mb-5">Siparis Ozeti</h3>
+                  <h3 className="text-lg font-bold text-[#0D2137] mb-5">Sipariş Özeti</h3>
 
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
@@ -223,7 +223,7 @@ export default function Cart() {
                     <div className="flex justify-between text-sm">
                       <span className="text-[#5A6B7B]">Kargo Bedeli</span>
                       <span className={shipping === 0 ? 'text-emerald-600 font-medium' : 'font-medium text-[#0D2137]'}>
-                        {shipping === 0 ? 'Ucretsiz' : `${shipping} ₺`}
+                        {shipping === 0 ? 'Ücretsiz' : `${shipping} ₺`}
                       </span>
                     </div>
                     <div className="flex justify-between text-base font-semibold pt-3 border-t border-[#F0F6FF]">
@@ -235,7 +235,7 @@ export default function Cart() {
                   {/* Security */}
                   <div className="flex items-center justify-center gap-4 mt-5 py-4 border-t border-[#F0F6FF]">
                     {[
-                      { icon: ShieldCheck, label: 'Guvenli' },
+                      { icon: ShieldCheck, label: 'Güvenli' },
                       { icon: Check, label: 'SSL' },
                     ].map((badge) => (
                       <div key={badge.label} className="flex items-center gap-1.5 text-[11px] text-[#8B9DAF]">
@@ -249,7 +249,7 @@ export default function Cart() {
                     to="/odeme"
                     className="flex items-center justify-center gap-2 w-full bg-[#1A73E8] text-white py-4 rounded-full font-semibold hover:bg-[#1557B0] transition-all mt-2 shadow-lg shadow-[#1A73E8]/20"
                   >
-                    Odemeye Gec <ArrowRight className="w-4 h-4" />
+                    Ödemeye Geç <ArrowRight className="w-4 h-4" />
                   </Link>
 
                   {/* WhatsApp Order */}
@@ -264,14 +264,14 @@ export default function Cart() {
                     }
                     className="flex items-center justify-center gap-2 w-full mt-3 border border-[#E8F0FE] text-[#5A6B7B] py-3 rounded-full text-sm font-medium hover:border-[#00C9A7] hover:text-[#00C9A7] transition-all"
                   >
-                    <MessageCircle className="w-4 h-4" /> WhatsApp ile Siparis Ver
+                    <MessageCircle className="w-4 h-4" /> WhatsApp ile Sipariş Ver
                   </button>
 
                   <Link
                     to="/urunler"
                     className="flex items-center justify-center w-full text-sm font-medium text-[#8B9DAF] hover:text-[#0D2137] py-3 mt-2 transition-colors"
                   >
-                    Alisverise Devam Et
+                    Alışverişe Devam Et
                   </Link>
                 </div>
               </div>
