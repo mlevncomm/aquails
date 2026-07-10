@@ -18,6 +18,7 @@ import { useToastStore } from '@/components/Toast';
 import { getAddresses, type Address } from '@/services/addressService';
 import { getPaytrPublicStatus, getBankAccounts, isPaytrConfigured } from '@/services/settingsService';
 import { initPaytrPayment, buildPaytrBasket, formatPaymentAmountKurus } from '@/services/paymentService';
+import { getShippingConfig } from '@/services/shippingService';
 import { cn } from '@/lib/utils';
 
 const steps = [
@@ -30,12 +31,6 @@ const paymentMethods = [
   { id: 'card', label: 'Kredi / Banka Kartı', desc: 'PayTR güvenli ödeme — taksit imkanı', icon: CreditCard },
   { id: 'transfer', label: 'Havale / EFT', desc: 'Banka hesabına havale ile ödeme', icon: Building2 },
   { id: 'cod', label: 'Kapıda Ödeme', desc: 'Nakit veya kredi kartı ile kapıda ödeme (+150₺)', icon: Truck },
-];
-
-const shippingMethods = [
-  { id: 'standard', label: 'Standart Kargo', desc: '3-5 iş günü içinde teslimat', price: 0, priceLabel: 'Ücretsiz' },
-  { id: 'fast', label: 'Hızlı Kargo', desc: '1-2 iş günü içinde teslimat', price: 49, priceLabel: '49₺' },
-  { id: 'same', label: 'Aynı Gün Teslimat', desc: 'Bugün teslimat (İstanbul)', price: 99, priceLabel: '99₺' },
 ];
 
 const paymentMethodLabels: Record<string, string> = {
@@ -84,6 +79,8 @@ export default function Checkout() {
   const [paytrEnabled, setPaytrEnabled] = useState(false);
   const [bankAccounts, setBankAccounts] = useState<{ bankName: string; accountName: string; iban: string }[]>([]);
   const [showBankInfo, setShowBankInfo] = useState(false);
+  const [shippingMethods, setShippingMethods] = useState<{ id: string; label: string; desc: string; price: number; priceLabel: string }[]>([]);
+  const [codFeeSetting, setCodFeeSetting] = useState(150);
 
   const [contact, setContact] = useState<ContactForm>({
     name: user?.name ?? '',
@@ -101,7 +98,7 @@ export default function Checkout() {
   });
 
   const subtotal = getSubtotal();
-  const codFee = paymentMethod === 'cod' ? 150 : 0;
+  const codFee = paymentMethod === 'cod' ? codFeeSetting : 0;
   const shippingCost = shippingMethods.find((s) => s.id === shippingMethod)?.price || 0;
   const couponDiscount = appliedCoupon?.discount || 0;
   const isFreeShipping = appliedCoupon?.type === 'shipping';
@@ -112,6 +109,19 @@ export default function Checkout() {
   useEffect(() => {
     void getPaytrPublicStatus().then((s) => setPaytrEnabled(isPaytrConfigured(s)));
     void getBankAccounts().then(setBankAccounts);
+    void getShippingConfig().then((cfg) => {
+      setCodFeeSetting(cfg.codFee);
+      setShippingMethods(
+        cfg.methods.map((m) => ({
+          id: m.id,
+          label: m.label,
+          desc: m.desc,
+          price: m.price,
+          priceLabel: m.price === 0 ? 'Ücretsiz' : `${m.price}₺`,
+        }))
+      );
+      if (cfg.methods[0]) setShippingMethod(cfg.methods[0].id);
+    });
   }, []);
 
   useEffect(() => {

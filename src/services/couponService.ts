@@ -116,6 +116,31 @@ export async function incrementCouponUsage(code: string): Promise<void> {
   await supabase.rpc('increment_coupon_usage', { p_code: code.toUpperCase() });
 }
 
+export async function getActiveCouponsForCustomer(): Promise<Coupon[]> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+
+  const { data } = await supabase
+    .from('coupons')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  const now = new Date();
+  return (data ?? [])
+    .filter((c) => {
+      if (c.end_date && new Date(c.end_date) < now) return false;
+      if (c.usage_limit > 0 && c.usage_count >= c.usage_limit) return false;
+      return true;
+    })
+    .map((c) => ({
+      code: c.code,
+      type: dbTypeToUi(c.type as DbCoupon['type']),
+      value: Number(c.value),
+      minOrder: Number(c.min_order_amount ?? 0) || undefined,
+    }));
+}
+
 export async function getCoupons(): Promise<AdminCoupon[]> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return [];

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { RefreshCw, Users } from 'lucide-react';
-import { getSubscriptions, getSubscriptionStats, type AdminSubscription } from '@/services/subscriptionService';
+import { getSubscriptions, getSubscriptionStats, updateSubscriptionStatus, type AdminSubscription } from '@/services/subscriptionService';
+import { useToastStore } from '@/components/Toast';
 
 const statusLabels: Record<string, { text: string; color: string }> = {
   active: { text: 'Aktif', color: 'bg-emerald-50 text-emerald-600' },
@@ -12,14 +13,27 @@ export default function AdminSubscriptionsPage() {
   const [subs, setSubs] = useState<AdminSubscription[]>([]);
   const [stats, setStats] = useState({ total: 0, active: 0, paused: 0, monthlyRevenue: 0 });
   const [loading, setLoading] = useState(true);
+  const addToast = useToastStore((s) => s.add);
 
-  useEffect(() => {
+  const load = () => {
     void Promise.all([getSubscriptions(), getSubscriptionStats()]).then(([data, s]) => {
       setSubs(data);
       setStats(s);
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    load();
   }, []);
+
+  const setStatus = async (id: string, status: AdminSubscription['status']) => {
+    const res = await updateSubscriptionStatus(id, status);
+    if (res.success) {
+      addToast('Abonelik durumu güncellendi.', 'success');
+      load();
+    }
+  };
 
   return (
     <>
@@ -48,7 +62,7 @@ export default function AdminSubscriptionsPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-[#F8FBFF]">
-                  {['Müşteri', 'Plan', 'Cihaz', 'Sonraki Teslimat', 'Tutar', 'Durum'].map((h) => (
+                  {['Müşteri', 'Plan', 'Cihaz', 'Sonraki Teslimat', 'Tutar', 'Durum', 'İşlem'].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-[#8B9DAF] uppercase whitespace-nowrap">
                       {h}
                     </th>
@@ -67,6 +81,13 @@ export default function AdminSubscriptionsPage() {
                       <td className="px-4 py-3 text-sm font-semibold text-[#0D2137]">{s.price.toLocaleString('tr-TR')}₺</td>
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${st.color}`}>{st.text}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1 text-xs">
+                          {s.status !== 'active' && <button onClick={() => void setStatus(s.id, 'active')} className="px-2 py-1 rounded bg-emerald-50 text-emerald-600">Aktif</button>}
+                          {s.status !== 'paused' && <button onClick={() => void setStatus(s.id, 'paused')} className="px-2 py-1 rounded bg-amber-50 text-amber-600">Duraklat</button>}
+                          {s.status !== 'cancelled' && <button onClick={() => void setStatus(s.id, 'cancelled')} className="px-2 py-1 rounded bg-red-50 text-red-600">İptal</button>}
+                        </div>
                       </td>
                     </tr>
                   );

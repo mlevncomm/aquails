@@ -1,18 +1,31 @@
 import { EmptyState } from '@/components/EmptyState';
-import { Tag, Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { Tag, Copy, Check, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useToastStore } from '@/components/Toast';
+import { getActiveCouponsForCustomer, type Coupon } from '@/services/couponService';
 
-const coupons = [
-  { code: 'AQUAILS10', discount: '%10 İndirim', min: '1.000₺', expiry: '31 Aralık 2026', active: true },
-  { code: 'FILTRE250', discount: '250₺ İndirim', min: '2.000₺', expiry: '30 Eylül 2026', active: true },
-  { code: 'KARGO', discount: 'Ücretsiz Kargo', min: 'Yok', expiry: 'Süresiz', active: true },
-  { code: 'YENI500', discount: '500₺ Hoş Geldin', min: '5.000₺', expiry: '30 Haziran 2026', active: false },
-];
+function formatDiscount(c: Coupon): string {
+  if (c.type === 'percent') return `%${c.value} İndirim`;
+  if (c.type === 'shipping') return 'Ücretsiz Kargo';
+  return `${c.value.toLocaleString('tr-TR')}₺ İndirim`;
+}
+
+function formatMin(c: Coupon): string {
+  return c.minOrder && c.minOrder > 0 ? `${c.minOrder.toLocaleString('tr-TR')}₺` : 'Yok';
+}
 
 export default function CustomerCouponsPage() {
   const [copied, setCopied] = useState('');
-  const addToast = useToastStore(s => s.add);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const addToast = useToastStore((s) => s.add);
+
+  useEffect(() => {
+    void getActiveCouponsForCustomer().then((data) => {
+      setCoupons(data);
+      setLoading(false);
+    });
+  }, []);
 
   const copyCode = (code: string) => {
     navigator.clipboard?.writeText(code);
@@ -21,18 +34,27 @@ export default function CustomerCouponsPage() {
     setTimeout(() => setCopied(''), 2000);
   };
 
-  return (
-      <>      <h2 className="text-lg font-semibold text-[#0D2137] mb-5">Kuponlarım</h2>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16 text-[#8B9DAF]">
+        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Yükleniyor...
+      </div>
+    );
+  }
 
-      {coupons.filter(c => c.active).length === 0 ? (
+  return (
+    <>
+      <h2 className="text-lg font-semibold text-[#0D2137] mb-5">Kuponlarım</h2>
+
+      {coupons.length === 0 ? (
         <EmptyState icon={<Tag className="w-8 h-8" />} title="Aktif Kuponunuz Yok" description="Kampanyaları takip ederek kupon kazanabilirsiniz." action={{ label: 'Kampanyalar', href: '/kampanyalar' }} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {coupons.filter(c => c.active).map(c => (
+          {coupons.map((c) => (
             <div key={c.code} className="bg-white border border-[#E8F0FE] rounded-2xl p-5 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-16 h-16 bg-[#F0F6FF] rounded-bl-full" />
-              <p className="text-lg font-bold text-[#0D2137] mb-1">{c.discount}</p>
-              <p className="text-xs text-[#8B9DAF] mb-3">Min. {c.min} | {c.expiry}</p>
+              <p className="text-lg font-bold text-[#0D2137] mb-1">{formatDiscount(c)}</p>
+              <p className="text-xs text-[#8B9DAF] mb-3">Min. sipariş: {formatMin(c)}</p>
               <button
                 onClick={() => copyCode(c.code)}
                 className="flex items-center gap-2 bg-[#F0F6FF] text-[#1A73E8] px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#E8F0FE] transition-all"
@@ -44,6 +66,6 @@ export default function CustomerCouponsPage() {
           ))}
         </div>
       )}
-      </>
+    </>
   );
 }

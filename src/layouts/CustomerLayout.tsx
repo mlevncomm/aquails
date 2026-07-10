@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router';
 import {
   LayoutDashboard, ShoppingBag, MapPin, User, Heart, Filter,
@@ -8,7 +8,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import { logout as logoutService } from '@/services/authService';
-import { useNotificationStore } from '@/stores/notificationStore';
+import { getUnreadCount } from '@/services/notificationService';
 
 const menuItems = [
   { label: 'Dashboard', href: '/hesabim', icon: LayoutDashboard },
@@ -32,8 +32,13 @@ export function CustomerLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, clearUser } = useAuthStore();
-  const { unreadCount } = useNotificationStore();
+  const [unreadCount, setUnreadCount] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    void getUnreadCount(user.id).then(setUnreadCount);
+  }, [user, location.pathname]);
 
   const handleLogout = () => {
     logoutService();
@@ -105,8 +110,8 @@ export function CustomerLayout() {
             >
               <item.icon className="w-[18px] h-[18px] flex-shrink-0" />
               <span className="flex-1 truncate">{item.label}</span>
-              {item.label === 'Bildirimlerim' && unreadCount() > 0 && (
-                <span className="w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">{unreadCount()}</span>
+              {item.label === 'Bildirimlerim' && unreadCount > 0 && (
+                <span className="w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">{unreadCount}</span>
               )}
               {location.pathname === item.href && <ChevronRight className="w-3.5 h-3.5 opacity-40 flex-shrink-0" />}
             </Link>
@@ -151,7 +156,7 @@ export function CustomerLayout() {
               className="relative w-10 h-10 flex items-center justify-center rounded-xl hover:bg-[#F0F6FF] transition-colors text-[#8B9DAF]"
             >
               <Bell className="w-[18px] h-[18px]" />
-              {unreadCount() > 0 && (
+              {unreadCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
               )}
             </Link>

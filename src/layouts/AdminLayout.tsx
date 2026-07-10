@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, Users, Wrench, Filter,
   Tag, Settings, LogOut, Menu, X, ChevronDown,
   BookOpen, Star, HelpCircle, RefreshCw, FileText,
-  Link2, Award, CreditCard
+  Link2, Award, CreditCard, Truck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
@@ -25,6 +25,8 @@ const menuItems: MenuItem[] = [
     icon: Package,
     children: [
       { label: 'Ürün Listesi', href: '/admin/urunler' },
+      { label: 'Ürün Yükleme', href: '/admin/urun-yukleme' },
+      { label: 'Toplu Fiyat', href: '/admin/toplu-fiyat' },
       { label: 'Kategoriler', href: '/admin/kategoriler' },
       { label: 'Stok', href: '/admin/stok' },
       { label: 'Stok Bildirimleri', href: '/admin/stok-bildirimleri' },
@@ -58,6 +60,7 @@ const menuItems: MenuItem[] = [
   },
   { label: 'Filtre Takibi', href: '/admin/filtre-takibi', icon: Filter },
   { label: 'Abonelikler', href: '/admin/abonelikler', icon: RefreshCw },
+  { label: 'Kargo Modülü', href: '/admin/kargo', icon: Truck },
   { label: 'Raporlar', href: '/admin/raporlar', icon: FileText },
   { label: 'Link Sayfası', href: '/admin/linkler', icon: Link2 },
   { label: 'Ödeme Ayarları', href: '/admin/odeme-ayarlari', icon: CreditCard },

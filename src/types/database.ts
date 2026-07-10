@@ -648,6 +648,183 @@ export interface Database {
         };
         Relationships: [];
       };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          message: string;
+          type: string;
+          link: string | null;
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          message?: string;
+          type?: string;
+          link?: string | null;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          message?: string;
+          type?: string;
+          link?: string | null;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      user_favorites: {
+        Row: { id: string; user_id: string; product_id: string; created_at: string };
+        Insert: { id?: string; user_id: string; product_id: string; created_at?: string };
+        Update: { id?: string; user_id?: string; product_id?: string; created_at?: string };
+        Relationships: [];
+      };
+      return_requests: {
+        Row: {
+          id: string;
+          user_id: string;
+          order_id: string | null;
+          order_number: string;
+          product_name: string;
+          type: string;
+          reason: string;
+          status: string;
+          admin_note: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          order_id?: string | null;
+          order_number?: string;
+          product_name?: string;
+          type?: string;
+          reason?: string;
+          status?: string;
+          admin_note?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          order_id?: string | null;
+          order_number?: string;
+          product_name?: string;
+          type?: string;
+          reason?: string;
+          status?: string;
+          admin_note?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      filter_tracking: {
+        Row: {
+          id: string;
+          user_id: string;
+          device_name: string;
+          filter_name: string;
+          installed_at: string;
+          change_interval_days: number;
+          reminder_enabled: boolean;
+          last_changed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          device_name?: string;
+          filter_name?: string;
+          installed_at?: string;
+          change_interval_days?: number;
+          reminder_enabled?: boolean;
+          last_changed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          device_name?: string;
+          filter_name?: string;
+          installed_at?: string;
+          change_interval_days?: number;
+          reminder_enabled?: boolean;
+          last_changed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      loyalty_transactions: {
+        Row: {
+          id: string;
+          user_id: string;
+          amount: number;
+          type: string;
+          description: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          amount: number;
+          type: string;
+          description?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          amount?: number;
+          type?: string;
+          description?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      referrals: {
+        Row: {
+          id: string;
+          referrer_id: string;
+          referred_email: string;
+          referred_user_id: string | null;
+          status: string;
+          reward_points: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          referrer_id: string;
+          referred_email?: string;
+          referred_user_id?: string | null;
+          status?: string;
+          reward_points?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          referrer_id?: string;
+          referred_email?: string;
+          referred_user_id?: string | null;
+          status?: string;
+          reward_points?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -682,6 +859,14 @@ export interface Database {
           p_hash: string;
         };
         Returns: string;
+      };
+      redeem_loyalty_points: {
+        Args: { p_points: number };
+        Returns: Record<string, unknown>;
+      };
+      bulk_update_product_prices: {
+        Args: { p_category_slug: string; p_mode: string; p_value: number };
+        Returns: number;
       };
     };
     Enums: Record<string, never>;

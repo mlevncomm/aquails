@@ -69,6 +69,36 @@ export async function createAddress(
   return { success: true, address: mapAddress(data as DbAddress) };
 }
 
+export async function updateAddress(
+  id: string,
+  userId: string,
+  input: Omit<Address, 'id'>
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  if (input.isDefault) {
+    await supabase.from('addresses').update({ is_default: false }).eq('user_id', userId);
+  }
+
+  const { error } = await supabase
+    .from('addresses')
+    .update({
+      title: input.title,
+      type: input.type,
+      city: input.city,
+      district: input.district,
+      full_address: input.fullAddress,
+      postal_code: input.postalCode ?? null,
+      is_default: input.isDefault,
+    })
+    .eq('id', id)
+    .eq('user_id', userId);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
 export async function deleteAddress(id: string): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
