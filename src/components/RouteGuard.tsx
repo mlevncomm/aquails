@@ -15,11 +15,12 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     const isAdminRoute = path.startsWith('/admin');
 
     if (isCustomerRoute && !isAuthenticated) {
-      navigate('/giris', { replace: true });
+      const redirect = encodeURIComponent(path + location.search);
+      navigate(`/giris?redirect=${redirect}`, { replace: true });
     } else if (isAdminRoute && !isAdmin) {
       navigate('/', { replace: true });
     }
-  }, [location.pathname, isAuthenticated, isAdmin, hasHydrated, navigate]);
+  }, [location.pathname, location.search, isAuthenticated, isAdmin, hasHydrated, navigate]);
 
   return <>{children}</>;
 }

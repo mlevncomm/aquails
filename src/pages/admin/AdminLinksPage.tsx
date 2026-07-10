@@ -3,10 +3,11 @@ import { Link } from 'react-router';
 import {
   Plus, Pencil, Trash2, Eye, GripVertical, Check,
   ShoppingBag, Droplet, Filter, Gift, RefreshCw, Wrench,
-  Truck, MessageCircle, Phone, Instagram, ExternalLink
+  Truck, MessageCircle, Phone, Instagram, ExternalLink, Loader2
 } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
 import { cn } from '@/lib/utils';
+import { getNavLinks, saveNavLinks, type NavLinkItem } from '@/services/settingsService';
 
 const iconOptions = [
   { value: 'ShoppingBag', label: 'Alışveriş', icon: ShoppingBag },
@@ -22,57 +23,43 @@ const iconOptions = [
   { value: 'ExternalLink', label: 'Dis Link', icon: ExternalLink },
 ];
 
-const defaultLinks = [
-  { id: '1', title: 'Ürünleri İncele', url: '/urunler', icon: 'ShoppingBag', active: true, featured: false, order: 1 },
-  { id: '2', title: 'Su Arıtma Cihazları', url: '/urunler?kategori=su-aritma', icon: 'Droplet', active: true, featured: true, order: 2 },
-  { id: '3', title: 'Su Arıtma Cihazları', url: '/urunler?kategori=su-aritma', icon: 'Droplet', active: true, featured: false, order: 3 },
-  { id: '4', title: 'Kampanyalar', url: '/kampanyalar', icon: 'Gift', active: true, featured: false, order: 4 },
-  { id: '5', title: 'Filtre Aboneliği', url: '/filtre-aboneligi', icon: 'RefreshCw', active: true, featured: false, order: 5 },
-  { id: '6', title: 'Servis Randevusu Al', url: '/servis-randevusu', icon: 'Wrench', active: true, featured: true, order: 6 },
-  { id: '7', title: 'Sipariş Takip', url: '/siparis-takip', icon: 'Truck', active: true, featured: false, order: 7 },
-  { id: '8', title: 'WhatsApp Destek', url: 'https://wa.me/905321234567', icon: 'MessageCircle', active: true, featured: false, order: 8 },
-  { id: '9', title: 'Instagram', url: 'https://instagram.com/aquails', icon: 'Instagram', active: true, featured: false, order: 9 },
-  { id: '10', title: 'İletişim', url: '/iletisim', icon: 'Phone', active: true, featured: false, order: 10 },
-];
-
-interface LinkItem {
-  id: string;
-  title: string;
-  url: string;
-  icon: string;
-  active: boolean;
-  featured: boolean;
-  order: number;
-}
+interface LinkItem extends NavLinkItem {}
 
 export default function AdminLinksPage() {
   const addToast = useToastStore(s => s.add);
-  const [links, setLinks] = useState<LinkItem[]>(() => {
-    const saved = localStorage.getItem('admin-links');
-    return saved ? JSON.parse(saved) : defaultLinks;
-  });
+  const [links, setLinks] = useState<LinkItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<LinkItem | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [newForm, setNewForm] = useState<Partial<LinkItem>>({ title: '', url: '', icon: 'ExternalLink', active: true, featured: false });
 
   useEffect(() => {
-    localStorage.setItem('admin-links', JSON.stringify(links));
-  }, [links]);
+    void getNavLinks().then((data) => {
+      setLinks(data);
+      setLoading(false);
+    });
+  }, []);
+
+  const persistLinks = async (next: LinkItem[]) => {
+    setLinks(next);
+    const res = await saveNavLinks(next);
+    if (!res.success) addToast(res.error ?? 'Kaydedilemedi.', 'error');
+  };
 
   const handleToggleActive = (id: string) => {
-    setLinks(prev => prev.map(l => l.id === id ? { ...l, active: !l.active } : l));
+    void persistLinks(links.map(l => l.id === id ? { ...l, active: !l.active } : l));
     addToast('Durum güncellendi', 'success');
   };
 
   const handleToggleFeatured = (id: string) => {
-    setLinks(prev => prev.map(l => l.id === id ? { ...l, featured: !l.featured } : l));
+    void persistLinks(links.map(l => l.id === id ? { ...l, featured: !l.featured } : l));
     addToast('Öne çıkan durumu güncellendi', 'success');
   };
 
   const handleDelete = (id: string) => {
     if (confirm('Bu bağlantıyı silmek istediğinize emin misiniz?')) {
-      setLinks(prev => prev.filter(l => l.id !== id));
+      void persistLinks(links.filter(l => l.id !== id));
       addToast('Bağlantı silindi', 'success');
     }
   };
@@ -88,7 +75,7 @@ export default function AdminLinksPage() {
       addToast('Başlık ve URL zorunludur.', 'error');
       return;
     }
-    setLinks(prev => prev.map(l => l.id === editForm.id ? editForm : l));
+    void persistLinks(links.map(l => l.id === editForm.id ? editForm : l));
     setIsEditing(false);
     setEditForm(null);
     addToast('Bağlantı güncellendi', 'success');
@@ -108,7 +95,7 @@ export default function AdminLinksPage() {
       featured: false,
       order: links.length + 1,
     };
-    setLinks(prev => [...prev, newLink]);
+    void persistLinks([...links, newLink]);
     setShowAdd(false);
     setNewForm({ title: '', url: '', icon: 'ExternalLink', active: true, featured: false });
     addToast('Yeni bağlantı eklendi', 'success');
@@ -121,6 +108,10 @@ export default function AdminLinksPage() {
 
   const sortedLinks = [...links].sort((a, b) => a.order - b.order);
   const activeCount = links.filter(l => l.active).length;
+
+  if (loading) {
+    return <div className="p-6 text-sm text-[#8B9DAF] flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Yükleniyor...</div>;
+  }
 
   return (
     <div className="p-4 md:p-6">

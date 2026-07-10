@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { Droplets, Mail, Eye, EyeOff } from 'lucide-react';
 import { login } from '@/services/authService';
 import { useToastStore } from '@/components/Toast';
@@ -7,6 +7,10 @@ import { useToastStore } from '@/components/Toast';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect')
+    ? decodeURIComponent(searchParams.get('redirect')!)
+    : '/hesabim';
   const addToast = useToastStore(s => s.add);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +25,9 @@ export default function LoginPage() {
     setLoading(false);
     if (res.success && res.user) {
       addToast(`Hoş geldiniz, ${res.user.name}!`, 'success');
-      navigate(res.user.role === 'admin' || res.user.role === 'super_admin' ? '/admin' : '/hesabim', { replace: true });
+      const isAdmin = res.user.role === 'admin' || res.user.role === 'super_admin';
+      const target = isAdmin ? '/admin' : redirectTo;
+      navigate(target.startsWith('/') ? target : '/hesabim', { replace: true });
     } else {
       addToast(res.error || 'Giriş başarısız.', 'error');
     }

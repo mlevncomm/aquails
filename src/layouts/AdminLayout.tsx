@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, Users, Wrench, Filter,
   Tag, Settings, LogOut, Menu, X, Bell, Search, ChevronDown,
   BookOpen, Star, HelpCircle, RefreshCw, FileText,
-  Link2, Award
+  Link2, Award, CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNotificationStore } from '@/stores/notificationStore';
@@ -62,6 +62,7 @@ const menuItems: MenuItem[] = [
   { label: 'Abonelikler', href: '/admin/abonelikler', icon: RefreshCw },
   { label: 'Raporlar', href: '/admin/raporlar', icon: FileText },
   { label: 'Link Sayfasi', href: '/admin/linkler', icon: Link2 },
+  { label: 'Ödeme Ayarları', href: '/admin/odeme-ayarlari', icon: CreditCard },
   { label: 'Ayarlar', href: '/admin/ayarlar', icon: Settings },
 ];
 

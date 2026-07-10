@@ -75,7 +75,9 @@ import AdminReportsPage from './pages/admin/AdminReportsPage';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 import AdminLinksPage from './pages/admin/AdminLinksPage';
 import AdminLoyaltyPage from './pages/admin/AdminLoyaltyPage';
+import AdminPaymentSettingsPage from './pages/admin/AdminPaymentSettingsPage';
 import AdminAbandonedCartsPage from './pages/admin/AdminAbandonedCartsPage';
+import CheckoutResultPage from './pages/CheckoutResultPage';
 
 import AllLinksPage from './pages/AllLinksPage';
 import ProductWizardPage from './pages/ProductWizardPage';
@@ -96,6 +98,8 @@ export default function App() {
           <Route path="/urun/:slug" element={<ProductDetail />} />
           <Route path="/sepet" element={<Cart />} />
           <Route path="/odeme" element={<Checkout />} />
+          <Route path="/odeme/basarili" element={<CheckoutResultPage />} />
+          <Route path="/odeme/basarisiz" element={<CheckoutResultPage />} />
           <Route path="/arama" element={<SearchResults />} />
           <Route path="/karsilastir" element={<ComparePage />} />
           <Route path="/kampanyalar" element={<CampaignsPage />} />
@@ -168,6 +172,7 @@ export default function App() {
           <Route path="/admin/stok-bildirimleri" element={<AdminStockNotificationsPage />} />
           <Route path="/admin/raporlar" element={<AdminReportsPage />} />
           <Route path="/admin/ayarlar" element={<AdminSettingsPage />} />
+          <Route path="/admin/odeme-ayarlari" element={<AdminPaymentSettingsPage />} />
           <Route path="/admin/linkler" element={<AdminLinksPage />} />
           <Route path="/admin/sadakat" element={<AdminLoyaltyPage />} />
           <Route path="/admin/terk-edilmis-sepetler" element={<AdminAbandonedCartsPage />} />

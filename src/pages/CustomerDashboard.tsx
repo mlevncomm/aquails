@@ -1,22 +1,19 @@
 import { Link } from 'react-router';
+import { useEffect, useState } from 'react';
 import {
   ShoppingBag, Truck, Filter as FilterIcon, Heart, Clock,
-  Wrench, Zap, ChevronRight, Bell, RefreshCw, MapPin,
-  CreditCard, Star, Package
+  Wrench, Zap, ChevronRight, RefreshCw, MapPin, Package
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
-import { orders, filterStatuses } from '@/data';
+import { filterStatuses } from '@/data';
 import { cn } from '@/lib/utils';
 import { ProductCard } from '@/components/ProductCard';
 import { products } from '@/data';
-
-const stats = [
-  { icon: ShoppingBag, label: 'Toplam Sipariş', value: '12', trend: '+2', color: 'bg-[#1A73E8]/10 text-[#1A73E8]' },
-  { icon: Truck, label: 'Kargoda / Bekliyor', value: '2', trend: '1 yeni', color: 'bg-emerald-50 text-emerald-600' },
-  { icon: FilterIcon, label: 'Filtre Değişimine', value: '15 Gün', trend: 'Acele et', color: 'bg-amber-50 text-amber-600' },
-  { icon: Heart, label: 'Favorilerim', value: '5', trend: '', color: 'bg-red-50 text-red-500' },
-];
+import { getCustomerOrders, type CustomerOrder } from '@/services/orderService';
+import { getAddresses, type Address } from '@/services/addressService';
+import { useAuthStore } from '@/stores/authStore';
+import { orderStatusToTr } from '@/lib/orderStatus';
 
 const quickActions = [
   { icon: ShoppingBag, label: 'Sipariş Ver', href: '/urunler', color: 'from-[#1A73E8] to-[#1557B0]' },
@@ -25,32 +22,49 @@ const quickActions = [
   { icon: MapPin, label: 'Adres Ekle', href: '/hesabim/adresler', color: 'from-purple-500 to-purple-600' },
 ];
 
-const recentActivity = [
-  { icon: Package, text: 'Siparişiniz kargoya verildi', detail: 'AQ-2025-1847', time: '2 saat önce', color: 'bg-blue-50 text-blue-600' },
-  { icon: Bell, text: 'Filtre değişim zamanı yaklaşıyor', detail: 'Sediment filtresi %20', time: '1 gün önce', color: 'bg-amber-50 text-amber-600' },
-  { icon: Star, text: 'Yeni kampanya başladı', detail: '%20 Yaz İndirimi', time: '2 gün önce', color: 'bg-purple-50 text-purple-600' },
-  { icon: CreditCard, text: 'Ödemeniz onaylandı', detail: '12.900₺', time: '3 gün önce', color: 'bg-emerald-50 text-emerald-600' },
-];
-
 const serviceRequests = [
   { type: 'Filtre Değişimi', date: '8 Haz 2025', status: 'pending' as const, desc: 'PurePro 7 Aşamalı cihaz için' },
   { type: 'Periyodik Bakım', date: '15 Haz 2025', status: 'scheduled' as const, desc: 'Yıllık bakım kontrolü' },
 ];
 
-const addresses = [
-  { title: 'Ev', address: 'Atatürk Mah. Cumhuriyet Cad. No:45 D:12, Pendik/İstanbul', isDefault: true },
-  { title: 'İş', address: 'Caferağa Mah. Moda Cad. No:12, Kadıköy/İstanbul', isDefault: false },
-];
-
 export default function CustomerDashboard() {
+  const user = useAuthStore((s) => s.user);
+  const [orders, setOrders] = useState<CustomerOrder[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    void getCustomerOrders(user.id).then(setOrders);
+    void getAddresses(user.id).then(setAddresses);
+  }, [user]);
+
+  const activeOrders = orders.filter((o) => ['pending', 'processing', 'shipped'].includes(o.status));
+  const stats = [
+    { icon: ShoppingBag, label: 'Toplam Sipariş', value: String(orders.length), trend: '', color: 'bg-[#1A73E8]/10 text-[#1A73E8]' },
+    { icon: Truck, label: 'Aktif Sipariş', value: String(activeOrders.length), trend: '', color: 'bg-emerald-50 text-emerald-600' },
+    { icon: FilterIcon, label: 'Filtre Değişimine', value: `${filterStatuses[0]?.daysRemaining ?? '—'} Gün`, trend: '', color: 'bg-amber-50 text-amber-600' },
+    { icon: Heart, label: 'Adreslerim', value: String(addresses.length), trend: '', color: 'bg-red-50 text-red-500' },
+  ];
+
+  const recentActivity = orders.slice(0, 4).map((o) => ({
+    icon: Package,
+    text: `Sipariş ${orderStatusToTr(o.status)}`,
+    detail: o.orderNo,
+    time: o.date,
+    color: 'bg-blue-50 text-blue-600',
+  }));
   return (
     <>
       {/* Welcome Banner */}
       <ScrollReveal>
         <div className="bg-gradient-to-r from-[#1A73E8] to-[#4285F4] rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-white">Tekrar Hoş Geldiniz, Ahmet!</h3>
-            <p className="text-sm text-white/80 mt-1">Son siparişiniz kargoya verildi. 2 aktif bildiriminiz var.</p>
+            <h3 className="text-lg sm:text-xl font-bold text-white">Tekrar Hoş Geldiniz, {user?.name?.split(' ')[0] ?? 'Müşterimiz'}!</h3>
+            <p className="text-sm text-white/80 mt-1">
+              {activeOrders.length > 0
+                ? `${activeOrders.length} aktif siparişiniz var.`
+                : 'Yeni bir sipariş vermek için ürünlerimizi inceleyin.'}
+            </p>
           </div>
           <Link
             to="/hesabim/siparisler"
@@ -122,8 +136,8 @@ export default function CustomerDashboard() {
                         <Package className="w-4 h-4 text-[#1A73E8]/40" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-[#1A73E8]">{order.orderNumber}</p>
-                        <p className="text-xs text-[#8B9DAF] mt-0.5">{order.createdAt}</p>
+                        <p className="text-sm font-medium text-[#1A73E8]">{order.orderNo}</p>
+                        <p className="text-xs text-[#8B9DAF] mt-0.5">{order.date}</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -135,7 +149,7 @@ export default function CustomerDashboard() {
                         order.status === 'pending' && 'bg-amber-50 text-amber-600',
                         order.status === 'cancelled' && 'bg-red-50 text-red-500',
                       )}>
-                        {order.status === 'delivered' ? 'Tamamlandı' : order.status === 'shipped' ? 'Kargoda' : order.status === 'pending' ? 'Bekliyor' : 'İptal'}
+                        {orderStatusToTr(order.status)}
                       </span>
                     </div>
                   </Link>
@@ -151,7 +165,9 @@ export default function CustomerDashboard() {
                 <h4 className="text-base font-semibold text-[#0D2137]">Son Aktiviteler</h4>
               </div>
               <div className="p-4 space-y-2">
-                {recentActivity.map((act, i) => (
+                {recentActivity.length === 0 ? (
+                  <p className="text-sm text-[#8B9DAF] text-center py-4">Henüz sipariş aktivitesi yok.</p>
+                ) : recentActivity.map((act, i) => (
                   <div key={i} className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#F8FBFF] transition-colors">
                     <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5', act.color)}>
                       <act.icon className="w-4 h-4" />
@@ -258,17 +274,20 @@ export default function CustomerDashboard() {
                 <Link to="/hesabim/adresler" className="text-[11px] font-medium text-[#1A73E8] hover:underline">Yönet</Link>
               </div>
               <div className="p-4 space-y-3">
-                {addresses.map((addr) => (
-                  <div key={addr.title} className="bg-[#F8FBFF] rounded-xl p-4">
+                {addresses.slice(0, 2).map((addr) => (
+                  <div key={addr.id} className="bg-[#F8FBFF] rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <h5 className="text-sm font-semibold text-[#0D2137]">{addr.title}</h5>
                       {addr.isDefault && (
                         <span className="bg-[#1A73E8]/10 text-[#1A73E8] text-[10px] font-semibold px-2 py-0.5 rounded-full">Varsayılan</span>
                       )}
                     </div>
-                    <p className="text-[13px] text-[#5A6B7B] leading-relaxed">{addr.address}</p>
+                    <p className="text-[13px] text-[#5A6B7B] leading-relaxed">{addr.fullAddress}, {addr.district}/{addr.city}</p>
                   </div>
                 ))}
+                {addresses.length === 0 && (
+                  <p className="text-sm text-[#8B9DAF] text-center py-2">Kayıtlı adres yok.</p>
+                )}
               </div>
             </div>
           </ScrollReveal>

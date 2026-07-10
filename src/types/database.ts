@@ -190,6 +190,9 @@ export interface Database {
           billing_address: Record<string, unknown>;
           installation_slot: string | null;
           notes: string | null;
+          cargo_company: string | null;
+          tracking_number: string | null;
+          cod_fee: number;
           created_at: string;
           updated_at: string;
         };
@@ -208,6 +211,9 @@ export interface Database {
           billing_address?: Record<string, unknown>;
           installation_slot?: string | null;
           notes?: string | null;
+          cargo_company?: string | null;
+          tracking_number?: string | null;
+          cod_fee?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -226,6 +232,9 @@ export interface Database {
           billing_address?: Record<string, unknown>;
           installation_slot?: string | null;
           notes?: string | null;
+          cargo_company?: string | null;
+          tracking_number?: string | null;
+          cod_fee?: number;
           created_at?: string;
           updated_at?: string;
         };

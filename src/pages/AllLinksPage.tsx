@@ -5,10 +5,11 @@ import {
   Filter, Gift, RefreshCw, Wrench, Truck,
   MessageCircle, Phone, Mail, Instagram, Globe, ShieldCheck,
   Award, CreditCard, Headphones, Copy, Check, ArrowRight,
-  ShoppingBag, ExternalLink, Sparkles, Calculator, FlaskConical, MapPin
+  ShoppingBag, ExternalLink, Sparkles, Calculator, FlaskConical, MapPin, Droplet
 } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
 import { SEO } from '@/components/SEO';
+import { getNavLinks, type NavLinkItem } from '@/services/settingsService';
 
 
 const linkGroups = [
@@ -74,13 +75,32 @@ const featuredProducts = [
   },
 ];
 
+const iconMap: Record<string, React.ElementType> = {
+  ShoppingBag, Filter, Gift, RefreshCw, Wrench, Truck, MessageCircle, Phone, Instagram, ExternalLink, Sparkles, Calculator, FlaskConical, MapPin, Droplet,
+};
+
+function buildLinkGroups(links: NavLinkItem[]) {
+  if (!links.length) return linkGroups;
+  return [{
+    title: 'Bağlantılar',
+    links: [...links].sort((a, b) => a.order - b.order).map((l) => ({
+      label: l.title,
+      href: l.url,
+      icon: iconMap[l.icon] ?? ExternalLink,
+      external: l.url.startsWith('http'),
+    })),
+  }];
+}
+
 export default function AllLinksPage() {
   const addToast = useToastStore(s => s.add);
   const [copied, setCopied] = useState(false);
+  const [navLinks, setNavLinks] = useState<NavLinkItem[]>([]);
 
   useEffect(() => {
     document.title = 'Aquails | Tüm Bağlantılar';
     window.scrollTo(0, 0);
+    void getNavLinks().then((links) => setNavLinks(links.filter((l) => l.active)));
   }, []);
 
   const handleCopyCoupon = () => {
@@ -147,7 +167,7 @@ export default function AllLinksPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="space-y-6 flex-1"
         >
-          {linkGroups.map((group, gi) => (
+          {buildLinkGroups(navLinks).map((group, gi) => (
             <div key={group.title}>
               <p className="text-[10px] font-semibold text-[#8B9DAF] tracking-[0.15em] uppercase mb-2 px-1">{group.title}</p>
               <div className="space-y-2">
