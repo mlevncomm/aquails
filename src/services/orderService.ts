@@ -387,10 +387,11 @@ export async function createOrder(
   }
 
   if (!input.deferStockUntilPaid) {
-    await decrementStock(supabase, resolvedItems);
-    if (paymentStatus === 'paid') {
-      await addLoyaltyPoints(supabase, input.userId, input.total);
-      await supabase.from('orders').update({ status: 'processing' }).eq('id', order.id);
+    const { error: fulfillError } = await supabase.rpc('confirm_order_fulfillment', {
+      p_order_id: order.id,
+    });
+    if (fulfillError) {
+      console.warn('confirm_order_fulfillment:', fulfillError.message);
     }
   }
 
@@ -412,46 +413,6 @@ export async function createOrder(
       shippingAddress: full.shipping.address,
     },
   };
-}
-
-async function decrementStock(
-  supabase: NonNullable<ReturnType<typeof getSupabaseOrNull>>,
-  items: { productId: string | null; qty: number }[]
-): Promise<void> {
-  for (const item of items) {
-    if (!item.productId) continue;
-    const { data: product } = await supabase
-      .from('products')
-      .select('stock')
-      .eq('id', item.productId)
-      .maybeSingle();
-    if (product) {
-      await supabase
-        .from('products')
-        .update({ stock: Math.max(0, product.stock - item.qty) })
-        .eq('id', item.productId);
-    }
-  }
-}
-
-async function addLoyaltyPoints(
-  supabase: NonNullable<ReturnType<typeof getSupabaseOrNull>>,
-  userId: string,
-  total: number
-): Promise<void> {
-  const loyaltyPoints = Math.floor(total / 10);
-  if (loyaltyPoints <= 0) return;
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('loyalty_points')
-    .eq('id', userId)
-    .maybeSingle();
-  if (profile) {
-    await supabase
-      .from('profiles')
-      .update({ loyalty_points: (profile.loyalty_points ?? 0) + loyaltyPoints })
-      .eq('id', userId);
-  }
 }
 
 export async function updateOrderStatus(

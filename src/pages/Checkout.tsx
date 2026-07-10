@@ -16,7 +16,7 @@ import { completeAbandonedCart, syncAbandonedCart } from '@/services/abandonedCa
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/components/Toast';
 import { getAddresses, type Address } from '@/services/addressService';
-import { getPaytrSettings, getBankAccounts, isPaytrConfigured } from '@/services/settingsService';
+import { getPaytrPublicStatus, getBankAccounts, isPaytrConfigured } from '@/services/settingsService';
 import { initPaytrPayment, buildPaytrBasket, formatPaymentAmountKurus } from '@/services/paymentService';
 import { cn } from '@/lib/utils';
 
@@ -110,7 +110,7 @@ export default function Checkout() {
   const total = subtotal + effectiveShipping + codFee - discount;
 
   useEffect(() => {
-    void getPaytrSettings().then((s) => setPaytrEnabled(isPaytrConfigured(s)));
+    void getPaytrPublicStatus().then((s) => setPaytrEnabled(isPaytrConfigured(s)));
     void getBankAccounts().then(setBankAccounts);
   }, []);
 

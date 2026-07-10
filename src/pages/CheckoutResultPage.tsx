@@ -5,11 +5,14 @@ import { Check, Lock, XCircle } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { getOrderByNumber, pollOrderPaymentStatus } from '@/services/orderService';
 import { useToastStore } from '@/components/Toast';
+import { useCartStore } from '@/stores/cartStore';
+import { completeAbandonedCart } from '@/services/abandonedCartService';
 
 export default function CheckoutResultPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const addToast = useToastStore((s) => s.add);
+  const clearCart = useCartStore((s) => s.clearCart);
   const orderNo = searchParams.get('order') ?? '';
   const isSuccess = window.location.pathname.includes('basarili');
   const [status, setStatus] = useState<'checking' | 'paid' | 'pending' | 'failed'>('checking');
@@ -46,9 +49,11 @@ export default function CheckoutResultPage() {
 
   useEffect(() => {
     if (status === 'paid') {
+      clearCart();
+      void completeAbandonedCart();
       addToast('Ödemeniz onaylandı!', 'success');
     }
-  }, [status, addToast]);
+  }, [status, addToast, clearCart]);
 
   return (
     <PageLayout>

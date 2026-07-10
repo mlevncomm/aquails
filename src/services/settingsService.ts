@@ -174,6 +174,15 @@ export async function saveSiteSettings(settings: SiteSettings): Promise<void> {
   }
 }
 
+export interface PaytrPublicStatus {
+  enabled: boolean;
+  testMode: boolean;
+}
+
+export async function getPaytrPublicStatus(): Promise<PaytrPublicStatus> {
+  return getSetting<PaytrPublicStatus>('paytr_public', { enabled: false, testMode: true });
+}
+
 export async function getPaytrSettings(): Promise<PaytrSettings> {
   return getSetting<PaytrSettings>('paytr', {
     enabled: false,
@@ -185,7 +194,14 @@ export async function getPaytrSettings(): Promise<PaytrSettings> {
 }
 
 export async function savePaytrSettings(settings: PaytrSettings): Promise<{ success: boolean; error?: string }> {
-  return setSetting('paytr', settings as unknown as Record<string, unknown>);
+  const result = await setSetting('paytr', settings as unknown as Record<string, unknown>);
+  if (result.success) {
+    await setSetting('paytr_public', {
+      enabled: settings.enabled,
+      testMode: settings.testMode,
+    });
+  }
+  return result;
 }
 
 export async function getNavLinks(): Promise<NavLinkItem[]> {
@@ -210,11 +226,6 @@ export async function saveBankAccounts(accounts: BankAccount[]): Promise<{ succe
   return setSetting('bank_accounts', { accounts });
 }
 
-export function isPaytrConfigured(settings: PaytrSettings): boolean {
-  return Boolean(
-    settings.enabled &&
-      settings.merchantId.trim() &&
-      settings.merchantKey.trim() &&
-      settings.merchantSalt.trim()
-  );
+export function isPaytrConfigured(settings: PaytrPublicStatus | PaytrSettings): boolean {
+  return Boolean(settings.enabled);
 }

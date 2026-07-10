@@ -113,18 +113,7 @@ export async function incrementCouponUsage(code: string): Promise<void> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return;
 
-  const { data } = await supabase
-    .from('coupons')
-    .select('usage_count')
-    .eq('code', code.toUpperCase())
-    .maybeSingle();
-
-  if (data) {
-    await supabase
-      .from('coupons')
-      .update({ usage_count: data.usage_count + 1 })
-      .eq('code', code.toUpperCase());
-  }
+  await supabase.rpc('increment_coupon_usage', { p_code: code.toUpperCase() });
 }
 
 export async function getCoupons(): Promise<AdminCoupon[]> {

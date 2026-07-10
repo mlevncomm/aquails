@@ -655,6 +655,34 @@ export interface Database {
         Args: { p_session_id: string };
         Returns: undefined;
       };
+      confirm_order_fulfillment: {
+        Args: { p_order_id: string };
+        Returns: undefined;
+      };
+      increment_coupon_usage: {
+        Args: { p_code: string };
+        Returns: undefined;
+      };
+      paytr_prepare_payment: {
+        Args: {
+          p_order_id: string;
+          p_order_number: string;
+          p_email: string;
+          p_user_ip: string;
+          p_payment_amount: number;
+          p_user_basket_b64: string;
+        };
+        Returns: Record<string, unknown>;
+      };
+      paytr_handle_webhook: {
+        Args: {
+          p_merchant_oid: string;
+          p_status: string;
+          p_total_amount: string;
+          p_hash: string;
+        };
+        Returns: string;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
