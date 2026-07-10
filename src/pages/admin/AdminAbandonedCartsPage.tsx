@@ -1,30 +1,52 @@
+import { useState, useEffect, useCallback } from 'react';
 import { Send, RotateCcw, Trash2 } from 'lucide-react';
-import { getAbandonedCarts, getStats, sendReminder, markConverted, deleteAbandonedCart } from '@/services/abandonedCartService';
+import {
+  getAbandonedCarts,
+  getStats,
+  sendReminder,
+  markConverted,
+  deleteAbandonedCart,
+  type AbandonedCart,
+} from '@/services/abandonedCartService';
 import { useToastStore } from '@/components/Toast';
-import { useState } from 'react';
 
 export default function AdminAbandonedCartsPage() {
-  const addToast = useToastStore(s => s.add);
-  const [carts, setCarts] = useState(getAbandonedCarts());
-  const stats = getStats();
+  const addToast = useToastStore((s) => s.add);
+  const [carts, setCarts] = useState<AbandonedCart[]>([]);
+  const [stats, setStats] = useState({ total: 0, new: 0, reminderSent: 0, converted: 0, avgCartValue: 0 });
+  const [loading, setLoading] = useState(true);
 
-  const refresh = () => setCarts(getAbandonedCarts());
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const [cartData, statsData] = await Promise.all([getAbandonedCarts(), getStats()]);
+    setCarts(cartData);
+    setStats(statsData);
+    setLoading(false);
+  }, []);
 
-  const handleSendReminder = (id: string) => {
-    sendReminder(id);
-    addToast('Hatırlatıcı gönderildi.', 'success');
-    refresh();
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const handleSendReminder = async (id: string) => {
+    const result = await sendReminder(id);
+    if (result.success) {
+      addToast('Hatırlatıcı gönderildi.', 'success');
+      void refresh();
+    }
   };
 
-  const handleConvert = (id: string) => {
-    markConverted(id);
-    addToast('Dönüştürüldü olarak işaretlendi.', 'success');
-    refresh();
+  const handleConvert = async (id: string) => {
+    const result = await markConverted(id);
+    if (result.success) {
+      addToast('Dönüştürüldü olarak işaretlendi.', 'success');
+      void refresh();
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteAbandonedCart(id);
-    refresh();
+  const handleDelete = async (id: string) => {
+    const result = await deleteAbandonedCart(id);
+    if (result.success) void refresh();
   };
 
   const statusColor: Record<string, string> = {
@@ -41,7 +63,7 @@ export default function AdminAbandonedCartsPage() {
 
   return (
     <div className="p-4 md:p-6">
-      <h1 className="text-xl md:text-2xl font-bold text-[#0D2137] mb-1">Terk Edilmis Sepetler</h1>
+      <h1 className="text-xl md:text-2xl font-bold text-[#0D2137] mb-1">Terk Edilmiş Sepetler</h1>
       <p className="text-sm text-[#8B9DAF] mb-6">Sepeti terk eden müşterileri takip edin, hatırlatıcı gönderin.</p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -49,8 +71,8 @@ export default function AdminAbandonedCartsPage() {
           { label: 'Toplam', value: stats.total },
           { label: 'Yeni', value: stats.new },
           { label: 'Hatırlatıcı', value: stats.reminderSent },
-          { label: 'Donusum', value: stats.converted },
-        ].map(s => (
+          { label: 'Dönüşüm', value: stats.converted },
+        ].map((s) => (
           <div key={s.label} className="bg-white border border-[#E8F0FE] rounded-xl p-4">
             <p className="text-xs text-[#8B9DAF]">{s.label}</p>
             <p className="text-xl font-bold text-[#0D2137]">{s.value}</p>
@@ -58,46 +80,59 @@ export default function AdminAbandonedCartsPage() {
         ))}
       </div>
 
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#E8F0FE]">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Müşteri</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Ürünler</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Tutar</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Son Aktivite</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Durum</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-[#8B9DAF]">İşlem</th>
-              </tr>
-            </thead>
-            <tbody>
-              {carts.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-8 text-sm text-[#8B9DAF]">Terk edilmiş sepet bulunmuyor.</td></tr>
-              ) : carts.map(c => (
-                <tr key={c.id} className="border-b border-[#F0F6FF] last:border-0">
-                  <td className="px-4 py-3 text-sm font-medium text-[#0D2137]">{c.customerName}</td>
-                  <td className="px-4 py-3 text-xs text-[#5A6B7B]">{c.items.map(i => i.productName).join(', ')}</td>
-                  <td className="px-4 py-3 text-sm font-semibold text-[#0D2137]">{c.total.toLocaleString('tr-TR')} ₺</td>
-                  <td className="px-4 py-3 text-xs text-[#8B9DAF]">{new Date(c.lastActivity).toLocaleDateString('tr-TR')}</td>
-                  <td className="px-4 py-3"><span className={`text-xs font-medium px-2 py-1 rounded-full ${statusColor[c.status]}`}>{statusLabel[c.status]}</span></td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      {c.status === 'new' && (
-                        <button onClick={() => handleSendReminder(c.id)} className="p-1.5 rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8] transition-all" title="Hatırlatıcı gönder"><Send className="w-3.5 h-3.5" /></button>
-                      )}
-                      {c.status !== 'converted' && (
-                        <button onClick={() => handleConvert(c.id)} className="p-1.5 rounded-lg hover:bg-emerald-50 text-[#8B9DAF] hover:text-emerald-500 transition-all" title="Dönüştür"><RotateCcw className="w-3.5 h-3.5" /></button>
-                      )}
-                      <button onClick={() => handleDelete(c.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-[#8B9DAF] hover:text-red-500 transition-all" title="Sil"><Trash2 className="w-3.5 h-3.5" /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {loading ? (
+        <div className="text-center py-12 text-sm text-[#8B9DAF]">Yükleniyor...</div>
+      ) : carts.length === 0 ? (
+        <div className="bg-white border border-[#E8F0FE] rounded-2xl p-8 text-center text-sm text-[#8B9DAF]">
+          Terk edilmiş sepet bulunmuyor.
         </div>
-      </div>
+      ) : (
+        <div className="space-y-3">
+          {carts.map((cart) => (
+            <div key={cart.id} className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                <div>
+                  <p className="text-sm font-semibold text-[#0D2137]">{cart.customerName}</p>
+                  {cart.customerEmail && <p className="text-xs text-[#8B9DAF]">{cart.customerEmail}</p>}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor[cart.status]}`}>
+                    {statusLabel[cart.status]}
+                  </span>
+                  <span className="text-sm font-bold text-[#0D2137]">{cart.total.toLocaleString('tr-TR')}₺</span>
+                </div>
+              </div>
+              <p className="text-xs text-[#8B9DAF] mb-3">
+                {cart.items.length} ürün · Son aktivite: {new Date(cart.lastActivity).toLocaleString('tr-TR')}
+              </p>
+              <div className="flex gap-2">
+                {cart.status === 'new' && (
+                  <button
+                    onClick={() => void handleSendReminder(cart.id)}
+                    className="flex items-center gap-1.5 text-xs bg-[#1A73E8] text-white px-3 py-1.5 rounded-lg hover:bg-[#1557B0]"
+                  >
+                    <Send className="w-3.5 h-3.5" /> Hatırlat
+                  </button>
+                )}
+                {cart.status !== 'converted' && (
+                  <button
+                    onClick={() => void handleConvert(cart.id)}
+                    className="flex items-center gap-1.5 text-xs border border-[#D6E3F0] text-[#5A6B7B] px-3 py-1.5 rounded-lg hover:border-emerald-400 hover:text-emerald-600"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" /> Dönüştü
+                  </button>
+                )}
+                <button
+                  onClick={() => void handleDelete(cart.id)}
+                  className="flex items-center gap-1.5 text-xs border border-red-200 text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-50"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Sil
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

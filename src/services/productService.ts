@@ -84,7 +84,7 @@ async function fetchProductsFromSupabase(): Promise<Product[] | null> {
     .order('name');
 
   if (error || !data?.length) return null;
-  return (data as ProductWithRelations[]).map(mapDbProduct);
+  return (data as unknown as ProductWithRelations[]).map(mapDbProduct);
 }
 
 async function fetchProductBySlugFromSupabase(slug: string): Promise<Product | undefined> {
@@ -99,7 +99,7 @@ async function fetchProductBySlugFromSupabase(slug: string): Promise<Product | u
     .maybeSingle();
 
   if (error || !data) return undefined;
-  return mapDbProduct(data as ProductWithRelations);
+  return mapDbProduct(data as unknown as ProductWithRelations);
 }
 
 export async function getProducts(): Promise<Product[]> {
@@ -136,7 +136,7 @@ export async function searchProducts(query: string): Promise<Product[]> {
       .or(`name.ilike.%${q}%,slug.ilike.%${q}%`);
 
     if (!error && data?.length) {
-      return (data as ProductWithRelations[]).map(mapDbProduct);
+      return (data as unknown as ProductWithRelations[]).map(mapDbProduct);
     }
   }
 

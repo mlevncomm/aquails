@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -7,7 +7,7 @@ import {
   MessageCircle, Bell, Mail, Phone, Send, AlertCircle, HelpCircle, Loader2
 } from 'lucide-react';
 import { openWhatsApp, getProductInquiryMessage } from '@/services/whatsappService';
-import { requestNotification, getNotifications } from '@/services/stockNotificationService';
+import { subscribeStockAlert, getStockNotifications } from '@/services/stockNotificationService';
 import { useToastStore } from '@/components/Toast';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
@@ -60,11 +60,18 @@ export default function ProductDetail() {
   const [notifySubmitted, setNotifySubmitted] = useState(false);
   const [notifyErrors, setNotifyErrors] = useState<Record<string, string>>({});
 
-  const isLowStock = product ? product.stock <= 5 : false;
-  const isOutOfStock = product ? product.stock === 0 : false;
-  const existingNotification = product
-    ? getNotifications().find(n => n.productId === product.id && n.status === 'pending')
-    : undefined;
+  const [publicQuestions, setPublicQuestions] = useState<Awaited<ReturnType<typeof getPublicQuestionsForProduct>>>([]);
+  const [hasNotification, setHasNotification] = useState(false);
+
+  useEffect(() => {
+    if (!product) return;
+    void getPublicQuestionsForProduct(product.id).then(setPublicQuestions);
+    if (notifyEmail) {
+      void getStockNotifications().then((items) => {
+        setHasNotification(items.some((n) => n.productName === product.name && n.email === notifyEmail && !n.notified));
+      });
+    }
+  }, [product, notifyEmail]);
 
   if (loading) {
     return (
@@ -123,9 +130,12 @@ export default function ProductDetail() {
   };
 
   const isFavorited = isFav(product.id);
-  const publicQuestions = getPublicQuestionsForProduct(product.id);
 
-  const handleNotifySubmit = (e: React.FormEvent) => {
+  const isLowStock = product.stock <= 5;
+  const isOutOfStock = product.stock === 0;
+  const existingNotification = hasNotification ? { productId: product.id } : undefined;
+
+  const handleNotifySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product) return;
     const errors: Record<string, string> = {};
@@ -138,12 +148,21 @@ export default function ProductDetail() {
     setNotifyErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
-    requestNotification(product.id, product.name, notifyEmail, notifyPhone || undefined);
-    setNotifySubmitted(true);
-    addToast('Stok bildirimine kaydoldunuz. Ürün gelince haberdar edileceksiniz.', 'success');
+    const result = await subscribeStockAlert({
+      productId: product.id,
+      productName: product.name,
+      email: notifyEmail,
+    });
+    if (result.success) {
+      setNotifySubmitted(true);
+      setHasNotification(true);
+      addToast('Stok bildirimine kaydoldunuz. Ürün gelince haberdar edileceksiniz.', 'success');
+    } else {
+      addToast(result.error ?? 'Kayıt başarısız.', 'error');
+    }
   };
 
-  const handleQuestionSubmit = (e: React.FormEvent) => {
+  const handleQuestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const name = questionName.trim() || user?.name || '';
     const text = questionText.trim();
@@ -155,10 +174,14 @@ export default function ProductDetail() {
       addToast('Lütfen sorunuzu yazın.', 'error');
       return;
     }
-    askQuestion(product.id, product.name, name, text);
-    setQuestionText('');
-    setQuestionSubmitted(true);
-    addToast('Sorunuz alındı. Cevaplandığında burada görünecek.', 'success');
+    const result = await askQuestion(product.id, product.name, name, text);
+    if (result.success) {
+      setQuestionText('');
+      setQuestionSubmitted(true);
+      addToast('Sorunuz alındı. Cevaplandığında burada görünecek.', 'success');
+    } else {
+      addToast(result.error ?? 'Soru gönderilemedi.', 'error');
+    }
   };
 
   const productImages = product.images && product.images.length > 0

@@ -10,9 +10,8 @@ import type { ServiceSlot } from '@/services/serviceCalendarService';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { useCartStore } from '@/stores/cartStore';
-import { validateCoupon } from '@/services/couponService';
-import { saveOrder, generateOrderNo } from '@/services/orderService';
-import type { CustomerOrder } from '@/services/orderService';
+import { validateCoupon, incrementCouponUsage } from '@/services/couponService';
+import { createOrder } from '@/services/orderService';
 import { completeAbandonedCart, syncAbandonedCart } from '@/services/abandonedCartService';
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/components/Toast';
@@ -90,56 +89,76 @@ export default function Checkout() {
     );
   }, [items, isCompleted, navigate, addToast, user?.name, user?.email]);
 
-  const handleCompleteOrder = () => {
+  const handleCompleteOrder = async () => {
     if (!items.length) {
       addToast('Sepetiniz boş.', 'error');
       navigate('/sepet', { replace: true });
       return;
     }
 
-    const orderNo = generateOrderNo();
-    const order: CustomerOrder = {
-      id: Date.now().toString(),
-      orderNo,
-      date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }),
-      status: 'pending',
-      total,
+    if (!user) {
+      addToast('Sipariş vermek için giriş yapmalısınız.', 'error');
+      navigate('/giris?redirect=/odeme');
+      return;
+    }
+
+    const shippingAddr = {
+      title: 'Teslimat',
+      city: 'İstanbul',
+      district: '',
+      full_address: 'İstanbul',
+    };
+
+    const result = await createOrder({
+      userId: user.id,
       items: items.map((item) => ({
+        productId: item.product.id,
         name: item.product.name,
         qty: item.quantity,
         price: item.product.price,
       })),
+      subtotal,
+      shippingCost,
+      discount,
+      total,
       paymentMethod: paymentMethodLabels[paymentMethod] ?? paymentMethod,
-      shippingAddress: 'İstanbul',
-    };
+      shippingAddress: shippingAddr,
+      installationSlot: selectedDate || undefined,
+    });
 
-    saveOrder(order);
-    completeAbandonedCart();
+    if (!result.success || !result.order) {
+      addToast(result.error ?? 'Sipariş oluşturulamadı.', 'error');
+      return;
+    }
+
+    if (appliedCoupon?.code) {
+      await incrementCouponUsage(appliedCoupon.code);
+    }
+
+    await completeAbandonedCart();
     clearCart();
-    setCompletedOrderNo(orderNo);
+    setCompletedOrderNo(result.order.orderNo);
     setIsCompleted(true);
     addToast('Siparişiniz başarıyla oluşturuldu.', 'success');
   };
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     if (!couponCode.trim()) { addToast('Kupon kodu girin.', 'error'); return; }
     setCouponLoading(true);
-    setTimeout(() => {
-      const result = validateCoupon(couponCode, subtotal);
-      if (result.valid && result.coupon) {
-        if (result.coupon.type === 'shipping') {
-          setAppliedCoupon({ code: result.coupon.code, discount: 0, type: 'shipping' });
-          addToast('Kargo ücretsiz kuponu uygulandı!', 'success');
-        } else {
-          setAppliedCoupon({ code: result.coupon.code, discount: result.discount, type: result.coupon.type });
-          addToast(`${result.coupon.code} kuponu uygulandı! ${result.discount.toLocaleString('tr-TR')}₺ indirim`, 'success');
-        }
+    const result = await validateCoupon(couponCode, subtotal);
+    setCouponLoading(false);
+    if (result.valid && result.coupon) {
+      if (result.coupon.type === 'shipping') {
+        setAppliedCoupon({ code: result.coupon.code, discount: 0, type: 'shipping' });
+        addToast('Kargo ücretsiz kuponu uygulandı!', 'success');
       } else {
-        addToast(result.message || 'Geçersiz kupon.', 'error');
-        setAppliedCoupon(null);
+        setAppliedCoupon({ code: result.coupon.code, discount: result.discount, type: result.coupon.type });
+        addToast(`${result.coupon.code} kuponu uygulandı! ${result.discount.toLocaleString('tr-TR')}₺ indirim`, 'success');
       }
-      setCouponLoading(false);
-    }, 400);
+    } else {
+      addToast(result.message || 'Geçersiz kupon.', 'error');
+      setAppliedCoupon(null);
+    }
   };
 
   const handleRemoveCoupon = () => {
