@@ -82,29 +82,36 @@ export async function convertPointsToCoupon(
 }
 
 export async function redeemPoints(
-  userId: string,
+  _userId: string,
   amount: number,
   _reason?: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; code?: string; discount?: number }> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { data } = await supabase
-    .from('profiles')
-    .select('loyalty_points, loyalty_redeemed')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if (!data || data.loyalty_points < amount) return { success: false, error: 'Yetersiz puan.' };
-
-  const { error } = await supabase
-    .from('profiles')
-    .update({
-      loyalty_points: data.loyalty_points - amount,
-      loyalty_redeemed: data.loyalty_redeemed + amount,
-    })
-    .eq('id', userId);
-
+  const { data, error } = await supabase.rpc('redeem_loyalty_points', { p_points: amount });
   if (error) return { success: false, error: error.message };
-  return { success: true };
+
+  const result = data as { code?: string; discount?: number };
+  return { success: true, code: result?.code, discount: Number(result?.discount ?? 0) };
+}
+
+export async function getLoyaltyHistory(userId: string): Promise<{ id: string; amount: number; type: string; description: string; date: string }[]> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+
+  const { data } = await supabase
+    .from('loyalty_transactions')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  return (data ?? []).map((t) => ({
+    id: t.id,
+    amount: t.amount,
+    type: t.type,
+    description: t.description,
+    date: new Date(t.created_at).toLocaleDateString('tr-TR'),
+  }));
 }

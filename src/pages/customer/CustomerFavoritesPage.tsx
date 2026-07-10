@@ -1,21 +1,54 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { Heart, ShoppingCart } from 'lucide-react';
+import { Heart, ShoppingCart, Loader2 } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { products } from '@/data/products';
 import { useCartStore } from '@/stores/cartStore';
-import { useFavoritesStore } from '@/stores/favoritesStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useToastStore } from '@/components/Toast';
+import { getFavoriteProducts, removeFavorite } from '@/services/favoriteService';
+import type { Product } from '@/types';
 
 export default function CustomerFavoritesPage() {
-  const favoriteIds = useFavoritesStore((s) => s.ids);
-  const toggle = useFavoritesStore((s) => s.toggle);
+  const user = useAuthStore((s) => s.user);
+  const addToast = useToastStore((s) => s.add);
   const { addItem, openDrawer } = useCartStore();
+  const [favorites, setFavorites] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const favorites = products.filter((p) => favoriteIds.includes(p.id));
+  const loadFavorites = async () => {
+    if (!user) return;
+    const data = await getFavoriteProducts(user.id);
+    setFavorites(data);
+    setLoading(false);
+  };
 
-  const handleAddToCart = (p: (typeof products)[0]) => {
+  useEffect(() => {
+    void loadFavorites();
+  }, [user]);
+
+  const handleAddToCart = (p: Product) => {
     addItem(p);
     openDrawer();
   };
+
+  const handleRemove = async (productId: string) => {
+    if (!user) return;
+    const res = await removeFavorite(user.id, productId);
+    if (res.success) {
+      setFavorites((prev) => prev.filter((p) => p.id !== productId));
+      addToast('Favorilerden çıkarıldı.', 'info');
+    } else {
+      addToast(res.error ?? 'İşlem başarısız.', 'error');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16 text-[#8B9DAF]">
+        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Yükleniyor...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -63,7 +96,7 @@ export default function CustomerFavoritesPage() {
                     <ShoppingCart className="w-3 h-3" /> Sepete Ekle
                   </button>
                   <button
-                    onClick={() => toggle(p.id)}
+                    onClick={() => void handleRemove(p.id)}
                     className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-rose-500 transition-all"
                     aria-label="Favorilerden çıkar"
                   >

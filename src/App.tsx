@@ -77,6 +77,9 @@ import AdminLinksPage from './pages/admin/AdminLinksPage';
 import AdminLoyaltyPage from './pages/admin/AdminLoyaltyPage';
 import AdminPaymentSettingsPage from './pages/admin/AdminPaymentSettingsPage';
 import AdminAbandonedCartsPage from './pages/admin/AdminAbandonedCartsPage';
+import AdminShippingPage from './pages/admin/AdminShippingPage';
+import AdminBulkPricePage from './pages/admin/AdminBulkPricePage';
+import AdminProductImportPage from './pages/admin/AdminProductImportPage';
 import CheckoutResultPage from './pages/CheckoutResultPage';
 
 import AllLinksPage from './pages/AllLinksPage';
@@ -176,6 +179,9 @@ export default function App() {
           <Route path="/admin/linkler" element={<AdminLinksPage />} />
           <Route path="/admin/sadakat" element={<AdminLoyaltyPage />} />
           <Route path="/admin/terk-edilmis-sepetler" element={<AdminAbandonedCartsPage />} />
+          <Route path="/admin/kargo" element={<AdminShippingPage />} />
+          <Route path="/admin/toplu-fiyat" element={<AdminBulkPricePage />} />
+          <Route path="/admin/urun-yukleme" element={<AdminProductImportPage />} />
         </Route>
 
         <Route path="/all-links" element={<AllLinksPage />} />

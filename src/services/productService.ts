@@ -113,6 +113,54 @@ export async function getProduct(slug: string): Promise<Product | undefined> {
   return getLocalProductBySlug(slug);
 }
 
+export async function getProductById(id: string): Promise<Product | undefined> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) {
+    const local = localProducts.find((p) => p.id === id);
+    return local;
+  }
+
+  const { data } = await supabase
+    .from('products')
+    .select(PRODUCT_SELECT)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (!data) return undefined;
+  return mapDbProduct(data as unknown as ProductWithRelations);
+}
+
+export async function bulkUpdateProductPrices(
+  categorySlug: string,
+  mode: 'percent' | 'fixed_add' | 'set_tax',
+  value: number
+): Promise<{ success: boolean; count?: number; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  const { data, error } = await supabase.rpc('bulk_update_product_prices', {
+    p_category_slug: categorySlug,
+    p_mode: mode,
+    p_value: value,
+  });
+
+  if (error) return { success: false, error: error.message };
+  return { success: true, count: data as number };
+}
+
+export async function importProductsBatch(
+  rows: AdminProductForm[]
+): Promise<{ success: boolean; imported: number; errors: string[] }> {
+  let imported = 0;
+  const errors: string[] = [];
+  for (const row of rows) {
+    const res = await createProduct(row);
+    if (res.success) imported++;
+    else errors.push(`${row.name}: ${res.error}`);
+  }
+  return { success: errors.length === 0, imported, errors };
+}
+
 export async function getRelated(productId: string, limit = 4): Promise<Product[]> {
   const all = await getProducts();
   const source = all.find((p) => p.id === productId);

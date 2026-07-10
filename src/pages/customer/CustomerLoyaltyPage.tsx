@@ -1,27 +1,62 @@
 import { useState, useEffect } from 'react';
-import { Award, Gift, TrendingUp, History } from 'lucide-react';
+import { Award, Gift, TrendingUp, History, Loader2 } from 'lucide-react';
 import { EmptyState } from '@/components/EmptyState';
-import { useLoyaltyStore } from '@/stores/loyaltyStore';
-import { EARN_RULES } from '@/services/loyaltyService';
+import { EARN_RULES, getLoyaltyData, redeemPoints, getLoyaltyHistory } from '@/services/loyaltyService';
+import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/components/Toast';
 
 export default function CustomerLoyaltyPage() {
-  const { data, refresh, convert } = useLoyaltyStore();
+  const user = useAuthStore((s) => s.user);
   const addToast = useToastStore((s) => s.add);
+  const [data, setData] = useState({ totalPoints: 0, availablePoints: 0, totalRedeemed: 0 });
+  const [history, setHistory] = useState<{ id: string; amount: number; type: string; description: string; date: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [redeeming, setRedeeming] = useState(false);
   const [convertAmount, setConvertAmount] = useState(500);
 
+  const loadData = async () => {
+    if (!user) return;
+    const [loyalty, hist] = await Promise.all([
+      getLoyaltyData(user.id),
+      getLoyaltyHistory(user.id),
+    ]);
+    setData(loyalty);
+    setHistory(hist);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    void loadData();
+  }, [user]);
 
   const handleConvert = async () => {
-    const coupon = await convert(convertAmount);
-    if (coupon) {
-      addToast(`${coupon.discount}₺ değerinde kupon oluşturuldu: ${coupon.code}`, 'success');
+    if (!user) return;
+    if (convertAmount < 100) {
+      addToast('Minimum 100 puan gereklidir.', 'error');
+      return;
+    }
+    if (convertAmount > data.availablePoints) {
+      addToast('Yetersiz puan.', 'error');
+      return;
+    }
+    setRedeeming(true);
+    const res = await redeemPoints(user.id, convertAmount);
+    setRedeeming(false);
+    if (res.success && res.code) {
+      addToast(`${res.discount}₺ değerinde kupon oluşturuldu: ${res.code}`, 'success');
+      void loadData();
     } else {
-      addToast('Yetersiz puan veya geçersiz miktar.', 'error');
+      addToast(res.error ?? 'Yetersiz puan veya geçersiz miktar.', 'error');
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16 text-[#8B9DAF]">
+        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Yükleniyor...
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6">
@@ -60,9 +95,10 @@ export default function CustomerLoyaltyPage() {
           <span className="text-sm text-[#8B9DAF]">puan = {Math.floor(convertAmount / 10)}₺</span>
           <button
             onClick={() => void handleConvert()}
-            className="ml-auto bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1557B0] transition-all"
+            disabled={redeeming}
+            className="ml-auto bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1557B0] transition-all disabled:opacity-60"
           >
-            Çevir
+            {redeeming ? 'Çevriliyor...' : 'Çevir'}
           </button>
         </div>
       </div>
@@ -81,12 +117,28 @@ export default function CustomerLoyaltyPage() {
 
       <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
         <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Puan Geçmişi</h3>
-        <EmptyState
-          icon={<History className="w-8 h-8" />}
-          title="Henüz İşlem Yok"
-          description="Puan kazanma ve harcama işlemleriniz burada görünecek."
-          variant="default"
-        />
+        {history.length === 0 ? (
+          <EmptyState
+            icon={<History className="w-8 h-8" />}
+            title="Henüz İşlem Yok"
+            description="Puan kazanma ve harcama işlemleriniz burada görünecek."
+            variant="default"
+          />
+        ) : (
+          <div className="space-y-2">
+            {history.map((h) => (
+              <div key={h.id} className="flex items-center justify-between p-3 bg-[#F8FBFF] rounded-xl">
+                <div>
+                  <p className="text-sm text-[#0D2137]">{h.description}</p>
+                  <p className="text-xs text-[#8B9DAF]">{h.date}</p>
+                </div>
+                <span className={`text-sm font-semibold ${h.type === 'redeem' ? 'text-red-500' : 'text-[#1A73E8]'}`}>
+                  {h.type === 'redeem' ? '-' : '+'}{Math.abs(h.amount)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

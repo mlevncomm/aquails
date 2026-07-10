@@ -69,3 +69,59 @@ export async function updateSubscriptionStatus(
   if (error) return { success: false, error: error.message };
   return { success: true };
 }
+
+export interface CustomerSubscription {
+  id: string;
+  plan: string;
+  device: string;
+  nextDelivery: string;
+  price: number;
+  status: DbSubscription['status'];
+}
+
+export async function getCustomerSubscriptions(userId: string): Promise<CustomerSubscription[]> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+
+  const { data } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    plan: row.plan,
+    device: row.device_name,
+    nextDelivery: row.next_delivery
+      ? formatDateTR(row.next_delivery, { day: 'numeric', month: 'long', year: 'numeric' })
+      : '—',
+    price: Number(row.price),
+    status: row.status as DbSubscription['status'],
+  }));
+}
+
+export async function createSubscription(input: {
+  userId: string;
+  plan: string;
+  deviceName: string;
+  price: number;
+}): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  const next = new Date();
+  next.setMonth(next.getMonth() + 6);
+
+  const { error } = await supabase.from('subscriptions').insert({
+    user_id: input.userId,
+    plan: input.plan,
+    device_name: input.deviceName,
+    price: input.price,
+    next_delivery: next.toISOString(),
+    status: 'active',
+  });
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}

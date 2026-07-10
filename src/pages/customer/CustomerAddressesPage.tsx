@@ -3,6 +3,7 @@ import { MapPin, Plus, Pencil, Trash2, Home, Building2, Star, Loader2 } from 'lu
 import {
   getAddresses,
   createAddress,
+  updateAddress,
   deleteAddress,
   type Address,
 } from '@/services/addressService';
@@ -41,7 +42,9 @@ export default function CustomerAddressesPage() {
     e.preventDefault();
     if (!user) return;
     setSaving(true);
-    const res = await createAddress(user.id, form);
+    const res = editingId
+      ? await updateAddress(editingId, user.id, form)
+      : await createAddress(user.id, form);
     setSaving(false);
     if (!res.success) {
       addToast(res.error ?? 'Adres kaydedilemedi.', 'error');
