@@ -22,7 +22,16 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database['public']['Tables']['profiles']['Insert']>;
+        Update: {
+          id?: string;
+          email?: string;
+          name?: string;
+          phone?: string | null;
+          role?: UserRole;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       categories: {
         Row: {
@@ -49,7 +58,19 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database['public']['Tables']['categories']['Insert']>;
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          icon?: string | null;
+          description?: string | null;
+          parent_id?: string | null;
+          sort_order?: number;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       products: {
         Row: {
@@ -94,7 +115,28 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database['public']['Tables']['products']['Insert']>;
+        Update: {
+          id?: string;
+          category_id?: string;
+          name?: string;
+          slug?: string;
+          sku?: string;
+          description?: string;
+          short_description?: string;
+          price?: number;
+          old_price?: number | null;
+          stock?: number;
+          rating?: number;
+          review_count?: number;
+          features?: string[];
+          specifications?: Record<string, string>;
+          badge?: 'discount' | 'premium' | 'new' | null;
+          discount_percent?: number | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
       product_images: {
         Row: {
@@ -115,12 +157,22 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<Database['public']['Tables']['product_images']['Insert']>;
+        Update: {
+          id?: string;
+          product_id?: string;
+          url?: string;
+          alt_text?: string | null;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
     Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
 

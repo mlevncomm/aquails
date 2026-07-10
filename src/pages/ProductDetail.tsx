@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart, ShoppingCart, Zap, Check, ChevronRight,
   Shield, Truck, Wrench, Star, ThumbsUp,
-  MessageCircle, Bell, Mail, Phone, Send, AlertCircle, HelpCircle
+  MessageCircle, Bell, Mail, Phone, Send, AlertCircle, HelpCircle, Loader2
 } from 'lucide-react';
 import { openWhatsApp, getProductInquiryMessage } from '@/services/whatsappService';
 import { requestNotification, getNotifications } from '@/services/stockNotificationService';
@@ -16,10 +16,11 @@ import { RatingStars } from '@/components/RatingStars';
 import { QuantitySelector } from '@/components/QuantitySelector';
 import { SEO } from '@/components/SEO';
 import { getProductSchema, getBreadcrumbSchema } from '@/components/SchemaOrg';
-import { getProductBySlug, getRelatedProducts, products } from '@/data';
+import { useProduct } from '@/hooks/useCatalog';
 import { askQuestion, getPublicQuestionsForProduct } from '@/services/productQuestionService';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useFavoritesStore } from '@/stores/favoritesStore';
 import { cn } from '@/lib/utils';
 
 const tabs = [
@@ -38,12 +39,13 @@ const reviews = [
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const product = getProductBySlug(slug || '');
+  const navigate = useNavigate();
+  const { product, related: relatedProducts, loading } = useProduct(slug);
   const { addItem, openDrawer } = useCartStore();
   const user = useAuthStore((s) => s.user);
+  const { toggle: toggleFavorite, isFav } = useFavoritesStore();
   const addToast = useToastStore(s => s.add);
   const [quantity, setQuantity] = useState(1);
-  const [isFavorited, setIsFavorited] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
   const [activeImage, setActiveImage] = useState(0);
 
@@ -63,6 +65,16 @@ export default function ProductDetail() {
   const existingNotification = product
     ? getNotifications().find(n => n.productId === product.id && n.status === 'pending')
     : undefined;
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <div className="max-w-[1280px] mx-auto px-6 py-20 flex justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-aqua-primary" />
+        </div>
+      </PageLayout>
+    );
+  }
 
   if (!product) {
     return (
@@ -96,17 +108,22 @@ export default function ProductDetail() {
   const breadcrumbSchema = getBreadcrumbSchema([
     { name: 'Ana Sayfa', url: '/' },
     { name: 'Ürünler', url: '/urunler' },
-    { name: product.category, url: `/urunler?kategori=${product.category?.toLowerCase().replace(/\s+/g, '-')}` },
+    { name: product.category, url: `/urunler?kategori=${product.categorySlug}` },
     { name: product.name, url: `/urun/${product.slug}` },
   ]);
-
-  const relatedProducts = getRelatedProducts(product.id, 4);
-  const publicQuestions = getPublicQuestionsForProduct(product.id);
 
   const handleAddToCart = () => {
     addItem(product, quantity);
     openDrawer();
   };
+
+  const handleBuyNow = () => {
+    addItem(product, quantity);
+    navigate('/odeme');
+  };
+
+  const isFavorited = isFav(product.id);
+  const publicQuestions = getPublicQuestionsForProduct(product.id);
 
   const handleNotifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -301,9 +318,10 @@ export default function ProductDetail() {
                 <ShoppingCart className="w-5 h-5" />
                 {isOutOfStock ? 'Stokta Yok' : 'Sepete Ekle'}
               </button>
-              <Link
-                to={isOutOfStock ? '#' : '/odeme'}
-                onClick={(e) => { if (isOutOfStock) e.preventDefault(); }}
+              <button
+                type="button"
+                disabled={isOutOfStock}
+                onClick={handleBuyNow}
                 className={cn(
                   'flex-1 flex items-center justify-center gap-2 border-2 py-3.5 sm:py-4 rounded-full font-semibold transition-all',
                   isOutOfStock
@@ -313,7 +331,7 @@ export default function ProductDetail() {
               >
                 <Zap className="w-5 h-5" />
                 Hemen Al
-              </Link>
+              </button>
               <button
                 onClick={() => openWhatsApp(getProductInquiryMessage(product.name))}
                 className="flex-1 flex items-center justify-center gap-2 border-2 border-[#00C9A7] text-[#00C9A7] py-3.5 sm:py-4 rounded-full font-semibold hover:bg-[#00C9A7]/5 active:scale-[0.98] transition-all"
@@ -322,7 +340,7 @@ export default function ProductDetail() {
                 WhatsApp
               </button>
               <button
-                onClick={() => setIsFavorited(!isFavorited)}
+                onClick={() => toggleFavorite(product.id)}
                 className={cn(
                   'w-full sm:w-14 h-12 sm:h-14 flex items-center justify-center border rounded-xl transition-all',
                   isFavorited
@@ -695,7 +713,7 @@ export default function ProductDetail() {
       <section className="max-w-[1280px] mx-auto px-6 pb-20">
         <h2 className="text-xl md:text-2xl font-bold text-aqua-secondary mb-6">Son Görüntüledikleriniz</h2>
         <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
-          {products.slice(0, 4).map((p) => (
+          {relatedProducts.slice(0, 4).map((p) => (
             <Link
               key={p.id}
               to={`/urun/${p.slug}`}

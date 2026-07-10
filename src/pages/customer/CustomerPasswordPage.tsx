@@ -1,30 +1,38 @@
 import { useState } from 'react';
 import { Lock, Eye, EyeOff, Shield, CheckCircle } from 'lucide-react';
+import { updatePassword } from '@/services/authService';
+import { useToastStore } from '@/components/Toast';
 
 export default function CustomerPasswordPage() {
+  const addToast = useToastStore((s) => s.add);
   const [show, setShow] = useState({ current: false, new: false, confirm: false });
   const [form, setForm] = useState({ current: '', newPass: '', confirm: '' });
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.current) e.current = 'Mevcut şifrenizi girin';
     if (!form.newPass) e.newPass = 'Yeni şifre girin';
-    else if (form.newPass.length < 8) e.newPass = 'En az 8 karakter olmalı';
-    else if (!/[A-Z]/.test(form.newPass)) e.newPass = 'En az 1 büyük harf içermeli';
-    else if (!/[0-9]/.test(form.newPass)) e.newPass = 'En az 1 rakam içermeli';
+    else if (form.newPass.length < 6) e.newPass = 'En az 6 karakter olmalı';
     if (form.newPass !== form.confirm) e.confirm = 'Şifreler eşleşmiyor';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) {
+    if (!validate()) return;
+    setLoading(true);
+    const res = await updatePassword(form.newPass);
+    setLoading(false);
+    if (res.success) {
       setSaved(true);
       setForm({ current: '', newPass: '', confirm: '' });
+      addToast('Şifreniz güncellendi.', 'success');
       setTimeout(() => setSaved(false), 3000);
+    } else {
+      addToast(res.error || 'Şifre güncellenemedi.', 'error');
     }
   };
 
@@ -85,7 +93,9 @@ export default function CustomerPasswordPage() {
             <p className={/[0-9]/.test(form.newPass) ? 'text-emerald-600' : ''}>• En az 1 rakam</p>
           </div>
 
-          <button type="submit" className="w-full bg-[#1A73E8] text-white py-2.5 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all">Şifremi Güncelle</button>
+          <button type="submit" disabled={loading} className="w-full bg-[#1A73E8] text-white py-2.5 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all disabled:opacity-60">
+            {loading ? 'Güncelleniyor...' : 'Şifremi Güncelle'}
+          </button>
         </form>
       </div>
       </>

@@ -13,7 +13,8 @@ import { ProductCard } from '@/components/ProductCard';
 import { RatingStars } from '@/components/RatingStars';
 import { SEO } from '@/components/SEO';
 import { getOrganizationSchema, getWebsiteSchema } from '@/components/SchemaOrg';
-import { products, categories } from '@/data';
+import { products as staticProducts, categories as staticCategories } from '@/data';
+import { useCatalog } from '@/hooks/useCatalog';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -77,17 +78,20 @@ const categoryImages: Record<string, string> = {
 };
 
 export default function Home() {
+  const { products, categories } = useCatalog();
+  const catalogProducts = products.length > 0 ? products : staticProducts;
+  const catalogCategories = categories.length > 0 ? categories : staticCategories;
   const [activeTab, setActiveTab] = useState('cok-satanlar');
   const [openFaq, setOpenFaq] = useState<string | null>(null);
 
   const tabProducts: Record<string, typeof products> = {
-    'cok-satanlar': products.filter(p => p.rating >= 4.5).slice(0, 4),
-    'yeni-gelenler': products.filter(p => p.badge === 'new').slice(0, 4),
-    'kampanyali': products.filter(p => p.discountPercent && p.discountPercent > 0).slice(0, 4),
-    'su-aritma': products.filter(p => p.categorySlug === 'su-aritma').slice(0, 4),
+    'cok-satanlar': catalogProducts.filter(p => p.rating >= 4.5).slice(0, 4),
+    'yeni-gelenler': catalogProducts.filter(p => p.badge === 'new').slice(0, 4),
+    'kampanyali': catalogProducts.filter(p => p.discountPercent && p.discountPercent > 0).slice(0, 4),
+    'su-aritma': catalogProducts.filter(p => p.categorySlug === 'su-aritma').slice(0, 4),
   };
 
-  const shownCategories = categories.filter(c => categoryImages[c.id]).slice(0, 6);
+  const shownCategories = catalogCategories.filter(c => categoryImages[c.id]).slice(0, 6);
 
   return (
     <>
@@ -221,7 +225,7 @@ export default function Home() {
             ))}
           </ScrollReveal>
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" staggerDelay={0.08} key={activeTab}>
-            {(tabProducts[activeTab] || products.slice(0, 4)).map(p => (
+            {(tabProducts[activeTab] || catalogProducts.slice(0, 4)).map(p => (
               <StaggerItem key={p.id}><ProductCard product={p} /></StaggerItem>
             ))}
           </StaggerContainer>

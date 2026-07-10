@@ -29,7 +29,6 @@ export default function LoginPage() {
 
   return (
     <div className="w-full max-w-[400px]">
-        {/* Logo */}
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
           <Droplets className="w-8 h-8 text-[#1A73E8]" />
           <span className="text-2xl font-bold text-[#0D2137]">aquails</span>
@@ -68,20 +67,11 @@ export default function LoginPage() {
             <button type="submit" disabled={loading} className="w-full bg-[#1A73E8] text-white py-2.5 rounded-full text-sm font-semibold hover:bg-[#1557B0] hover:shadow-md transition-all disabled:opacity-60 disabled:cursor-not-allowed">
               {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
             </button>
-
-            <button type="button" onClick={() => { setEmail('admin@aquails.com'); setPassword('admin123'); }} className="w-full border border-[#E8F0FE] text-[#5A6B7B] py-2 rounded-full text-xs font-medium hover:border-[#1A73E8] hover:text-[#1A73E8] transition-all">
-              Google ile Giriş Yap (Mock)
-            </button>
           </form>
 
           <p className="text-center text-xs text-[#8B9DAF] mt-5">
             Hesabınız yok mu? <Link to="/kayit-ol" className="text-[#1A73E8] font-semibold hover:underline">Kayıt Ol</Link>
           </p>
-
-          <div className="mt-4 pt-4 border-t border-[#F0F6FF] space-y-1 text-[10px] text-[#8B9DAF]">
-            <p>Demo: <strong>ahmet@email.com</strong> / <strong>123456</strong> (Müşteri)</p>
-            <p>Demo: <strong>admin@aquails.com</strong> / <strong>admin123</strong> (Admin)</p>
-          </div>
         </div>
       </div>
   );

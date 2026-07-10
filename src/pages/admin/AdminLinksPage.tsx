@@ -136,9 +136,9 @@ export default function AdminLinksPage() {
           <p className="text-sm text-[#8B9DAF] mt-1">Instagram bio bağlantı sayfasındaki linkleri yönetin.</p>
         </div>
         <div className="flex items-center gap-3">
-          <a href="/#/all-links" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-medium text-[#1A73E8] hover:underline">
+          <Link to="/all-links" target="_blank" className="flex items-center gap-2 text-sm font-medium text-[#1A73E8] hover:underline">
             <Eye className="w-4 h-4" /> Sayfayı Görüntüle
-          </a>
+          </Link>
           <button onClick={() => { setShowAdd(true); setIsEditing(false); }} className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1557B0] transition-all">
             <Plus className="w-4 h-4" /> Link Ekle
           </button>
