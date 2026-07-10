@@ -94,7 +94,12 @@ export default function AdminPaymentSettingsPage() {
             <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <p>
               Mağaza No, Parola ve Gizli Anahtar bilgilerini PayTR Mağaza Paneli → Bilgi sayfasından alın.
-              Bildirim URL: <code className="bg-white px-1 rounded">.../functions/v1/payment-webhook</code>
+              Bildirim URL:{' '}
+              <code className="bg-white px-1 rounded">
+                {typeof window !== 'undefined'
+                  ? `${window.location.origin}/api/payment-webhook`
+                  : 'https://aquails.vercel.app/api/payment-webhook'}
+              </code>
             </p>
           </div>
 

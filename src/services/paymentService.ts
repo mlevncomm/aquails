@@ -24,17 +24,35 @@ export interface PaytrInitPayload {
 export async function initPaytrPayment(payload: PaytrInitPayload): Promise<PaytrInitResult> {
   try {
     const supabase = getSupabase();
-    const { data, error } = await supabase.functions.invoke('paytr-init', {
-      body: payload,
-    });
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    if (error) {
-      return { success: false, error: error.message };
+    if (!session?.access_token) {
+      return { success: false, error: 'Ödeme için giriş yapmalısınız.' };
     }
 
-    const result = data as { success?: boolean; token?: string; error?: string; message?: string };
-    if (!result?.success || !result.token) {
-      return { success: false, error: result?.error ?? result?.message ?? 'Ödeme başlatılamadı.' };
+    const res = await fetch('/api/paytr-init', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = (await res.json()) as {
+      success?: boolean;
+      token?: string;
+      error?: string;
+      message?: string;
+    };
+
+    if (!res.ok || !result?.success || !result.token) {
+      return {
+        success: false,
+        error: result?.error ?? result?.message ?? 'Ödeme başlatılamadı.',
+      };
     }
 
     return {
