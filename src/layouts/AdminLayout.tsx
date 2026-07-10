@@ -1,5 +1,5 @@
+import { Link, useLocation, Outlet, useNavigate } from 'react-router';
 import { useState } from 'react';
-import { Link, useLocation, Outlet } from 'react-router';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Wrench, Filter,
   Tag, Settings, LogOut, Menu, X, Bell, Search, ChevronDown,
@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNotificationStore } from '@/stores/notificationStore';
+import { useAuthStore } from '@/stores/authStore';
+import { logout } from '@/services/authService';
 
 interface MenuItem {
   label: string;
@@ -65,6 +67,8 @@ const menuItems: MenuItem[] = [
 
 export function AdminLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['Ürün Yönetimi', 'Siparişler', 'Servis']);
@@ -183,16 +187,21 @@ export function AdminLayout() {
         <div className="p-3 border-t border-[#1A3A5C]">
           <div className="flex items-center gap-3 px-3 py-2.5">
             <div className="w-9 h-9 bg-[#1A73E8] rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-semibold text-white">A</span>
+              <span className="text-sm font-semibold text-white">{(user?.name ?? 'A')[0]}</span>
             </div>
             {!collapsed && (
               <div className="min-w-0">
-                <p className="text-[13px] font-medium text-white truncate">Admin</p>
-                <p className="text-[11px] text-[#8B9DAF]">Süper Admin</p>
+                <p className="text-[13px] font-medium text-white truncate">{user?.name ?? 'Admin'}</p>
+                <p className="text-[11px] text-[#8B9DAF]">
+                  {user?.role === 'super_admin' ? 'Süper Admin' : user?.role === 'admin' ? 'Admin' : 'Yönetici'}
+                </p>
               </div>
             )}
           </div>
-          <button className="flex items-center gap-3 w-full px-3 py-2.5 mt-1 rounded-xl text-[13px] font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors min-h-[44px]">
+          <button
+            onClick={() => { logout(); navigate('/giris'); }}
+            className="flex items-center gap-3 w-full px-3 py-2.5 mt-1 rounded-xl text-[13px] font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors min-h-[44px]"
+          >
             <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
             {!collapsed && 'Çıkış Yap'}
           </button>
@@ -247,7 +256,7 @@ export function AdminLayout() {
 
             {/* Avatar */}
             <div className="w-9 h-10 bg-[#1A73E8]/10 rounded-full flex items-center justify-center border-2 border-[#E8F0FE]">
-              <span className="text-sm font-semibold text-[#1A73E8]">A</span>
+              <span className="text-sm font-semibold text-[#1A73E8]">{(user?.name ?? 'A')[0]}</span>
             </div>
           </div>
         </header>

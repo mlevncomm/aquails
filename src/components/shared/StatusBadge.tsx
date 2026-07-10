@@ -15,7 +15,6 @@ const statusMap: Record<string, { label: string; class: string }> = {
   // Service statuses
   'Bekliyor': { label: 'Bekliyor', class: 'bg-amber-50 text-amber-600' },
   'Planlandı': { label: 'Planlandı', class: 'bg-sky-50 text-sky-600' },
-  'Tamamlandı': { label: 'Tamamlandı', class: 'bg-emerald-50 text-emerald-600' },
   'İptal': { label: 'İptal', class: 'bg-red-50 text-red-600' },
   'Kargoda': { label: 'Kargoda', class: 'bg-blue-50 text-blue-600' },
   // Generic
@@ -23,6 +22,14 @@ const statusMap: Record<string, { label: string; class: string }> = {
   inactive: { label: 'Pasif', class: 'bg-gray-100 text-gray-500' },
   low: { label: 'Kritik Stok', class: 'bg-red-50 text-red-600' },
   'Yeni': { label: 'Yeni', class: 'bg-violet-50 text-violet-600' },
+  'Hazırlanıyor': { label: 'Hazırlanıyor', class: 'bg-sky-50 text-sky-600' },
+  'Tamamlandı': { label: 'Tamamlandı', class: 'bg-emerald-50 text-emerald-600' },
+  'İptal Edildi': { label: 'İptal Edildi', class: 'bg-red-50 text-red-600' },
+  returned: { label: 'İade', class: 'bg-orange-50 text-orange-600' },
+  'İade': { label: 'İade', class: 'bg-orange-50 text-orange-600' },
+  scheduled: { label: 'Planlandı', class: 'bg-sky-50 text-sky-600' },
+  in_progress: { label: 'Devam Ediyor', class: 'bg-blue-50 text-blue-600' },
+  completed: { label: 'Tamamlandı', class: 'bg-emerald-50 text-emerald-600' },
 };
 
 export function StatusBadge({ status, size = 'sm' }: StatusBadgeProps) {

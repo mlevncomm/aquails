@@ -10,6 +10,8 @@ export interface Database {
           name: string;
           phone: string | null;
           role: UserRole;
+          loyalty_points: number;
+          loyalty_redeemed: number;
           created_at: string;
           updated_at: string;
         };
@@ -19,6 +21,8 @@ export interface Database {
           name?: string;
           phone?: string | null;
           role?: UserRole;
+          loyalty_points?: number;
+          loyalty_redeemed?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -28,6 +32,8 @@ export interface Database {
           name?: string;
           phone?: string | null;
           role?: UserRole;
+          loyalty_points?: number;
+          loyalty_redeemed?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -168,9 +174,479 @@ export interface Database {
         };
         Relationships: [];
       };
+      orders: {
+        Row: {
+          id: string;
+          user_id: string;
+          order_number: string;
+          status: string;
+          subtotal: number;
+          shipping_cost: number;
+          discount: number;
+          total: number;
+          payment_method: string | null;
+          payment_status: string;
+          shipping_address: Record<string, unknown>;
+          billing_address: Record<string, unknown>;
+          installation_slot: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          order_number: string;
+          status?: string;
+          subtotal?: number;
+          shipping_cost?: number;
+          discount?: number;
+          total?: number;
+          payment_method?: string | null;
+          payment_status?: string;
+          shipping_address?: Record<string, unknown>;
+          billing_address?: Record<string, unknown>;
+          installation_slot?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          order_number?: string;
+          status?: string;
+          subtotal?: number;
+          shipping_cost?: number;
+          discount?: number;
+          total?: number;
+          payment_method?: string | null;
+          payment_status?: string;
+          shipping_address?: Record<string, unknown>;
+          billing_address?: Record<string, unknown>;
+          installation_slot?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      order_items: {
+        Row: {
+          id: string;
+          order_id: string;
+          product_id: string | null;
+          product_name: string;
+          quantity: number;
+          unit_price: number;
+          total_price: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          order_id: string;
+          product_id?: string | null;
+          product_name: string;
+          quantity: number;
+          unit_price: number;
+          total_price: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          order_id?: string;
+          product_id?: string | null;
+          product_name?: string;
+          quantity?: number;
+          unit_price?: number;
+          total_price?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      coupons: {
+        Row: {
+          id: string;
+          code: string;
+          type: 'percentage' | 'fixed' | 'shipping';
+          value: number;
+          min_order_amount: number | null;
+          max_discount: number | null;
+          usage_limit: number;
+          usage_count: number;
+          start_date: string | null;
+          end_date: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          type: 'percentage' | 'fixed' | 'shipping';
+          value?: number;
+          min_order_amount?: number | null;
+          max_discount?: number | null;
+          usage_limit?: number;
+          usage_count?: number;
+          start_date?: string | null;
+          end_date?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          code?: string;
+          type?: 'percentage' | 'fixed' | 'shipping';
+          value?: number;
+          min_order_amount?: number | null;
+          max_discount?: number | null;
+          usage_limit?: number;
+          usage_count?: number;
+          start_date?: string | null;
+          end_date?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      product_questions: {
+        Row: {
+          id: string;
+          product_id: string;
+          user_id: string | null;
+          customer_name: string;
+          question: string;
+          answer: string | null;
+          is_published: boolean;
+          answered_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          product_id: string;
+          user_id?: string | null;
+          customer_name?: string;
+          question: string;
+          answer?: string | null;
+          is_published?: boolean;
+          answered_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          product_id?: string;
+          user_id?: string | null;
+          customer_name?: string;
+          question?: string;
+          answer?: string | null;
+          is_published?: boolean;
+          answered_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      reviews: {
+        Row: {
+          id: string;
+          product_id: string;
+          user_id: string | null;
+          rating: number;
+          title: string;
+          content: string;
+          is_published: boolean;
+          helpful: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          product_id: string;
+          user_id?: string | null;
+          rating: number;
+          title?: string;
+          content?: string;
+          is_published?: boolean;
+          helpful?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          product_id?: string;
+          user_id?: string | null;
+          rating?: number;
+          title?: string;
+          content?: string;
+          is_published?: boolean;
+          helpful?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      service_requests: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: 'installation' | 'filter_change' | 'maintenance' | 'repair';
+          status: 'pending' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+          address: string;
+          preferred_date: string | null;
+          description: string;
+          assigned_to: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          type: 'installation' | 'filter_change' | 'maintenance' | 'repair';
+          status?: 'pending' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+          address: string;
+          preferred_date?: string | null;
+          description?: string;
+          assigned_to?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          type?: 'installation' | 'filter_change' | 'maintenance' | 'repair';
+          status?: 'pending' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+          address?: string;
+          preferred_date?: string | null;
+          description?: string;
+          assigned_to?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      abandoned_carts: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          session_id: string | null;
+          customer_name: string;
+          customer_email: string | null;
+          items: unknown[];
+          total: number;
+          status: 'new' | 'reminder-sent' | 'converted';
+          last_activity: string;
+          reminder_sent_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          session_id?: string | null;
+          customer_name?: string;
+          customer_email?: string | null;
+          items?: unknown[];
+          total?: number;
+          status?: 'new' | 'reminder-sent' | 'converted';
+          last_activity?: string;
+          reminder_sent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string | null;
+          session_id?: string | null;
+          customer_name?: string;
+          customer_email?: string | null;
+          items?: unknown[];
+          total?: number;
+          status?: 'new' | 'reminder-sent' | 'converted';
+          last_activity?: string;
+          reminder_sent_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      addresses: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          type: 'shipping' | 'billing';
+          city: string;
+          district: string;
+          full_address: string;
+          postal_code: string | null;
+          is_default: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          type: 'shipping' | 'billing';
+          city: string;
+          district: string;
+          full_address: string;
+          postal_code?: string | null;
+          is_default?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          type?: 'shipping' | 'billing';
+          city?: string;
+          district?: string;
+          full_address?: string;
+          postal_code?: string | null;
+          is_default?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      blog_posts: {
+        Row: {
+          id: string;
+          title: string;
+          slug: string;
+          category: string;
+          content: string;
+          status: 'draft' | 'published';
+          views: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          slug: string;
+          category?: string;
+          content?: string;
+          status?: 'draft' | 'published';
+          views?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          slug?: string;
+          category?: string;
+          content?: string;
+          status?: 'draft' | 'published';
+          views?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          plan: string;
+          device_name: string;
+          next_delivery: string | null;
+          price: number;
+          status: 'active' | 'paused' | 'cancelled';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          plan: string;
+          device_name?: string;
+          next_delivery?: string | null;
+          price?: number;
+          status?: 'active' | 'paused' | 'cancelled';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          plan?: string;
+          device_name?: string;
+          next_delivery?: string | null;
+          price?: number;
+          status?: 'active' | 'paused' | 'cancelled';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      stock_notifications: {
+        Row: {
+          id: string;
+          product_id: string | null;
+          product_name: string;
+          email: string;
+          notified: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          product_id?: string | null;
+          product_name: string;
+          email: string;
+          notified?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          product_id?: string | null;
+          product_name?: string;
+          email?: string;
+          notified?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      site_settings: {
+        Row: {
+          key: string;
+          value: Record<string, unknown>;
+          updated_at: string;
+        };
+        Insert: {
+          key: string;
+          value?: Record<string, unknown>;
+          updated_at?: string;
+        };
+        Update: {
+          key?: string;
+          value?: Record<string, unknown>;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      mark_abandoned_cart_converted: {
+        Args: { p_session_id: string };
+        Returns: undefined;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
@@ -180,3 +656,13 @@ export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type DbProduct = Database['public']['Tables']['products']['Row'];
 export type DbCategory = Database['public']['Tables']['categories']['Row'];
 export type DbProductImage = Database['public']['Tables']['product_images']['Row'];
+export type DbOrder = Database['public']['Tables']['orders']['Row'];
+export type DbOrderItem = Database['public']['Tables']['order_items']['Row'];
+export type DbCoupon = Database['public']['Tables']['coupons']['Row'];
+export type DbReview = Database['public']['Tables']['reviews']['Row'];
+export type DbServiceRequest = Database['public']['Tables']['service_requests']['Row'];
+export type DbAbandonedCart = Database['public']['Tables']['abandoned_carts']['Row'];
+export type DbAddress = Database['public']['Tables']['addresses']['Row'];
+export type DbBlogPost = Database['public']['Tables']['blog_posts']['Row'];
+export type DbSubscription = Database['public']['Tables']['subscriptions']['Row'];
+export type DbStockNotification = Database['public']['Tables']['stock_notifications']['Row'];
