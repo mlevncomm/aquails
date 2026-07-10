@@ -1,371 +1,523 @@
 import { Link } from 'react-router';
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Banknote, ShoppingBag, Clock, Users, AlertTriangle, Wrench,
-  TrendingUp, TrendingDown, Eye, ClipboardList,
-  CheckCircle2, Package, MessageSquare, Star, Bell, RefreshCw,
-  Zap, ArrowRight, Calendar
+  Package, MessageSquare, Star, Bell, RefreshCw, Zap,
+  ArrowRight, Eye, TrendingUp, Loader2, ChevronRight,
 } from 'lucide-react';
-import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
-import { getDashboardStats, getSalesChartData, getLowStockProducts, getRecentOrders } from '@/services/adminStatsService';
+import {
+  getDashboardStats,
+  getSalesChartDataRange,
+  getLowStockProducts,
+  getRecentOrders,
+  getCatalogCategoryBreakdown,
+  type CategoryBreakdown,
+} from '@/services/adminStatsService';
 import { orderStatusToTr } from '@/lib/orderStatus';
+import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell,
+} from 'recharts';
+import { AdminCard, AdminTableWrap, AdminEmpty } from '@/components/admin/admin-ui';
 
-const categoryPieData = [
-  { name: 'Su Arıtma Cihazları', value: 100, color: '#1A73E8' },
-];
+const PIE_COLORS = ['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b', '#f43f5e', '#06b6d4', '#6366f1'];
 
-const statusColors: Record<string, string> = {
-  'Tamamlandı': 'bg-aqua-success/10 text-aqua-success',
-  'Kargoda': 'bg-aqua-primary/10 text-aqua-primary',
-  'Bekliyor': 'bg-aqua-warning/10 text-aqua-warning',
-  'İptal': 'bg-aqua-danger/10 text-aqua-danger',
+const statusStyles: Record<string, string> = {
+  'Tamamlandı': 'bg-emerald-50 text-emerald-700',
+  'Kargoda': 'bg-sky-50 text-sky-700',
+  'Hazırlanıyor': 'bg-amber-50 text-amber-700',
+  'Yeni': 'bg-violet-50 text-violet-700',
+  'İptal Edildi': 'bg-slate-100 text-slate-500',
+  'İade': 'bg-orange-50 text-orange-700',
 };
 
+function formatCurrency(n: number) {
+  if (n >= 1_000_000) return `₺${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `₺${(n / 1_000).toFixed(0)}K`;
+  return `₺${n.toLocaleString('tr-TR')}`;
+}
+
+function KpiSkeleton() {
+  return (
+    <div className="animate-pulse bg-white rounded-2xl border border-slate-100 p-6 h-[132px]">
+      <div className="w-10 h-10 bg-slate-100 rounded-xl mb-4" />
+      <div className="h-7 w-24 bg-slate-100 rounded-lg mb-2" />
+      <div className="h-4 w-16 bg-slate-50 rounded" />
+    </div>
+  );
+}
+
+type ChartRange = 'week' | 'month' | 'year';
+
 export default function AdminDashboard() {
+  const user = useAuthStore((s) => s.user);
+  const [loading, setLoading] = useState(true);
+  const [chartRange, setChartRange] = useState<ChartRange>('month');
   const [stats, setStats] = useState<Awaited<ReturnType<typeof getDashboardStats>> | null>(null);
-  const [chartData, setChartData] = useState<Awaited<ReturnType<typeof getSalesChartData>>>([]);
+  const [chartData, setChartData] = useState<Awaited<ReturnType<typeof getSalesChartDataRange>>>([]);
   const [lowStock, setLowStock] = useState<Awaited<ReturnType<typeof getLowStockProducts>>>([]);
   const [recentOrders, setRecentOrders] = useState<Awaited<ReturnType<typeof getRecentOrders>>>([]);
+  const [categories, setCategories] = useState<CategoryBreakdown[]>([]);
 
   useEffect(() => {
     void Promise.all([
       getDashboardStats(),
-      getSalesChartData(),
       getLowStockProducts(),
-      getRecentOrders(5),
-    ]).then(([s, chart, stock, orders]) => {
+      getRecentOrders(6),
+      getCatalogCategoryBreakdown(),
+    ]).then(([s, stock, orders, cats]) => {
       setStats(s);
-      setChartData(chart);
       setLowStock(stock);
       setRecentOrders(orders);
+      setCategories(cats);
+      setLoading(false);
     });
   }, []);
 
-  const statCards = stats ? [
-    { icon: Banknote, label: 'Bu ay', value: `₺${stats.monthlyRevenue.toLocaleString('tr-TR')}`, trend: '—', trendUp: true, color: 'bg-[#EBF3FF] text-[#1A73E8]' },
-    { icon: ShoppingBag, label: 'Bu ay', value: String(stats.monthlyOrders), trend: '—', trendUp: true, color: 'bg-[#F0FDF4] text-[#00C9A7]' },
-    { icon: Clock, label: 'İşlem bekliyor', value: String(stats.pendingOrders), trend: '—', trendUp: false, color: 'bg-[#FFFBEB] text-[#F5A623]' },
-    { icon: Users, label: 'Toplam kayıtlı', value: stats.totalCustomers.toLocaleString('tr-TR'), trend: '—', trendUp: true, color: 'bg-[#F3E8FF] text-[#8B5CF6]' },
-    { icon: AlertTriangle, label: 'Acil tedbir gerekli', value: String(stats.criticalAlerts), trend: '—', trendUp: false, color: 'bg-[#FEF2F2] text-[#E85454]' },
-    { icon: Wrench, label: 'Randevulu servis', value: String(stats.todayInstallations), trend: '—', trendUp: true, color: 'bg-[#EBF3FF] text-[#1A73E8]' },
-  ] : [];
+  useEffect(() => {
+    void getSalesChartDataRange(chartRange).then(setChartData);
+  }, [chartRange]);
 
-  const operationCards = stats ? [
-    { icon: Wrench, label: 'Bugünkü Kurulum', value: stats.todayInstallations, href: '/admin/servis-takvimi', color: 'bg-emerald-50 text-emerald-600 border-emerald-200', iconBg: 'bg-emerald-100' },
-    { icon: Clock, label: 'Bekleyen Servis', value: stats.pendingService, href: '/admin/servis-talepleri', color: 'bg-amber-50 text-amber-600 border-amber-200', iconBg: 'bg-amber-100' },
-    { icon: Package, label: 'Düşük Stok', value: stats.lowStockCount, href: '/admin/stok', color: 'bg-red-50 text-red-500 border-red-200', iconBg: 'bg-red-100' },
-    { icon: ShoppingBag, label: 'Terk Edilmiş Sepet', value: stats.abandonedCarts, href: '/admin/terk-edilmis-sepetler', color: 'bg-purple-50 text-purple-600 border-purple-200', iconBg: 'bg-purple-100' },
-    { icon: Users, label: 'Yeni Müşteri (Bugün)', value: stats.newCustomersToday, href: '/admin/musteriler', color: 'bg-blue-50 text-blue-600 border-blue-200', iconBg: 'bg-blue-100' },
-    { icon: ClipboardList, label: 'Bekleyen Sipariş', value: stats.pendingOrders, href: '/admin/siparisler', color: 'bg-sky-50 text-sky-600 border-sky-200', iconBg: 'bg-sky-100' },
-    { icon: MessageSquare, label: 'Okunmamış Soru', value: stats.unreadQuestions, href: '/admin/sorular', color: 'bg-teal-50 text-teal-600 border-teal-200', iconBg: 'bg-teal-100' },
-    { icon: Star, label: 'Onay Bekleyen Yorum', value: stats.unreadReviews, href: '/admin/yorumlar', color: 'bg-yellow-50 text-yellow-600 border-yellow-200', iconBg: 'bg-yellow-100' },
-    { icon: Banknote, label: 'Bugünkü Ciro', value: `₺${stats.todayRevenue.toLocaleString('tr-TR')}`, href: '/admin/raporlar', color: 'bg-indigo-50 text-indigo-600 border-indigo-200', iconBg: 'bg-indigo-100' },
-    { icon: Bell, label: 'Kritik Uyarı', value: stats.criticalAlerts, href: '/admin/stok-bildirimleri', color: 'bg-rose-50 text-rose-600 border-rose-200', iconBg: 'bg-rose-100' },
-    { icon: RefreshCw, label: 'Bekleyen İade', value: stats.pendingReturns, href: '/admin/iade-degisim', color: 'bg-orange-50 text-orange-600 border-orange-200', iconBg: 'bg-orange-100' },
-    { icon: Zap, label: 'Aktif Abonelik', value: stats.activeSubscriptions, href: '/admin/abonelikler', color: 'bg-cyan-50 text-cyan-600 border-cyan-200', iconBg: 'bg-cyan-100' },
-  ] : [];
+  const todayLabel = new Date().toLocaleDateString('tr-TR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const primaryKpis = stats
+    ? [
+        {
+          label: 'Bu Ay Ciro',
+          value: formatCurrency(stats.monthlyRevenue),
+          sub: `${stats.monthlyOrders} sipariş`,
+          icon: Banknote,
+          accent: 'from-sky-500 to-blue-600',
+          bg: 'bg-sky-50',
+          text: 'text-sky-700',
+          href: '/admin/raporlar',
+        },
+        {
+          label: 'Bugünkü Ciro',
+          value: formatCurrency(stats.todayRevenue),
+          sub: 'Günlük toplam',
+          icon: TrendingUp,
+          accent: 'from-emerald-500 to-teal-600',
+          bg: 'bg-emerald-50',
+          text: 'text-emerald-700',
+          href: '/admin/raporlar',
+        },
+        {
+          label: 'Bekleyen Sipariş',
+          value: String(stats.pendingOrders),
+          sub: 'İşlem bekliyor',
+          icon: Clock,
+          accent: 'from-amber-500 to-orange-500',
+          bg: 'bg-amber-50',
+          text: 'text-amber-700',
+          href: '/admin/siparisler',
+        },
+        {
+          label: 'Toplam Müşteri',
+          value: stats.totalCustomers.toLocaleString('tr-TR'),
+          sub: stats.newCustomersToday > 0 ? `+${stats.newCustomersToday} bugün` : 'Kayıtlı müşteri',
+          icon: Users,
+          accent: 'from-violet-500 to-purple-600',
+          bg: 'bg-violet-50',
+          text: 'text-violet-700',
+          href: '/admin/musteriler',
+        },
+      ]
+    : [];
+
+  const operations = stats
+    ? [
+        { label: 'Bugünkü Kurulum', value: stats.todayInstallations, href: '/admin/servis-takvimi', icon: Wrench, urgent: stats.todayInstallations > 0 },
+        { label: 'Bekleyen Servis', value: stats.pendingService, href: '/admin/servis-talepleri', icon: Clock, urgent: stats.pendingService > 0 },
+        { label: 'Düşük Stok', value: stats.lowStockCount, href: '/admin/stok', icon: Package, urgent: stats.lowStockCount > 0 },
+        { label: 'Terk Edilmiş Sepet', value: stats.abandonedCarts, href: '/admin/terk-edilmis-sepetler', icon: ShoppingBag, urgent: stats.abandonedCarts > 0 },
+        { label: 'Okunmamış Soru', value: stats.unreadQuestions, href: '/admin/sorular', icon: MessageSquare, urgent: stats.unreadQuestions > 0 },
+        { label: 'Onay Bekleyen Yorum', value: stats.unreadReviews, href: '/admin/yorumlar', icon: Star, urgent: stats.unreadReviews > 0 },
+        { label: 'Kritik Uyarı', value: stats.criticalAlerts, href: '/admin/stok-bildirimleri', icon: Bell, urgent: stats.criticalAlerts > 0 },
+        { label: 'Bekleyen İade', value: stats.pendingReturns, href: '/admin/iade-degisim', icon: RefreshCw, urgent: stats.pendingReturns > 0 },
+        { label: 'Aktif Abonelik', value: stats.activeSubscriptions, href: '/admin/abonelikler', icon: Zap, urgent: false },
+      ]
+    : [];
+
+  const attentionItems = useMemo(() => operations.filter((o) => o.urgent), [operations]);
+
+  const pieData = categories.map((c, i) => ({
+    name: c.name,
+    value: c.count,
+    color: PIE_COLORS[i % PIE_COLORS.length],
+  }));
+
+  const maxChartSales = Math.max(...chartData.map((d) => d.sales), 1);
+
+  const yFormatter = (v: number) => {
+    if (maxChartSales < 1000) return `₺${v}`;
+    if (maxChartSales < 1_000_000) return `₺${(v / 1000).toFixed(0)}K`;
+    return `${(v / 1_000_000).toFixed(1)}M`;
+  };
 
   return (
-      <>      {/* Stats Row */}
-      <StaggerContainer className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6" staggerDelay={0.08}>
-        {statCards.map((stat) => (
-          <StaggerItem key={stat.label}>
-            <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-              <div className="flex items-center justify-between">
-                <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center', stat.color.split(' ')[0])}>
-                  <stat.icon className={cn('w-5 h-5', stat.color.split(' ')[1])} />
-                </div>
-                <div className={cn('flex items-center gap-1 text-xs font-semibold', stat.trendUp ? 'text-aqua-success' : 'text-aqua-danger')}>
-                  {stat.trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                  {stat.trend}
-                </div>
-              </div>
-              <p className="text-xl font-bold text-aqua-secondary mt-3">{stat.value}</p>
-              <p className="text-xs text-aqua-text-muted mt-0.5">{stat.label}</p>
-            </div>
-          </StaggerItem>
-        ))}
-      </StaggerContainer>
-
-      {/* Operations Cards */}
-      <ScrollReveal delay={0.2} className="mb-6">
-        <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-aqua-secondary flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-aqua-primary" />
-              Operasyon Özeti
-            </h3>
-            <span className="text-xs text-aqua-text-muted">Bugün</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-            {operationCards.map((card) => (
-              <Link
-                key={card.label}
-                to={card.href}
-                className={cn(
-                  'flex flex-col items-center text-center p-4 rounded-xl border transition-all hover:shadow-md hover:-translate-y-0.5',
-                  card.color
-                )}
-              >
-                <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center mb-2', card.iconBg)}>
-                  <card.icon className="w-5 h-5" />
-                </div>
-                <span className="text-lg font-bold">{card.value}</span>
-                <span className="text-[11px] font-medium opacity-80 mt-0.5">{card.label}</span>
-              </Link>
-            ))}
-          </div>
+    <div className="space-y-8 pb-4">
+      {/* Welcome */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <p className="text-sm text-slate-500 capitalize">{todayLabel}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mt-1">
+            Hoş geldiniz{user?.name ? `, ${user.name.split(' ')[0]}` : ''}
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">Mağazanızın güncel özetine göz atın.</p>
         </div>
-      </ScrollReveal>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/admin/siparisler"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors shadow-sm"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Siparişler
+          </Link>
+          <Link
+            to="/admin/urunler"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
+          >
+            <Package className="w-4 h-4" />
+            Ürünler
+          </Link>
+        </div>
+      </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-        {/* Sales Chart */}
-        <ScrollReveal delay={0.3} className="lg:col-span-2">
-          <div className="bg-white border border-aqua-border-light rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-base font-semibold text-aqua-secondary">Satış Trendi</h3>
-              <div className="flex bg-aqua-bg rounded-lg p-0.5">
-                {['Haftalık', 'Aylık', 'Yıllık'].map((period) => (
-                  <button
-                    key={period}
-                    className={cn(
-                      'px-3 py-1.5 text-xs font-semibold rounded-md transition-all',
-                      period === 'Aylık' ? 'bg-white text-aqua-primary shadow-sm' : 'text-aqua-text-muted hover:text-aqua-secondary'
-                    )}
-                  >
-                    {period}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <ResponsiveContainer width="100%" height={260}>
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#1A73E8" stopOpacity={0.1} />
-                    <stop offset="95%" stopColor="#1A73E8" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0F6FF" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#8B9DAF' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#8B9DAF' }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`} />
-                <Tooltip
-                  formatter={(value: number) => [`${(value / 1000000).toFixed(2)}M ₺`, 'Satış']}
-                  contentStyle={{ backgroundColor: '#0D2137', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
-                />
-                <Area type="monotone" dataKey="sales" stroke="#1A73E8" strokeWidth={2} fill="url(#salesGradient)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </ScrollReveal>
-
-        {/* Category Pie */}
-        <ScrollReveal delay={0.4}>
-          <div className="bg-white border border-aqua-border-light rounded-2xl p-6">
-            <h3 className="text-base font-semibold text-aqua-secondary mb-5">Kategori Satışları</h3>
-            <div className="relative">
-              <ResponsiveContainer width="100%" height={180}>
-                <PieChart>
-                  <Pie
-                    data={categoryPieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={75}
-                    paddingAngle={3}
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={800}
-                  >
-                    {categoryPieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-xl font-bold text-aqua-secondary">{stats?.monthlyOrders ?? 0}</span>
-                <span className="text-[11px] text-aqua-text-muted">sipariş</span>
-              </div>
-            </div>
-            <div className="space-y-2 mt-3">
-              {categoryPieData.map((cat) => (
-                <div key={cat.name} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
-                    <span className="text-aqua-text-secondary">{cat.name}</span>
-                  </div>
-                  <span className="font-medium text-aqua-secondary">%{cat.value}</span>
+      {/* Primary KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5">
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)
+          : primaryKpis.map((kpi) => (
+            <Link
+              key={kpi.label}
+              to={kpi.href}
+              className="group relative bg-white rounded-2xl border border-slate-100 p-6 hover:border-slate-200 hover:shadow-md transition-all overflow-hidden"
+            >
+              <div className={cn('absolute top-0 left-0 right-0 h-1 bg-gradient-to-r opacity-80', kpi.accent)} />
+              <div className="flex items-start justify-between">
+                <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center', kpi.bg)}>
+                  <kpi.icon className={cn('w-5 h-5', kpi.text)} />
                 </div>
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition-all" />
+              </div>
+              <p className="text-2xl font-bold text-slate-900 mt-4 tracking-tight">{kpi.value}</p>
+              <p className="text-sm font-medium text-slate-700 mt-0.5">{kpi.label}</p>
+              <p className="text-xs text-slate-400 mt-1">{kpi.sub}</p>
+            </Link>
+          ))}
+      </div>
+
+      {/* Attention banner */}
+      {!loading && attentionItems.length > 0 && (
+        <AdminCard className="!p-0 overflow-hidden border-amber-200/60 bg-gradient-to-r from-amber-50/80 to-white">
+          <div className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex items-center gap-2 text-amber-800">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-semibold">{attentionItems.length} konu dikkat gerektiriyor</span>
+            </div>
+            <div className="flex flex-wrap gap-2 sm:ml-auto">
+              {attentionItems.slice(0, 4).map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-amber-200 text-xs font-medium text-amber-900 hover:bg-amber-50 transition-colors"
+                >
+                  {item.label}
+                  <span className="font-bold">{item.value}</span>
+                </Link>
               ))}
             </div>
           </div>
-        </ScrollReveal>
+        </AdminCard>
+      )}
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 lg:gap-6">
+        <AdminCard className="xl:col-span-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Satış Trendi</h2>
+              <p className="text-xs text-slate-400 mt-0.5">Dönemsel ciro grafiği</p>
+            </div>
+            <div className="flex bg-slate-100 rounded-xl p-1 self-start">
+              {([
+                ['week', 'Haftalık'],
+                ['month', 'Aylık'],
+                ['year', 'Yıllık'],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setChartRange(key)}
+                  className={cn(
+                    'px-3 py-1.5 text-xs font-medium rounded-lg transition-all',
+                    chartRange === key
+                      ? 'bg-white text-sky-700 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700',
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {loading ? (
+            <div className="h-[280px] flex items-center justify-center text-slate-400">
+              <Loader2 className="w-6 h-6 animate-spin" />
+            </div>
+          ) : chartData.every((d) => d.sales === 0) ? (
+            <div className="h-[280px] flex flex-col items-center justify-center text-center px-4">
+              <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center mb-3">
+                <TrendingUp className="w-6 h-6 text-slate-300" />
+              </div>
+              <p className="text-sm font-medium text-slate-600">Henüz satış verisi yok</p>
+              <p className="text-xs text-slate-400 mt-1">İlk siparişler geldiğinde grafik burada görünecek.</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="dashSalesGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={yFormatter} width={48} />
+                <Tooltip
+                  formatter={(value: number) => [`₺${value.toLocaleString('tr-TR')}`, 'Ciro']}
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  }}
+                />
+                <Area type="monotone" dataKey="sales" stroke="#0ea5e9" strokeWidth={2} fill="url(#dashSalesGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </AdminCard>
+
+        <AdminCard>
+          <h2 className="text-base font-semibold text-slate-900">Katalog Dağılımı</h2>
+          <p className="text-xs text-slate-400 mt-0.5 mb-5">Ürün sayısına göre kategoriler</p>
+          {loading ? (
+            <div className="h-[220px] flex items-center justify-center">
+              <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+            </div>
+          ) : pieData.length === 0 ? (
+            <AdminEmpty message="Kategori verisi yok" />
+          ) : (
+            <>
+              <div className="relative">
+                <ResponsiveContainer width="100%" height={180}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={52}
+                      outerRadius={78}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {pieData.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-2xl font-bold text-slate-900">
+                    {pieData.reduce((s, c) => s + c.value, 0)}
+                  </span>
+                  <span className="text-[11px] text-slate-400">ürün</span>
+                </div>
+              </div>
+              <div className="space-y-2 mt-2 max-h-[160px] overflow-y-auto pr-1">
+                {pieData.map((cat) => (
+                  <div key={cat.name} className="flex items-center justify-between text-xs gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                      <span className="text-slate-600 truncate">{cat.name}</span>
+                    </div>
+                    <span className="font-semibold text-slate-800 flex-shrink-0">{cat.value}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </AdminCard>
       </div>
 
-      {/* Orders Table */}
-      <ScrollReveal delay={0.5} className="mb-6">
-        <div className="bg-white border border-aqua-border-light rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-aqua-bg">
-            <h3 className="text-base font-semibold text-aqua-secondary">Son Siparişler</h3>
-            <Link to="/admin" className="text-[13px] text-aqua-primary hover:underline">Tümünü Gör</Link>
+      {/* Operations grid */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">Operasyon Özeti</h2>
+            <p className="text-xs text-slate-400 mt-0.5">Tüm metrikler — tıklayarak ilgili sayfaya gidin</p>
           </div>
-          <div className="overflow-x-auto">
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {loading
+            ? Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="animate-pulse h-24 bg-white rounded-xl border border-slate-100" />
+            ))
+            : operations.map((op) => (
+              <Link
+                key={op.label}
+                to={op.href}
+                className={cn(
+                  'flex flex-col justify-between p-4 rounded-xl border bg-white transition-all hover:shadow-sm hover:-translate-y-0.5 min-h-[96px]',
+                  op.urgent ? 'border-amber-200 bg-amber-50/30' : 'border-slate-100 hover:border-slate-200',
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <op.icon className={cn('w-4 h-4', op.urgent ? 'text-amber-600' : 'text-slate-400')} />
+                  {op.urgent && <span className="w-2 h-2 rounded-full bg-amber-500" />}
+                </div>
+                <div className="mt-3">
+                  <p className="text-xl font-bold text-slate-900 leading-none">{op.value}</p>
+                  <p className="text-[11px] text-slate-500 mt-1.5 leading-snug">{op.label}</p>
+                </div>
+              </Link>
+            ))}
+        </div>
+      </div>
+
+      {/* Recent orders + low stock */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 lg:gap-6">
+        <AdminTableWrap className="xl:col-span-2">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Son Siparişler</h2>
+              <p className="text-xs text-slate-400">En son gelen siparişler</p>
+            </div>
+            <Link to="/admin/siparisler" className="text-xs font-medium text-sky-600 hover:text-sky-700 flex items-center gap-1">
+              Tümünü gör <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          {loading ? (
+            <div className="py-16 flex justify-center text-slate-400"><Loader2 className="w-6 h-6 animate-spin" /></div>
+          ) : recentOrders.length === 0 ? (
+            <AdminEmpty message="Henüz sipariş yok" />
+          ) : (
             <table className="w-full">
               <thead>
-                <tr className="bg-aqua-bg/50">
-                  {['Sipariş No', 'Müşteri', 'Ürün', 'Tutar', 'Durum', 'Tarih', 'İşlem'].map((h) => (
-                    <th key={h} className="text-left px-6 py-3 text-[11px] font-semibold text-aqua-text-muted uppercase tracking-wider">
+                <tr className="bg-slate-50/80">
+                  {['Sipariş', 'Müşteri', 'Tutar', 'Durum', ''].map((h) => (
+                    <th key={h} className="text-left px-5 py-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {recentOrders.map((order, i) => (
-                  <motion.tr
-                    key={order.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.04 }}
-                    className="border-b border-aqua-bg last:border-0 hover:bg-aqua-bg/30 transition-colors"
-                  >
-                    <td className="px-6 py-3.5 text-sm font-medium text-aqua-primary">{order.order_number}</td>
-                    <td className="px-6 py-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 bg-aqua-primary/10 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-bold text-aqua-primary">
-                            {(order.profiles as { name?: string } | null)?.name?.[0] ?? 'M'}
-                          </span>
+                {recentOrders.map((order) => {
+                  const statusTr = orderStatusToTr(order.status);
+                  const customerName = (order.profiles as { name?: string } | null)?.name ?? 'Müşteri';
+                  return (
+                    <tr key={order.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50">
+                      <td className="px-5 py-3.5">
+                        <p className="text-sm font-semibold text-sky-700">{order.order_number}</p>
+                        <p className="text-[11px] text-slate-400">
+                          {new Date(order.created_at).toLocaleDateString('tr-TR')}
+                        </p>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 bg-sky-50 rounded-full flex items-center justify-center text-xs font-bold text-sky-700">
+                            {customerName[0]}
+                          </div>
+                          <span className="text-sm text-slate-700">{customerName}</span>
                         </div>
-                        <span className="text-sm font-medium text-aqua-secondary">
-                          {(order.profiles as { name?: string } | null)?.name ?? 'Müşteri'}
+                      </td>
+                      <td className="px-5 py-3.5 text-sm font-semibold text-slate-900">
+                        {Number(order.total).toLocaleString('tr-TR')}₺
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className={cn('text-[11px] font-medium px-2 py-0.5 rounded-full', statusStyles[statusTr] ?? 'bg-slate-100 text-slate-600')}>
+                          {statusTr}
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-3.5 text-[13px] text-aqua-text-secondary">—</td>
-                    <td className="px-6 py-3.5 text-sm font-semibold text-aqua-secondary">
-                      {Number(order.total).toLocaleString('tr-TR')}₺
-                    </td>
-                    <td className="px-6 py-3.5">
-                      <span className={cn('text-[11px] font-semibold px-2.5 py-1 rounded-md', statusColors[orderStatusToTr(order.status)] ?? 'bg-gray-100 text-gray-600')}>
-                        {orderStatusToTr(order.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3.5 text-[13px] text-aqua-text-muted">
-                      {new Date(order.created_at).toLocaleDateString('tr-TR')}
-                    </td>
-                    <td className="px-6 py-3.5">
-                      <Link to={`/admin/siparisler/${order.id}`} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aqua-bg transition-colors">
-                        <Eye className="w-4 h-4 text-aqua-text-muted" />
-                      </Link>
-                    </td>
-                  </motion.tr>
-                ))}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <Link
+                          to={`/admin/siparisler/${order.id}`}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-sky-50 text-slate-400 hover:text-sky-600 transition-colors"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-          </div>
-        </div>
-      </ScrollReveal>
+          )}
+        </AdminTableWrap>
 
-      {/* Bottom Row - 4 Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-5">
-        {/* Pending Tasks */}
-        <ScrollReveal delay={0.55}>
-          <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold text-aqua-secondary flex items-center gap-1.5">
-                <ClipboardList className="w-4 h-4 text-aqua-primary" />
-                Bekleyen Görevler
-              </h4>
-              <span className="bg-aqua-warning/10 text-aqua-warning text-[11px] font-semibold px-2 py-0.5 rounded-md">0 Görev</span>
+        <AdminCard>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Düşük Stok</h2>
+              <p className="text-xs text-slate-400">10 adet ve altı</p>
             </div>
-            <div className="space-y-2 text-center py-4 text-xs text-aqua-text-muted">
-              Bekleyen görev yok
-            </div>
+            {lowStock.length > 0 && (
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-600">
+                {lowStock.length}
+              </span>
+            )}
           </div>
-        </ScrollReveal>
-
-        {/* Critical Stock Alerts */}
-        <ScrollReveal delay={0.6}>
-          <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold text-aqua-secondary flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4 text-aqua-danger" />
-                Kritik Stok Uyarıları
-              </h4>
-              <span className="bg-aqua-danger/10 text-aqua-danger text-[11px] font-semibold px-2 py-0.5 rounded-md">{lowStock.filter((p) => p.stock <= 5).length} Ürün</span>
+          {loading ? (
+            <div className="py-12 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>
+          ) : lowStock.length === 0 ? (
+            <div className="text-center py-10">
+              <Package className="w-8 h-8 text-slate-200 mx-auto mb-2" />
+              <p className="text-sm text-slate-500">Stoklar yeterli</p>
             </div>
-            <div className="space-y-3">
-              {lowStock.filter((p) => p.stock <= 5).map((p) => (
-                <div key={p.sku} className="flex items-center gap-3 p-3 rounded-xl bg-red-50/50 border border-red-100">
-                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Package className="w-4 h-4 text-red-400" />
+          ) : (
+            <div className="space-y-2">
+              {lowStock.slice(0, 6).map((p) => (
+                <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+                  <div className={cn(
+                    'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
+                    p.stock <= 3 ? 'bg-red-50' : 'bg-amber-50',
+                  )}>
+                    <Package className={cn('w-4 h-4', p.stock <= 3 ? 'text-red-500' : 'text-amber-500')} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-aqua-secondary line-clamp-1">{p.name}</p>
-                    <p className="text-[10px] text-aqua-text-muted">{p.sku}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-slate-800 line-clamp-1">{p.name}</p>
+                    <p className="text-[10px] text-slate-400">{p.sku}</p>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <span className="text-lg font-bold text-aqua-danger">{p.stock}</span>
-                    <p className="text-[10px] text-aqua-text-muted">adet</p>
-                  </div>
+                  <span className={cn(
+                    'text-sm font-bold flex-shrink-0',
+                    p.stock <= 3 ? 'text-red-600' : 'text-amber-600',
+                  )}>
+                    {p.stock}
+                  </span>
                 </div>
               ))}
             </div>
-            <Link to="/admin/stok" className="flex items-center justify-center gap-1.5 mt-4 text-xs font-semibold text-aqua-primary hover:text-aqua-primary-dark transition-colors">
-              Tüm Stokları Gör <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </ScrollReveal>
-
-        {/* Today's Services */}
-        <ScrollReveal delay={0.65}>
-          <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold text-aqua-secondary flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-aqua-primary" />
-                Bugünkü Servisler
-              </h4>
-              <span className="bg-aqua-primary/10 text-aqua-primary text-[11px] font-semibold px-2 py-0.5 rounded-md">{stats?.todayInstallations ?? 0} Randevu</span>
-            </div>
-            <div className="space-y-2 text-center py-4 text-xs text-aqua-text-muted">
-              Bugün planlı servis yok
-            </div>
-            <Link to="/admin/servis-takvimi" className="flex items-center justify-center gap-1.5 mt-4 text-xs font-semibold text-aqua-primary hover:text-aqua-primary-dark transition-colors">
-              Takvimi Gör <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </ScrollReveal>
-
-        {/* Low Stock */}
-        <ScrollReveal delay={0.7}>
-          <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold text-aqua-secondary">Düşük Stok Ürünleri</h4>
-              <span className="bg-aqua-danger/10 text-aqua-danger text-[11px] font-semibold px-2 py-0.5 rounded-md">{lowStock.length} Ürün</span>
-            </div>
-            <div className="space-y-3">
-              {lowStock.map((p) => (
-                <div key={p.id} className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-aqua-bg rounded-lg flex items-center justify-center flex-shrink-0">
-                    <ShoppingBag className="w-4 h-4 text-aqua-primary/30" />
-                  </div>
-                  <p className="text-[13px] font-medium text-aqua-secondary flex-1 line-clamp-1">{p.name}</p>
-                  <span className="text-xs text-aqua-danger font-medium flex-shrink-0">{p.stock} adet</span>
-                </div>
-              ))}
-            </div>
-            <Link to="/admin/stok" className="flex items-center justify-center gap-1.5 mt-4 text-xs font-semibold text-aqua-primary hover:text-aqua-primary-dark transition-colors">
-              Stok Yönetimi <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </ScrollReveal>
+          )}
+          <Link
+            to="/admin/stok"
+            className="flex items-center justify-center gap-1.5 mt-5 pt-4 border-t border-slate-100 text-xs font-semibold text-sky-600 hover:text-sky-700"
+          >
+            Stok yönetimi <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </AdminCard>
       </div>
-      </>
+    </div>
   );
 }

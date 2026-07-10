@@ -235,7 +235,7 @@ export function AdminLayout() {
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-8 overflow-y-auto w-full max-w-[1400px]">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 overflow-y-auto w-full max-w-[1600px] mx-auto">
           <Outlet />
         </main>
       </div>

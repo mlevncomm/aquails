@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function AdminPageHeader({
   title,
@@ -157,9 +158,9 @@ export function AdminEmpty({ message }: { message: string }) {
   );
 }
 
-export function AdminTableWrap({ children }: { children: ReactNode }) {
+export function AdminTableWrap({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <AdminCard padding={false} className="overflow-hidden">
+    <AdminCard padding={false} className={cn('overflow-hidden', className)}>
       <div className="overflow-x-auto">{children}</div>
     </AdminCard>
   );
