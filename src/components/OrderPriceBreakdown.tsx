@@ -26,16 +26,17 @@ export function OrderPriceBreakdown({
   className = '',
   compact = false,
 }: OrderPriceBreakdownProps) {
+  const rate = taxConfig.rate > 0 ? taxConfig.rate : 20;
   const totals = calcOrderTotals({
     subtotal,
     shipping,
     codFee,
     discount,
-    taxRate: taxConfig.rate,
+    taxRate: rate,
     priceIncludesVat: taxConfig.priceIncludesVat,
   });
 
-  const hasTax = taxConfig.rate > 0;
+  const hasTax = rate > 0;
   const totalWithVatLabel = taxConfig.priceIncludesVat ? `${totalLabel} (KDV Dahil)` : `${totalLabel} (KDV Dahil)`;
 
   return (
@@ -75,7 +76,7 @@ export function OrderPriceBreakdown({
           )}
           <div className="flex justify-between text-sm gap-4">
             <span className="text-[#5A6B7B] shrink-0">
-              KDV (%{taxConfig.rate})
+              KDV (%{rate})
               {taxConfig.priceIncludesVat ? ' — fiyata dahil' : ''}
             </span>
             <span className="font-semibold text-[#1A73E8] text-right">{formatPrice(totals.vat)}</span>

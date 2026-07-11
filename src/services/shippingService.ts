@@ -56,8 +56,9 @@ export async function saveShippingConfig(config: ShippingConfig): Promise<{ succ
 
 export async function getTaxConfig(): Promise<TaxConfig> {
   const raw = await getSetting<Partial<TaxConfig>>('tax', DEFAULT_TAX);
+  const rate = Number(raw.rate);
   return {
-    rate: Number(raw.rate) > 0 ? Number(raw.rate) : DEFAULT_TAX.rate,
+    rate: Number.isFinite(rate) && rate > 0 ? rate : DEFAULT_TAX.rate,
     displayInCheckout: raw.displayInCheckout !== false && raw.displayInCheckout !== ('false' as unknown as boolean),
     priceIncludesVat: raw.priceIncludesVat !== false && raw.priceIncludesVat !== ('false' as unknown as boolean),
   };

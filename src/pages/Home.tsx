@@ -66,6 +66,14 @@ const nasilCalisir = [
   { step: '04', title: 'Filtreyi Takip Et', desc: 'Aquails filtre değişimlerini sizin için hatırlatır.', icon: ClipboardCheck },
 ];
 
+const heroStats = [
+  { v: '10.000+', l: 'Mutlu Müşteri' },
+  { v: '500+', l: 'Servis Noktası' },
+  { v: '%99', l: 'Memnuniyet' },
+];
+
+const heroBadges = ['Ücretsiz Keşif', 'Kurulum Desteği', '5 Yıl Garanti', 'Filtre Hatırlatma'];
+
 const impactStats = [
   { v: '10.000+', l: 'Mutlu Müşteri', sub: 'Türkiye geneli' },
   { v: '%99', l: 'Klor Azaltma', sub: 'Laboratuvar testli' },
@@ -126,60 +134,122 @@ export default function Home() {
         schema={{ ...getOrganizationSchema(), ...getWebsiteSchema() }}
       />
       <PageLayout variant="default">
-        {/* ——— CINEMATIC HERO ——— */}
-        <section className="relative min-h-[88vh] sm:min-h-[92vh] flex items-center justify-center overflow-hidden">
+        {/* ——— HERO: Split layout + zengin görseller ——— */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-[#EBF4FF] via-[#F0F8FF] to-[#E8F4FF]">
           <img
-            src="/images/service-installation.jpg"
+            src="/images/hero-bg.jpg"
             alt=""
-            className="absolute inset-0 w-full h-full object-cover scale-105"
+            className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay"
             aria-hidden
           />
-          <div className="absolute inset-0 hero-cinematic" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(26,115,232,0.15)_0%,transparent_70%)]" />
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#1A73E8]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#00D4C8]/10 rounded-full blur-3xl pointer-events-none" />
 
-          <PageContainer className="relative z-10 text-center py-20 sm:py-28">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="max-w-3xl mx-auto"
-            >
-              <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs font-medium px-4 py-2 rounded-full mb-6">
-                <Droplet className="w-3.5 h-3.5 text-[#4FC3F7]" />
-                Akıllı Su Teknolojisi · 2008&apos;den Beri
-              </span>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] text-balance tracking-tight">
-                Doğayla Uyumlu,
-                <span className="block mt-2 text-[#4FC3F7]">Akıllı Su Arıtma</span>
-              </h1>
-              <p className="text-sm sm:text-base md:text-lg text-white/75 mt-6 leading-relaxed max-w-2xl mx-auto">
-                Aquails; eviniz ve iş yeriniz için modern arıtma cihazları, akıllı filtre takibi ve profesyonel servis hizmetlerini tek platformda sunar.
-              </p>
-              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-10">
-                <Link
-                  to="/urunler"
-                  className="inline-flex items-center gap-2 bg-white text-[#0D2137] px-7 sm:px-9 py-3.5 sm:py-4 rounded-full font-semibold text-sm hover:bg-[#F0F6FF] hover:shadow-xl transition-all"
-                >
-                  Ürünleri Keşfet <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  to="/servis-randevusu"
-                  className="inline-flex items-center gap-2 border-2 border-white/40 text-white px-7 sm:px-9 py-3.5 sm:py-4 rounded-full font-semibold text-sm hover:bg-white/10 transition-all"
-                >
-                  Ücretsiz Keşif Al
-                </Link>
-              </div>
-            </motion.div>
+          <PageContainer className="relative py-12 sm:py-16 lg:py-24">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center min-w-0">
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="min-w-0 order-2 lg:order-1"
+              >
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {heroBadges.map(b => (
+                    <span key={b} className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-[11px] sm:text-xs font-medium text-[#1A73E8] px-3 py-1.5 rounded-full border border-[#1A73E8]/15 shadow-sm">
+                      <Check className="w-3 h-3 flex-shrink-0" />{b}
+                    </span>
+                  ))}
+                </div>
+
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold text-[#0D2137] leading-[1.12] text-balance">
+                  Daha Temiz Su,
+                  <span className="block gradient-text mt-1">Daha Akıllı Teknoloji</span>
+                </h1>
+                <p className="text-sm sm:text-base text-[#5A6B7B] mt-5 leading-relaxed max-w-lg">
+                  Aquails; eviniz ve iş yeriniz için modern su arıtma cihazları, akıllı filtre takibi ve profesyonel servis hizmetlerini tek platformda sunar.
+                </p>
+
+                <div className="flex flex-wrap gap-3 mt-8">
+                  <Link
+                    to="/urunler"
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-[#1A73E8] to-[#1557B0] text-white px-6 sm:px-8 py-3.5 rounded-full font-semibold text-sm hover:shadow-lg hover:shadow-[#1A73E8]/25 transition-all"
+                  >
+                    Ürünleri İncele <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    to="/servis-randevusu"
+                    className="inline-flex items-center gap-2 bg-white border-2 border-[#1A73E8]/30 text-[#1A73E8] px-6 sm:px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-[#F0F6FF] transition-all shadow-sm"
+                  >
+                    Servis Randevusu
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-10">
+                  {heroStats.map(s => (
+                    <div key={s.l} className="bg-white/80 backdrop-blur-sm rounded-2xl p-3 sm:p-4 text-center border border-[#E8F0FE] shadow-aquails card-lift">
+                      <p className="text-lg sm:text-2xl font-bold text-[#0D2137]">{s.v}</p>
+                      <p className="text-[10px] sm:text-[11px] text-[#8B9DAF] mt-0.5">{s.l}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7, delay: 0.15 }}
+                className="relative min-w-0 order-1 lg:order-2"
+              >
+                <div className="absolute -inset-3 bg-gradient-to-br from-[#1A73E8]/25 to-[#00D4C8]/20 rounded-[2rem] blur-2xl pointer-events-none" />
+                <div className="relative bg-white rounded-3xl p-3 sm:p-4 shadow-aquails-hover border border-white/80">
+                  <img
+                    src="/images/hero-product.jpg"
+                    alt="Aquails Su Arıtma Cihazı"
+                    className="w-full aspect-square object-cover rounded-2xl"
+                  />
+                </div>
+                <div className="absolute -bottom-3 left-2 sm:-bottom-4 sm:left-0 bg-white rounded-2xl p-3 sm:p-4 shadow-lg border border-[#E8F0FE] max-w-[210px]">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#00C9A7] to-[#00D4C8] rounded-xl flex items-center justify-center">
+                      <ShieldCheck className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#0D2137]">5 Yıl Garanti</p>
+                      <p className="text-[10px] text-[#8B9DAF]">Tam kapsamlı destek</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute -top-2 right-2 sm:-top-3 sm:right-0 bg-white rounded-2xl px-3 py-2 shadow-lg border border-[#E8F0FE]">
+                  <p className="text-xs font-bold text-[#1A73E8]">★ 4.9 / 5</p>
+                  <p className="text-[10px] text-[#8B9DAF]">10.000+ müşteri</p>
+                </div>
+              </motion.div>
+            </div>
           </PageContainer>
+        </section>
 
-          {/* Wave divider */}
-          <svg className="absolute bottom-0 left-0 w-full h-16 sm:h-24 text-[#F7FAFF]" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden>
-            <path fill="currentColor" d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,50 1440,40 L1440,80 L0,80 Z" />
-          </svg>
+        {/* ——— Görsel galeri şeridi ——— */}
+        <section className="py-6 bg-white border-y border-[#E8F0FE]/80 overflow-hidden">
+          <div className="responsive-scroll-x">
+            <div className="flex gap-3 px-4 sm:px-6 min-w-max sm:min-w-0 sm:grid sm:grid-cols-4 sm:max-w-[1280px] sm:mx-auto">
+              {[
+                { src: '/images/service-installation.jpg', label: 'Profesyonel Kurulum' },
+                { src: '/images/filter-subscription.jpg', label: 'Filtre Aboneliği' },
+                { src: '/images/campaign-1.jpg', label: 'Kampanyalar' },
+                { src: '/images/about-hero.jpg', label: 'Su Teknolojisi' },
+              ].map((img) => (
+                <div key={img.label} className="relative w-[220px] sm:w-auto h-[120px] sm:h-[140px] rounded-2xl overflow-hidden flex-shrink-0 card-lift">
+                  <img src={img.src} alt={img.label} className="w-full h-full object-cover" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0D2137]/70 to-transparent" />
+                  <p className="absolute bottom-2 left-3 text-xs font-semibold text-white">{img.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* ——— OVERLAPPING SOLUTION CARDS ——— */}
-        <section className="relative z-20 -mt-12 sm:-mt-16 pb-4">
+        <section className="relative z-20 pb-4 pt-6">
           <PageContainer>
             <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6" staggerDelay={0.1}>
               {heroSolutions.map((s) => (
