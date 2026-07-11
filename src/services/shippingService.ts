@@ -1,4 +1,5 @@
 import { getSupabaseOrNull } from '@/lib/supabase';
+import { calculateCartTax } from '@/services/taxService';
 
 export interface ShippingMethod {
   id: string;
@@ -28,7 +29,7 @@ const DEFAULT_SHIPPING: ShippingConfig = {
   codFee: 150,
 };
 
-const DEFAULT_TAX: TaxConfig = { rate: 20, displayInCheckout: true, priceIncludesVat: true };
+const DEFAULT_TAX: TaxConfig = { rate: 20, displayInCheckout: true, priceIncludesVat: false };
 
 async function getSetting<T>(key: string, fallback: T): Promise<T> {
   const supabase = getSupabaseOrNull();
@@ -60,7 +61,7 @@ export async function getTaxConfig(): Promise<TaxConfig> {
   return {
     rate: Number.isFinite(rate) && rate > 0 ? rate : DEFAULT_TAX.rate,
     displayInCheckout: raw.displayInCheckout !== false && raw.displayInCheckout !== ('false' as unknown as boolean),
-    priceIncludesVat: raw.priceIncludesVat !== false && raw.priceIncludesVat !== ('false' as unknown as boolean),
+    priceIncludesVat: raw.priceIncludesVat === true,
   };
 }
 
@@ -93,10 +94,23 @@ export interface OrderTotalsResult extends OrderTotalsInput {
 }
 
 export function calcOrderTotals(input: OrderTotalsInput): OrderTotalsResult {
-  const base = Math.max(
-    0,
-    input.subtotal + input.shipping + (input.codFee ?? 0) - (input.discount ?? 0),
-  );
-  const { net, vat, gross } = calcVatAmount(base, input.taxRate, input.priceIncludesVat);
-  return { ...input, codFee: input.codFee ?? 0, discount: input.discount ?? 0, net, vat, gross };
+  const result = calculateCartTax({
+    lines: [{ unitPrice: input.subtotal, quantity: 1 }],
+    shipping: input.shipping,
+    codFee: input.codFee,
+    discount: input.discount,
+    config: {
+      rate: input.taxRate,
+      priceIncludesVat: input.priceIncludesVat,
+      displayInCheckout: true,
+    },
+  });
+  return {
+    ...input,
+    codFee: input.codFee ?? 0,
+    discount: input.discount ?? 0,
+    net: result.totalNet,
+    vat: result.totalTax,
+    gross: result.totalGross,
+  };
 }

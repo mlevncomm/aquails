@@ -9,6 +9,8 @@ export interface Product {
   shortDescription: string;
   price: number;
   oldPrice: number | null;
+  /** Ürün bazlı KDV oranı (%); yoksa site varsayılanı kullanılır */
+  taxRate?: number;
   rating: number;
   reviewCount: number;
   stock: number;

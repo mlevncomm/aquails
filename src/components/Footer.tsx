@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { BrandLogo } from '@/components/BrandLogo';
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 
 const quickLinks = ['Ana Sayfa', 'Ürünler', 'Kampanyalar', 'Blog', 'SSS'];
@@ -38,12 +39,7 @@ export function Footer() {
             {/* Brand */}
             <div>
               <div className="mb-4">
-                <img
-                  src="/images/brand/aquails-logo-dark.png"
-                  alt="Aquails"
-                  className="h-8 w-auto"
-                  loading="lazy"
-                />
+                <BrandLogo variant="logo" inverted className="h-8" />
               </div>
               <p className="text-sm text-aqua-text-muted leading-relaxed">
                 2008'den beri su arıtma teknolojilerinde güvenilir çözüm ortağınız.

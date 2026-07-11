@@ -6,6 +6,7 @@ import { RatingStars } from './RatingStars';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
 import { useToastStore } from '@/components/Toast';
+import { ProductPrice } from '@/components/ProductPrice';
 import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
@@ -51,9 +52,7 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
         <h4 className="text-[13px] font-medium text-aqua-secondary line-clamp-1 group-hover:text-aqua-primary transition-colors">
           {product.name}
         </h4>
-        <p className="text-sm font-semibold text-aqua-secondary mt-1">
-          {product.price.toLocaleString('tr-TR')}₺
-        </p>
+        <ProductPrice product={product} size="sm" />
       </Link>
     );
   }
@@ -117,16 +116,7 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
             <RatingStars rating={product.rating} size="sm" showCount count={product.reviewCount} />
           </div>
 
-          <div className="flex items-center gap-2 mt-3">
-            <span className="text-lg font-bold text-aqua-secondary">
-              {product.price.toLocaleString('tr-TR')}₺
-            </span>
-            {product.oldPrice && (
-              <span className="text-sm text-aqua-text-muted line-through">
-                {product.oldPrice.toLocaleString('tr-TR')}₺
-              </span>
-            )}
-          </div>
+          <ProductPrice product={product} size="md" className="mt-3" />
 
           <div className="flex items-center gap-2 mt-3">
             <span className="text-[11px] font-medium bg-aqua-success/10 text-aqua-success px-2 py-0.5 rounded-md">

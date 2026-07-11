@@ -96,6 +96,7 @@ export interface Database {
           specifications: Record<string, string>;
           badge: 'discount' | 'premium' | 'new' | null;
           discount_percent: number | null;
+          tax_rate: number;
           is_active: boolean;
           created_at: string;
           updated_at: string;
@@ -117,6 +118,7 @@ export interface Database {
           specifications?: Record<string, string>;
           badge?: 'discount' | 'premium' | 'new' | null;
           discount_percent?: number | null;
+          tax_rate?: number;
           is_active?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -138,6 +140,7 @@ export interface Database {
           specifications?: Record<string, string>;
           badge?: 'discount' | 'premium' | 'new' | null;
           discount_percent?: number | null;
+          tax_rate?: number;
           is_active?: boolean;
           created_at?: string;
           updated_at?: string;

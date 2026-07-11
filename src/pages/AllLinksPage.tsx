@@ -8,6 +8,7 @@ import {
   Droplet, Zap, Coffee, Building2, Settings, ChevronRight,
 } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
+import { BrandLogo } from '@/components/BrandLogo';
 import { SEO } from '@/components/SEO';
 import { useCatalog } from '@/hooks/useCatalog';
 import { openWhatsApp, getWhatsAppUrl } from '@/services/whatsappService';
@@ -175,7 +176,7 @@ export default function AllLinksPage() {
             <div className="relative w-[88px] h-[88px] mx-auto mb-4">
               <div className="absolute inset-0 rounded-[28px] bg-gradient-to-br from-sky-400 via-blue-500 to-cyan-400 p-[3px] shadow-lg shadow-sky-500/20">
                 <div className="w-full h-full bg-white rounded-[25px] flex items-center justify-center overflow-hidden">
-                  <img src="/images/brand/aquails-icon.png" alt="Aquails" className="w-14 h-14 object-contain" />
+                  <BrandLogo variant="icon" className="w-14 h-14" />
                 </div>
               </div>
             </div>

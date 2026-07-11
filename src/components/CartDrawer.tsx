@@ -4,11 +4,11 @@ import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
 import { useCartPricing } from '@/hooks/useCartPricing';
 import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
+import { CartLinePrice } from '@/components/CartLinePrice';
 
 export function CartDrawer() {
-  const { items, isDrawerOpen, closeDrawer, updateQuantity, removeItem, getSubtotal } = useCartStore();
-  const subtotal = getSubtotal();
-  const { taxConfig, shipping } = useCartPricing(subtotal);
+  const { items, isDrawerOpen, closeDrawer, updateQuantity, removeItem } = useCartStore();
+  const { taxConfig, taxTotals } = useCartPricing(items);
 
   return (
     <AnimatePresence>
@@ -81,7 +81,7 @@ export function CartDrawer() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-aqua-secondary truncate">{item.product.name}</p>
                           <p className="text-sm font-semibold text-aqua-secondary mt-1">
-                            {(item.product.price * item.quantity).toLocaleString('tr-TR')} ₺
+                            <CartLinePrice product={item.product} quantity={item.quantity} />
                           </p>
                           <div className="flex items-center gap-2 mt-2">
                             <button
@@ -115,8 +115,7 @@ export function CartDrawer() {
             {items.length > 0 && (
               <div className="p-5 border-t border-aqua-border-light bg-white min-w-0">
                 <OrderPriceBreakdown
-                  subtotal={subtotal}
-                  shipping={shipping}
+                  totals={taxTotals}
                   taxConfig={taxConfig}
                   totalLabel="Toplam"
                   compact

@@ -13,19 +13,19 @@ import { openWhatsApp, getCartOrderMessage } from '@/services/whatsappService';
 import { SEO } from '@/components/SEO';
 import { useCartPricing } from '@/hooks/useCartPricing';
 import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
+import { CartLinePrice } from '@/components/CartLinePrice';
+import { getProductGrossPrice } from '@/lib/pricing';
 
 
 export default function Cart() {
-  const { items, updateQuantity, removeItem, getSubtotal } = useCartStore();
-  const subtotal = getSubtotal();
+  const { items, updateQuantity, removeItem } = useCartStore();
   const {
     taxConfig,
-    shipping,
     total,
+    taxTotals,
     freeShippingProgress,
     remainingForFreeShipping,
-  } = useCartPricing(subtotal);
-  const discount = 0;
+  } = useCartPricing(items);
 
   const recommendations = items.length > 0 ? getSmartRecommendations(items) : [];
 
@@ -115,7 +115,7 @@ export default function Cart() {
                         </Link>
                         <p className="text-xs text-[#8B9DAF] mt-1">{item.product.category}</p>
                         <p className="text-sm text-[#5A6B7B] mt-1">
-                          {item.product.price.toLocaleString('tr-TR')} ₺
+                          <CartLinePrice product={item.product} quantity={1} layout="unit" />
                         </p>
                       </div>
 
@@ -139,7 +139,7 @@ export default function Cart() {
                       {/* Price */}
                       <div className="text-right w-20 flex-shrink-0 hidden sm:block">
                         <p className="text-base font-semibold text-[#0D2137]">
-                          {(item.product.price * item.quantity).toLocaleString('tr-TR')} ₺
+                          <CartLinePrice product={item.product} quantity={item.quantity} />
                         </p>
                       </div>
 
@@ -221,9 +221,7 @@ export default function Cart() {
 
                   <div className="space-y-3">
                     <OrderPriceBreakdown
-                      subtotal={subtotal}
-                      shipping={shipping}
-                      discount={discount}
+                      totals={taxTotals}
                       taxConfig={taxConfig}
                       totalLabel="Toplam"
                     />
@@ -254,7 +252,11 @@ export default function Cart() {
                     onClick={() =>
                       openWhatsApp(
                         getCartOrderMessage(
-                          items.map((i) => ({ name: i.product.name, quantity: i.quantity, price: i.product.price })),
+                          items.map((i) => ({
+                            name: i.product.name,
+                            quantity: i.quantity,
+                            price: getProductGrossPrice(i.product, taxConfig.rate),
+                          })),
                           total
                         )
                       )

@@ -1,17 +1,29 @@
 import { useState, useEffect, useMemo } from 'react';
-import { getShippingConfig, getTaxConfig, calcOrderTotals, type TaxConfig } from '@/services/shippingService';
+import type { CartItem } from '@/types';
+import { getShippingConfig, getTaxConfig, type TaxConfig } from '@/services/shippingService';
+import { calculateCartTax, cartItemsToTaxLines } from '@/services/taxService';
+import { getProductGrossPrice } from '@/lib/pricing';
 import { getSiteSettings } from '@/services/settingsService';
 
-const DEFAULT_TAX: TaxConfig = { rate: 20, displayInCheckout: true, priceIncludesVat: true };
+const DEFAULT_TAX: TaxConfig = { rate: 20, displayInCheckout: true, priceIncludesVat: false };
 
 export function useCartPricing(
-  subtotal: number,
-  options?: { codFee?: number; discount?: number },
+  items: CartItem[],
+  options?: { codFee?: number; discount?: number; shipping?: number },
 ) {
   const [taxConfig, setTaxConfig] = useState<TaxConfig>(DEFAULT_TAX);
   const [shippingCost, setShippingCost] = useState(49);
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(1500);
   const [loaded, setLoaded] = useState(false);
+
+  const subtotal = useMemo(
+    () =>
+      items.reduce(
+        (sum, i) => sum + getProductGrossPrice(i.product, taxConfig.rate) * i.quantity,
+        0,
+      ),
+    [items, taxConfig.rate],
+  );
 
   useEffect(() => {
     void Promise.all([
@@ -26,22 +38,25 @@ export function useCartPricing(
 
   const codFee = options?.codFee ?? 0;
   const discount = options?.discount ?? 0;
-  const shipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
+  const autoShipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
+  const shipping = options?.shipping ?? autoShipping;
 
-  const orderTotals = useMemo(
+  const taxTotals = useMemo(
     () =>
-      calcOrderTotals({
-        subtotal,
+      calculateCartTax({
+        lines: cartItemsToTaxLines(items),
         shipping,
         codFee,
         discount,
-        taxRate: taxConfig.rate,
-        priceIncludesVat: taxConfig.priceIncludesVat,
+        config: { ...taxConfig, priceIncludesVat: false },
       }),
-    [subtotal, shipping, codFee, discount, taxConfig.rate, taxConfig.priceIncludesVat],
+    [items, shipping, codFee, discount, taxConfig],
   );
 
-  const freeShippingProgress = Math.min(100, freeShippingThreshold > 0 ? (subtotal / freeShippingThreshold) * 100 : 0);
+  const freeShippingProgress = Math.min(
+    100,
+    freeShippingThreshold > 0 ? (subtotal / freeShippingThreshold) * 100 : 0,
+  );
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
 
   return {
@@ -50,8 +65,9 @@ export function useCartPricing(
     shippingCost,
     codFee,
     discount,
-    total: orderTotals.gross,
-    orderTotals,
+    subtotal,
+    total: taxTotals.totalGross,
+    taxTotals,
     freeShippingThreshold,
     freeShippingProgress,
     remainingForFreeShipping,

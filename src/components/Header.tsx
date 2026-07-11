@@ -15,6 +15,7 @@ import { useCompareStore } from '@/stores/compareStore';
 import { logout } from '@/services/authService';
 import { categories as staticCategories } from '@/data';
 import { useCatalog } from '@/hooks/useCatalog';
+import { BrandLogo } from '@/components/BrandLogo';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -114,18 +115,8 @@ export function Header() {
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0 min-w-0">
-            <img
-              src="/images/brand/aquails-logo-light.png"
-              alt="Aquails"
-              className="h-8 w-auto hidden sm:block"
-              loading="eager"
-            />
-            <img
-              src="/images/brand/aquails-icon.png"
-              alt="Aquails"
-              className="h-8 w-auto sm:hidden"
-              loading="eager"
-            />
+            <BrandLogo variant="logo" className="h-8 hidden sm:block" />
+            <BrandLogo variant="icon" className="h-8 w-8 sm:hidden" />
           </Link>
 
           {/* Desktop Nav */}
@@ -253,7 +244,7 @@ export function Header() {
               <div className="p-5">
                 <div className="flex items-center justify-between mb-6">
                   <Link to="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
-                    <img src="/images/brand/aquails-logo-light.png" alt="Aquails" className="h-8 w-auto" />
+                    <BrandLogo variant="logo" className="h-8" />
                   </Link>
                   <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-[#F0F6FF] rounded-lg"><X className="w-5 h-5" /></button>
                 </div>
