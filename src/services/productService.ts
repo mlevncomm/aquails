@@ -43,6 +43,7 @@ function mapDbProduct(row: ProductWithRelations): Product {
     shortDescription: row.short_description,
     price: Number(row.price),
     oldPrice: row.old_price != null ? Number(row.old_price) : null,
+    taxRate: 'tax_rate' in row && row.tax_rate != null ? Number(row.tax_rate) : undefined,
     rating: Number(row.rating),
     reviewCount: row.review_count,
     stock: row.stock,

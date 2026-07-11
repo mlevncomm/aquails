@@ -6,9 +6,8 @@ import { useCartPricing } from '@/hooks/useCartPricing';
 import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
 
 export function CartDrawer() {
-  const { items, isDrawerOpen, closeDrawer, updateQuantity, removeItem, getSubtotal } = useCartStore();
-  const subtotal = getSubtotal();
-  const { taxConfig, shipping } = useCartPricing(subtotal);
+  const { items, isDrawerOpen, closeDrawer, updateQuantity, removeItem } = useCartStore();
+  const { taxConfig, taxTotals } = useCartPricing(items);
 
   return (
     <AnimatePresence>
@@ -115,8 +114,7 @@ export function CartDrawer() {
             {items.length > 0 && (
               <div className="p-5 border-t border-aqua-border-light bg-white min-w-0">
                 <OrderPriceBreakdown
-                  subtotal={subtotal}
-                  shipping={shipping}
+                  totals={taxTotals}
                   taxConfig={taxConfig}
                   totalLabel="Toplam"
                   compact

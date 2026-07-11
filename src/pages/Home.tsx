@@ -72,7 +72,16 @@ const heroStats = [
   { v: '%99', l: 'Memnuniyet' },
 ];
 
-const heroBadges = ['Ücretsiz Keşif', 'Kurulum Desteği', '5 Yıl Garanti', 'Filtre Hatırlatma'];
+const trustMarquee = [
+  'Ücretsiz Keşif',
+  'Profesyonel Kurulum',
+  '5 Yıl Garanti',
+  'Orijinal Filtreler',
+  '7/24 Destek',
+  'PayTR Güvenli Ödeme',
+  '500+ Servis Noktası',
+  'Laboratuvar Testli',
+];
 
 const impactStats = [
   { v: '10.000+', l: 'Mutlu Müşteri', sub: 'Türkiye geneli' },
@@ -124,6 +133,8 @@ export default function Home() {
   };
 
   const shownCategories = catalogCategories.filter(c => categoryImages[c.id]).slice(0, 6);
+  const featuredProduct = catalogProducts.find(p => p.badge === 'premium') ?? catalogProducts[0];
+  const heroBadges = ['Ücretsiz Keşif', 'Kurulum Desteği', '5 Yıl Garanti', 'Filtre Hatırlatma'];
 
   return (
     <>
@@ -227,6 +238,83 @@ export default function Home() {
             </div>
           </PageContainer>
         </section>
+
+        {/* ——— Güven şeridi (marquee) ——— */}
+        <section className="py-3 bg-[#0D2137] overflow-hidden">
+          <div className="flex animate-marquee whitespace-nowrap">
+            {[...trustMarquee, ...trustMarquee].map((label, i) => (
+              <span key={`${label}-${i}`} className="inline-flex items-center gap-2 mx-6 text-xs sm:text-sm font-medium text-white/90">
+                <Check className="w-3.5 h-3.5 text-[#4FC3F7] flex-shrink-0" />
+                {label}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* ——— Öne çıkan ürün spotlight ——— */}
+        {featuredProduct && (
+          <section className="py-12 sm:py-16 bg-white">
+            <PageContainer>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center min-w-0">
+                <ScrollReveal className="relative order-2 lg:order-1">
+                  <div className="absolute -inset-4 bg-gradient-to-br from-[#1A73E8]/10 to-[#00D4C8]/10 rounded-[2rem] blur-2xl pointer-events-none" />
+                  <div className="relative bg-[#F8FBFF] rounded-3xl p-6 sm:p-8 border border-[#E8F0FE]">
+                    <span className="text-xs font-bold text-[#1A73E8] tracking-widest uppercase">Editörün Seçimi</span>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-[#0D2137] mt-2">{featuredProduct.name}</h2>
+                    <p className="text-sm text-[#5A6B7B] mt-3 leading-relaxed line-clamp-3">
+                      {featuredProduct.shortDescription || featuredProduct.description}
+                    </p>
+                    <div className="flex items-center gap-3 mt-5">
+                      <RatingStars rating={featuredProduct.rating} size="sm" />
+                      <span className="text-xs text-[#8B9DAF]">({featuredProduct.reviewCount} değerlendirme)</span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4 mt-6">
+                      <p className="text-2xl sm:text-3xl font-bold text-[#1A73E8]">
+                        {featuredProduct.price.toLocaleString('tr-TR')} ₺
+                      </p>
+                      {featuredProduct.oldPrice && (
+                        <p className="text-lg text-[#8B9DAF] line-through">
+                          {featuredProduct.oldPrice.toLocaleString('tr-TR')} ₺
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-3 mt-6">
+                      <Link
+                        to={`/urun/${featuredProduct.slug}`}
+                        className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all"
+                      >
+                        İncele <ArrowRight className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        to="/urun-secim-sihirbazi"
+                        className="inline-flex items-center gap-2 border-2 border-[#E8F0FE] text-[#5A6B7B] px-6 py-3 rounded-full font-medium text-sm hover:border-[#1A73E8] hover:text-[#1A73E8] transition-all"
+                      >
+                        <Sparkles className="w-4 h-4" /> Sihirbaz
+                      </Link>
+                    </div>
+                  </div>
+                </ScrollReveal>
+                <ScrollReveal x={20} delay={0.1} className="order-1 lg:order-2">
+                  <Link to={`/urun/${featuredProduct.slug}`} className="block relative group">
+                    <div className="absolute -inset-3 bg-gradient-to-br from-[#1A73E8]/20 to-[#00D4C8]/15 rounded-[2rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    <div className="relative bg-white rounded-3xl p-4 shadow-aquails-hover border border-[#E8F0FE] overflow-hidden">
+                      <img
+                        src={featuredProduct.images?.[0] || '/images/hero-product.jpg'}
+                        alt={featuredProduct.name}
+                        className="w-full aspect-square object-cover rounded-2xl group-hover:scale-[1.02] transition-transform duration-500"
+                      />
+                      {featuredProduct.badge && (
+                        <span className="absolute top-6 left-6 bg-[#1A73E8] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
+                          {featuredProduct.badge === 'premium' ? 'Premium' : featuredProduct.badge === 'new' ? 'Yeni' : 'İndirim'}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                </ScrollReveal>
+              </div>
+            </PageContainer>
+          </section>
+        )}
 
         {/* ——— Görsel galeri şeridi ——— */}
         <section className="py-6 bg-white border-y border-[#E8F0FE]/80 overflow-hidden">

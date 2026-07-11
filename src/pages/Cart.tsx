@@ -16,16 +16,14 @@ import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
 
 
 export default function Cart() {
-  const { items, updateQuantity, removeItem, getSubtotal } = useCartStore();
-  const subtotal = getSubtotal();
+  const { items, updateQuantity, removeItem } = useCartStore();
   const {
     taxConfig,
-    shipping,
     total,
+    taxTotals,
     freeShippingProgress,
     remainingForFreeShipping,
-  } = useCartPricing(subtotal);
-  const discount = 0;
+  } = useCartPricing(items);
 
   const recommendations = items.length > 0 ? getSmartRecommendations(items) : [];
 
@@ -221,9 +219,7 @@ export default function Cart() {
 
                   <div className="space-y-3">
                     <OrderPriceBreakdown
-                      subtotal={subtotal}
-                      shipping={shipping}
-                      discount={discount}
+                      totals={taxTotals}
                       taxConfig={taxConfig}
                       totalLabel="Toplam"
                     />

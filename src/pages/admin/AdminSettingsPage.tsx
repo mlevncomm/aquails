@@ -43,6 +43,19 @@ function TaxSection() {
           Fiyatlar KDV dahil
         </label>
       </div>
+      <div className="mt-4 p-4 bg-sky-50 border border-sky-100 rounded-xl text-xs text-slate-600 leading-relaxed max-w-3xl space-y-2">
+        <p>
+          <strong>WooCommerce uyumlu KDV mantığı:</strong> Ürün fiyatları &quot;KDV dahil&quot; seçeneğine göre girilir.
+          Kargo ve kapıda ödeme ücretleri her zaman KDV hariçtir; checkout toplamına KDV eklenir.
+        </p>
+        <p>
+          <strong>KDV dahil:</strong> Ürün fiyatları zaten vergi içerir. Sepette KDV bilgi amaçlı gösterilir; ürün tutarına tekrar eklenmez.
+          Kargo KDV&apos;si toplama eklenir.
+        </p>
+        <p>
+          <strong>KDV hariç:</strong> Ürün fiyatları net girilir. Checkout&apos;ta KDV üstüne eklenir ve genel toplam artar.
+        </p>
+      </div>
       <AdminButton type="button" className="mt-4" disabled={saving} onClick={() => void save()}>
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
         KDV Kaydet

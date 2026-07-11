@@ -18,7 +18,8 @@ import { useToastStore } from '@/components/Toast';
 import { getAddresses, type Address } from '@/services/addressService';
 import { getPaytrPublicStatus, getBankAccounts, isPaytrConfigured } from '@/services/settingsService';
 import { initPaytrPayment, buildPaytrBasket, formatPaymentAmountKurus } from '@/services/paymentService';
-import { getShippingConfig, getTaxConfig, calcOrderTotals, type TaxConfig } from '@/services/shippingService';
+import { getShippingConfig } from '@/services/shippingService';
+import { useCartPricing } from '@/hooks/useCartPricing';
 import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
 import { cn } from '@/lib/utils';
 
@@ -82,7 +83,6 @@ export default function Checkout() {
   const [showBankInfo, setShowBankInfo] = useState(false);
   const [shippingMethods, setShippingMethods] = useState<{ id: string; label: string; desc: string; price: number; priceLabel: string }[]>([]);
   const [codFeeSetting, setCodFeeSetting] = useState(150);
-  const [taxConfig, setTaxConfig] = useState<TaxConfig>({ rate: 20, displayInCheckout: true, priceIncludesVat: true });
 
   const [contact, setContact] = useState<ContactForm>({
     name: user?.name ?? '',
@@ -106,15 +106,12 @@ export default function Checkout() {
   const isFreeShipping = appliedCoupon?.type === 'shipping';
   const effectiveShipping = isFreeShipping ? 0 : shippingCost;
   const discount = couponDiscount > 0 ? couponDiscount : 0;
-  const orderTotals = calcOrderTotals({
-    subtotal,
-    shipping: effectiveShipping,
+
+  const { taxTotals, total, taxConfig } = useCartPricing(items, {
     codFee,
     discount,
-    taxRate: taxConfig.rate,
-    priceIncludesVat: taxConfig.priceIncludesVat,
+    shipping: effectiveShipping,
   });
-  const total = orderTotals.gross;
 
   useEffect(() => {
     void getPaytrPublicStatus().then((s) => setPaytrEnabled(isPaytrConfigured(s)));
@@ -132,7 +129,6 @@ export default function Checkout() {
       );
       if (cfg.methods[0]) setShippingMethod(cfg.methods[0].id);
     });
-    void getTaxConfig().then(setTaxConfig);
   }, []);
 
   useEffect(() => {
@@ -659,10 +655,7 @@ export default function Checkout() {
 
               <div className="space-y-2.5 pt-3 border-t border-aqua-border-light">
                 <OrderPriceBreakdown
-                  subtotal={subtotal}
-                  shipping={effectiveShipping}
-                  codFee={codFee}
-                  discount={discount}
+                  totals={taxTotals}
                   taxConfig={taxConfig}
                 />
               </div>

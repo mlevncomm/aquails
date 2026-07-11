@@ -1,4 +1,5 @@
 import { getSupabaseOrNull } from '@/lib/supabase';
+import { calculateCartTax } from '@/services/taxService';
 
 export interface ShippingMethod {
   id: string;
@@ -93,10 +94,23 @@ export interface OrderTotalsResult extends OrderTotalsInput {
 }
 
 export function calcOrderTotals(input: OrderTotalsInput): OrderTotalsResult {
-  const base = Math.max(
-    0,
-    input.subtotal + input.shipping + (input.codFee ?? 0) - (input.discount ?? 0),
-  );
-  const { net, vat, gross } = calcVatAmount(base, input.taxRate, input.priceIncludesVat);
-  return { ...input, codFee: input.codFee ?? 0, discount: input.discount ?? 0, net, vat, gross };
+  const result = calculateCartTax({
+    lines: [{ unitPrice: input.subtotal, quantity: 1 }],
+    shipping: input.shipping,
+    codFee: input.codFee,
+    discount: input.discount,
+    config: {
+      rate: input.taxRate,
+      priceIncludesVat: input.priceIncludesVat,
+      displayInCheckout: true,
+    },
+  });
+  return {
+    ...input,
+    codFee: input.codFee ?? 0,
+    discount: input.discount ?? 0,
+    net: result.totalNet,
+    vat: result.totalTax,
+    gross: result.totalGross,
+  };
 }
