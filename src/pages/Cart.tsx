@@ -1,5 +1,4 @@
 import { Link } from 'react-router';
-import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingCart, ArrowRight, Check, Minus, Plus, Trash2,
@@ -12,39 +11,21 @@ import { useCartStore } from '@/stores/cartStore';
 import { getSmartRecommendations } from '@/services/smartCartService';
 import { openWhatsApp, getCartOrderMessage } from '@/services/whatsappService';
 import { SEO } from '@/components/SEO';
-import { getShippingConfig, getTaxConfig, calcOrderTotals, type TaxConfig } from '@/services/shippingService';
-import { getSiteSettings } from '@/services/settingsService';
+import { useCartPricing } from '@/hooks/useCartPricing';
 import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
 
 
 export default function Cart() {
   const { items, updateQuantity, removeItem, getSubtotal } = useCartStore();
   const subtotal = getSubtotal();
-  const [shippingCost, setShippingCost] = useState(49);
-  const [freeShippingThreshold, setFreeShippingThreshold] = useState(1500);
-  const [taxConfig, setTaxConfig] = useState<TaxConfig>({ rate: 20, displayInCheckout: true, priceIncludesVat: true });
-
-  useEffect(() => {
-    void getShippingConfig().then((cfg) => {
-      const standard = cfg.methods.find((m) => m.id === 'standard') ?? cfg.methods[0];
-      if (standard) setShippingCost(standard.price);
-    });
-    void getSiteSettings().then((s) => setFreeShippingThreshold(s.freeShippingThreshold));
-    void getTaxConfig().then(setTaxConfig);
-  }, []);
-
-  const shipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
-  const discount = 0;
-  const orderTotals = calcOrderTotals({
-    subtotal,
+  const {
+    taxConfig,
     shipping,
-    discount,
-    taxRate: taxConfig.rate,
-    priceIncludesVat: taxConfig.priceIncludesVat,
-  });
-  const total = orderTotals.gross;
-  const freeShippingProgress = Math.min(100, (subtotal / freeShippingThreshold) * 100);
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
+    total,
+    freeShippingProgress,
+    remainingForFreeShipping,
+  } = useCartPricing(subtotal);
+  const discount = 0;
 
   const recommendations = items.length > 0 ? getSmartRecommendations(items) : [];
 

@@ -2,18 +2,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router';
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
+import { useCartPricing } from '@/hooks/useCartPricing';
+import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
 
 export function CartDrawer() {
   const { items, isDrawerOpen, closeDrawer, updateQuantity, removeItem, getSubtotal } = useCartStore();
   const subtotal = getSubtotal();
-  const shipping = subtotal >= 1500 ? 0 : 49;
-  const total = subtotal + shipping;
+  const { taxConfig, shipping } = useCartPricing(subtotal);
 
   return (
     <AnimatePresence>
       {isDrawerOpen && (
         <>
-          {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -23,15 +23,13 @@ export function CartDrawer() {
             onClick={closeDrawer}
           />
 
-          {/* Drawer */}
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="fixed top-0 right-0 bottom-0 w-full max-w-[420px] bg-white z-50 shadow-drawer flex flex-col"
+            className="fixed top-0 right-0 bottom-0 w-full max-w-[420px] bg-white z-50 shadow-drawer flex flex-col overflow-hidden"
           >
-            {/* Header */}
             <div className="flex items-center justify-between p-5 border-b border-aqua-border-light">
               <h3 className="text-lg font-semibold text-aqua-secondary flex items-center gap-2">
                 <ShoppingBag className="w-5 h-5 text-aqua-primary" />
@@ -45,15 +43,12 @@ export function CartDrawer() {
               </button>
             </div>
 
-            {/* Items */}
-            <div className="flex-1 overflow-y-auto p-5">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 min-w-0">
               {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <ShoppingBag className="w-16 h-16 text-aqua-border mb-4" />
                   <p className="text-lg font-semibold text-aqua-text-muted">Sepetiniz boş</p>
-                  <p className="text-sm text-aqua-text-muted mt-1">
-                    Ürünleri keşfetmeye başlayın
-                  </p>
+                  <p className="text-sm text-aqua-text-muted mt-1">Ürünleri keşfetmeye başlayın</p>
                   <Link
                     to="/urunler"
                     onClick={closeDrawer}
@@ -73,9 +68,8 @@ export function CartDrawer() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20, height: 0, marginBottom: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="flex items-center gap-3 pb-4 border-b border-aqua-border-light last:border-0"
+                        className="flex items-center gap-3 pb-4 border-b border-aqua-border-light last:border-0 min-w-0"
                       >
-                        {/* Image */}
                         <div className="w-[60px] h-[60px] bg-aqua-bg rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                           <img
                             src={item.product.images?.[0] || '/images/products/placeholder.jpg'}
@@ -84,17 +78,11 @@ export function CartDrawer() {
                             onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
                           />
                         </div>
-
-                        {/* Info */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-aqua-secondary truncate">
-                            {item.product.name}
-                          </p>
+                          <p className="text-sm font-medium text-aqua-secondary truncate">{item.product.name}</p>
                           <p className="text-sm font-semibold text-aqua-secondary mt-1">
-                            {(item.product.price * item.quantity).toLocaleString('tr-TR')}₺
+                            {(item.product.price * item.quantity).toLocaleString('tr-TR')} ₺
                           </p>
-
-                          {/* Quantity */}
                           <div className="flex items-center gap-2 mt-2">
                             <button
                               onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
@@ -102,9 +90,7 @@ export function CartDrawer() {
                             >
                               <Minus className="w-3 h-3" />
                             </button>
-                            <span className="text-sm font-semibold w-6 text-center">
-                              {item.quantity}
-                            </span>
+                            <span className="text-sm font-semibold w-6 text-center">{item.quantity}</span>
                             <button
                               onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                               className="w-7 h-7 flex items-center justify-center rounded-lg bg-aqua-bg text-aqua-text-secondary hover:bg-aqua-border-light transition-colors"
@@ -113,8 +99,6 @@ export function CartDrawer() {
                             </button>
                           </div>
                         </div>
-
-                        {/* Delete */}
                         <button
                           onClick={() => removeItem(item.product.id)}
                           className="w-8 h-8 flex items-center justify-center rounded-lg text-aqua-text-muted hover:bg-aqua-danger/10 hover:text-aqua-danger transition-colors flex-shrink-0"
@@ -128,31 +112,19 @@ export function CartDrawer() {
               )}
             </div>
 
-            {/* Footer */}
             {items.length > 0 && (
-              <div className="p-5 border-t border-aqua-border-light bg-white">
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-aqua-text-secondary">Ara Toplam</span>
-                    <span className="font-medium text-aqua-secondary">
-                      {subtotal.toLocaleString('tr-TR')}₺
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-aqua-text-secondary">Kargo</span>
-                    <span className={shipping === 0 ? 'text-aqua-success font-medium' : 'font-medium text-aqua-secondary'}>
-                      {shipping === 0 ? 'Ücretsiz' : `${shipping}₺`}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-base font-semibold pt-2 border-t border-aqua-border-light">
-                    <span className="text-aqua-secondary">Toplam</span>
-                    <span className="text-aqua-secondary">{total.toLocaleString('tr-TR')}₺</span>
-                  </div>
-                </div>
+              <div className="p-5 border-t border-aqua-border-light bg-white min-w-0">
+                <OrderPriceBreakdown
+                  subtotal={subtotal}
+                  shipping={shipping}
+                  taxConfig={taxConfig}
+                  totalLabel="Toplam"
+                  compact
+                />
                 <Link
                   to="/odeme"
                   onClick={closeDrawer}
-                  className="flex items-center justify-center gap-2 w-full bg-aqua-primary text-white py-3.5 rounded-full font-semibold hover:bg-aqua-primary-dark hover:shadow-primary transition-all"
+                  className="flex items-center justify-center gap-2 w-full bg-aqua-primary text-white py-3.5 rounded-full font-semibold hover:bg-aqua-primary-dark hover:shadow-primary transition-all mt-4"
                 >
                   Ödemeye Geç
                   <ArrowRight className="w-4 h-4" />

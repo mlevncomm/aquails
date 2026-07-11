@@ -8,6 +8,8 @@ interface OrderPriceBreakdownProps {
   taxConfig: TaxConfig;
   totalLabel?: string;
   className?: string;
+  /** Sepet drawer gibi kompakt görünüm */
+  compact?: boolean;
 }
 
 function formatPrice(value: number): string {
@@ -22,6 +24,7 @@ export function OrderPriceBreakdown({
   taxConfig,
   totalLabel = 'Genel Toplam',
   className = '',
+  compact = false,
 }: OrderPriceBreakdownProps) {
   const totals = calcOrderTotals({
     subtotal,
@@ -32,10 +35,15 @@ export function OrderPriceBreakdown({
     priceIncludesVat: taxConfig.priceIncludesVat,
   });
 
+  const hasTax = taxConfig.rate > 0;
+  const totalWithVatLabel = taxConfig.priceIncludesVat ? `${totalLabel} (KDV Dahil)` : `${totalLabel} (KDV Dahil)`;
+
   return (
     <div className={`space-y-2.5 ${className}`}>
       <div className="flex justify-between text-sm gap-4">
-        <span className="text-[#5A6B7B] shrink-0">Ara Toplam</span>
+        <span className="text-[#5A6B7B] shrink-0">
+          Ara Toplam{taxConfig.priceIncludesVat && hasTax ? ' (KDV Dahil)' : ''}
+        </span>
         <span className="font-medium text-[#0D2137] text-right">{formatPrice(subtotal)}</span>
       </div>
       <div className="flex justify-between text-sm gap-4">
@@ -56,25 +64,27 @@ export function OrderPriceBreakdown({
           <span>-{formatPrice(discount)}</span>
         </div>
       )}
-      {taxConfig.displayInCheckout && (
+
+      {hasTax && (
         <>
-          <div className="flex justify-between text-sm gap-4">
-            <span className="text-[#5A6B7B] shrink-0">KDV Hariç Tutar</span>
-            <span className="font-medium text-[#0D2137] text-right">{formatPrice(totals.net)}</span>
-          </div>
+          {!compact && taxConfig.displayInCheckout && (
+            <div className="flex justify-between text-sm gap-4 pt-1 border-t border-dashed border-[#E8F0FE]">
+              <span className="text-[#5A6B7B] shrink-0">KDV Hariç Tutar</span>
+              <span className="font-medium text-[#0D2137] text-right">{formatPrice(totals.net)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-sm gap-4">
             <span className="text-[#5A6B7B] shrink-0">
-              KDV (%{taxConfig.rate}){taxConfig.priceIncludesVat ? ' (dahil)' : ''}
+              KDV (%{taxConfig.rate})
+              {taxConfig.priceIncludesVat ? ' — fiyata dahil' : ''}
             </span>
-            <span className="font-medium text-[#0D2137] text-right">{formatPrice(totals.vat)}</span>
+            <span className="font-semibold text-[#1A73E8] text-right">{formatPrice(totals.vat)}</span>
           </div>
         </>
       )}
-      <div className="flex justify-between text-base font-semibold pt-2 border-t border-[#F0F6FF] gap-4">
-        <span className="text-[#0D2137] shrink-0">
-          {totalLabel}
-          {taxConfig.priceIncludesVat && taxConfig.displayInCheckout ? ' (KDV Dahil)' : ''}
-        </span>
+
+      <div className="flex justify-between text-base font-semibold pt-3 border-t-2 border-[#E8F0FE] gap-4">
+        <span className="text-[#0D2137] shrink-0">{hasTax ? totalWithVatLabel : totalLabel}</span>
         <span className="text-xl font-bold text-[#0D2137] text-right">{formatPrice(totals.gross)}</span>
       </div>
     </div>
