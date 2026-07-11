@@ -29,7 +29,7 @@ export function PageLayout({ children, variant = 'default' }: PageLayoutProps) {
           <div className="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#1A73E8]/[0.02] rounded-full blur-3xl pointer-events-none -z-0" />
         </>
       )}
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 min-w-0 overflow-x-hidden w-full">{children}</div>
     </div>
   );
 }

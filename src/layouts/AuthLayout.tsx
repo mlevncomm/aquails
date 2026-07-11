@@ -2,7 +2,7 @@ import { Link, Outlet } from 'react-router';
 
 export function AuthLayout() {
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-[#E8F4FD] via-[#F0F6FF] to-[#C5E0F8] p-4 relative overflow-hidden">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-[#E8F4FD] via-[#F0F6FF] to-[#C5E0F8] p-4 relative overflow-x-hidden w-full max-w-[100vw]">
       {/* Soft blob decorations */}
       <div className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] bg-[#1A73E8]/[0.05] rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-[20%] -left-[10%] w-[400px] h-[400px] bg-[#4FC3F7]/[0.06] rounded-full blur-3xl pointer-events-none" />

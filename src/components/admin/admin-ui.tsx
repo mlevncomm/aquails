@@ -13,9 +13,9 @@ export function AdminPageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{title}</h1>
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6 sm:mb-8 min-w-0">
+      <div className="min-w-0">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{title}</h1>
         {description && <p className="text-slate-500 mt-1 text-sm">{description}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
@@ -34,7 +34,7 @@ export function AdminCard({
 }) {
   return (
     <div
-      className={`bg-white rounded-2xl border border-slate-200/80 shadow-sm ${padding ? 'p-6' : ''} ${className}`}
+      className={`bg-white rounded-2xl border border-slate-200/80 shadow-sm min-w-0 ${padding ? 'p-4 sm:p-6' : ''} ${className}`}
     >
       {children}
     </div>

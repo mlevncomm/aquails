@@ -40,12 +40,33 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-aqua-bg text-aqua-text-primary font-inter antialiased;
-  }
-
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  body {
+    @apply bg-aqua-bg text-aqua-text-primary font-inter antialiased;
+    overflow-x: hidden;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #root {
+    min-width: 0;
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  img,
+  video,
+  svg {
+    max-width: 100%;
+  }
+
+  table {
+    max-width: 100%;
   }
 }
 
@@ -149,5 +170,65 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Global page layout */
+  .page-container {
+    @apply w-full max-w-[1280px] mx-auto px-4 sm:px-6 min-w-0;
+  }
+
+  .page-container-wide {
+    @apply w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 min-w-0;
+  }
+
+  .page-section {
+    @apply py-12 md:py-16 lg:py-20 relative;
+  }
+
+  .responsive-scroll-x {
+    @apply overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0;
+  }
+
+  .safe-flex-row {
+    @apply flex flex-wrap items-center gap-2 sm:gap-3 min-w-0;
+  }
+
+  /* Trust marquee */
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .marquee-track {
+    animation: marquee 35s linear infinite;
+  }
+
+  .marquee-track:hover {
+    animation-play-state: paused;
+  }
+
+  /* Homepage mesh gradient */
+  .hero-mesh {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 20%, rgba(26, 115, 232, 0.12), transparent 50%),
+      radial-gradient(ellipse 60% 50% at 80% 30%, rgba(0, 212, 200, 0.1), transparent 45%),
+      radial-gradient(ellipse 50% 40% at 50% 80%, rgba(79, 195, 247, 0.08), transparent 40%),
+      linear-gradient(135deg, #eef6ff 0%, #f5faff 45%, #e8f4ff 100%);
+  }
+
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl border border-white/60 shadow-aquails;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-[#1A73E8] via-[#4FC3F7] to-[#00D4C8] bg-clip-text text-transparent;
+  }
+
+  .card-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-aquails-hover;
   }
 }

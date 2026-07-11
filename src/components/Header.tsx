@@ -66,6 +66,11 @@ export function Header() {
   }, []);
 
   useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobileMenuOpen]);
+
+  useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) setIsSearchOpen(false);
     };
@@ -88,9 +93,9 @@ export function Header() {
   return (
     <>
       {/* Top Bar */}
-      <div className="bg-[#0D2137] text-white">
-        <div className="max-w-[1280px] mx-auto px-4 h-8 flex items-center justify-between text-[11px]">
-          <p className="text-[#8B9DAF]">Ücretsiz Kargo - 1.500₺ ve Üzeri Siparişlerde</p>
+      <div className="bg-[#0D2137] text-white overflow-x-hidden">
+        <div className="max-w-[1280px] mx-auto px-4 h-8 flex items-center justify-between text-[11px] min-w-0 gap-2">
+          <p className="text-[#8B9DAF] truncate min-w-0">Ücretsiz Kargo — 1.500₺ ve üzeri siparişlerde</p>
           <div className="hidden sm:flex items-center gap-4">
             <Link to="/siparis-takip" className="text-[#8B9DAF] hover:text-white transition-colors">Sipariş Takip</Link>
             <span className="text-[#1A3A5C]">|</span>
@@ -100,10 +105,10 @@ export function Header() {
       </div>
 
       {/* Main Header */}
-      <header className={cn('sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#E8F0FE]/60 transition-shadow duration-300', isScrolled ? 'shadow-sm' : '')}>
-        <div className="max-w-[1280px] mx-auto px-4 h-16 flex items-center justify-between">
+      <header className={cn('sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-[#E8F0FE]/60 transition-shadow duration-300 overflow-x-hidden', isScrolled ? 'shadow-sm' : '')}>
+        <div className="max-w-[1280px] mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2 min-w-0">
           {/* Mobile Menu Toggle */}
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden p-2 -ml-2 hover:bg-[#F0F6FF] rounded-lg transition-colors">
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden p-2 -ml-1 hover:bg-[#F0F6FF] rounded-lg transition-colors flex-shrink-0" aria-label="Menü">
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
@@ -136,7 +141,7 @@ export function Header() {
           </nav>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-0.5 flex-shrink-0">
             {/* Search */}
             <div ref={searchRef} className="relative">
               <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="relative w-9 h-9 flex items-center justify-center rounded-lg text-[#5A6B7B] hover:bg-[#F0F6FF] hover:text-[#1A73E8] transition-all">
@@ -244,7 +249,7 @@ export function Header() {
         {isMobileMenuOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
-            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.3 }} className="fixed top-0 left-0 bottom-0 w-[300px] bg-white z-50 lg:hidden shadow-xl overflow-y-auto">
+            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.3 }} className="fixed top-0 left-0 bottom-0 w-[min(300px,88vw)] bg-white z-50 lg:hidden shadow-xl overflow-y-auto overflow-x-hidden">
               <div className="p-5">
                 <div className="flex items-center justify-between mb-6">
                   <Link to="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>

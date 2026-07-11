@@ -15,7 +15,7 @@ export function Footer() {
     <footer>
       {/* CTA Band */}
       <div className="bg-aqua-secondary py-16 md:py-20">
-        <div className="max-w-[640px] mx-auto px-6 text-center">
+        <div className="max-w-[640px] mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white">
             Temiz Su, Sağlıklı Gelecek.
           </h2>
@@ -33,7 +33,7 @@ export function Footer() {
 
       {/* Main Footer */}
       <div className="bg-[#0A1929] pt-14 pb-8">
-        <div className="max-w-[1280px] mx-auto px-6">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 min-w-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
             {/* Brand */}
             <div>
