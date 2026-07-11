@@ -19,7 +19,7 @@ export function getOrganizationSchema() {
     '@type': 'Organization',
     name: 'Aquails',
     url: SITE_URL,
-    logo: `${SITE_URL}/images/brand/aquails-logo-light.png`,
+    logo: `${SITE_URL}/images/brand/logo.png`,
     description: 'Daha Temiz Su, Daha Akıllı Teknoloji',
     sameAs: [
       'https://instagram.com/aquails',

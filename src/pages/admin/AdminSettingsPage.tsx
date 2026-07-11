@@ -17,7 +17,7 @@ function TaxSection() {
   const save = async () => {
     if (!tax) return;
     setSaving(true);
-    const res = await saveTaxConfig(tax);
+    const res = await saveTaxConfig({ ...tax, priceIncludesVat: false });
     setSaving(false);
     addToast(res.success ? 'KDV ayarları kaydedildi.' : (res.error ?? 'Hata'), res.success ? 'success' : 'error');
   };
@@ -29,31 +29,24 @@ function TaxSection() {
       <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
         <Receipt className="w-4 h-4 text-sky-600" />KDV / Vergi
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
         <div>
-          <AdminLabel>KDV Oranı (%)</AdminLabel>
+          <AdminLabel>Varsayılan KDV Oranı (%)</AdminLabel>
           <AdminInput type="number" value={tax.rate} onChange={(e) => setTax({ ...tax, rate: Number(e.target.value) })} />
         </div>
         <label className="flex items-center gap-2 text-sm text-slate-600 mt-6">
           <input type="checkbox" checked={tax.displayInCheckout} onChange={(e) => setTax({ ...tax, displayInCheckout: e.target.checked })} />
           Checkout&apos;ta KDV göster
         </label>
-        <label className="flex items-center gap-2 text-sm text-slate-600 mt-6">
-          <input type="checkbox" checked={tax.priceIncludesVat} onChange={(e) => setTax({ ...tax, priceIncludesVat: e.target.checked })} />
-          Fiyatlar KDV dahil
-        </label>
       </div>
       <div className="mt-4 p-4 bg-sky-50 border border-sky-100 rounded-xl text-xs text-slate-600 leading-relaxed max-w-3xl space-y-2">
         <p>
-          <strong>WooCommerce uyumlu KDV mantığı:</strong> Ürün fiyatları &quot;KDV dahil&quot; seçeneğine göre girilir.
-          Kargo ve kapıda ödeme ücretleri her zaman KDV hariçtir; checkout toplamına KDV eklenir.
+          <strong>Fiyat girişi KDV hariçtir.</strong> Admin panelinde ürün fiyatını 100₺ ve KDV oranını %20 girerseniz,
+          müşteri sepetinde ve vitrinde <strong>120₺</strong> görür.
         </p>
         <p>
-          <strong>KDV dahil:</strong> Ürün fiyatları zaten vergi içerir. Sepette KDV bilgi amaçlı gösterilir; ürün tutarına tekrar eklenmez.
-          Kargo KDV&apos;si toplama eklenir.
-        </p>
-        <p>
-          <strong>KDV hariç:</strong> Ürün fiyatları net girilir. Checkout&apos;ta KDV üstüne eklenir ve genel toplam artar.
+          Her ürünün kendi KDV oranı olabilir (ürün düzenleme ekranı). Oran girilmezse yukarıdaki varsayılan kullanılır.
+          Kargo ve kapıda ödeme ücretleri KDV hariç girilir; checkout toplamına KDV eklenir.
         </p>
       </div>
       <AdminButton type="button" className="mt-4" disabled={saving} onClick={() => void save()}>

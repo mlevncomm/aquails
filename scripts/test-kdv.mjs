@@ -84,6 +84,14 @@ function assert(condition, msg) {
 
 console.log('WooCommerce KDV / Sepet Toplam Testleri\n');
 
+// Kullanıcı senaryosu: 100₺ net + %20 KDV = 120₺
+const userCase = calculateCartTax({
+  lines: [{ unitPrice: 100, quantity: 1, taxRate: 20 }],
+  shipping: 0,
+  config: { rate: 20, priceIncludesVat: false },
+});
+assert(userCase.totalGross === 120, `100₺ + %20 KDV = 120₺ (got ${userCase.totalGross})`);
+
 // KDV dahil fiyat — ürün toplamı aynı kalır
 const inclProduct = calculateCartTax({
   lines: [{ unitPrice: 2899, quantity: 1 }],

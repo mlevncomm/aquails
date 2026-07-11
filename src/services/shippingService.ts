@@ -29,7 +29,7 @@ const DEFAULT_SHIPPING: ShippingConfig = {
   codFee: 150,
 };
 
-const DEFAULT_TAX: TaxConfig = { rate: 20, displayInCheckout: true, priceIncludesVat: true };
+const DEFAULT_TAX: TaxConfig = { rate: 20, displayInCheckout: true, priceIncludesVat: false };
 
 async function getSetting<T>(key: string, fallback: T): Promise<T> {
   const supabase = getSupabaseOrNull();
@@ -61,7 +61,7 @@ export async function getTaxConfig(): Promise<TaxConfig> {
   return {
     rate: Number.isFinite(rate) && rate > 0 ? rate : DEFAULT_TAX.rate,
     displayInCheckout: raw.displayInCheckout !== false && raw.displayInCheckout !== ('false' as unknown as boolean),
-    priceIncludesVat: raw.priceIncludesVat !== false && raw.priceIncludesVat !== ('false' as unknown as boolean),
+    priceIncludesVat: raw.priceIncludesVat === true,
   };
 }
 

@@ -2,9 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import type { CartItem } from '@/types';
 import { getShippingConfig, getTaxConfig, type TaxConfig } from '@/services/shippingService';
 import { calculateCartTax, cartItemsToTaxLines } from '@/services/taxService';
+import { getProductGrossPrice } from '@/lib/pricing';
 import { getSiteSettings } from '@/services/settingsService';
 
-const DEFAULT_TAX: TaxConfig = { rate: 20, displayInCheckout: true, priceIncludesVat: true };
+const DEFAULT_TAX: TaxConfig = { rate: 20, displayInCheckout: true, priceIncludesVat: false };
 
 export function useCartPricing(
   items: CartItem[],
@@ -16,8 +17,12 @@ export function useCartPricing(
   const [loaded, setLoaded] = useState(false);
 
   const subtotal = useMemo(
-    () => items.reduce((sum, i) => sum + i.product.price * i.quantity, 0),
-    [items],
+    () =>
+      items.reduce(
+        (sum, i) => sum + getProductGrossPrice(i.product, taxConfig.rate) * i.quantity,
+        0,
+      ),
+    [items, taxConfig.rate],
   );
 
   useEffect(() => {
@@ -43,7 +48,7 @@ export function useCartPricing(
         shipping,
         codFee,
         discount,
-        config: taxConfig,
+        config: { ...taxConfig, priceIncludesVat: false },
       }),
     [items, shipping, codFee, discount, taxConfig],
   );

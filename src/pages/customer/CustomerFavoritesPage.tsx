@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Heart, ShoppingCart, Loader2 } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState';
+import { ProductPrice } from '@/components/ProductPrice';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/components/Toast';
@@ -84,10 +85,7 @@ export default function CustomerFavoritesPage() {
                   {p.name}
                 </Link>
                 <p className="text-xs text-[#8B9DAF] mt-0.5">{p.category}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-base font-bold text-[#0D2137]">{p.price.toLocaleString('tr-TR')}₺</span>
-                  {p.oldPrice && <span className="text-xs text-[#8B9DAF] line-through">{p.oldPrice.toLocaleString('tr-TR')}₺</span>}
-                </div>
+                <ProductPrice product={p} size="sm" className="mt-2" />
                 <div className="flex gap-1.5 mt-2.5">
                   <button
                     onClick={() => handleAddToCart(p)}

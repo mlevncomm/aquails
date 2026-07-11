@@ -5,6 +5,7 @@ import {
   Wrench, Lock, LogOut, Bell, ExternalLink, Menu, X,
   RefreshCw, RotateCcw, GitCompare, Tag, ChevronRight, Award, Users,
 } from 'lucide-react';
+import { BrandLogo } from '@/components/BrandLogo';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import { logout as logoutService } from '@/services/authService';
@@ -83,7 +84,7 @@ export function CustomerLayout() {
         {/* Logo */}
         <div className="p-4 pb-3 border-b border-[#E8F0FE]">
           <Link to="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-            <img src="/images/brand/aquails-logo-light.png" alt="Aquails" className="h-7 w-auto" />
+            <BrandLogo variant="logo" className="h-7" />
           </Link>
         </div>
 

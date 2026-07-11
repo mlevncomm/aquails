@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Wrench, Package, HelpCircle, Send, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { openWhatsApp, getWhatsAppUrl } from '@/services/whatsappService';
+import { BrandLogo } from '@/components/BrandLogo';
 
 const QUICK_MESSAGES = [
   { label: 'Ürün bilgisi', message: 'Merhaba, su arıtma ürünleriniz hakkında bilgi almak istiyorum.' },
@@ -147,11 +148,7 @@ export function FloatingWhatsApp() {
               <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 px-4 py-4 text-white">
                 <div className="flex items-center gap-3">
                   <div className="relative w-11 h-11 rounded-full bg-white/20 flex items-center justify-center ring-2 ring-white/30">
-                    <img
-                      src="/images/brand/aquails-icon.png"
-                      alt=""
-                      className="w-7 h-7 rounded-md"
-                    />
+                    <BrandLogo variant="icon" className="w-7 h-7 rounded-md" />
                     <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-300 border-2 border-emerald-600 rounded-full" />
                   </div>
                   <div className="min-w-0 flex-1">

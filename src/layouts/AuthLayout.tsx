@@ -1,4 +1,5 @@
 import { Link, Outlet } from 'react-router';
+import { BrandLogo } from '@/components/BrandLogo';
 
 export function AuthLayout() {
   return (
@@ -16,7 +17,7 @@ export function AuthLayout() {
       {/* Logo */}
       <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20">
         <Link to="/">
-          <img src="/images/brand/aquails-logo-light.png" alt="Aquails" className="h-8 w-auto" />
+          <BrandLogo variant="logo" className="h-8" />
         </Link>
       </div>
 

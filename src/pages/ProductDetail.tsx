@@ -21,6 +21,8 @@ import { askQuestion, getPublicQuestionsForProduct } from '@/services/productQue
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
+import { ProductPrice } from '@/components/ProductPrice';
+import { getProductGrossPrice } from '@/lib/pricing';
 import { cn } from '@/lib/utils';
 
 const tabs = [
@@ -104,8 +106,8 @@ export default function ProductDetail() {
     description: product.shortDescription || product.description,
     image: product.images?.[0] || '/images/products/placeholder.jpg',
     sku: product.id,
-    price: product.price,
-    oldPrice: product.oldPrice ?? undefined,
+    price: getProductGrossPrice(product),
+    oldPrice: product.oldPrice != null ? getProductGrossPrice({ ...product, price: product.oldPrice }) : undefined,
     rating: product.rating,
     reviewCount: product.reviewCount,
     category: product.category,
@@ -268,21 +270,7 @@ export default function ProductDetail() {
               </Link>
             </div>
 
-            <div className="flex items-end gap-3 mt-5">
-              <span className="text-3xl font-bold text-aqua-secondary">
-                {product.price.toLocaleString('tr-TR')}₺
-              </span>
-              {product.oldPrice && (
-                <span className="text-lg text-aqua-text-muted line-through">
-                  {product.oldPrice.toLocaleString('tr-TR')}₺
-                </span>
-              )}
-              {product.discountPercent && (
-                <span className="bg-aqua-danger/10 text-aqua-danger text-xs font-semibold px-2.5 py-1 rounded-md">
-                  %{product.discountPercent} İNDİRİM
-                </span>
-              )}
-            </div>
+            <ProductPrice product={product} size="lg" showTaxHint className="mt-5" />
 
             <div className="mt-3">
               {isOutOfStock ? (

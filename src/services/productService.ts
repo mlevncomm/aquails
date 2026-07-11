@@ -43,7 +43,7 @@ function mapDbProduct(row: ProductWithRelations): Product {
     shortDescription: row.short_description,
     price: Number(row.price),
     oldPrice: row.old_price != null ? Number(row.old_price) : null,
-    taxRate: 'tax_rate' in row && row.tax_rate != null ? Number(row.tax_rate) : undefined,
+    taxRate: row.tax_rate != null ? Number(row.tax_rate) : undefined,
     rating: Number(row.rating),
     reviewCount: row.review_count,
     stock: row.stock,
@@ -206,6 +206,7 @@ export interface AdminProductForm {
   description: string;
   price: number;
   oldPrice?: number | null;
+  taxRate?: number;
   stock: number;
   isActive: boolean;
   specifications: Record<string, string>;
@@ -252,6 +253,7 @@ export async function updateProduct(
       stock: input.stock,
       is_active: input.isActive,
       specifications: input.specifications,
+      tax_rate: input.taxRate ?? 20,
     })
     .eq('id', id);
 
@@ -283,6 +285,7 @@ export async function createProduct(
       specifications: input.specifications,
       rating: 0,
       review_count: 0,
+      tax_rate: input.taxRate ?? 20,
     })
     .select('id')
     .single();

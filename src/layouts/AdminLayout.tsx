@@ -6,6 +6,7 @@ import {
   BookOpen, Star, HelpCircle, RefreshCw, FileText,
   Link2, Award, CreditCard, Truck
 } from 'lucide-react';
+import { BrandLogo } from '@/components/BrandLogo';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import { logout } from '@/services/authService';
@@ -118,10 +119,10 @@ export function AdminLayout() {
 
         <div className="px-4 py-5 border-b border-slate-100">
           <Link to="/admin" className="flex items-center gap-3 px-1" onClick={() => setMobileOpen(false)}>
-            <img src="/images/brand/aquails-icon.png" alt="Aquails" className="w-9 h-9 rounded-xl flex-shrink-0" />
+            <BrandLogo variant="icon" className="w-9 h-9 rounded-xl flex-shrink-0" />
             {!collapsed && (
               <div className="min-w-0">
-                <img src="/images/brand/aquails-logo-dark.png" alt="Aquails" className="h-5 w-auto" />
+                <BrandLogo variant="logo" className="h-5" />
                 <p className="text-[11px] text-slate-400 mt-0.5">Yönetim Paneli</p>
               </div>
             )}

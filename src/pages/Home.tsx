@@ -11,6 +11,7 @@ import { PageLayout } from '@/layouts/PageLayout';
 import { PageContainer } from '@/components/PageContainer';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
 import { ProductCard } from '@/components/ProductCard';
+import { ProductPrice } from '@/components/ProductPrice';
 import { RatingStars } from '@/components/RatingStars';
 import { SEO } from '@/components/SEO';
 import { getOrganizationSchema, getWebsiteSchema } from '@/components/SchemaOrg';
@@ -268,16 +269,7 @@ export default function Home() {
                       <RatingStars rating={featuredProduct.rating} size="sm" />
                       <span className="text-xs text-[#8B9DAF]">({featuredProduct.reviewCount} değerlendirme)</span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-4 mt-6">
-                      <p className="text-2xl sm:text-3xl font-bold text-[#1A73E8]">
-                        {featuredProduct.price.toLocaleString('tr-TR')} ₺
-                      </p>
-                      {featuredProduct.oldPrice && (
-                        <p className="text-lg text-[#8B9DAF] line-through">
-                          {featuredProduct.oldPrice.toLocaleString('tr-TR')} ₺
-                        </p>
-                      )}
-                    </div>
+                    <ProductPrice product={featuredProduct} size="lg" className="mt-6" />
                     <div className="flex flex-wrap gap-3 mt-6">
                       <Link
                         to={`/urun/${featuredProduct.slug}`}

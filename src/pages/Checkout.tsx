@@ -21,6 +21,8 @@ import { initPaytrPayment, buildPaytrBasket, formatPaymentAmountKurus } from '@/
 import { getShippingConfig } from '@/services/shippingService';
 import { useCartPricing } from '@/hooks/useCartPricing';
 import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
+import { getProductGrossPrice } from '@/lib/pricing';
+import { CartLinePrice } from '@/components/CartLinePrice';
 import { cn } from '@/lib/utils';
 
 const steps = [
@@ -166,7 +168,7 @@ export default function Checkout() {
       items.map((item) => ({
         productId: item.product.id,
         productName: item.product.name,
-        price: item.product.price,
+        price: getProductGrossPrice(item.product, taxConfig.rate),
         quantity: item.quantity,
         image: item.product.images?.[0],
       })),
@@ -242,9 +244,9 @@ export default function Checkout() {
         slug: item.product.slug,
         name: item.product.name,
         qty: item.quantity,
-        price: item.product.price,
+        price: getProductGrossPrice(item.product, taxConfig.rate),
       })),
-      subtotal,
+      subtotal: taxTotals.linesNet,
       shippingCost: effectiveShipping,
       codFee,
       discount,
@@ -276,7 +278,7 @@ export default function Checkout() {
         paymentAmount: formatPaymentAmountKurus(total),
         userBasket: buildPaytrBasket(items.map((i) => ({
           name: i.product.name,
-          price: i.product.price,
+          price: getProductGrossPrice(i.product, taxConfig.rate),
           qty: i.quantity,
         }))),
         merchantOkUrl: `${origin}/odeme/basarili?order=${result.order.orderNo}`,
@@ -624,9 +626,9 @@ export default function Checkout() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-medium text-aqua-secondary truncate">{item.product.name}</p>
-                      <p className="text-xs text-aqua-text-muted">{item.quantity} x {item.product.price.toLocaleString('tr-TR')}₺</p>
+                      <p className="text-xs text-aqua-text-muted">{item.quantity} x <CartLinePrice product={item.product} quantity={1} layout="unit" /></p>
                     </div>
-                    <span className="text-sm font-semibold">{(item.product.price * item.quantity).toLocaleString('tr-TR')}₺</span>
+                    <span className="text-sm font-semibold"><CartLinePrice product={item.product} quantity={item.quantity} /></span>
                   </div>
                 ))}
               </div>

@@ -37,6 +37,7 @@ export default function AdminProductEditPage() {
     description: '',
     price: '',
     oldPrice: '',
+    taxRate: '20',
     stock: '',
     isActive: true,
   });
@@ -68,6 +69,7 @@ export default function AdminProductEditPage() {
         description: product.description,
         price: String(product.price),
         oldPrice: product.oldPrice ? String(product.oldPrice) : '',
+        taxRate: String(product.taxRate ?? 20),
         stock: String(product.stock),
         isActive: product.isActive ?? true,
       });
@@ -105,6 +107,7 @@ export default function AdminProductEditPage() {
       description: form.description,
       price: Number(form.price),
       oldPrice: form.oldPrice ? Number(form.oldPrice) : null,
+      taxRate: Number(form.taxRate) || 20,
       stock: Number(form.stock),
       isActive: form.isActive,
       specifications,
@@ -225,18 +228,30 @@ export default function AdminProductEditPage() {
             <h3 className="text-sm font-semibold text-slate-800 mb-4">Fiyat & Stok</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <AdminLabel>Fiyat (₺)</AdminLabel>
-                <AdminInput type="number" required value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
+                <AdminLabel>Fiyat — KDV Hariç (₺)</AdminLabel>
+                <AdminInput type="number" required step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
               </div>
               <div>
-                <AdminLabel>İndirimli (₺)</AdminLabel>
-                <AdminInput type="number" value={form.oldPrice} onChange={(e) => setForm({ ...form, oldPrice: e.target.value })} />
+                <AdminLabel>KDV Oranı (%)</AdminLabel>
+                <AdminInput type="number" required value={form.taxRate} onChange={(e) => setForm({ ...form, taxRate: e.target.value })} />
+              </div>
+              <div>
+                <AdminLabel>İndirimli — KDV Hariç (₺)</AdminLabel>
+                <AdminInput type="number" step="0.01" value={form.oldPrice} onChange={(e) => setForm({ ...form, oldPrice: e.target.value })} />
               </div>
               <div>
                 <AdminLabel>Stok</AdminLabel>
                 <AdminInput type="number" required value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} />
               </div>
             </div>
+            {form.price && (
+              <p className="text-xs text-sky-700 mt-3 bg-sky-50 px-3 py-2 rounded-lg">
+                Müşteri fiyatı (KDV dahil):{' '}
+                <strong>
+                  {(Number(form.price) * (1 + (Number(form.taxRate) || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
+                </strong>
+              </p>
+            )}
             <label className="flex items-center gap-2 text-sm text-slate-600 mt-4">
               <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="w-4 h-4 accent-sky-600" />
               Aktif
