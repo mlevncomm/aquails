@@ -41,6 +41,7 @@ interface HeaderIconButtonProps {
   badge?: number;
   badgeTone?: 'primary' | 'danger' | 'dark';
   className?: string;
+  hero?: boolean;
 }
 
 function HeaderIconButton({
@@ -51,6 +52,7 @@ function HeaderIconButton({
   badge,
   badgeTone = 'primary',
   className,
+  hero = false,
 }: HeaderIconButtonProps) {
   const badgeColors = {
     primary: 'bg-[#1A73E8] text-white shadow-[0_2px_8px_rgba(26,115,232,0.35)]',
@@ -75,12 +77,16 @@ function HeaderIconButton({
   );
 
   const baseClass = cn(
-    'relative flex items-center justify-center rounded-2xl transition-all duration-200',
-    'text-[#3D5166] hover:text-[#1A73E8]',
-    'bg-[#F4F8FF]/90 ring-1 ring-[#E8F0FE]/90',
-    'hover:bg-white hover:ring-[#1A73E8]/20 hover:shadow-sm',
-    'active:scale-[0.94]',
-    'w-10 h-10 lg:w-9 lg:h-9 lg:rounded-xl',
+    hero
+      ? 'header-icon-hero'
+      : cn(
+          'relative flex items-center justify-center rounded-2xl transition-all duration-200',
+          'text-[#3D5166] hover:text-[#1A73E8]',
+          'bg-[#F4F8FF]/90 ring-1 ring-[#E8F0FE]/90',
+          'hover:bg-white hover:ring-[#1A73E8]/20 hover:shadow-sm',
+          'active:scale-[0.94]',
+          'w-10 h-10 lg:w-9 lg:h-9 lg:rounded-xl',
+        ),
     className,
   );
 
@@ -117,6 +123,9 @@ export function Header() {
   const compareCount = useCompareStore(s => s.ids.length);
   const cartCount = getTotalItems();
   const searchRef = useRef<HTMLDivElement>(null);
+  const isHomePage = location.pathname === '/';
+  const heroHeader = isHomePage && !isScrolled;
+  const desktopNavLinks = navLinks.filter((l) => l.href !== '/iletisim');
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -126,7 +135,7 @@ export function Header() {
   }, [location.pathname]);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 12);
+    const handleScroll = () => setIsScrolled(window.scrollY > 80);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -158,7 +167,8 @@ export function Header() {
 
   return (
     <>
-      {/* Top Bar */}
+      {/* Top Bar — ana sayfada gizli */}
+      {!isHomePage && (
       <div className="bg-[#0D2137] text-white overflow-x-hidden">
         <div className="max-w-[1280px] mx-auto px-4 h-8 flex items-center justify-between text-[11px] min-w-0 gap-2">
           <p className="text-[#8B9DAF] truncate min-w-0">Ücretsiz Kargo — 1.500₺ ve üzeri siparişlerde</p>
@@ -169,16 +179,22 @@ export function Header() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Main Header */}
       <header
         className={cn(
-          'sticky top-0 z-50 overflow-x-hidden transition-all duration-300',
-          'border-b border-[#E8F0FE]/70',
-          'bg-white/75 backdrop-blur-2xl supports-[backdrop-filter]:bg-white/65',
-          isScrolled
-            ? 'shadow-[0_8px_30px_rgba(13,33,55,0.06)] border-[#E8F0FE]'
-            : 'shadow-none',
+          'z-50 overflow-x-hidden transition-all duration-300',
+          isHomePage ? 'fixed top-0 left-0 right-0' : 'sticky top-0',
+          heroHeader
+            ? 'bg-transparent border-b border-transparent'
+            : cn(
+                'border-b border-[#E8F0FE]/70',
+                'bg-white/75 backdrop-blur-2xl supports-[backdrop-filter]:bg-white/65',
+                isScrolled
+                  ? 'shadow-[0_8px_30px_rgba(13,33,55,0.06)] border-[#E8F0FE]'
+                  : 'shadow-none',
+              ),
         )}
       >
         <div className="max-w-[1280px] mx-auto px-3 sm:px-4 min-w-0">
@@ -188,6 +204,7 @@ export function Header() {
               label={isMobileMenuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="rounded-full"
+              hero={heroHeader}
             >
               {isMobileMenuOpen ? (
                 <X className="w-[20px] h-[20px]" strokeWidth={2.25} />
@@ -201,13 +218,19 @@ export function Header() {
               className="flex justify-center min-w-0 px-1"
               aria-label="Aquails Ana Sayfa"
             >
-              <BrandLogo variant="logo" bare className="h-[26px] w-auto max-w-[140px]" />
+              <BrandLogo
+                variant="logo"
+                bare
+                inverted={heroHeader}
+                className="h-[26px] w-auto max-w-[140px]"
+              />
             </Link>
 
             <div className="flex items-center gap-1.5">
               <HeaderIconButton
                 label="Ara"
                 onClick={() => setIsSearchOpen(true)}
+                hero={heroHeader}
               >
                 <Search className="w-[19px] h-[19px]" strokeWidth={2.1} />
               </HeaderIconButton>
@@ -216,6 +239,7 @@ export function Header() {
                 onClick={toggleDrawer}
                 badge={cartCount}
                 badgeTone="primary"
+                hero={heroHeader}
               >
                 <ShoppingBagIcon />
               </HeaderIconButton>
@@ -225,13 +249,26 @@ export function Header() {
           {/* ——— Desktop header ——— */}
           <div className="hidden lg:flex items-center justify-between gap-2 h-16">
             <Link to="/" className="flex items-center flex-shrink-0 min-w-0 mr-2">
-              <BrandLogo variant="logo" bare className="h-8" />
+              <BrandLogo variant="logo" bare inverted={heroHeader} className="h-8" />
             </Link>
 
             <nav className="flex items-center gap-0.5">
-              {navLinks.map(link => (
+              {desktopNavLinks.map(link => (
                 <div key={link.label} className="relative" onMouseEnter={() => link.hasMega && setIsMegaOpen(true)} onMouseLeave={() => link.hasMega && setIsMegaOpen(false)}>
-                  <Link to={link.href} className={cn('relative px-3 py-2 text-[13px] font-medium rounded-lg transition-colors flex items-center gap-1', location.pathname === link.href ? 'text-[#1A73E8] bg-[#F0F6FF]' : 'text-[#5A6B7B] hover:text-[#0D2137] hover:bg-[#F8FBFF]')}>
+                  <Link
+                    to={link.href}
+                    className={cn(
+                      'relative px-3 py-2 text-[13px] font-medium rounded-lg transition-colors flex items-center gap-1',
+                      heroHeader
+                        ? cn(
+                            'nav-link-hero',
+                            location.pathname === link.href && 'text-white wavy-underline-white',
+                          )
+                        : location.pathname === link.href
+                          ? 'text-[#1A73E8] bg-[#F0F6FF]'
+                          : 'text-[#5A6B7B] hover:text-[#0D2137] hover:bg-[#F8FBFF]',
+                    )}
+                  >
                     {link.label}
                     {link.hasMega && <ChevronDown className={cn('w-3 h-3 transition-transform', isMegaOpen ? 'rotate-180' : '')} />}
                   </Link>
@@ -240,8 +277,13 @@ export function Header() {
             </nav>
 
             <div className="flex items-center gap-1 flex-shrink-0">
+              {heroHeader && (
+                <Link to="/iletisim" className="btn-pill-white text-[12px] px-5 py-2 mr-1 hidden lg:inline-flex">
+                  İletişim
+                </Link>
+              )}
               <div ref={searchRef} className="relative">
-                <HeaderIconButton label="Ara" onClick={() => setIsSearchOpen(!isSearchOpen)}>
+                <HeaderIconButton label="Ara" onClick={() => setIsSearchOpen(!isSearchOpen)} hero={heroHeader}>
                   <Search className="w-[18px] h-[18px]" strokeWidth={2.1} />
                 </HeaderIconButton>
                 <AnimatePresence>
@@ -256,15 +298,15 @@ export function Header() {
                 </AnimatePresence>
               </div>
 
-              <HeaderIconButton href="/karsilastir" label="Karşılaştır" badge={compareCount} badgeTone="dark">
+              <HeaderIconButton href="/karsilastir" label="Karşılaştır" badge={compareCount} badgeTone="dark" hero={heroHeader}>
                 <GitCompare className="w-[18px] h-[18px]" strokeWidth={2.1} />
               </HeaderIconButton>
 
-              <HeaderIconButton href={isAuthenticated ? '/hesabim/favoriler' : '/giris'} label="Favoriler" badge={favCount} badgeTone="danger">
+              <HeaderIconButton href={isAuthenticated ? '/hesabim/favoriler' : '/giris'} label="Favoriler" badge={favCount} badgeTone="danger" hero={heroHeader}>
                 <Heart className="w-[18px] h-[18px]" strokeWidth={2.1} />
               </HeaderIconButton>
 
-              <HeaderIconButton label="Sepet" onClick={toggleDrawer} badge={cartCount}>
+              <HeaderIconButton label="Sepet" onClick={toggleDrawer} badge={cartCount} hero={heroHeader}>
                 <ShoppingBagIcon className="w-[18px] h-[18px]" />
               </HeaderIconButton>
 
@@ -318,7 +360,10 @@ export function Header() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               onSubmit={handleSearch}
-              className="fixed top-[calc(32px+58px+8px)] left-3 right-3 z-[61] lg:hidden"
+              className={cn(
+                'fixed left-3 right-3 z-[61] lg:hidden',
+                isHomePage ? 'top-[calc(58px+8px)]' : 'top-[calc(32px+58px+8px)]',
+              )}
             >
               <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl ring-1 ring-[#E8F0FE] p-2">
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B9DAF]" />
@@ -338,7 +383,7 @@ export function Header() {
       {/* Mega Menu - Desktop */}
       <AnimatePresence>
         {isMegaOpen && (
-          <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} onMouseEnter={() => setIsMegaOpen(true)} onMouseLeave={() => setIsMegaOpen(false)} className="hidden lg:block fixed left-0 right-0 top-[64px] z-40 bg-white border-b border-[#E8F0FE] shadow-lg">
+          <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} onMouseEnter={() => setIsMegaOpen(true)} onMouseLeave={() => setIsMegaOpen(false)} className={cn('hidden lg:block fixed left-0 right-0 z-40 bg-white border-b border-[#E8F0FE] shadow-lg', isHomePage ? 'top-16' : 'top-[96px]')}>
             <div className="max-w-[1280px] mx-auto px-4 py-6">
               <div className="grid grid-cols-7 gap-3">
                 {categories.map(cat => {
