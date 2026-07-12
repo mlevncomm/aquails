@@ -14,10 +14,28 @@ const categoryLinks = [
 export function Footer() {
   return (
     <footer>
+      {/* CTA Band */}
+      <div className="bg-aqua-secondary py-16 md:py-20">
+        <div className="max-w-[640px] mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white">
+            Temiz Su, Sağlıklı Gelecek.
+          </h2>
+          <p className="mt-3 text-aqua-text-muted text-base">
+            Aquails ailesine katılın, su arıtma çözümlerimizle tanışın.
+          </p>
+          <Link
+            to="/urunler"
+            className="inline-block mt-7 bg-aqua-primary text-white px-8 py-3.5 rounded-full text-[15px] font-semibold hover:shadow-primary-hover hover:-translate-y-0.5 transition-all duration-300"
+          >
+            Hemen Alışverişe Başla
+          </Link>
+        </div>
+      </div>
+
       {/* Main Footer */}
-      <div className="bg-[#0A1929] pt-12 pb-8">
+      <div className="bg-[#0A1929] pt-14 pb-8">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 min-w-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
             {/* Brand */}
             <div>
               <div className="mb-4">
@@ -91,7 +109,7 @@ export function Footer() {
           </div>
 
           {/* Bottom Line */}
-          <div className="mt-10 pt-6 border-t border-[#1A3A5C] flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-aqua-text-muted">
+          <div className="mt-12 pt-6 border-t border-[#1A3A5C] flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-aqua-text-muted">
             <p>&copy; 2025 Aquails. Tüm hakları saklıdır.</p>
             <div className="flex gap-4">
               <a href="#" className="hover:text-white transition-colors">Gizlilik Politikası</a>
