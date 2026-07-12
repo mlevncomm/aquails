@@ -477,24 +477,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ========== FINAL CTA ========== */}
-      <section className="relative bg-gradient-to-br from-[#0B1D3A] via-[#0D2137] to-[#0B1D3A] overflow-hidden py-20">
-        <div className="absolute inset-0">
-          <div className="absolute top-10 right-20 w-96 h-96 bg-[#1A73E8]/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-10 left-20 w-72 h-72 bg-[#00D4C8]/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#1A73E8]/5 rounded-full blur-3xl pointer-events-none" />
-        </div>
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 text-center relative">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-            <h2 className="text-2xl md:text-4xl font-bold text-white leading-tight">Eviniz için Doğru Su Arıtma<br />Sistemini Birlikte Seçelim</h2>
-            <p className="text-sm sm:text-base text-white/70 mt-4 max-w-lg mx-auto">Uzman ekibimiz size en uygun çözümü sunmak için hazır. Ücretsiz keşif randevusu alın veya ürünlerimizi inceleyin.</p>
-            <div className="flex flex-wrap justify-center gap-3 mt-10">
-              <Link to="/urunler" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-8 py-4 rounded-full font-semibold hover:bg-[#1557B0] transition-all shadow-lg">Ürünleri İncele <ArrowRight className="w-4 h-4" /></Link>
-              <Link to="/servis-randevusu" className="inline-flex items-center gap-2 border-2 border-white/30 text-white px-8 py-4 rounded-full font-semibold hover:bg-white/10 transition-all">Servis Randevusu Al</Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
     </PageLayout>
     </>
   );
