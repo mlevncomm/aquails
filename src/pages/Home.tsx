@@ -182,7 +182,12 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="max-w-xl"
           >
-            <BrandLogo variant="logo" inverted bare className="h-10 sm:h-12 mb-6 md:mb-8 drop-shadow-sm" />
+            <div className="flex items-center gap-3 mb-6 md:mb-8">
+              <BrandLogo variant="icon" bare className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.25)]" />
+              <span className="text-2xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-sm">
+                Aquails
+              </span>
+            </div>
             <h1 className="text-4xl sm:text-5xl md:text-[3.25rem] font-bold text-white leading-[1.1] tracking-tight">
               Daha Temiz Su,<br />
               Daha Akıllı Teknoloji
