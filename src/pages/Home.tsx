@@ -266,7 +266,7 @@ export default function Home() {
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Öne Çıkan Ürünler</span>
             <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">En Çok Tercih Edilenler</h2>
           </ScrollReveal>
-          <ScrollReveal className="flex justify-center flex-wrap gap-2 mb-10">
+          <div className="flex justify-center flex-wrap gap-2 mb-10">
             {[
               { key: 'cok-satanlar', label: 'Çok Satanlar' },
               { key: 'yeni-gelenler', label: 'Yeni Gelenler' },
@@ -277,12 +277,12 @@ export default function Home() {
                 {t.label}
               </button>
             ))}
-          </ScrollReveal>
-          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" staggerDelay={0.08} key={activeTab}>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {(tabProducts[activeTab as keyof typeof tabProducts] ?? catalogProducts.slice(0, 4)).map(p => (
-              <StaggerItem key={p.id}><ProductCard product={p} /></StaggerItem>
+              <div key={p.id}><ProductCard product={p} /></div>
             ))}
-          </StaggerContainer>
+          </div>
           <div className="text-center mt-10">
             <Link to="/urunler" className="inline-flex items-center gap-2 text-sm font-semibold text-[#1A73E8] hover:underline">Tüm Ürünleri Gör <ArrowRight className="w-4 h-4" /></Link>
           </div>
