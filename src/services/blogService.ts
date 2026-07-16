@@ -11,6 +11,34 @@ export interface BlogPostListItem {
   views: number;
 }
 
+export interface PublicBlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  category: string;
+  excerpt: string;
+  image: string;
+  readTime: string;
+}
+
+const BLOG_IMAGE_CYCLE = [
+  '/images/blog-1.jpg',
+  '/images/blog-2.jpg',
+  '/images/blog-3.jpg',
+];
+
+function excerptFromContent(content: string, max = 140): string {
+  const plain = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!plain) return 'Aquails bilgi merkezinden güncel rehberler.';
+  return plain.length > max ? `${plain.slice(0, max).trim()}…` : plain;
+}
+
+function estimateReadTime(content: string): string {
+  const words = content.trim().split(/\s+/).filter(Boolean).length;
+  const minutes = Math.max(2, Math.ceil(words / 200));
+  return `${minutes} dk`;
+}
+
 function mapPost(row: DbBlogPost): BlogPostListItem {
   return {
     id: row.id,
@@ -19,6 +47,18 @@ function mapPost(row: DbBlogPost): BlogPostListItem {
     status: row.status,
     date: formatDateTR(row.created_at),
     views: row.views,
+  };
+}
+
+function mapPublicPost(row: DbBlogPost, index: number): PublicBlogPost {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    category: row.category,
+    excerpt: excerptFromContent(row.content),
+    image: BLOG_IMAGE_CYCLE[index % BLOG_IMAGE_CYCLE.length],
+    readTime: estimateReadTime(row.content),
   };
 }
 
@@ -33,6 +73,21 @@ export async function getBlogPosts(): Promise<BlogPostListItem[]> {
 
   if (error || !data) return [];
   return (data as DbBlogPost[]).map(mapPost);
+}
+
+export async function getPublishedBlogPosts(limit = 3): Promise<PublicBlogPost[]> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .select('*')
+    .eq('status', 'published')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error || !data) return [];
+  return (data as DbBlogPost[]).map(mapPublicPost);
 }
 
 export async function createBlogPost(input: {

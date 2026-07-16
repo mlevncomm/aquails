@@ -13,6 +13,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
 import { useCompareStore } from '@/stores/compareStore';
 import { logout } from '@/services/authService';
+import { getSiteConfig } from '@/services/settingsService';
 import { categories as staticCategories } from '@/data';
 import { useCatalog } from '@/hooks/useCatalog';
 import { BrandLogo } from '@/components/BrandLogo';
@@ -109,6 +110,8 @@ export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
+  const [phone, setPhone] = useState('0850 123 45 67');
+  const [freeShippingLimit, setFreeShippingLimit] = useState(1500);
   const location = useLocation();
   const navigate = useNavigate();
   const { toggleDrawer, getTotalItems } = useCartStore();
@@ -117,6 +120,16 @@ export function Header() {
   const compareCount = useCompareStore(s => s.ids.length);
   const cartCount = getTotalItems();
   const searchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSiteConfig().then((cfg) => {
+      if (cancelled) return;
+      if (cfg.phone) setPhone(cfg.phone);
+      if (cfg.freeShippingLimit > 0) setFreeShippingLimit(cfg.freeShippingLimit);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -161,11 +174,15 @@ export function Header() {
       {/* Top Bar */}
       <div className="bg-[#0D2137] text-white overflow-x-hidden">
         <div className="max-w-[1280px] mx-auto px-4 h-8 flex items-center justify-between text-[11px] min-w-0 gap-2">
-          <p className="text-[#8B9DAF] truncate min-w-0">Ücretsiz Kargo — 1.500₺ ve üzeri siparişlerde</p>
+          <p className="text-[#8B9DAF] truncate min-w-0">
+            Ücretsiz Kargo — {freeShippingLimit.toLocaleString('tr-TR')}₺ ve üzeri siparişlerde
+          </p>
           <div className="hidden sm:flex items-center gap-4">
             <Link to="/siparis-takip" className="text-[#8B9DAF] hover:text-white transition-colors">Sipariş Takip</Link>
             <span className="text-[#1A3A5C]">|</span>
-            <p className="text-[#8B9DAF] flex items-center gap-1.5"><Phone className="w-3 h-3" /> 0850 123 45 67</p>
+            <a href={`tel:${phone.replace(/\s/g, '')}`} className="text-[#8B9DAF] flex items-center gap-1.5 hover:text-white transition-colors">
+              <Phone className="w-3 h-3" /> {phone}
+            </a>
           </div>
         </div>
       </div>
@@ -173,7 +190,7 @@ export function Header() {
       {/* Main Header */}
       <header
         className={cn(
-          'sticky top-0 z-50 overflow-x-hidden transition-all duration-300',
+          'sticky top-0 z-50 relative overflow-x-visible transition-all duration-300',
           'border-b border-[#E8F0FE]/70',
           'bg-white/75 backdrop-blur-2xl supports-[backdrop-filter]:bg-white/65',
           isScrolled
@@ -300,6 +317,46 @@ export function Header() {
             </div>
           </div>
         </div>
+
+        {/* Mega Menu - Desktop (anchored to sticky header bottom) */}
+        <AnimatePresence>
+          {isMegaOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              onMouseEnter={() => setIsMegaOpen(true)}
+              onMouseLeave={() => setIsMegaOpen(false)}
+              className="hidden lg:block absolute left-0 right-0 top-full z-40 bg-white border-b border-[#E8F0FE] shadow-lg"
+            >
+              <div className="max-w-[1280px] mx-auto px-4 py-6">
+                <div className="grid grid-cols-7 gap-3">
+                  {categories.map(cat => {
+                    const Icon = getCategoryIcon(cat.icon);
+                    return (
+                      <Link
+                        key={cat.id}
+                        to={`/urunler?kategori=${cat.id}`}
+                        onClick={() => setIsMegaOpen(false)}
+                        className="group p-4 rounded-xl hover:bg-[#F8FBFF] transition-all"
+                      >
+                        <div className="w-10 h-10 bg-[#F0F6FF] rounded-xl flex items-center justify-center mb-3 group-hover:bg-[#1A73E8] transition-colors">
+                          <Icon className="w-5 h-5 text-[#1A73E8] group-hover:text-white transition-colors" />
+                        </div>
+                        <h4 className="text-sm font-semibold text-[#0D2137] mb-1">{cat.name}</h4>
+                        <p className="text-xs text-[#8B9DAF]">{cat.productCount} ürün</p>
+                      </Link>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 pt-4 border-t border-[#F0F6FF] flex items-center justify-between">
+                  <p className="text-xs text-[#8B9DAF]">Tüm ürünleri keşfedin: <Link to="/urunler" onClick={() => setIsMegaOpen(false)} className="text-[#1A73E8] font-medium hover:underline">Tüm Ürünler</Link></p>
+                  <Link to="/kampanyalar" onClick={() => setIsMegaOpen(false)} className="text-xs font-medium text-[#1A73E8] hover:underline">Tüm Kampanyalar →</Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Mobile search overlay */}
@@ -332,39 +389,6 @@ export function Header() {
               </div>
             </motion.form>
           </>
-        )}
-      </AnimatePresence>
-
-      {/* Mega Menu - Desktop */}
-      <AnimatePresence>
-        {isMegaOpen && (
-          <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} onMouseEnter={() => setIsMegaOpen(true)} onMouseLeave={() => setIsMegaOpen(false)} className="hidden lg:block fixed left-0 right-0 top-[64px] z-40 bg-white border-b border-[#E8F0FE] shadow-lg">
-            <div className="max-w-[1280px] mx-auto px-4 py-6">
-              <div className="grid grid-cols-7 gap-3">
-                {categories.map(cat => {
-                  const Icon = getCategoryIcon(cat.icon);
-                  return (
-                    <Link
-                      key={cat.id}
-                      to={`/urunler?kategori=${cat.id}`}
-                      onClick={() => setIsMegaOpen(false)}
-                      className="group p-4 rounded-xl hover:bg-[#F8FBFF] transition-all"
-                    >
-                      <div className="w-10 h-10 bg-[#F0F6FF] rounded-xl flex items-center justify-center mb-3 group-hover:bg-[#1A73E8] transition-colors">
-                        <Icon className="w-5 h-5 text-[#1A73E8] group-hover:text-white transition-colors" />
-                      </div>
-                      <h4 className="text-sm font-semibold text-[#0D2137] mb-1">{cat.name}</h4>
-                      <p className="text-xs text-[#8B9DAF]">{cat.productCount} ürün</p>
-                    </Link>
-                  );
-                })}
-              </div>
-              <div className="mt-4 pt-4 border-t border-[#F0F6FF] flex items-center justify-between">
-                <p className="text-xs text-[#8B9DAF]">Tüm ürünleri keşfedin: <Link to="/urunler" onClick={() => setIsMegaOpen(false)} className="text-[#1A73E8] font-medium hover:underline">Tüm Ürünler</Link></p>
-                <Link to="/kampanyalar" onClick={() => setIsMegaOpen(false)} className="text-xs font-medium text-[#1A73E8] hover:underline">Tüm Kampanyalar →</Link>
-              </div>
-            </div>
-          </motion.div>
         )}
       </AnimatePresence>
 

@@ -651,6 +651,39 @@ export interface Database {
         };
         Relationships: [];
       };
+      contact_messages: {
+        Row: {
+          id: string;
+          name: string;
+          email: string;
+          phone: string;
+          subject: string;
+          message: string;
+          status: 'new' | 'read' | 'replied' | 'archived';
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          email: string;
+          phone?: string;
+          subject?: string;
+          message: string;
+          status?: 'new' | 'read' | 'replied' | 'archived';
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          email?: string;
+          phone?: string;
+          subject?: string;
+          message?: string;
+          status?: 'new' | 'read' | 'replied' | 'archived';
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       notifications: {
         Row: {
           id: string;
@@ -891,3 +924,4 @@ export type DbAddress = Database['public']['Tables']['addresses']['Row'];
 export type DbBlogPost = Database['public']['Tables']['blog_posts']['Row'];
 export type DbSubscription = Database['public']['Tables']['subscriptions']['Row'];
 export type DbStockNotification = Database['public']['Tables']['stock_notifications']['Row'];
+export type DbContactMessage = Database['public']['Tables']['contact_messages']['Row'];

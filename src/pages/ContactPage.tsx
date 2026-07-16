@@ -1,36 +1,68 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { Phone, Mail, MapPin, Clock, Send, CheckCircle, MessageCircle, Wrench, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Send, CheckCircle, MessageCircle, Wrench, ArrowRight, ShieldCheck, Loader2 } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { useToastStore } from '@/components/Toast';
 import { SEO } from '@/components/SEO';
-
-
-const contactInfo = [
-  { icon: Phone, label: 'Müşteri Hizmetleri', value: '0850 123 45 67', sub: '7/24 destek hattı' },
-  { icon: Phone, label: 'WhatsApp', value: '0 532 123 45 67', sub: 'Hızlı destek için yazın' },
-  { icon: Mail, label: 'E-posta', value: 'info@aquails.com', sub: '24 saat içinde yanıt' },
-  { icon: Mail, label: 'Teknik Destek', value: 'teknik@aquails.com', sub: 'Servis ve arıza talepleri' },
-  { icon: MapPin, label: 'Merkez Ofis', value: 'Pendik, İstanbul', sub: 'Türkiye geneli servis ağı' },
-  { icon: Clock, label: 'Çalışma Saatleri', value: 'Pzt-Cmt: 08:00-18:00', sub: 'Pazar: 10:00-16:00' },
-];
+import { submitContactMessage } from '@/services/contactService';
+import { getSiteConfig } from '@/services/settingsService';
 
 const sikSorulan = [
   { q: 'Siparişim ne zaman elime ulaşır?', a: 'Stoktaki ürünler için ortalama 1-3 iş günü içinde kargo teslimatı sağlanır.' },
   { q: 'Kurulum ücretli mi?', a: 'Tüm su arıtma cihazlarımızda profesyonel kurulum ücretsizdir.' },
-  { q: 'Servis talebi nasıl oluşturabilirim?', a: 'Web sitemizden veya 0850 123 45 67 numaralı hattımızdan servis randevusu alabilirsiniz.' },
+  { q: 'Servis talebi nasıl oluşturabilirim?', a: 'Web sitemizden veya müşteri hizmetleri hattımızdan servis randevusu alabilirsiniz.' },
 ];
+
+function toWaLink(whatsapp: string): string {
+  const digits = whatsapp.replace(/\D/g, '');
+  if (!digits) return 'https://wa.me/905321234567';
+  const normalized = digits.startsWith('90') ? digits : digits.startsWith('0') ? `90${digits.slice(1)}` : `90${digits}`;
+  return `https://wa.me/${normalized}`;
+}
 
 export default function ContactPage() {
   const addToast = useToastStore(s => s.add);
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [phone, setPhone] = useState('0850 123 45 67');
+  const [whatsapp, setWhatsapp] = useState('0532 123 45 67');
+  const [email, setEmail] = useState('info@aquails.com.tr');
+  const [address, setAddress] = useState('Pendik, İstanbul');
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: 'Genel Bilgi', message: '' });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    let cancelled = false;
+    getSiteConfig().then((cfg) => {
+      if (cancelled) return;
+      if (cfg.phone) setPhone(cfg.phone);
+      if (cfg.whatsapp) setWhatsapp(cfg.whatsapp);
+      if (cfg.email) setEmail(cfg.email);
+      if (cfg.address) setAddress(cfg.address);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const contactInfo = [
+    { icon: Phone, label: 'Müşteri Hizmetleri', value: phone, sub: '7/24 destek hattı' },
+    { icon: Phone, label: 'WhatsApp', value: whatsapp, sub: 'Hızlı destek için yazın' },
+    { icon: Mail, label: 'E-posta', value: email, sub: '24 saat içinde yanıt' },
+    { icon: Mail, label: 'Teknik Destek', value: email.replace('info@', 'teknik@'), sub: 'Servis ve arıza talepleri' },
+    { icon: MapPin, label: 'Merkez Ofis', value: address, sub: 'Türkiye geneli servis ağı' },
+    { icon: Clock, label: 'Çalışma Saatleri', value: 'Pzt-Cmt: 08:00-18:00', sub: 'Pazar: 10:00-16:00' },
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
       addToast('Lütfen tüm zorunlu alanları doldurun.', 'error');
+      return;
+    }
+    setSubmitting(true);
+    const result = await submitContactMessage(form);
+    setSubmitting(false);
+    if (!result.success) {
+      addToast(result.error || 'Mesaj gönderilemedi.', 'error');
       return;
     }
     setSent(true);
@@ -41,7 +73,7 @@ export default function ContactPage() {
     <>
       <SEO
         title="İletişim | Aquails"
-        description="Aquails iletişim bilgileri. Su arıtma cihazları, servis ve destek için bize ulaşın. 0850 123 45 67"
+        description={`Aquails iletişim bilgileri. Su arıtma cihazları, servis ve destek için bize ulaşın. ${phone}`}
         canonical="/iletisim"
       />
     <PageLayout>
@@ -84,8 +116,8 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <p className="text-xs text-white/80 mb-3">Ürün seçimi, sipariş ve servis talepleriniz için WhatsApp hattımızdan bize ulaşabilirsiniz.</p>
-                <a href="https://wa.me/905321234567" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-4 py-2 rounded-full transition-all">
-                  <MessageCircle className="w-3.5 h-3.5" /> WhatsApp\'tan Yaz
+                <a href={toWaLink(whatsapp)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-4 py-2 rounded-full transition-all">
+                  <MessageCircle className="w-3.5 h-3.5" /> WhatsApp&apos;tan Yaz
                 </a>
               </div>
 
@@ -166,8 +198,13 @@ export default function ContactPage() {
                       <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Mesajınız *</label>
                       <textarea required value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} rows={5} className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8] resize-none" placeholder="Mesajınızı buraya yazın..." />
                     </div>
-                    <button type="submit" className="flex items-center justify-center gap-2 w-full sm:w-auto bg-[#1A73E8] text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all">
-                      <Send className="w-4 h-4" /> Gönder
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="flex items-center justify-center gap-2 w-full sm:w-auto bg-[#1A73E8] text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                      {submitting ? 'Gönderiliyor…' : 'Gönder'}
                     </button>
                   </form>
                 </>
