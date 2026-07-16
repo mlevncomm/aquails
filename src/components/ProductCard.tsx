@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Product } from '@/types';
 import { RatingStars } from './RatingStars';
@@ -36,11 +36,13 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
   };
 
   const primaryImage = product.images?.[0] || '/images/products/placeholder.jpg';
+  const shortFeatures = (product.features || []).slice(0, 2);
+  const inStock = product.stock > 0;
 
   if (compact) {
     return (
       <Link to={`/urun/${product.slug}`} className="block group flex-shrink-0 w-[200px]">
-        <div className="bg-aqua-bg rounded-xl aspect-square flex items-center justify-center mb-2 group-hover:shadow-card-hover transition-all duration-300 overflow-hidden">
+        <div className="bg-aq-ice rounded-2xl aspect-square flex items-center justify-center mb-2 transition-all duration-300 overflow-hidden border border-aq-border/60">
           <img
             src={primaryImage}
             alt={product.name}
@@ -49,7 +51,7 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
             onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
           />
         </div>
-        <h4 className="text-[13px] font-medium text-aqua-secondary line-clamp-1 group-hover:text-aqua-primary transition-colors">
+        <h4 className="text-[13px] font-medium text-aq-text line-clamp-1 group-hover:text-aq-blue transition-colors">
           {product.name}
         </h4>
         <ProductPrice product={product} size="sm" />
@@ -59,13 +61,12 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="group bg-white border border-aqua-border-light rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow duration-300"
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="group bg-white border border-aq-border/60 rounded-2xl overflow-hidden hover:border-aq-blue/20 transition-all duration-300 flex flex-col h-full"
     >
-      <Link to={`/urun/${product.slug}`}>
-        {/* Image */}
-        <div className="relative bg-aqua-bg aspect-square flex items-center justify-center overflow-hidden">
+      <Link to={`/urun/${product.slug}`} className="flex flex-col flex-1 min-w-0">
+        <div className="relative bg-aq-ice aspect-[4/3] sm:aspect-square flex items-center justify-center overflow-hidden">
           <img
             src={primaryImage}
             alt={product.name}
@@ -73,67 +74,103 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
             loading="lazy"
             onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
           />
-          
-          {/* Badges */}
+
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {product.discountPercent && (
-              <span className="bg-aqua-danger/10 text-aqua-danger text-[11px] font-semibold px-2.5 py-1 rounded-md">
+              <span className="bg-white/95 text-[#E85454] text-[11px] font-medium px-2.5 py-1 rounded-full shadow-sm border border-[#E85454]/15">
                 %{product.discountPercent} İNDİRİM
               </span>
             )}
             {product.badge === 'new' && (
-              <span className="bg-aqua-secondary text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
+              <span className="bg-aq-deep text-white text-[11px] font-medium px-2.5 py-1 rounded-full shadow-sm">
                 YENİ
+              </span>
+            )}
+            {product.badge === 'premium' && (
+              <span className="bg-aq-deep text-white text-[11px] font-medium px-2.5 py-1 rounded-full shadow-sm">
+                PREMIUM
               </span>
             )}
           </div>
 
-          {/* Favorite */}
           <button
+            type="button"
             onClick={handleFavorite}
-            className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+            aria-label={isFavorited ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+            className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-white shadow-sm ring-1 ring-aq-border/80"
           >
             <Heart
               className={cn(
                 'w-4 h-4 transition-colors',
-                isFavorited ? 'text-aqua-danger fill-aqua-danger' : 'text-aqua-text-secondary'
+                isFavorited ? 'text-[#E85454] fill-[#E85454]' : 'text-aq-muted',
               )}
             />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-4">
-          <span className="inline-block bg-aqua-primary/5 text-aqua-primary text-[11px] font-medium px-2.5 py-0.5 rounded-md">
+        <div className="p-4 sm:p-5 flex flex-col flex-1">
+          <span className="inline-flex self-start bg-aq-sky text-aq-blue text-[11px] font-medium px-2.5 py-0.5 rounded-full">
             {product.category}
           </span>
 
-          <h3 className="text-[15px] font-semibold text-aqua-secondary mt-2.5 line-clamp-2 leading-snug group-hover:text-aqua-primary transition-colors">
+          <h3 className="text-[15px] font-semibold text-aq-text mt-2.5 line-clamp-2 leading-snug group-hover:text-aq-blue transition-colors">
             {product.name}
           </h3>
 
-          <div className="mt-2">
+          {shortFeatures.length > 0 && (
+            <ul className="mt-2 space-y-0.5">
+              {shortFeatures.map((f) => (
+                <li key={f} className="text-[11px] text-aq-muted line-clamp-1">
+                  · {f}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="mt-2.5">
             <RatingStars rating={product.rating} size="sm" showCount count={product.reviewCount} />
           </div>
 
-          <ProductPrice product={product} size="md" className="mt-3" />
-
-          <div className="flex items-center gap-2 mt-3">
-            <span className="text-[11px] font-medium bg-aqua-success/10 text-aqua-success px-2 py-0.5 rounded-md">
-              Stokta
-            </span>
+          <div className="mt-auto pt-3">
+            <ProductPrice product={product} size="md" />
+            <div className="flex items-center gap-2 mt-2">
+              <span
+                className={cn(
+                  'text-[11px] font-medium px-2 py-0.5 rounded-full',
+                  inStock
+                    ? 'bg-aq-sky text-aq-blue'
+                    : 'bg-red-50 text-red-500',
+                )}
+              >
+                {inStock ? 'Stokta' : 'Tükendi'}
+              </span>
+            </div>
           </div>
         </div>
       </Link>
 
-      {/* Add to Cart Button */}
-      <div className="px-3 sm:px-4 pb-3 sm:pb-4">
-        <button
-          onClick={handleAddToCart}
-          className="w-full flex items-center justify-center gap-1.5 sm:gap-2 bg-[#1A73E8]/5 text-[#1A73E8] py-2 sm:py-2.5 rounded-xl text-[12px] sm:text-sm font-semibold hover:bg-[#1A73E8] hover:text-white active:scale-[0.98] transition-all duration-200"
+      <div className="px-3 sm:px-5 pb-3 sm:pb-5 flex items-center gap-2">
+        <Link
+          to={`/urun/${product.slug}`}
+          className="flex-1 flex items-center justify-center gap-1.5 border border-aq-border/60 text-aq-text py-2.5 rounded-xl text-[13px] font-semibold hover:border-aq-blue hover:text-aq-blue active:scale-[0.98] transition-all duration-200"
         >
-          <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span>Sepete Ekle</span>
+          İncele
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={!inStock}
+          aria-label="Sepete Ekle"
+          title="Sepete Ekle"
+          className={cn(
+            'flex-shrink-0 w-10 h-10 sm:w-11 sm:h-11 inline-flex items-center justify-center rounded-full border transition-all duration-200 active:scale-[0.96]',
+            inStock
+              ? 'border-aq-border/60 text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-sky'
+              : 'border-aq-border/60 text-aq-muted bg-aq-ice cursor-not-allowed',
+          )}
+        >
+          <ShoppingCart className="w-4 h-4" />
         </button>
       </div>
     </motion.div>

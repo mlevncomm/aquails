@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart, ShoppingCart, Zap, Check, ChevronRight,
-  Shield, Truck, Wrench, Star, ThumbsUp,
+  Shield, Truck, Wrench, ThumbsUp,
   MessageCircle, Bell, Mail, Phone, Send, AlertCircle, HelpCircle, Loader2
 } from 'lucide-react';
 import { openWhatsApp, getProductInquiryMessage } from '@/services/whatsappService';
@@ -50,6 +50,7 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [activeImage, setActiveImage] = useState(0);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const [questionName, setQuestionName] = useState('');
   const [questionText, setQuestionText] = useState('');
@@ -79,7 +80,7 @@ export default function ProductDetail() {
     return (
       <PageLayout>
         <div className="page-container py-20 flex justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-aqua-primary" />
+          <Loader2 className="w-8 h-8 animate-spin text-aq-blue" />
         </div>
       </PageLayout>
     );
@@ -91,8 +92,8 @@ export default function ProductDetail() {
         <SEO title="Ürün Bulunamadı | Aquails" noindex />
         <PageLayout>
           <div className="page-container py-20 text-center">
-            <h1 className="text-2xl font-bold text-aqua-secondary">Ürün bulunamadı</h1>
-            <Link to="/urunler" className="text-aqua-primary hover:underline mt-4 inline-block">
+            <h1 className="text-2xl font-bold text-aq-text">Ürün bulunamadı</h1>
+            <Link to="/urunler" className="text-aq-blue hover:underline mt-4 inline-block">
               Ürünlere Dön
             </Link>
           </div>
@@ -207,14 +208,14 @@ export default function ProductDetail() {
       <PageLayout>
       {/* Breadcrumb */}
       <div className="page-container pt-6">
-        <nav className="text-[13px] text-aqua-text-muted">
-          <Link to="/" className="text-aqua-primary hover:underline">Ana Sayfa</Link>
+        <nav className="text-[13px] text-aq-muted">
+          <Link to="/" className="text-aq-blue hover:underline">Ana Sayfa</Link>
           <ChevronRight className="w-3 h-3 inline mx-1" />
-          <Link to="/urunler" className="text-aqua-primary hover:underline">Ürünler</Link>
+          <Link to="/urunler" className="text-aq-blue hover:underline">Ürünler</Link>
           <ChevronRight className="w-3 h-3 inline mx-1" />
-          <span className="text-aqua-text-secondary">{product.category}</span>
+          <span className="text-aq-muted">{product.category}</span>
           <ChevronRight className="w-3 h-3 inline mx-1" />
-          <span className="text-aqua-text-secondary">{product.name}</span>
+          <span className="text-aq-muted">{product.name}</span>
         </nav>
       </div>
 
@@ -223,7 +224,7 @@ export default function ProductDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left - Gallery */}
           <ScrollReveal x={-20}>
-            <div className="bg-white border border-aqua-border-light rounded-2xl aspect-square flex items-center justify-center overflow-hidden">
+            <div className="bg-aq-ice border border-aq-border/60 rounded-2xl aspect-square flex items-center justify-center overflow-hidden">
               <img
                 src={productImages[activeImage] || productImages[0]}
                 alt={product.name}
@@ -237,8 +238,8 @@ export default function ProductDetail() {
                   key={i}
                   onClick={() => setActiveImage(i)}
                   className={cn(
-                    'w-[72px] h-[72px] rounded-xl border-2 flex items-center justify-center bg-aqua-bg transition-all overflow-hidden',
-                    activeImage === i ? 'border-aqua-primary' : 'border-transparent hover:border-aqua-border'
+                    'w-[72px] h-[72px] rounded-xl border-2 flex items-center justify-center bg-aq-ice transition-all overflow-hidden',
+                    activeImage === i ? 'border-aq-deep' : 'border-transparent hover:border-aq-border/60'
                   )}
                 >
                   <img
@@ -254,18 +255,18 @@ export default function ProductDetail() {
 
           {/* Right - Info */}
           <ScrollReveal x={20} delay={0.1}>
-            <span className="inline-block bg-aqua-primary/5 text-aqua-primary text-xs font-medium px-3 py-1 rounded-md">
+            <span className="inline-block bg-aq-sky text-aq-blue text-xs font-medium px-3 py-1 rounded-md">
               {product.category}
             </span>
 
-            <h1 className="text-2xl md:text-3xl font-bold text-aqua-secondary mt-3 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-bold text-aq-text mt-3 leading-tight">
               {product.name}
             </h1>
 
             <div className="flex items-center gap-3 mt-3">
               <RatingStars rating={product.rating} size="md" />
-              <span className="text-sm font-semibold text-aqua-secondary">{product.rating}</span>
-              <Link to="#reviews" className="text-sm text-aqua-text-muted hover:text-aqua-primary">
+              <span className="text-sm font-semibold text-aq-text">{product.rating}</span>
+              <Link to="#reviews" className="text-sm text-aq-muted hover:text-aq-blue">
                 ({product.reviewCount} Değerlendirme)
               </Link>
             </div>
@@ -284,28 +285,28 @@ export default function ProductDetail() {
                   Son {product.stock} adet - Hemen sipariş verin
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-md">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-aq-sky text-aq-blue px-2.5 py-1 rounded-md">
                   <Check className="w-3 h-3" />
                   Stokta ({product.stock} adet)
                 </span>
               )}
             </div>
 
-            <p className="text-[15px] text-aqua-text-secondary leading-relaxed mt-5">
+            <p className="text-[15px] text-aq-muted leading-relaxed mt-5">
               {product.shortDescription}
             </p>
 
             <div className="flex flex-wrap gap-2 mt-4">
               {product.features.map((f) => (
-                <span key={f} className="inline-flex items-center gap-1.5 bg-aqua-bg border border-aqua-border-light rounded-lg px-3 py-1.5 text-[13px] font-medium text-aqua-secondary">
-                  <Check className="w-3 h-3 text-aqua-success" />
+                <span key={f} className="inline-flex items-center gap-1.5 bg-aq-ice border border-aq-border/60 rounded-lg px-3 py-1.5 text-[13px] font-medium text-aq-text">
+                  <Check className="w-3 h-3 text-aq-aqua" />
                   {f}
                 </span>
               ))}
             </div>
 
             <div className="mt-6">
-              <span className="text-sm font-semibold text-aqua-secondary">Adet</span>
+              <span className="text-sm font-semibold text-aq-text">Adet</span>
               <div className="mt-2">
                 <QuantitySelector
                   quantity={quantity}
@@ -317,35 +318,36 @@ export default function ProductDetail() {
 
             <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 mt-6">
               <button
-                onClick={handleAddToCart}
-                disabled={isOutOfStock}
-                className={cn(
-                  'flex-1 flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-full font-semibold transition-all',
-                  isOutOfStock
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-aqua-primary text-white hover:bg-aqua-primary-dark hover:shadow-primary active:scale-[0.98]'
-                )}
-              >
-                <ShoppingCart className="w-5 h-5" />
-                {isOutOfStock ? 'Stokta Yok' : 'Sepete Ekle'}
-              </button>
-              <button
                 type="button"
                 disabled={isOutOfStock}
                 onClick={handleBuyNow}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-2 border-2 py-3.5 sm:py-4 rounded-full font-semibold transition-all',
+                  'flex-1 flex items-center justify-center gap-2 border border-aq-border/60 py-3.5 sm:py-4 rounded-xl font-semibold transition-all',
                   isOutOfStock
                     ? 'border-gray-200 text-gray-300 cursor-not-allowed'
-                    : 'border-aqua-primary text-aqua-primary hover:bg-aqua-primary hover:text-white active:scale-[0.98]'
+                    : 'text-aq-text hover:border-aq-blue hover:text-aq-blue active:scale-[0.98]'
                 )}
               >
                 <Zap className="w-5 h-5" />
                 Hemen Al
               </button>
               <button
+                onClick={handleAddToCart}
+                disabled={isOutOfStock}
+                aria-label={isOutOfStock ? 'Stokta Yok' : 'Sepete Ekle'}
+                title={isOutOfStock ? 'Stokta Yok' : 'Sepete Ekle'}
+                className={cn(
+                  'w-full sm:w-14 h-12 sm:h-14 flex items-center justify-center rounded-full border transition-all active:scale-[0.96]',
+                  isOutOfStock
+                    ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'border-aq-border/60 text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-sky'
+                )}
+              >
+                <ShoppingCart className="w-5 h-5" />
+              </button>
+              <button
                 onClick={() => openWhatsApp(getProductInquiryMessage(product.name))}
-                className="flex-1 flex items-center justify-center gap-2 border-2 border-[#00C9A7] text-[#00C9A7] py-3.5 sm:py-4 rounded-full font-semibold hover:bg-[#00C9A7]/5 active:scale-[0.98] transition-all"
+                className="flex-1 flex items-center justify-center gap-2 border-2 border-aq-aqua text-aq-aqua py-3.5 sm:py-4 rounded-xl font-semibold hover:bg-aq-sky active:scale-[0.98] transition-all"
               >
                 <MessageCircle className="w-4 h-4" />
                 WhatsApp
@@ -356,7 +358,7 @@ export default function ProductDetail() {
                   'w-full sm:w-14 h-12 sm:h-14 flex items-center justify-center border rounded-xl transition-all',
                   isFavorited
                     ? 'border-aqua-danger bg-aqua-danger/5 text-aqua-danger'
-                    : 'border-aqua-border-light text-aqua-text-secondary hover:border-aqua-primary'
+                    : 'border-aq-border/60 text-aq-muted hover:border-aq-deep'
                 )}
               >
                 <Heart className={cn('w-5 h-5', isFavorited && 'fill-aqua-danger')} />
@@ -443,30 +445,34 @@ export default function ProductDetail() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3"
+                className="mt-4 bg-aq-sky border border-aq-aqua/30 rounded-xl p-4 flex items-center gap-3"
               >
-                <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Check className="w-4 h-4 text-emerald-600" />
+                <div className="w-8 h-8 bg-aq-aqua/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Check className="w-4 h-4 text-aq-blue" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-emerald-700">Bildirim kaydınız alındı</p>
-                  <p className="text-xs text-emerald-600">Ürün stoğa girdiğinde size e-posta ile haber vereceğiz.</p>
+                  <p className="text-sm font-semibold text-aq-blue">Bildirim kaydınız alındı</p>
+                  <p className="text-xs text-aq-muted">Ürün stoğa girdiğinde size e-posta ile haber vereceğiz.</p>
                 </div>
               </motion.div>
             )}
 
-            <div className="mt-6 pt-5 border-t border-aqua-border-light space-y-2.5">
+            <div className="mt-6 pt-5 border-t border-aq-border/60 grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { icon: Truck, label: 'Kargo', value: 'Ücretsiz' },
-                { icon: Wrench, label: 'Kurulum', value: 'Ücretsiz Profesyonel' },
-                { icon: Shield, label: 'Garanti', value: '5 Yıl' },
+                { icon: Truck, label: 'Ücretsiz Kargo', value: '1.500₺ üzeri' },
+                { icon: Wrench, label: 'Ücretsiz Kurulum', value: 'Profesyonel montaj' },
+                { icon: Shield, label: '5 Yıl Garanti', value: 'Tam kapsamlı' },
+                { icon: Check, label: 'Stok & Servis', value: isOutOfStock ? 'Stokta yok' : 'Hazır teslimat' },
               ].map((item) => (
-                <div key={item.label} className="flex items-center gap-4 text-[13px]">
-                  <span className="text-aqua-text-muted w-20">{item.label}</span>
-                  <div className="flex items-center gap-2 text-aqua-secondary">
-                    <item.icon className="w-4 h-4 text-aqua-primary" />
-                    {item.value}
+                <div
+                  key={item.label}
+                  className="rounded-2xl bg-aq-ice border border-aq-border/60 px-3 py-3 flex flex-col gap-1.5"
+                >
+                  <div className="w-8 h-8 rounded-xl bg-white border border-aq-border/60 flex items-center justify-center">
+                    <item.icon className="w-4 h-4 text-aq-blue" />
                   </div>
+                  <p className="text-[12px] font-semibold text-aq-text leading-tight">{item.label}</p>
+                  <p className="text-[11px] text-aq-muted">{item.value}</p>
                 </div>
               ))}
             </div>
@@ -474,242 +480,329 @@ export default function ProductDetail() {
         </div>
       </section>
 
-      {/* Tabs */}
-      <section className="page-container pb-12">
-        <div className="bg-white border border-aqua-border-light rounded-2xl overflow-hidden">
-          {/* Tab Nav */}
-          <div className="flex border-b border-aqua-border-light overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'px-5 py-3.5 text-sm font-semibold whitespace-nowrap border-b-2 -mb-px transition-all',
-                  activeTab === tab.id
-                    ? 'text-aqua-primary border-aqua-primary'
-                    : 'text-aqua-text-muted border-transparent hover:text-aqua-secondary'
-                )}
-              >
-                {tab.label}
-                {tab.id === 'reviews' && ` (${product.reviewCount})`}
-                {tab.id === 'questions' && publicQuestions.length > 0 && ` (${publicQuestions.length})`}
-              </button>
-            ))}
+      {/* Tabs — responsive minimalist */}
+      <section className="page-container pb-12 md:pb-16">
+        <div className="-mx-5 sm:mx-0 px-5 sm:px-0">
+          <div
+            className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1 snap-x snap-mandatory scrollbar-hide"
+            role="tablist"
+            aria-label="Ürün bilgileri"
+          >
+            {tabs.map((tab) => {
+              const count =
+                tab.id === 'reviews'
+                  ? product.reviewCount
+                  : tab.id === 'questions' && publicQuestions.length > 0
+                    ? publicQuestions.length
+                    : null;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'snap-start flex-shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 sm:px-4 py-2 text-[12px] sm:text-[13px] font-semibold transition-all',
+                    isActive
+                      ? 'bg-aq-deep text-white'
+                      : 'bg-aq-ice text-aq-muted hover:text-aq-text hover:bg-aq-sky',
+                  )}
+                >
+                  <span>{tab.label}</span>
+                  {count != null && (
+                    <span
+                      className={cn(
+                        'tabular-nums text-[11px] font-medium',
+                        isActive ? 'text-white/70' : 'text-aq-muted',
+                      )}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
+        </div>
 
-          {/* Tab Content */}
-          <div className="p-6 md:p-8">
-            <AnimatePresence mode="wait">
-              {activeTab === 'description' && (
-                <motion.div
-                  key="description"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="text-[15px] text-aqua-text-secondary leading-relaxed"
-                >
-                  <p>{product.description}</p>
-                  <h4 className="text-base font-semibold text-aqua-secondary mt-6 mb-3">7 Aşamalı Arıtma Süreci</h4>
-                  <ol className="space-y-2 ml-5">
-                    <li className="list-decimal"><strong>5 Mikron Sediment Filtre:</strong> Pas, kum ve tortuları tutar.</li>
-                    <li className="list-decimal"><strong>GAC Aktif Karbon Filtre:</strong> Klor, kötü koku ve tadı giderir.</li>
-                    <li className="list-decimal"><strong>CTO Karbon Blok Filtre:</strong> Klor kalıntılarını ve organik bileşikleri temizler.</li>
-                    <li className="list-decimal"><strong>RO Membran Filtre:</strong> Bakteri, virüs, ağır metaller ve %99.9 safsızlığı giderir.</li>
-                    <li className="list-decimal"><strong>Post Karbon Filtre:</strong> Son tat ve koku düzenlemesi.</li>
-                    <li className="list-decimal"><strong>Mineral Filtre:</strong> Sağlıklı mineralleri (kalsiyum, magnezyum) suya katar.</li>
-                    <li className="list-decimal"><strong>UV Sterilizasyon:</strong> Son aşamada mikrop temizliği.</li>
-                  </ol>
-                </motion.div>
-              )}
-
-              {activeTab === 'specs' && (
-                <motion.div
-                  key="specs"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <table className="w-full">
-                    <tbody>
-                      {Object.entries(product.specifications).map(([key, value]) => (
-                        <tr key={key} className="border-b border-aqua-bg last:border-0">
-                          <td className="py-3.5 text-sm font-medium text-aqua-text-secondary w-1/2">{key}</td>
-                          <td className="py-3.5 text-sm font-medium text-aqua-secondary text-right">{value}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </motion.div>
-              )}
-
-              {activeTab === 'shipping' && (
-                <motion.div
-                  key="shipping"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="text-[15px] text-aqua-text-secondary leading-relaxed"
-                >
-                  <div className="bg-aqua-bg border-l-4 border-aqua-primary rounded-r-xl p-4 mb-4">
-                    <p className="font-medium text-aqua-secondary">Siparişleriniz 1-3 iş günü içinde kargoya verilir.</p>
+        <div className="pt-6 sm:pt-8 md:pt-10">
+          <AnimatePresence mode="wait">
+            {activeTab === 'description' && (
+              <motion.div
+                key="description"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.2 }}
+                className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12"
+              >
+                <div className="lg:col-span-7 min-w-0">
+                  <div className="relative">
+                    <p
+                      className={cn(
+                        'text-[14px] sm:text-[15px] text-aq-muted leading-[1.75] whitespace-pre-line',
+                        !descExpanded && 'line-clamp-[8] sm:line-clamp-[10]',
+                      )}
+                    >
+                      {product.description}
+                    </p>
+                    {!descExpanded && (product.description?.length ?? 0) > 320 && (
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent" />
+                    )}
                   </div>
-                  <p>İstanbul içi aynı gün teslimat imkanı mevcuttur. Diğer iller için ortalama teslimat süresi 2-4 iş günüdür.</p>
-                  <h4 className="text-base font-semibold text-aqua-secondary mt-4 mb-2">Kurulum Hizmeti</h4>
-                  <p>Tüm su arıtma cihazlarımızda profesyonel kurulum hizmeti ücretsizdir. Kurulum ekibimiz cihazı evinize getirir, monte eder ve çalıştırır.</p>
-                  <h4 className="text-base font-semibold text-aqua-secondary mt-4 mb-2">İade Politikası</h4>
-                  <p>14 gün içinde koşulsuz iade imkanı. Ürün kutusunda ve ambalajında hasar olmaması gerekmektedir.</p>
-                </motion.div>
-              )}
+                  {(product.description?.length ?? 0) > 320 && (
+                    <button
+                      type="button"
+                      onClick={() => setDescExpanded((v) => !v)}
+                      className="mt-3 text-[13px] font-semibold text-aq-blue hover:text-aq-deep transition-colors"
+                    >
+                      {descExpanded ? 'Daha az göster' : 'Devamını oku'}
+                    </button>
+                  )}
+                </div>
 
-              {activeTab === 'reviews' && (
-                <motion.div
-                  key="reviews"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  {/* Rating Summary */}
-                  <div className="flex flex-col md:flex-row gap-8 mb-8">
-                    <div className="text-center md:text-left">
-                      <span className="text-5xl font-bold text-aqua-secondary">{product.rating}</span>
-                      <div className="mt-2">
-                        <RatingStars rating={product.rating} size="md" />
-                      </div>
-                      <p className="text-sm text-aqua-text-muted mt-1">{product.reviewCount} Değerlendirme</p>
+                <div className="lg:col-span-5 min-w-0">
+                  <h4 className="text-[11px] font-semibold tracking-[0.14em] uppercase text-aq-muted mb-4">
+                    7 Aşamalı Arıtma
+                  </h4>
+                  <ol className="space-y-0 divide-y divide-aq-border/70 rounded-2xl border border-aq-border/80 bg-aq-ice/40 overflow-hidden">
+                    {[
+                      { t: '5 Mikron Sediment', d: 'Pas, kum ve tortuları tutar.' },
+                      { t: 'GAC Aktif Karbon', d: 'Klor, kötü koku ve tadı giderir.' },
+                      { t: 'CTO Karbon Blok', d: 'Klor kalıntılarını ve organik bileşikleri temizler.' },
+                      { t: 'RO Membran', d: 'Bakteri, virüs, ağır metaller ve %99.9 safsızlığı giderir.' },
+                      { t: 'Post Karbon', d: 'Son tat ve koku düzenlemesi.' },
+                      { t: 'Mineral Filtre', d: 'Kalsiyum ve magnezyumu suya katar.' },
+                      { t: 'UV Sterilizasyon', d: 'Son aşamada mikrop temizliği.' },
+                    ].map((step, i) => (
+                      <li key={step.t} className="flex gap-3 px-4 py-3.5">
+                        <span className="text-[11px] font-semibold text-aq-blue tabular-nums pt-0.5 w-5 flex-shrink-0">
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-[13px] sm:text-sm font-semibold text-aq-text">{step.t}</p>
+                          <p className="text-[12px] sm:text-[13px] text-aq-muted mt-0.5 leading-relaxed">{step.d}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'specs' && (
+              <motion.div
+                key="specs"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.2 }}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-px rounded-2xl border border-aq-border/80 overflow-hidden bg-aq-border/60"
+              >
+                {Object.entries(product.specifications).map(([key, value]) => (
+                  <div
+                    key={key}
+                    className="flex flex-col gap-1 bg-white px-4 py-4 sm:px-5"
+                  >
+                    <span className="text-[12px] text-aq-muted">{key}</span>
+                    <span className="text-sm font-semibold text-aq-text break-words">{value}</span>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+
+            {activeTab === 'shipping' && (
+              <motion.div
+                key="shipping"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.2 }}
+                className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5"
+              >
+                <div className="rounded-2xl border border-aq-border/80 bg-aq-ice/40 p-5 sm:p-6 sm:col-span-3 md:col-span-1">
+                  <div className="w-9 h-9 rounded-xl bg-white border border-aq-border/60 flex items-center justify-center mb-3">
+                    <Truck className="w-4 h-4 text-aq-blue" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-aq-text mb-1.5">Kargo</h4>
+                  <p className="text-[13px] text-aq-muted leading-relaxed">
+                    1–3 iş günü içinde kargoya verilir. İstanbul içi aynı gün; diğer iller 2–4 iş günü.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-aq-border/80 bg-white p-5 sm:p-6">
+                  <div className="w-9 h-9 rounded-xl bg-aq-ice border border-aq-border/60 flex items-center justify-center mb-3">
+                    <Wrench className="w-4 h-4 text-aq-blue" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-aq-text mb-1.5">Kurulum</h4>
+                  <p className="text-[13px] text-aq-muted leading-relaxed">
+                    Profesyonel kurulum ücretsizdir. Ekibimiz montajı yapar ve cihazı çalıştırır.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-aq-border/80 bg-white p-5 sm:p-6">
+                  <div className="w-9 h-9 rounded-xl bg-aq-ice border border-aq-border/60 flex items-center justify-center mb-3">
+                    <Shield className="w-4 h-4 text-aq-blue" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-aq-text mb-1.5">İade</h4>
+                  <p className="text-[13px] text-aq-muted leading-relaxed">
+                    14 gün koşulsuz iade. Ürün kutusu ve ambalajının hasarsız olması gerekir.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'reviews' && (
+              <motion.div
+                key="reviews"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-6 sm:gap-8 items-end mb-8 sm:mb-10 pb-8 sm:pb-10 border-b border-aq-border/70">
+                  <div>
+                    <span className="text-4xl sm:text-5xl font-bold tracking-tight text-aq-text">{product.rating}</span>
+                    <div className="mt-2">
+                      <RatingStars rating={product.rating} size="md" />
                     </div>
-                    <div className="flex-1 max-w-xs">
-                      {[5, 4, 3, 2, 1].map((star) => {
-                        const pct = star === 5 ? 72 : star === 4 ? 18 : star === 3 ? 6 : star === 2 ? 3 : 1;
-                        return (
-                          <div key={star} className="flex items-center gap-2 mb-1.5">
-                            <span className="text-xs text-aqua-text-muted w-3">{star}</span>
-                            <Star className="w-3 h-3 text-[#F5A623] fill-[#F5A623]" />
-                            <div className="flex-1 h-1.5 bg-aqua-bg rounded-full overflow-hidden">
-                              <div className="h-full bg-[#F5A623] rounded-full" style={{ width: `${pct}%` }} />
-                            </div>
-                            <span className="text-xs text-aqua-text-muted w-6">{pct}%</span>
+                    <p className="text-[13px] text-aq-muted mt-1.5">{product.reviewCount} değerlendirme</p>
+                  </div>
+                  <div className="w-full max-w-sm">
+                    {[5, 4, 3, 2, 1].map((star) => {
+                      const pct = star === 5 ? 72 : star === 4 ? 18 : star === 3 ? 6 : star === 2 ? 3 : 1;
+                      return (
+                        <div key={star} className="flex items-center gap-2 mb-1.5">
+                          <span className="text-xs text-aq-muted w-3 tabular-nums">{star}</span>
+                          <div className="flex-1 h-1 bg-aq-ice rounded-full overflow-hidden">
+                            <div className="h-full bg-[#F5A623] rounded-full" style={{ width: `${pct}%` }} />
                           </div>
-                        );
-                      })}
-                    </div>
-                    <div className="flex items-start">
-                      <button className="border-2 border-aqua-primary text-aqua-primary px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-aqua-primary hover:text-white transition-all">
-                        Yorum Yaz
+                          <span className="text-xs text-aq-muted w-8 tabular-nums text-right">{pct}%</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <button
+                    type="button"
+                    className="w-full sm:w-auto border border-aq-border/60 text-aq-text px-5 py-2.5 rounded-xl text-[13px] font-semibold hover:border-aq-blue hover:text-aq-blue transition-all"
+                  >
+                    Yorum Yaz
+                  </button>
+                </div>
+
+                <div className="space-y-0 divide-y divide-aq-border/70 max-w-3xl">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="py-6 first:pt-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-aq-sky rounded-full flex items-center justify-center">
+                          <span className="text-sm font-semibold text-aq-blue">{review.name[0]}</span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-aq-text">{review.name}</p>
+                          <p className="text-xs text-aq-muted">{review.date}</p>
+                        </div>
+                        <RatingStars rating={review.rating} size="sm" />
+                      </div>
+                      <h5 className="text-sm font-semibold text-aq-text mt-3">{review.title}</h5>
+                      <p className="text-[14px] text-aq-muted leading-relaxed mt-1.5">{review.content}</p>
+                      <button
+                        type="button"
+                        className="flex items-center gap-1.5 text-xs text-aq-muted hover:text-aq-blue mt-3 transition-colors"
+                      >
+                        <ThumbsUp className="w-3.5 h-3.5" />
+                        Faydalı ({review.helpful})
                       </button>
                     </div>
-                  </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-                  {/* Review List */}
-                  <div className="space-y-6">
-                    {reviews.map((review) => (
-                      <div key={review.id} className="border-b border-aqua-bg pb-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 bg-aqua-primary/10 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-bold text-aqua-primary">{review.name[0]}</span>
+            {activeTab === 'questions' && (
+              <motion.div
+                key="questions"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.2 }}
+                className="max-w-3xl space-y-10"
+              >
+                <div>
+                  <h4 className="text-sm font-semibold text-aq-text flex items-center gap-2 mb-4">
+                    <HelpCircle className="w-4 h-4 text-aq-blue" />
+                    Soru Sor
+                  </h4>
+                  {questionSubmitted ? (
+                    <p className="text-sm text-aq-muted">
+                      Sorunuz başarıyla gönderildi. Admin onayından sonra cevap burada yayınlanacaktır.
+                    </p>
+                  ) : (
+                    <form onSubmit={handleQuestionSubmit} className="space-y-3">
+                      <input
+                        type="text"
+                        value={questionName}
+                        onChange={(e) => setQuestionName(e.target.value)}
+                        placeholder={user?.name ? user.name : 'Adınız Soyadınız'}
+                        className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue bg-white"
+                      />
+                      <textarea
+                        value={questionText}
+                        onChange={(e) => setQuestionText(e.target.value)}
+                        placeholder="Ürün hakkında sorunuzu yazın..."
+                        rows={3}
+                        className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue bg-white resize-none"
+                      />
+                      <button
+                        type="submit"
+                        className="inline-flex items-center gap-2 border border-aq-border/60 text-aq-text px-5 py-2.5 rounded-xl text-[13px] font-semibold hover:border-aq-blue hover:text-aq-blue transition-all"
+                      >
+                        <Send className="w-4 h-4" />
+                        Soruyu Gönder
+                      </button>
+                    </form>
+                  )}
+                </div>
+
+                {publicQuestions.length > 0 ? (
+                  <div className="divide-y divide-aq-border/70">
+                    {publicQuestions.map((q) => (
+                      <div key={q.id} className="py-5 first:pt-0">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 bg-aq-sky rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-semibold text-aq-blue">{q.customerName[0]}</span>
                           </div>
-                          <div>
-                            <p className="text-sm font-semibold text-aqua-secondary">{review.name}</p>
-                            <p className="text-xs text-aqua-text-muted">{review.date}</p>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-aq-text">{q.customerName}</p>
+                            <p className="text-[14px] text-aq-muted mt-1 leading-relaxed">{q.question}</p>
+                            {q.answer && (
+                              <div className="mt-3 pl-3 border-l-2 border-aq-blue/30">
+                                <p className="text-xs font-medium text-aq-blue mb-1 flex items-center gap-1">
+                                  <MessageCircle className="w-3.5 h-3.5" />
+                                  Aquails Cevabı
+                                </p>
+                                <p className="text-[14px] text-aq-muted leading-relaxed">{q.answer}</p>
+                              </div>
+                            )}
                           </div>
-                          <RatingStars rating={review.rating} size="sm" className="ml-auto" />
                         </div>
-                        <h5 className="text-sm font-semibold text-aqua-secondary mt-3">{review.title}</h5>
-                        <p className="text-sm text-aqua-text-secondary leading-relaxed mt-1.5">{review.content}</p>
-                        <button className="flex items-center gap-1.5 text-xs text-aqua-text-muted hover:text-aqua-primary mt-3 transition-colors">
-                          <ThumbsUp className="w-3.5 h-3.5" />
-                          Faydalı ({review.helpful})
-                        </button>
                       </div>
                     ))}
                   </div>
-                </motion.div>
-              )}
-
-              {activeTab === 'questions' && (
-                <motion.div
-                  key="questions"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="space-y-6"
-                >
-                  <div className="bg-aqua-bg border border-aqua-border-light rounded-xl p-5">
-                    <h4 className="text-sm font-semibold text-aqua-secondary flex items-center gap-2 mb-3">
-                      <HelpCircle className="w-4 h-4 text-aqua-primary" />
-                      Soru Sor
-                    </h4>
-                    {questionSubmitted ? (
-                      <p className="text-sm text-aqua-text-secondary">
-                        Sorunuz başarıyla gönderildi. Admin onayından sonra cevap burada yayınlanacaktır.
-                      </p>
-                    ) : (
-                      <form onSubmit={handleQuestionSubmit} className="space-y-3">
-                        <input
-                          type="text"
-                          value={questionName}
-                          onChange={(e) => setQuestionName(e.target.value)}
-                          placeholder={user?.name ? user.name : 'Adınız Soyadınız'}
-                          className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary bg-white"
-                        />
-                        <textarea
-                          value={questionText}
-                          onChange={(e) => setQuestionText(e.target.value)}
-                          placeholder="Ürün hakkında sorunuzu yazın..."
-                          rows={3}
-                          className="w-full px-4 py-2.5 text-sm border border-aqua-border rounded-xl focus:outline-none focus:border-aqua-primary bg-white resize-none"
-                        />
-                        <button
-                          type="submit"
-                          className="inline-flex items-center gap-2 bg-aqua-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-aqua-primary-dark transition-all"
-                        >
-                          <Send className="w-4 h-4" />
-                          Soruyu Gönder
-                        </button>
-                      </form>
-                    )}
-                  </div>
-
-                  {publicQuestions.length > 0 ? (
-                    <div className="space-y-4">
-                      {publicQuestions.map((q) => (
-                        <div key={q.id} className="border-b border-aqua-bg pb-4 last:border-0">
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 bg-aqua-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-xs font-bold text-aqua-primary">{q.customerName[0]}</span>
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-semibold text-aqua-secondary">{q.customerName}</p>
-                              <p className="text-sm text-aqua-text-secondary mt-1">{q.question}</p>
-                              {q.answer && (
-                                <div className="mt-3 bg-aqua-bg rounded-xl p-3">
-                                  <p className="text-xs font-medium text-aqua-primary mb-1 flex items-center gap-1">
-                                    <MessageCircle className="w-3.5 h-3.5" />
-                                    Aquails Cevabı
-                                  </p>
-                                  <p className="text-sm text-aqua-text-secondary">{q.answer}</p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-aqua-text-muted text-center py-4">
-                      Henüz yayınlanmış soru-cevap bulunmuyor. İlk soruyu siz sorun!
-                    </p>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                ) : (
+                  <p className="text-sm text-aq-muted">
+                    Henüz yayınlanmış soru-cevap bulunmuyor. İlk soruyu siz sorun!
+                  </p>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
         <section className="page-container pb-20">
-          <h2 className="text-xl md:text-2xl font-bold text-aqua-secondary mb-6">Benzer Ürünler</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-aq-text mb-6">Benzer Ürünler</h2>
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" staggerDelay={0.08}>
             {relatedProducts.map((rp) => (
               <StaggerItem key={rp.id}>
@@ -722,7 +815,7 @@ export default function ProductDetail() {
 
       {/* Recently Viewed */}
       <section className="page-container pb-20">
-        <h2 className="text-xl md:text-2xl font-bold text-aqua-secondary mb-6">Son Görüntüledikleriniz</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-aq-text mb-6">Son Görüntüledikleriniz</h2>
         <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
           {relatedProducts.slice(0, 4).map((p) => (
             <Link
@@ -730,7 +823,7 @@ export default function ProductDetail() {
               to={`/urun/${p.slug}`}
               className="flex-shrink-0 w-[180px] group"
             >
-              <div className="bg-aqua-bg rounded-xl aspect-square flex items-center justify-center mb-2 overflow-hidden">
+              <div className="bg-aq-ice rounded-xl aspect-square flex items-center justify-center mb-2 overflow-hidden">
                 <img
                   src={p.images?.[0] || '/images/products/placeholder.jpg'}
                   alt={p.name}
@@ -739,10 +832,10 @@ export default function ProductDetail() {
                   onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
                 />
               </div>
-              <p className="text-[13px] font-medium text-aqua-secondary line-clamp-1 group-hover:text-aqua-primary transition-colors">
+              <p className="text-[13px] font-medium text-aq-text line-clamp-1 group-hover:text-aq-blue transition-colors">
                 {p.name}
               </p>
-              <p className="text-sm font-semibold text-aqua-secondary mt-0.5">
+              <p className="text-sm font-semibold text-aq-text mt-0.5">
                 {p.price.toLocaleString('tr-TR')}₺
               </p>
             </Link>

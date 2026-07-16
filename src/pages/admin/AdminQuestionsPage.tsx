@@ -50,26 +50,26 @@ export default function AdminQuestionsPage() {
 
   return (
     <>
-      <h2 className="text-lg font-semibold text-[#0D2137] mb-5">Soru & Cevap Yönetimi</h2>
+      <h2 className="text-lg font-semibold text-aq-text mb-5">Soru & Cevap Yönetimi</h2>
 
       {loading ? (
-        <div className="text-center py-12 text-sm text-[#8B9DAF]">Yükleniyor...</div>
+        <div className="text-center py-12 text-sm text-aq-muted">Yükleniyor...</div>
       ) : items.length === 0 ? (
-        <div className="bg-white border border-[#E8F0FE] rounded-2xl p-8 text-center text-sm text-[#8B9DAF]">
+        <div className="bg-white border border-aq-border/60 rounded-2xl p-8 text-center text-sm text-aq-muted">
           Henüz müşteri sorusu bulunmuyor.
         </div>
       ) : (
         <div className="space-y-4">
           {items.map((q) => (
-            <div key={q.id} className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
+            <div key={q.id} className="bg-white border border-aq-border/60 rounded-2xl p-5">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-[#F0F6FF] rounded-lg flex items-center justify-center">
-                    <HelpCircle className="w-4 h-4 text-[#1A73E8]" />
+                  <div className="w-8 h-8 bg-aq-ice rounded-lg flex items-center justify-center">
+                    <HelpCircle className="w-4 h-4 text-aq-blue" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[#0D2137]">{q.customerName}</p>
-                    <p className="text-xs text-[#8B9DAF]">
+                    <p className="text-sm font-semibold text-aq-text">{q.customerName}</p>
+                    <p className="text-xs text-aq-muted">
                       {q.productName} | {formatDate(q.createdAt)}
                     </p>
                   </div>
@@ -80,14 +80,14 @@ export default function AdminQuestionsPage() {
                   {q.status === 'answered' ? (q.isPublic ? 'Yayında' : 'Cevaplandı') : 'Bekliyor'}
                 </span>
               </div>
-              <p className="text-sm text-[#5A6B7B] mb-3 pl-10">{q.question}</p>
+              <p className="text-sm text-aq-muted mb-3 pl-10">{q.question}</p>
               {q.answer && (
-                <div className="bg-[#F8FBFF] rounded-xl p-3 ml-10 mb-3">
+                <div className="bg-aq-ice rounded-xl p-3 ml-10 mb-3">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <MessageCircle className="w-3.5 h-3.5 text-[#1A73E8]" />
-                    <span className="text-xs font-medium text-[#1A73E8]">Cevap</span>
+                    <MessageCircle className="w-3.5 h-3.5 text-aq-blue" />
+                    <span className="text-xs font-medium text-aq-blue">Cevap</span>
                   </div>
-                  <p className="text-sm text-[#5A6B7B]">{q.answer}</p>
+                  <p className="text-sm text-aq-muted">{q.answer}</p>
                 </div>
               )}
               {q.status === 'pending' && (
@@ -96,11 +96,11 @@ export default function AdminQuestionsPage() {
                     value={answerForm.id === q.id ? answerForm.text : ''}
                     onChange={(e) => setAnswerForm({ id: q.id, text: e.target.value })}
                     placeholder="Cevabınızı yazın..."
-                    className="flex-1 px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
+                    className="flex-1 px-3 py-2 text-sm border border-aq-border/60 rounded-lg bg-aq-ice focus:outline-none focus:border-aq-blue"
                   />
                   <button
                     onClick={() => void submitAnswer(q.id)}
-                    className="flex items-center gap-1 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#1557B0]"
+                    className="flex items-center gap-1 bg-aq-blue text-white px-4 py-2 rounded-xl text-sm hover:bg-aq-deep"
                   >
                     <Check className="w-4 h-4" /> Gönder
                   </button>

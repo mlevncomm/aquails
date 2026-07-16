@@ -26,20 +26,20 @@ function TaxSection() {
 
   return (
     <AdminCard className="mb-6">
-      <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
-        <Receipt className="w-4 h-4 text-sky-600" />KDV / Vergi
+      <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
+        <Receipt className="w-4 h-4 text-aq-blue" />KDV / Vergi
       </h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
         <div>
           <AdminLabel>Varsayılan KDV Oranı (%)</AdminLabel>
           <AdminInput type="number" value={tax.rate} onChange={(e) => setTax({ ...tax, rate: Number(e.target.value) })} />
         </div>
-        <label className="flex items-center gap-2 text-sm text-slate-600 mt-6">
+        <label className="flex items-center gap-2 text-sm text-aq-muted mt-6">
           <input type="checkbox" checked={tax.displayInCheckout} onChange={(e) => setTax({ ...tax, displayInCheckout: e.target.checked })} />
           Checkout&apos;ta KDV göster
         </label>
       </div>
-      <div className="mt-4 p-4 bg-sky-50 border border-sky-100 rounded-xl text-xs text-slate-600 leading-relaxed max-w-3xl space-y-2">
+      <div className="mt-4 p-4 bg-aq-sky border border-aq-aqua/30 rounded-xl text-xs text-aq-muted leading-relaxed max-w-3xl space-y-2">
         <p>
           <strong>Fiyat girişi KDV hariçtir.</strong> Admin panelinde ürün fiyatını 100₺ ve KDV oranını %20 girerseniz,
           müşteri sepetinde ve vitrinde <strong>120₺</strong> görür.
@@ -81,7 +81,7 @@ export default function AdminSettingsPage() {
 
   if (!settings) {
     return (
-      <div className="flex items-center justify-center py-24 text-slate-400">
+      <div className="flex items-center justify-center py-24 text-aq-muted">
         <Loader2 className="w-6 h-6 animate-spin" />
       </div>
     );
@@ -89,8 +89,8 @@ export default function AdminSettingsPage() {
 
   const Section = ({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) => (
     <AdminCard className="mb-6">
-      <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
-        <Icon className="w-4 h-4 text-sky-600" />{title}
+      <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
+        <Icon className="w-4 h-4 text-aq-blue" />{title}
       </h3>
       {children}
     </AdminCard>
@@ -156,7 +156,7 @@ export default function AdminSettingsPage() {
               value={settings.freeShippingThreshold}
               onChange={(e) => setSettings({ ...settings, freeShippingThreshold: Number(e.target.value) })}
             />
-            <p className="text-xs text-slate-400 mt-1">Detaylı kargo yöntemleri için Kargo Modülü sayfasını kullanın.</p>
+            <p className="text-xs text-aq-muted mt-1">Detaylı kargo yöntemleri için Kargo Modülü sayfasını kullanın.</p>
           </div>
         </Section>
 

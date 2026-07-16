@@ -12,6 +12,7 @@ export interface Database {
           role: UserRole;
           loyalty_points: number;
           loyalty_redeemed: number;
+          referral_code: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -23,6 +24,7 @@ export interface Database {
           role?: UserRole;
           loyalty_points?: number;
           loyalty_redeemed?: number;
+          referral_code?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -34,6 +36,7 @@ export interface Database {
           role?: UserRole;
           loyalty_points?: number;
           loyalty_redeemed?: number;
+          referral_code?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -174,6 +177,36 @@ export interface Database {
           sort_order?: number;
           created_at?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      service_slots: {
+        Row: {
+          id: string;
+          slot_date: string;
+          slot_time: string;
+          capacity: number;
+          booked: number;
+          is_available: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          slot_date: string;
+          slot_time: string;
+          capacity?: number;
+          booked?: number;
+          is_available?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          slot_date?: string;
+          slot_time?: string;
+          capacity?: number;
+          booked?: number;
+          is_available?: boolean;
+          created_at?: string;
         };
         Relationships: [];
       };
@@ -903,6 +936,34 @@ export interface Database {
       bulk_update_product_prices: {
         Args: { p_category_slug: string; p_mode: string; p_value: number };
         Returns: number;
+      };
+      track_order_by_number_and_contact: {
+        Args: { p_order_number: string; p_email_or_phone: string };
+        Returns: Record<string, unknown> | null;
+      };
+      ensure_referral_code: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      track_referral_signup: {
+        Args: { p_referral_code: string };
+        Returns: Record<string, unknown>;
+      };
+      admin_confirm_offline_payment: {
+        Args: { p_order_id: string };
+        Returns: Record<string, unknown>;
+      };
+      book_service_slot: {
+        Args: { p_slot_id: string };
+        Returns: Record<string, unknown>;
+      };
+      ensure_service_slots: {
+        Args: { p_days_ahead?: number };
+        Returns: undefined;
+      };
+      sync_user_cart: {
+        Args: { p_items: unknown };
+        Returns: undefined;
       };
     };
     Enums: Record<string, never>;

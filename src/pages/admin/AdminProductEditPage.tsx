@@ -8,7 +8,9 @@ import {
   getCategoryOptions,
   updateProduct,
   createProduct,
+  setProductPrimaryImage,
 } from '@/services/productService';
+import { uploadProductImage } from '@/services/storageService';
 import { AdminCard, AdminInput, AdminLabel, AdminSelect, AdminTextarea, AdminButton } from '@/components/admin/admin-ui';
 
 function specsFromProduct(specs: Record<string, string>) {
@@ -26,6 +28,7 @@ export default function AdminProductEditPage() {
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [specs, setSpecs] = useState([{ key: '', value: '' }]);
   const [form, setForm] = useState({
@@ -88,6 +91,29 @@ export default function AdminProductEditPage() {
     setSpecs(next);
   };
 
+  const handleImageUpload = async (file: File | null) => {
+    if (!file) return;
+    if (isNew) {
+      addToast('Önce ürünü kaydedin, sonra görsel yükleyin.', 'error');
+      return;
+    }
+    setUploadingImage(true);
+    const uploaded = await uploadProductImage(file, id!);
+    if (!uploaded.success || !uploaded.url) {
+      setUploadingImage(false);
+      addToast(uploaded.error ?? 'Görsel yüklenemedi.', 'error');
+      return;
+    }
+    const saved = await setProductPrimaryImage(id!, uploaded.url);
+    setUploadingImage(false);
+    if (!saved.success) {
+      addToast(saved.error ?? 'Görsel kaydedilemedi.', 'error');
+      return;
+    }
+    setImageUrl(uploaded.url);
+    addToast('Ürün görseli güncellendi.', 'success');
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.categoryId) {
@@ -128,7 +154,7 @@ export default function AdminProductEditPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24 text-slate-400">
+      <div className="flex items-center justify-center py-24 text-aq-muted">
         <Loader2 className="w-6 h-6 animate-spin" />
       </div>
     );
@@ -137,16 +163,16 @@ export default function AdminProductEditPage() {
   if (!isNew && notFound) {
     return (
       <>
-        <Link to="/admin/urunler" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-sky-600 mb-6">
+        <Link to="/admin/urunler" className="inline-flex items-center gap-1.5 text-sm text-aq-muted hover:text-aq-blue mb-6">
           <ArrowLeft className="w-4 h-4" /> Ürünlere Dön
         </Link>
         <AdminCard>
           <EmptyState
-            icon={<Package className="w-8 h-8 text-slate-400" />}
+            icon={<Package className="w-8 h-8 text-aq-muted" />}
             title="Ürün bulunamadı"
             description="Düzenlemek istediğiniz ürün mevcut değil veya silinmiş olabilir."
             action={
-              <Link to="/admin/urunler" className="bg-sky-600 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-sky-700">
+              <Link to="/admin/urunler" className="bg-aq-blue text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white">
                 Ürün Listesine Dön
               </Link>
             }
@@ -158,18 +184,18 @@ export default function AdminProductEditPage() {
 
   return (
     <>
-      <Link to="/admin/urunler" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-sky-600 mb-6">
+      <Link to="/admin/urunler" className="inline-flex items-center gap-1.5 text-sm text-aq-muted hover:text-aq-blue mb-6">
         <ArrowLeft className="w-4 h-4" /> Ürünlere Dön
       </Link>
 
-      <h2 className="text-xl font-bold text-slate-900 mb-6">
+      <h2 className="text-xl font-semibold text-aq-text mb-6">
         {isNew ? 'Yeni Ürün Ekle' : 'Ürün Düzenle'}
       </h2>
 
       <form onSubmit={(e) => void handleSave(e)} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <AdminCard>
-            <h3 className="text-sm font-semibold text-slate-800 mb-4">Temel Bilgiler</h3>
+            <h3 className="text-sm font-semibold text-aq-text mb-4">Temel Bilgiler</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <AdminLabel>Ürün Adı</AdminLabel>
@@ -204,8 +230,8 @@ export default function AdminProductEditPage() {
 
           <AdminCard>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-slate-800">Teknik Özellikler</h3>
-              <button type="button" onClick={addSpec} className="flex items-center gap-1 text-xs text-sky-600 font-medium hover:underline">
+              <h3 className="text-sm font-semibold text-aq-text">Teknik Özellikler</h3>
+              <button type="button" onClick={addSpec} className="flex items-center gap-1 text-xs text-aq-blue font-medium hover:underline">
                 <Plus className="w-3 h-3" /> Ekle
               </button>
             </div>
@@ -214,7 +240,7 @@ export default function AdminProductEditPage() {
                 <div key={i} className="flex gap-2">
                   <AdminInput value={s.key} onChange={(e) => updateSpec(i, 'key', e.target.value)} placeholder="Özellik" className="flex-1" />
                   <AdminInput value={s.value} onChange={(e) => updateSpec(i, 'value', e.target.value)} placeholder="Değer" className="flex-1" />
-                  <button type="button" onClick={() => removeSpec(i)} className="w-9 flex items-center justify-center text-slate-400 hover:text-red-500">
+                  <button type="button" onClick={() => removeSpec(i)} className="w-9 flex items-center justify-center text-aq-muted hover:text-red-500">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -225,7 +251,7 @@ export default function AdminProductEditPage() {
 
         <div className="space-y-6">
           <AdminCard>
-            <h3 className="text-sm font-semibold text-slate-800 mb-4">Fiyat & Stok</h3>
+            <h3 className="text-sm font-semibold text-aq-text mb-4">Fiyat & Stok</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <AdminLabel>Fiyat — KDV Hariç (₺)</AdminLabel>
@@ -245,28 +271,37 @@ export default function AdminProductEditPage() {
               </div>
             </div>
             {form.price && (
-              <p className="text-xs text-sky-700 mt-3 bg-sky-50 px-3 py-2 rounded-lg">
+              <p className="text-xs text-aq-blue mt-3 bg-aq-sky px-3 py-2 rounded-lg">
                 Müşteri fiyatı (KDV dahil):{' '}
                 <strong>
                   {(Number(form.price) * (1 + (Number(form.taxRate) || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
                 </strong>
               </p>
             )}
-            <label className="flex items-center gap-2 text-sm text-slate-600 mt-4">
-              <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="w-4 h-4 accent-sky-600" />
+            <label className="flex items-center gap-2 text-sm text-aq-muted mt-4">
+              <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="w-4 h-4 accent-aq-deep" />
               Aktif
             </label>
           </AdminCard>
 
           <AdminCard>
-            <h3 className="text-sm font-semibold text-slate-800 mb-3">Ürün Görseli</h3>
+            <h3 className="text-sm font-semibold text-aq-text mb-3">Ürün Görseli</h3>
             {imageUrl && (
               <img src={imageUrl} alt={form.name} className="w-full h-40 object-cover rounded-xl mb-3" />
             )}
-            <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center">
-              <ImageIcon className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-xs text-slate-400">Görseller katalog import ile yönetilir</p>
-            </div>
+            <label className="border-2 border-dashed border-aq-border/60 rounded-xl p-8 text-center block cursor-pointer hover:border-aq-blue/40 transition-colors">
+              <ImageIcon className="w-8 h-8 text-aq-muted/60 mx-auto mb-2" />
+              <p className="text-xs text-aq-muted">
+                {uploadingImage ? 'Yükleniyor...' : isNew ? 'Önce ürünü kaydedin' : 'Görsel yüklemek için tıklayın'}
+              </p>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                disabled={uploadingImage || isNew}
+                onChange={(e) => void handleImageUpload(e.target.files?.[0] ?? null)}
+              />
+            </label>
           </AdminCard>
 
           <AdminButton type="submit" disabled={saving} className="w-full">

@@ -33,8 +33,9 @@ function mapProfile(profile: Profile): User {
   };
 }
 
+/** @deprecated Prefer getCurrentUser / initAuth session hydration. */
 export function loadUserFromStorage(): User | null {
-  return null;
+  return useAuthStore.getState().user;
 }
 
 export async function getProfile(userId: string): Promise<User | null> {
@@ -138,7 +139,7 @@ export async function forgotPassword(email: string): Promise<{ success: boolean;
 
   const supabase = getSupabaseOrNull()!;
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/sifremi-unuttum`,
+    redirectTo: `${window.location.origin}/sifre-sifirla`,
   });
   if (error) return { success: false, error: error.message };
   return { success: true, message: 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.' };
@@ -204,7 +205,11 @@ export async function initAuth(): Promise<void> {
     const user = await getCurrentUser();
     if (user) useAuthStore.getState().setUser(user);
 
-    supabase.auth.onAuthStateChange(async (_event, session) => {
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        useAuthStore.getState().setHydrated();
+        return;
+      }
       if (session?.user) {
         const profile = await getProfile(session.user.id);
         useAuthStore.getState().setUser(profile ?? {

@@ -24,13 +24,13 @@ export default function AdminFilterTrackingPage() {
 
       <AdminTableWrap>
         {loading ? (
-          <div className="py-12 text-center text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+          <div className="py-12 text-center text-aq-muted"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
+              <tr className="bg-aq-ice border-b border-aq-border/60">
                 {['Müşteri', 'Cihaz', 'Adres', 'Tarih', 'Durum', 'Teknisyen'].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase whitespace-nowrap">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -38,15 +38,15 @@ export default function AdminFilterTrackingPage() {
               {requests.length === 0 ? (
                 <tr><td colSpan={6}><AdminEmpty message="Filtre değişim talebi bulunamadı" /></td></tr>
               ) : requests.map((f) => (
-                <tr key={f.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50">
-                  <td className="px-4 py-3 text-sm font-medium text-slate-800">{f.customer}</td>
-                  <td className="px-4 py-3 text-sm text-slate-600">{f.device}</td>
-                  <td className="px-4 py-3 text-sm text-slate-500 max-w-[200px] truncate">{f.address}</td>
-                  <td className="px-4 py-3 text-sm text-slate-600">{f.date}</td>
+                <tr key={f.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
+                  <td className="px-4 py-3 text-sm font-medium text-aq-text">{f.customer}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{f.device}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted max-w-[200px] truncate">{f.address}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{f.date}</td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-sky-50 text-sky-700">{f.status}</span>
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-aq-sky text-aq-blue">{f.status}</span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-500">{f.tech || '—'}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{f.tech || '—'}</td>
                 </tr>
               ))}
             </tbody>

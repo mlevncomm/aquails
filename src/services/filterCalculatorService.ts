@@ -61,7 +61,7 @@ export function calculateFilterChange(input: FilterCalcInput): FilterCalcResult 
   } else {
     status = 'healthy';
     statusLabel = 'Filtreniz sağlıklı aralıkta';
-    statusColor = '#00C9A7';
+    statusColor = '#1286D8';
   }
 
   if (input.hasTasteIssue && status === 'healthy') {

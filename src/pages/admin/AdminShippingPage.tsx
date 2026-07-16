@@ -50,7 +50,7 @@ export default function AdminShippingPage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>;
+    return <div className="flex justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-aq-muted" /></div>;
   }
 
   return (
@@ -59,8 +59,8 @@ export default function AdminShippingPage() {
 
       <form onSubmit={(e) => void handleSave(e)}>
         <AdminCard className="mb-6">
-          <h3 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
-            <Truck className="w-4 h-4 text-sky-600" />Genel
+          <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
+            <Truck className="w-4 h-4 text-aq-blue" />Genel
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
             <div>
@@ -76,12 +76,12 @@ export default function AdminShippingPage() {
 
         <AdminCard className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-slate-800">Kargo Yöntemleri</h3>
-            <button type="button" onClick={addMethod} className="text-xs text-sky-600 flex items-center gap-1"><Plus className="w-3.5 h-3.5" />Ekle</button>
+            <h3 className="text-sm font-semibold text-aq-text">Kargo Yöntemleri</h3>
+            <button type="button" onClick={addMethod} className="text-xs text-aq-blue flex items-center gap-1"><Plus className="w-3.5 h-3.5" />Ekle</button>
           </div>
           <div className="space-y-4">
             {methods.map((m, idx) => (
-              <div key={m.id} className="grid grid-cols-1 sm:grid-cols-5 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div key={m.id} className="grid grid-cols-1 sm:grid-cols-5 gap-3 p-4 bg-aq-ice rounded-xl border border-aq-border/60">
                 <div><AdminLabel>Ad</AdminLabel><AdminInput value={m.label} onChange={(e) => updateMethod(idx, 'label', e.target.value)} /></div>
                 <div><AdminLabel>Açıklama</AdminLabel><AdminInput value={m.desc} onChange={(e) => updateMethod(idx, 'desc', e.target.value)} /></div>
                 <div><AdminLabel>Fiyat (₺)</AdminLabel><AdminInput type="number" value={m.price} onChange={(e) => updateMethod(idx, 'price', Number(e.target.value))} /></div>

@@ -7,7 +7,7 @@ import { AdminPageHeader, AdminTableWrap, AdminEmpty } from '@/components/admin/
 const statusColors: Record<string, string> = {
   scheduled: 'bg-emerald-50 text-emerald-600',
   pending: 'bg-amber-50 text-amber-600',
-  completed: 'bg-slate-100 text-slate-500',
+  completed: 'bg-aq-ice text-aq-muted',
   cancelled: 'bg-red-50 text-red-500',
 };
 
@@ -46,12 +46,12 @@ export default function AdminServiceCalendarPage() {
           return (
             <div
               key={i}
-              className={`text-center p-3 rounded-xl ${isToday ? 'bg-sky-600 text-white' : 'bg-white border border-slate-200'}`}
+              className={`text-center p-3 rounded-xl ${isToday ? 'bg-aq-deep text-white' : 'bg-white border border-aq-border/60'}`}
             >
-              <p className={`text-xs ${isToday ? 'text-sky-100' : 'text-slate-400'}`}>
+              <p className={`text-xs ${isToday ? 'text-aq-sky' : 'text-aq-muted'}`}>
                 {d.toLocaleDateString('tr-TR', { weekday: 'short' })}
               </p>
-              <p className="text-lg font-bold">{d.getDate()}</p>
+              <p className="text-lg font-semibold">{d.getDate()}</p>
             </div>
           );
         })}
@@ -59,13 +59,13 @@ export default function AdminServiceCalendarPage() {
 
       <AdminTableWrap>
         {loading ? (
-          <div className="py-12 text-center text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+          <div className="py-12 text-center text-aq-muted"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
+              <tr className="bg-aq-ice border-b border-aq-border/60">
                 {['Müşteri', 'Tür', 'Tarih', 'Adres', 'Teknisyen', 'Durum'].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase whitespace-nowrap">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -73,27 +73,27 @@ export default function AdminServiceCalendarPage() {
               {appointments.length === 0 ? (
                 <tr><td colSpan={6}><AdminEmpty message="Planlanmış randevu yok" /></td></tr>
               ) : appointments.map((a) => (
-                <tr key={a.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50">
+                <tr key={a.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm font-medium text-slate-800">{a.customer}</span>
+                      <User className="w-4 h-4 text-aq-muted" />
+                      <span className="text-sm font-medium text-aq-text">{a.customer}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="flex items-center gap-1 text-sm text-slate-600">
+                    <span className="flex items-center gap-1 text-sm text-aq-muted">
                       <Wrench className="w-3.5 h-3.5" />{a.type}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-800">{a.date}</td>
+                  <td className="px-4 py-3 text-sm text-aq-text">{a.date}</td>
                   <td className="px-4 py-3">
-                    <span className="flex items-center gap-1 text-sm text-slate-500 max-w-[180px] truncate">
+                    <span className="flex items-center gap-1 text-sm text-aq-muted max-w-[180px] truncate">
                       <MapPin className="w-3.5 h-3.5 flex-shrink-0" />{a.address}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-600">{a.tech || '—'}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{a.tech || '—'}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColors[a.status] ?? 'bg-slate-100 text-slate-500'}`}>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColors[a.status] ?? 'bg-aq-ice text-aq-muted'}`}>
                       {statusLabels[a.status] ?? a.status}
                     </span>
                   </td>

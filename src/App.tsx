@@ -34,6 +34,7 @@ import ShippingPage from './pages/ShippingPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 
 import CustomerDashboard from './pages/CustomerDashboard';
 import CustomerOrdersPage from './pages/customer/CustomerOrdersPage';
@@ -131,6 +132,7 @@ export default function App() {
           <Route path="/giris" element={<LoginPage />} />
           <Route path="/kayit-ol" element={<RegisterPage />} />
           <Route path="/sifremi-unuttum" element={<ForgotPasswordPage />} />
+          <Route path="/sifre-sifirla" element={<ResetPasswordPage />} />
         </Route>
 
         <Route element={<CustomerLayout />}>

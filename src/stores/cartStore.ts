@@ -2,7 +2,14 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CartItem, Product } from '@/types';
 import { syncAbandonedCart } from '@/services/abandonedCartService';
+import { syncUserCartToServer } from '@/services/cartSyncService';
 import { useAuthStore } from '@/stores/authStore';
+
+export interface AppliedCartCoupon {
+  code: string;
+  discount: number;
+  type: string;
+}
 
 function trackAbandonedCartFromStore(items: CartItem[]): void {
   if (!items.length) return;
@@ -18,11 +25,14 @@ function trackAbandonedCartFromStore(items: CartItem[]): void {
     user?.name ?? 'Misafir',
     user?.email
   );
+  void syncUserCartToServer(items);
 }
 
 interface CartStore {
   items: CartItem[];
   isDrawerOpen: boolean;
+  appliedCoupon: AppliedCartCoupon | null;
+  setAppliedCoupon: (coupon: AppliedCartCoupon | null) => void;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -40,6 +50,8 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       isDrawerOpen: false,
+      appliedCoupon: null,
+      setAppliedCoupon: (coupon) => set({ appliedCoupon: coupon }),
 
       addItem: (product, quantity = 1) => {
         set((state) => {
@@ -78,7 +90,7 @@ export const useCartStore = create<CartStore>()(
         });
       },
 
-      clearCart: () => set({ items: [] }),
+      clearCart: () => set({ items: [], appliedCoupon: null }),
 
       toggleDrawer: () => set((state) => ({ isDrawerOpen: !state.isDrawerOpen })),
       closeDrawer: () => set({ isDrawerOpen: false }),

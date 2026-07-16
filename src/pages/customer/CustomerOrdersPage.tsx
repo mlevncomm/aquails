@@ -36,8 +36,8 @@ export default function CustomerOrdersPage() {
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${
-                filter === f.key ? 'bg-[#1A73E8] text-white' : 'bg-white border border-[#E8F0FE] text-[#5A6B7B] hover:border-[#1A73E8]'
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                filter === f.key ? 'bg-aq-deep text-white' : 'bg-white border border-aq-border/60 text-aq-muted hover:border-aq-blue'
               }`}
             >
               {f.label}
@@ -46,36 +46,36 @@ export default function CustomerOrdersPage() {
         </div>
 
         {loading ? (
-          <div className="bg-white border border-[#E8F0FE] rounded-2xl p-8 text-center text-sm text-[#8B9DAF]">
+          <div className="bg-white border border-aq-border/60 rounded-2xl p-8 text-center text-sm text-aq-muted">
             Siparişler yükleniyor...
           </div>
         ) : filtered.length === 0 ? (
-          <div className="bg-white border border-[#E8F0FE] rounded-2xl">
+          <div className="bg-white border border-aq-border/60 rounded-2xl">
             <EmptyState title="Henüz siparişiniz yok" description="İlk siparişinizi vermek için ürünlerimizi inceleyin." />
           </div>
         ) : (
           <div className="space-y-3">
             {filtered.map((order) => (
-              <div key={order.id} className="bg-white border border-[#E8F0FE] rounded-2xl p-5 hover:shadow-md transition-shadow">
+              <div key={order.id} className="bg-white border border-aq-border/60 rounded-2xl p-5 transition-shadow">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <span className="text-sm font-semibold text-[#1A73E8]">{order.orderNo}</span>
+                      <span className="text-sm font-semibold text-aq-blue">{order.orderNo}</span>
                       <StatusBadge status={order.status} />
                     </div>
-                    <p className="text-xs text-[#8B9DAF] mt-1.5">{order.date}</p>
-                    <p className="text-sm text-[#5A6B7B] mt-2 truncate">
+                    <p className="text-xs text-aq-muted mt-1.5">{order.date}</p>
+                    <p className="text-sm text-aq-muted mt-2 truncate">
                       {order.items.map((i) => i.name).join(', ')}
                     </p>
                   </div>
                   <div className="flex items-center gap-4 sm:text-right">
                     <div>
-                      <p className="text-base font-bold text-[#0D2137]">{order.total.toLocaleString('tr-TR')}₺</p>
-                      <p className="text-xs text-[#8B9DAF]">{order.items.length} ürün</p>
+                      <p className="text-base font-semibold text-aq-text">{order.total.toLocaleString('tr-TR')}₺</p>
+                      <p className="text-xs text-aq-muted">{order.items.length} ürün</p>
                     </div>
                     <Link
                       to={`/hesabim/siparisler/${order.id}`}
-                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#F0F6FF] text-[#1A73E8] hover:bg-[#1A73E8] hover:text-white transition-all"
+                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-aq-ice text-aq-blue hover:bg-aq-deep hover:text-white transition-all"
                     >
                       <Eye className="w-4 h-4" />
                     </Link>

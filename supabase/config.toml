@@ -48,7 +48,12 @@ file_size_limit = "50MiB"
 [auth]
 enabled = true
 site_url = "http://127.0.0.1:3000"
-additional_redirect_urls = ["https://127.0.0.1:3000", "http://localhost:3000"]
+additional_redirect_urls = [
+  "https://127.0.0.1:3000",
+  "http://localhost:3000",
+  "http://localhost:3000/sifre-sifirla",
+  "http://127.0.0.1:3000/sifre-sifirla"
+]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
@@ -69,6 +74,8 @@ enabled = true
 port = 54327
 backend = "postgres"
 
+# PayTR production path uses Vercel Functions under /api (api/paytr-init.ts, api/payment-webhook.ts).
+# Legacy Edge Function stubs below are not the primary checkout path — do not deploy them.
 [functions.create-checkout-session]
 verify_jwt = true
 

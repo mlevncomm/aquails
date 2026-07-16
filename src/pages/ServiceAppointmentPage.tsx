@@ -52,9 +52,9 @@ export default function ServiceAppointmentPage() {
       />
     <PageLayout>
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-[#0D2137] via-[#1A3A5C] to-[#0D2137] py-12 md:py-16 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep py-12 md:py-16 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-20 w-64 h-64 bg-[#1A73E8] rounded-full blur-3xl" />
+          <div className="absolute top-10 right-20 w-64 h-64 bg-aq-aqua rounded-full blur-3xl" />
         </div>
         <div className="page-container relative">
           <div className="flex items-center gap-2 text-[13px] text-white/50 mb-3">
@@ -70,32 +70,32 @@ export default function ServiceAppointmentPage() {
           {/* Form */}
           <div className="lg:col-span-2">
             {submitted ? (
-              <div className="bg-white border border-[#E8F0FE] rounded-2xl p-8 text-center">
-                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-8 h-8 text-emerald-500" />
+              <div className="bg-white border border-aq-border/60 rounded-2xl p-8 text-center">
+                <div className="w-16 h-16 bg-aq-sky rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 text-aq-aqua" />
                 </div>
-                <h2 className="text-lg font-bold text-[#0D2137] mb-2">Randevunuz Alindi!</h2>
-                <p className="text-sm text-[#8B9DAF] mb-4">Servis ekibimiz 24 saat içinde size dönüş yapacaktır.</p>
-                <p className="text-xs text-[#5A6B7B] bg-[#F8FBFF] rounded-xl p-3 inline-block">Randevu No: <strong>SR-{Date.now().toString().slice(-6)}</strong></p>
+                <h2 className="text-lg font-semibold text-aq-text mb-2">Randevunuz Alindi!</h2>
+                <p className="text-sm text-aq-muted mb-4">Servis ekibimiz 24 saat içinde size dönüş yapacaktır.</p>
+                <p className="text-xs text-aq-muted bg-aq-ice rounded-xl p-3 inline-block">Randevu No: <strong>SR-{Date.now().toString().slice(-6)}</strong></p>
                 <div className="mt-6 flex justify-center gap-3">
-                  <Link to="/" className="text-sm font-medium text-[#1A73E8] hover:underline">Ana Sayfaya Don</Link>
-                  <Link to="/urunler" className="text-sm font-medium text-[#1A73E8] hover:underline">Ürünleri İncele</Link>
+                  <Link to="/" className="text-sm font-medium text-aq-blue hover:underline">Ana Sayfaya Don</Link>
+                  <Link to="/urunler" className="text-sm font-medium text-aq-blue hover:underline">Ürünleri İncele</Link>
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="bg-white border border-[#E8F0FE] rounded-2xl p-6 space-y-5">
+              <form onSubmit={handleSubmit} className="bg-white border border-aq-border/60 rounded-2xl p-6 space-y-5">
                 {/* Service Type */}
                 <div>
-                  <label className="text-xs font-medium text-[#5A6B7B] mb-2 block">Talep Turu</label>
+                  <label className="text-xs font-medium text-aq-muted mb-2 block">Talep Turu</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {serviceTypes.map(s => {
                       const Icon = s.icon;
                       return (
-                        <button key={s.id} type="button" onClick={() => setType(s.id)} className={`flex items-center gap-3 p-3 rounded-xl text-sm font-medium border-2 transition-all text-left ${type === s.id ? 'border-[#1A73E8] bg-[#F0F6FF] text-[#1A73E8]' : 'border-[#E8F0FE] text-[#5A6B7B] hover:border-[#D6E3F0]'}`}>
+                        <button key={s.id} type="button" onClick={() => setType(s.id)} className={`flex items-center gap-3 p-3 rounded-xl text-sm font-medium border-2 transition-all text-left ${type === s.id ? 'border-aq-deep bg-aq-sky text-aq-blue' : 'border-aq-border/60 text-aq-muted hover:border-aq-border/60'}`}>
                           <Icon className="w-4 h-4 flex-shrink-0" />
                           <div>
                             <p className="text-sm font-medium">{s.label}</p>
-                            <p className="text-[10px] text-[#8B9DAF]">{s.desc}</p>
+                            <p className="text-[10px] text-aq-muted">{s.desc}</p>
                           </div>
                         </button>
                       );
@@ -105,33 +105,33 @@ export default function ServiceAppointmentPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Ad Soyad *</label>
-                    <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]" />
+                    <label className="text-xs font-medium text-aq-muted mb-1.5 block">Ad Soyad *</label>
+                    <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue" />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Telefon *</label>
-                    <input type="tel" required value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="05XX XXX XX XX" className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]" />
+                    <label className="text-xs font-medium text-aq-muted mb-1.5 block">Telefon *</label>
+                    <input type="tel" required value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="05XX XXX XX XX" className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Adres *</label>
-                  <textarea required value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} rows={2} className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8] resize-none" />
+                  <label className="text-xs font-medium text-aq-muted mb-1.5 block">Adres *</label>
+                  <textarea required value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} rows={2} className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue resize-none" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Cihaz Modeli</label>
-                    <input value={form.device} onChange={e => setForm({ ...form, device: e.target.value })} placeholder="Örn: Aquails Smart RO Pro" className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]" />
+                    <label className="text-xs font-medium text-aq-muted mb-1.5 block">Cihaz Modeli</label>
+                    <input value={form.device} onChange={e => setForm({ ...form, device: e.target.value })} placeholder="Örn: Aquails Smart RO Pro" className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue" />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Tercih Ettiğiniz Tarih</label>
-                    <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]" />
+                    <label className="text-xs font-medium text-aq-muted mb-1.5 block">Tercih Ettiğiniz Tarih</label>
+                    <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Açıklama</label>
-                  <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={3} placeholder="Sorunuzu kısaca açıklayın..." className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8] resize-none" />
+                  <label className="text-xs font-medium text-aq-muted mb-1.5 block">Açıklama</label>
+                  <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={3} placeholder="Sorunuzu kısaca açıklayın..." className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue resize-none" />
                 </div>
-                <button type="submit" className="flex items-center justify-center gap-2 w-full bg-[#1A73E8] text-white py-3 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all">
+                <button type="submit" className="flex items-center justify-center gap-2 w-full bg-aq-blue text-white py-3 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all">
                   <Calendar className="w-4 h-4" /> Randevu Oluştur
                 </button>
               </form>
@@ -140,13 +140,13 @@ export default function ServiceAppointmentPage() {
 
           {/* Sidebar */}
           <div className="space-y-5">
-            <div className="bg-gradient-to-br from-[#1A73E8] to-[#1557B0] rounded-2xl p-5 text-white">
+            <div className="bg-gradient-to-br from-aq-blue to-aq-aqua-hover rounded-2xl p-5 text-white">
               <h3 className="text-base font-semibold mb-1">Hızlı Destek</h3>
               <p className="text-xs text-white/70 mb-3">Acil durumlar için 7/24 telefon desteği</p>
               <a href="tel:08501234567" className="flex items-center gap-2 text-sm font-semibold"><Phone className="w-4 h-4" /> 0850 123 45 67</a>
             </div>
-            <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
-              <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Servis Kapsami</h3>
+            <div className="bg-white border border-aq-border/60 rounded-2xl p-5">
+              <h3 className="text-sm font-semibold text-aq-text mb-3">Servis Kapsami</h3>
               <div className="space-y-2.5">
                 {[
                   { icon: CheckCircle, label: 'Yeni cihaz kurulumu' },
@@ -156,22 +156,22 @@ export default function ServiceAppointmentPage() {
                   { icon: CheckCircle, label: 'Bina girisi filtrasyon' },
                   { icon: CheckCircle, label: '7/24 teknik destek' },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm text-[#5A6B7B]">
-                    <item.icon className="w-4 h-4 text-[#00C9A7] flex-shrink-0" />{item.label}
+                  <div key={i} className="flex items-center gap-2 text-sm text-aq-muted">
+                    <item.icon className="w-4 h-4 text-aq-aqua flex-shrink-0" />{item.label}
                   </div>
                 ))}
               </div>
             </div>
             {/* SSS */}
-            <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
-              <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Sik Sorulan</h3>
+            <div className="bg-white border border-aq-border/60 rounded-2xl p-5">
+              <h3 className="text-sm font-semibold text-aq-text mb-3">Sik Sorulan</h3>
               <div className="space-y-2">
                 {serviceSss.map((f, i) => (
                   <details key={i} className="group">
-                    <summary className="flex items-center gap-2 text-xs font-medium text-[#5A6B7B] cursor-pointer list-none hover:text-[#1A73E8] transition-colors py-1">
-                      <ChevronDown className="w-3 h-3 text-[#8B9DAF] group-open:rotate-180 transition-transform" />{f.q}
+                    <summary className="flex items-center gap-2 text-xs font-medium text-aq-muted cursor-pointer list-none hover:text-aq-blue transition-colors py-1">
+                      <ChevronDown className="w-3 h-3 text-aq-muted group-open:rotate-180 transition-transform" />{f.q}
                     </summary>
-                    <p className="text-[11px] text-[#8B9DAF] mt-1 pl-5 pb-1">{f.a}</p>
+                    <p className="text-[11px] text-aq-muted mt-1 pl-5 pb-1">{f.a}</p>
                   </details>
                 ))}
               </div>
@@ -182,17 +182,17 @@ export default function ServiceAppointmentPage() {
         {/* Kurulum Sureci */}
         <ScrollReveal className="mt-16">
           <div className="text-center mb-8">
-            <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Kurulum Sureci</span>
-            <h2 className="text-xl md:text-2xl font-bold text-[#0D2137] mt-2">4 Adimda Profesyonel Kurulum</h2>
+            <span className="text-xs font-semibold text-aq-blue tracking-[0.15em] uppercase">Kurulum Sureci</span>
+            <h2 className="text-xl md:text-2xl font-bold text-aq-text mt-2">4 Adimda Profesyonel Kurulum</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {kurulumSureci.map(k => (
-              <div key={k.step} className="bg-white border border-[#E8F0FE] rounded-2xl p-5 text-center">
-                <div className="w-10 h-10 bg-[#F0F6FF] rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-sm font-bold text-[#1A73E8]">{k.step}</span>
+              <div key={k.step} className="bg-white border border-aq-border/60 rounded-2xl p-5 text-center">
+                <div className="w-10 h-10 bg-aq-sky rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-sm font-semibold text-aq-blue">{k.step}</span>
                 </div>
-                <h4 className="text-sm font-semibold text-[#0D2137]">{k.title}</h4>
-                <p className="text-[11px] text-[#8B9DAF] mt-1">{k.desc}</p>
+                <h4 className="text-sm font-semibold text-aq-text">{k.title}</h4>
+                <p className="text-[11px] text-aq-muted mt-1">{k.desc}</p>
               </div>
             ))}
           </div>

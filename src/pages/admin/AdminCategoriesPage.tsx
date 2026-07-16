@@ -84,7 +84,7 @@ export default function AdminCategoriesPage() {
               <select
                 value={form.icon}
                 onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm"
+                className="w-full px-4 py-2.5 rounded-xl border border-aq-border/60 bg-white text-sm"
               >
                 {Object.keys(icons).map((k) => <option key={k} value={k}>{k}</option>)}
               </select>
@@ -100,32 +100,32 @@ export default function AdminCategoriesPage() {
       <AdminTableWrap>
         <table className="w-full">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-100">
+            <tr className="bg-aq-ice border-b border-aq-border/60">
               {['Kategori', 'Slug', 'Ürün Sayısı', 'Durum', 'İşlemler'].map((h) => (
-                <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase">{h}</th>
+                <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-400">Yükleniyor...</td></tr>
+              <tr><td colSpan={5} className="px-4 py-8 text-center text-sm text-aq-muted">Yükleniyor...</td></tr>
             ) : categories.length === 0 ? (
               <tr><td colSpan={5}><AdminEmpty message="Henüz kategori yok" /></td></tr>
             ) : categories.filter((c) => c.isActive).map((cat) => {
               const Icon = icons[cat.icon ?? ''] ?? Droplet;
               return (
-                <tr key={cat.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50">
+                <tr key={cat.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <Icon className="w-4 h-4 text-sky-600" />
-                      <span className="text-sm font-medium text-slate-800">{cat.name}</span>
+                      <Icon className="w-4 h-4 text-aq-blue" />
+                      <span className="text-sm font-medium text-aq-text">{cat.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-500">{cat.slug}</td>
-                  <td className="px-4 py-3 text-sm text-slate-800">{cat.productCount ?? 0}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{cat.slug}</td>
+                  <td className="px-4 py-3 text-sm text-aq-text">{cat.productCount ?? 0}</td>
                   <td className="px-4 py-3 text-sm text-emerald-600">{cat.isActive ? 'Aktif' : 'Pasif'}</td>
                   <td className="px-4 py-3">
-                    <button onClick={() => startEdit(cat)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-sky-50 text-slate-400 hover:text-sky-600">
+                    <button onClick={() => startEdit(cat)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-sky text-aq-muted hover:text-aq-blue">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                   </td>

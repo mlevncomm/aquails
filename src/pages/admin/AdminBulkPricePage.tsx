@@ -40,7 +40,7 @@ export default function AdminBulkPricePage() {
               <select
                 value={categorySlug}
                 onChange={(e) => setCategorySlug(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg"
+                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-lg"
               >
                 <option value="">Tüm Kategoriler</option>
                 {categories.map((c) => (
@@ -53,7 +53,7 @@ export default function AdminBulkPricePage() {
               <select
                 value={mode}
                 onChange={(e) => setMode(e.target.value as typeof mode)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg"
+                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-lg"
               >
                 <option value="percent">Yüzde değiştir (+/- %)</option>
                 <option value="fixed_add">Sabit tutar ekle (₺)</option>
@@ -63,7 +63,7 @@ export default function AdminBulkPricePage() {
             <div>
               <AdminLabel>Değer {mode === 'percent' ? '(%)' : mode === 'set_tax' ? '(KDV %)' : '(₺)'}</AdminLabel>
               <AdminInput type="number" step="0.01" value={value} onChange={(e) => setValue(Number(e.target.value))} />
-              {mode === 'percent' && <p className="text-xs text-slate-400 mt-1">Örn: 10 = %10 artış, -5 = %5 indirim</p>}
+              {mode === 'percent' && <p className="text-xs text-aq-muted mt-1">Örn: 10 = %10 artış, -5 = %5 indirim</p>}
             </div>
             <AdminButton type="submit" disabled={saving}>
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Percent className="w-4 h-4" />}

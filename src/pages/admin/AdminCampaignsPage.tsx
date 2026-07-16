@@ -71,7 +71,7 @@ export default function AdminCampaignsPage() {
           <form onSubmit={(e) => void handleSubmit(e)} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <AdminInput required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Kampanya adı (not)" />
             <AdminInput required value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="Kupon kodu" />
-            <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as 'percent' | 'fixed' })} className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
+            <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as 'percent' | 'fixed' })} className="px-4 py-2.5 rounded-xl border border-aq-border/60 text-sm">
               <option value="percent">Yüzde</option>
               <option value="fixed">Sabit</option>
             </select>
@@ -88,38 +88,38 @@ export default function AdminCampaignsPage() {
 
       <AdminTableWrap>
         {loading ? (
-          <div className="py-12 text-center text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+          <div className="py-12 text-center text-aq-muted"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
+              <tr className="bg-aq-ice border-b border-aq-border/60">
                 {['Kodu', 'İndirim', 'Başlangıç', 'Bitiş', 'Kullanım', 'Durum', 'İşlem'].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase whitespace-nowrap">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {items.map((c) => (
-                <tr key={c.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50">
+                <tr key={c.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <Tag className="w-4 h-4 text-sky-600" />
-                      <span className="text-sm font-bold text-sky-700">{c.code}</span>
+                      <Tag className="w-4 h-4 text-aq-blue" />
+                      <span className="text-sm font-semibold text-aq-blue">{c.code}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-800">
+                  <td className="px-4 py-3 text-sm text-aq-text">
                     {c.type === 'percent' ? `%${c.value}` : `${c.value}₺`}
                   </td>
-                  <td className="px-4 py-3 text-sm text-slate-500">{c.start}</td>
-                  <td className="px-4 py-3 text-sm text-slate-500">{c.end}</td>
-                  <td className="px-4 py-3 text-sm text-slate-600">{c.used}/{c.usageLimit || '∞'}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{c.start}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{c.end}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{c.used}/{c.usageLimit || '∞'}</td>
                   <td className="px-4 py-3">
-                    <button onClick={() => void toggle(c.id, c.active)} className={`text-xs font-medium px-2 py-0.5 rounded-full ${c.active ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
+                    <button onClick={() => void toggle(c.id, c.active)} className={`text-xs font-medium px-2 py-0.5 rounded-full ${c.active ? 'bg-emerald-50 text-emerald-600' : 'bg-aq-ice text-aq-muted'}`}>
                       {c.active ? 'Aktif' : 'Pasif'}
                     </button>
                   </td>
                   <td className="px-4 py-3">
-                    <button onClick={() => void remove(c.id)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500">
+                    <button onClick={() => void remove(c.id)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </td>

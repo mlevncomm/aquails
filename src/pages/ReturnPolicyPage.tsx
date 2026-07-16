@@ -21,7 +21,7 @@ export default function ReturnPolicyPage() {
       <SEO title="Aquails" noindex />
     <PageLayout variant="gradient">
       {/* Hero */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#0D2137] via-[#1A3A5C] to-[#1A73E8] py-14 md:py-18">
+      <div className="relative overflow-hidden bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep py-16 md:py-24">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-5 right-20 w-40 h-40 border border-white rounded-full" />
           <div className="absolute bottom-5 left-10 w-24 h-24 border border-white rounded-full" />
@@ -47,18 +47,18 @@ export default function ReturnPolicyPage() {
       <div className="max-w-[800px] mx-auto px-4 py-8 -mt-6 relative z-10">
         {/* Conditions */}
         <ScrollReveal>
-          <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6 md:p-8 mb-6 shadow-sm">
-            <h2 className="text-base font-semibold text-[#0D2137] mb-5 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-[#1A73E8]" />
+          <div className="bg-white border border-aq-border/60 rounded-2xl p-6 md:p-8 mb-6 shadow-sm">
+            <h2 className="text-base font-semibold text-aq-text mb-5 flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-aq-blue" />
               İade Koşulları
             </h2>
             <div className="space-y-3">
               {conditions.map((c, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-[#F8FBFF]/50">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${c.ok ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'}`}>
+                <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-aq-ice/50">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${c.ok ? 'bg-emerald-100 text-aq-blue' : 'bg-red-100 text-red-500'}`}>
                     {c.ok ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
                   </div>
-                  <span className="text-sm text-[#5A6B7B] pt-0.5">{c.text}</span>
+                  <span className="text-sm text-aq-muted pt-0.5">{c.text}</span>
                 </div>
               ))}
             </div>
@@ -73,12 +73,12 @@ export default function ReturnPolicyPage() {
               { icon: Package, title: 'Ücretsiz İade', desc: 'Kargo ücreti tarafımızdan karşılanır' },
               { icon: Sparkles, title: 'Hızlı İade', desc: '3-5 iş günü içinde geri ödeme' },
             ].map(item => (
-              <div key={item.title} className="bg-white border border-[#E8F0FE] rounded-2xl p-5 text-center hover:shadow-md transition-all">
-                <div className="w-12 h-12 bg-[#F0F6FF] rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <item.icon className="w-6 h-6 text-[#1A73E8]" />
+              <div key={item.title} className="bg-white border border-aq-border/60 rounded-2xl p-5 text-center transition-all">
+                <div className="w-12 h-12 bg-aq-sky rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <item.icon className="w-6 h-6 text-aq-blue" />
                 </div>
-                <h3 className="text-sm font-semibold text-[#0D2137]">{item.title}</h3>
-                <p className="text-xs text-[#8B9DAF] mt-1">{item.desc}</p>
+                <h3 className="text-sm font-semibold text-aq-text">{item.title}</h3>
+                <p className="text-xs text-aq-muted mt-1">{item.desc}</p>
               </div>
             ))}
           </div>

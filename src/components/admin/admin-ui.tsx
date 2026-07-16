@@ -15,8 +15,8 @@ export function AdminPageHeader({
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6 sm:mb-8 min-w-0">
       <div className="min-w-0">
-        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{title}</h1>
-        {description && <p className="text-slate-500 mt-1 text-sm">{description}</p>}
+        <h1 className="text-xl sm:text-2xl font-bold text-aq-text tracking-tight">{title}</h1>
+        {description && <p className="text-aq-muted mt-1 text-sm">{description}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>
@@ -34,7 +34,7 @@ export function AdminCard({
 }) {
   return (
     <div
-      className={`bg-white rounded-2xl border border-slate-200/80 shadow-sm min-w-0 ${padding ? 'p-4 sm:p-6' : ''} ${className}`}
+      className={`bg-white rounded-2xl border border-aq-border/60 min-w-0 ${padding ? 'p-5 sm:p-6' : ''} ${className}`}
     >
       {children}
     </div>
@@ -47,7 +47,7 @@ export function AdminInput({
 }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
-      className={`w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 ${className}`}
+      className={`w-full px-4 py-2.5 rounded-xl border border-aq-border/60 bg-white text-aq-text placeholder:text-aq-muted text-sm focus:outline-none focus:ring-2 focus:ring-aq-aqua/30 focus:border-aq-blue ${className}`}
       {...props}
     />
   );
@@ -60,7 +60,7 @@ export function AdminSelect({
 }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
-      className={`w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 ${className}`}
+      className={`w-full px-4 py-2.5 rounded-xl border border-aq-border/60 bg-white text-aq-text text-sm focus:outline-none focus:ring-2 focus:ring-aq-aqua/30 focus:border-aq-blue ${className}`}
       {...props}
     >
       {children}
@@ -74,14 +74,14 @@ export function AdminTextarea({
 }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
-      className={`w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 resize-none ${className}`}
+      className={`w-full px-4 py-2.5 rounded-xl border border-aq-border/60 bg-white text-aq-text placeholder:text-aq-muted text-sm focus:outline-none focus:ring-2 focus:ring-aq-aqua/30 focus:border-aq-blue resize-none ${className}`}
       {...props}
     />
   );
 }
 
 export function AdminLabel({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <label className={`block text-sm font-medium text-slate-700 mb-1.5 ${className}`}>{children}</label>;
+  return <label className={`block text-sm font-medium text-aq-muted mb-1.5 ${className}`}>{children}</label>;
 }
 
 export function AdminButton({
@@ -93,14 +93,14 @@ export function AdminButton({
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
 }) {
   const variants = {
-    primary: 'bg-sky-600 hover:bg-sky-700 text-white shadow-sm',
-    secondary: 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50',
-    danger: 'bg-red-600 hover:bg-red-700 text-white',
-    ghost: 'text-slate-600 hover:bg-slate-100',
+    primary: 'bg-aq-blue hover:bg-aq-deep text-white rounded-xl',
+    secondary: 'bg-white border border-aq-border/60 text-aq-muted hover:border-aq-blue hover:text-aq-blue rounded-xl',
+    danger: 'bg-red-600 hover:bg-red-700 text-white rounded-xl',
+    ghost: 'text-aq-muted hover:bg-aq-ice rounded-xl',
   };
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold transition-colors disabled:opacity-50 ${variants[variant]} ${className}`}
       {...props}
     >
       {children}
@@ -110,16 +110,16 @@ export function AdminButton({
 
 export function AdminBreadcrumb({ items }: { items: { label: string; to?: string }[] }) {
   return (
-    <nav className="flex items-center gap-1 text-sm text-slate-500 mb-6">
+    <nav className="flex items-center gap-1 text-sm text-aq-muted mb-6">
       {items.map((item, i) => (
         <span key={i} className="flex items-center gap-1">
-          {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-slate-300" />}
+          {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-aq-border" />}
           {item.to ? (
-            <Link to={item.to} className="hover:text-sky-600 transition-colors">
+            <Link to={item.to} className="hover:text-aq-blue transition-colors">
               {item.label}
             </Link>
           ) : (
-            <span className="text-slate-800 font-medium">{item.label}</span>
+            <span className="text-aq-text font-medium">{item.label}</span>
           )}
         </span>
       ))}
@@ -142,11 +142,11 @@ export function AdminStatCard({
     <AdminCard>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-slate-500">{label}</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
-          {sub && <p className="text-xs text-slate-400 mt-1">{sub}</p>}
+          <p className="text-sm text-aq-muted">{label}</p>
+          <p className="text-2xl font-bold text-aq-text mt-1">{value}</p>
+          {sub && <p className="text-xs text-aq-muted mt-1">{sub}</p>}
         </div>
-        {icon && <div className="p-2.5 rounded-xl bg-sky-50 text-sky-600">{icon}</div>}
+        {icon && <div className="p-2.5 rounded-xl bg-aq-sky text-aq-blue">{icon}</div>}
       </div>
     </AdminCard>
   );
@@ -154,7 +154,7 @@ export function AdminStatCard({
 
 export function AdminEmpty({ message }: { message: string }) {
   return (
-    <div className="text-center py-16 text-slate-400 text-sm">{message}</div>
+    <div className="text-center py-16 text-aq-muted text-sm">{message}</div>
   );
 }
 

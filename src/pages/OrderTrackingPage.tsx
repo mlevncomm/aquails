@@ -40,35 +40,35 @@ export default function OrderTrackingPage() {
       <PageLayout>
         <div className="max-w-[700px] mx-auto px-4 py-8">
           <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold text-[#0D2137] mb-2">Sipariş Takip</h1>
-            <p className="text-sm text-[#8B9DAF]">Sipariş numaranızı ve kayıtlı e-posta/telefonunuzu girin.</p>
+            <h1 className="text-2xl font-bold text-aq-text mb-2">Sipariş Takip</h1>
+            <p className="text-sm text-aq-muted">Sipariş numaranızı ve kayıtlı e-posta/telefonunuzu girin.</p>
           </div>
 
-          <form onSubmit={handleSearch} className="bg-white border border-[#E8F0FE] rounded-2xl p-6 mb-8">
+          <form onSubmit={handleSearch} className="bg-white border border-aq-border/60 rounded-2xl p-6 mb-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Sipariş Numarası</label>
+                <label className="text-xs font-medium text-aq-muted mb-1.5 block">Sipariş Numarası</label>
                 <input
                   value={orderNo}
                   onChange={(e) => setOrderNo(e.target.value)}
                   placeholder="AQ-2026-XXXX"
-                  className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
+                  className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue"
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">E-posta veya Telefon</label>
+                <label className="text-xs font-medium text-aq-muted mb-1.5 block">E-posta veya Telefon</label>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="ornek@email.com"
-                  className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
+                  className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue"
                 />
               </div>
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center justify-center gap-2 w-full sm:w-auto bg-[#1A73E8] text-white px-8 py-2.5 rounded-full text-sm font-semibold hover:bg-[#1557B0] disabled:opacity-60"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto bg-aq-blue text-white px-8 py-2.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white disabled:opacity-60"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               Sorgula
@@ -77,60 +77,60 @@ export default function OrderTrackingPage() {
 
           {result && (
             <div className="space-y-5">
-              <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6">
+              <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-[#F0F6FF] rounded-xl flex items-center justify-center">
-                    <Package className="w-6 h-6 text-[#1A73E8]" />
+                  <div className="w-12 h-12 bg-aq-sky rounded-xl flex items-center justify-center">
+                    <Package className="w-6 h-6 text-aq-blue" />
                   </div>
                   <div>
-                    <p className="text-sm text-[#8B9DAF]">Sipariş No</p>
-                    <p className="text-lg font-bold text-[#0D2137]">{result.orderNo}</p>
+                    <p className="text-sm text-aq-muted">Sipariş No</p>
+                    <p className="text-lg font-semibold text-aq-text">{result.orderNo}</p>
                   </div>
-                  <span className="ml-auto inline-flex items-center gap-1.5 bg-blue-50 text-blue-600 text-xs font-medium px-3 py-1 rounded-full">
+                  <span className="ml-auto inline-flex items-center gap-1.5 bg-aq-sky text-aq-blue text-xs font-medium px-3 py-1 rounded-full">
                     <Truck className="w-3 h-3" /> {result.statusLabel}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-[#5A6B7B]">
+                <div className="flex flex-wrap items-center gap-4 text-sm text-aq-muted">
                   {result.carrier !== '—' && (
                     <span className="flex items-center gap-1.5"><Truck className="w-4 h-4" />{result.carrier}</span>
                   )}
                   {result.trackingNo !== '—' && (
-                    <span className="font-medium text-[#1A73E8]">{result.trackingNo}</span>
+                    <span className="font-medium text-aq-blue">{result.trackingNo}</span>
                   )}
                   <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" />{result.address}</span>
                 </div>
               </div>
 
-              <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6">
-                <h3 className="text-base font-semibold text-[#0D2137] mb-5">Sipariş Durumu</h3>
+              <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+                <h3 className="text-base font-semibold text-aq-text mb-5">Sipariş Durumu</h3>
                 {result.timeline.map((t, i) => (
                   <div key={i} className="flex gap-4">
                     <div className="flex flex-col items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${t.done ? 'bg-emerald-50 text-emerald-500' : 'bg-gray-100 text-gray-400'}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${t.done ? 'bg-aq-sky text-aq-aqua' : 'bg-gray-100 text-gray-400'}`}>
                         {t.done ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                       </div>
-                      {i < result.timeline.length - 1 && <div className={`w-0.5 h-10 ${t.done ? 'bg-emerald-200' : 'bg-gray-200'}`} />}
+                      {i < result.timeline.length - 1 && <div className={`w-0.5 h-10 ${t.done ? 'bg-aq-aqua/30' : 'bg-gray-200'}`} />}
                     </div>
                     <div className="pb-6">
-                      <p className={`text-sm font-medium ${t.done ? 'text-[#0D2137]' : 'text-[#8B9DAF]'}`}>{t.status}</p>
-                      {t.date && <p className="text-xs text-[#8B9DAF]">{t.date}</p>}
+                      <p className={`text-sm font-medium ${t.done ? 'text-aq-text' : 'text-aq-muted'}`}>{t.status}</p>
+                      {t.date && <p className="text-xs text-aq-muted">{t.date}</p>}
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6">
-                <h3 className="text-base font-semibold text-[#0D2137] mb-4">Sipariş Özeti</h3>
+              <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+                <h3 className="text-base font-semibold text-aq-text mb-4">Sipariş Özeti</h3>
                 {result.items.map((item, i) => (
-                  <div key={i} className="flex justify-between py-3 border-b border-[#F0F6FF] last:border-0">
-                    <span className="text-sm text-[#5A6B7B]">{item.qty}x {item.name}</span>
+                  <div key={i} className="flex justify-between py-3 border-b border-aq-border/60 last:border-0">
+                    <span className="text-sm text-aq-muted">{item.qty}x {item.name}</span>
                     <span className="text-sm font-semibold">{(item.price * item.qty).toLocaleString('tr-TR')}₺</span>
                   </div>
                 ))}
               </div>
 
-              <p className="text-center text-sm text-[#8B9DAF]">
-                <Link to="/giris" className="text-[#1A73E8] hover:underline">Giriş yaparak</Link> tüm siparişlerinizi görüntüleyebilirsiniz.
+              <p className="text-center text-sm text-aq-muted">
+                <Link to="/giris" className="text-aq-blue hover:underline">Giriş yaparak</Link> tüm siparişlerinizi görüntüleyebilirsiniz.
               </p>
             </div>
           )}

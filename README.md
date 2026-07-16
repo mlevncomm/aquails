@@ -45,18 +45,31 @@ npm run dev
 
 Uygulama `http://localhost:3000` adresinde çalışır.
 
-### Ortam Değişkenleri (Frontend)
+### Ortam Değişkenleri
 
 | Değişken | Açıklama | Nerede |
 |----------|----------|--------|
 | `VITE_SUPABASE_URL` | Supabase proje URL'i | `.env`, Vercel |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon (public) key | `.env`, Vercel |
+| `SITE_URL` | Public site origin (PayTR / auth redirects) | `.env`, Vercel |
 | `DATABASE_URL` | Pooler (transaction mode, port 6543) | `.env` only — **commit etmeyin** |
 | `DIRECT_URL` | Pooler (session mode, port 5432) | `.env` only — migration için |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role (API / scripts) | Vercel server env, CI |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `npm run admin:create` | local `.env` only |
+| `TEST_EMAIL` / `TEST_PASSWORD` | e2e scriptleri | local `.env` only |
 
-> **Proje ref:** `lumwisbjvlggtdjcahtj` → `https://lumwisbjvlggtdjcahtj.supabase.co`
+> **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` ve PayTR secret'ları **asla** frontend'e veya `VITE_*` env'e konmamalıdır.
 
-> **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` **asla** frontend'e, `VITE_*` env'e veya Vercel **public** environment variables içine konmamalıdır.
+### PayTR yerel test
+
+Kartlı ödeme Vercel Functions (`api/paytr-init.ts`, `api/payment-webhook.ts`) üzerinden çalışır.
+`npm run dev` (Vite) `/api` route'larını sunmaz; yerel ödeme testi için:
+
+```bash
+npx vercel dev
+```
+
+Vercel'e `SITE_URL`, `VITE_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY` ve PayTR secret'larını ekleyin.
 
 ### Supabase CLI Kurulumu
 
@@ -181,20 +194,18 @@ supabase secrets set PAYTR_MERCHANT_SALT=your-merchant-salt
 
 Bu secret'lar Edge Functions içinde `Deno.env.get('...')` ile okunur; frontend veya Vercel public env'e yazılmaz.
 
-## Veri Katmanı (Geçiş Dönemi)
+## Veri Katmanı
 
-| Özellik | Supabase yapılandırılmışsa | Yapılandırılmamışsa (dev) |
-|---------|---------------------------|---------------------------|
-| Ürünler | `productService` → Supabase | `src/data/products.ts` fallback |
-| Auth | Supabase Auth + `profiles` | Dev legacy mock kullanıcılar |
-| Sepet / sipariş | localStorage (geçici) | localStorage |
+| Özellik | Kaynak |
+|---------|--------|
+| Ürünler / blog / kuponlar | Supabase (`productService`, `blogService`, `couponService`) |
+| Auth | Supabase Auth + `profiles` (şifre sıfırlama: `/sifre-sifirla`) |
+| Sepet | Zustand persist + girişli kullanıcıda `sync_user_cart` RPC |
+| Sipariş takip (misafir) | `track_order_by_number_and_contact` RPC |
+| Ödeme | Vercel `/api/paytr-*` + havale/COD için admin `admin_confirm_offline_payment` |
+| Görseller | Supabase Storage bucket `product-images` |
 
-### Dev Legacy Mock (yalnızca Supabase env yokken)
-
-| Rol | E-posta | Şifre |
-|-----|---------|-------|
-| Müşteri | `ahmet@email.com` | `123456` |
-| Admin | `admin@aquails.com` | `admin123` |
+Supabase yapılandırılmamışsa katalog servisleri statik `src/data` fallback'ine düşer; auth/ödeme çalışmaz.
 
 ## Scriptler
 

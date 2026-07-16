@@ -75,7 +75,7 @@ export default function CustomerServiceRequestsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16 text-[#8B9DAF]">
+      <div className="flex items-center justify-center py-16 text-aq-muted">
         <Loader2 className="w-5 h-5 animate-spin mr-2" /> Yükleniyor...
       </div>
     );
@@ -84,51 +84,51 @@ export default function CustomerServiceRequestsPage() {
   return (
     <>
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-bold text-[#0D2137]">Servis Taleplerim</h2>
-        <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-[#1557B0] transition-all">
+        <h2 className="text-lg font-semibold text-aq-text">Servis Taleplerim</h2>
+        <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-aq-blue text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-aq-deep hover:text-white transition-all">
           <Plus className="w-3.5 h-3.5" /> Yeni Talep
         </button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white border border-[#E8F0FE] rounded-2xl p-5 mb-5 space-y-3">
-          <div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-[#0D2137]">Yeni Servis Talebi</h3><button type="button" onClick={() => setShowForm(false)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#F0F6FF]"><X className="w-4 h-4" /></button></div>
+        <form onSubmit={handleSubmit} className="bg-white border border-aq-border/60 rounded-2xl p-5 mb-5 space-y-3">
+          <div className="flex items-center justify-between"><h3 className="text-sm font-semibold text-aq-text">Yeni Servis Talebi</h3><button type="button" onClick={() => setShowForm(false)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-aq-ice"><X className="w-4 h-4" /></button></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block">Servis Tipi</label><select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl bg-white">{types.map(t => <option key={t}>{t}</option>)}</select></div>
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block">Tercih Tarihi</label><input type="date" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl" /></div>
+            <div><label className="text-xs text-aq-muted mb-1 block">Servis Tipi</label><select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl bg-white">{types.map(t => <option key={t}>{t}</option>)}</select></div>
+            <div><label className="text-xs text-aq-muted mb-1 block">Tercih Tarihi</label><input type="date" required value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl" /></div>
           </div>
           <div>
-            <label className="text-xs text-[#8B9DAF] mb-1 block">Adres</label>
+            <label className="text-xs text-aq-muted mb-1 block">Adres</label>
             {addresses.length > 0 ? (
-              <select required value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl bg-white">
+              <select required value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl bg-white">
                 {addresses.map(a => <option key={a.id} value={formatAddressLabel(a)}>{formatAddressLabel(a)}</option>)}
               </select>
             ) : (
-              <input required value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} placeholder="Adres girin" className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl" />
+              <input required value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} placeholder="Adres girin" className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl" />
             )}
           </div>
-          <div><label className="text-xs text-[#8B9DAF] mb-1 block">Açıklama</label><textarea required value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl resize-none" /></div>
-          <button type="submit" disabled={saving} className="bg-[#1A73E8] text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-[#1557B0] disabled:opacity-60">
+          <div><label className="text-xs text-aq-muted mb-1 block">Açıklama</label><textarea required value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl resize-none" /></div>
+          <button type="submit" disabled={saving} className="bg-aq-blue text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white disabled:opacity-60">
             {saving ? 'Oluşturuluyor...' : 'Talep Oluştur'}
           </button>
         </form>
       )}
 
       {requests.length === 0 ? (
-        <div className="bg-white border border-[#E8F0FE] rounded-2xl"><EmptyState icon={<Wrench className="w-7 h-7 text-[#8B9DAF]" />} title="Servis talebiniz yok" description="Yeni bir servis talebi oluşturun." action={<button onClick={() => setShowForm(true)} className="bg-[#1A73E8] text-white px-5 py-2 rounded-full text-sm font-semibold">Talep Oluştur</button>} /></div>
+        <div className="bg-white border border-aq-border/60 rounded-2xl"><EmptyState icon={<Wrench className="w-7 h-7 text-aq-muted" />} title="Servis talebiniz yok" description="Yeni bir servis talebi oluşturun." action={<button onClick={() => setShowForm(true)} className="bg-aq-blue hover:bg-aq-deep text-white px-5 py-2 rounded-xl text-sm font-semibold transition-colors">Talep Oluştur</button>} /></div>
       ) : (
         <div className="space-y-3">
           {requests.map(r => (
-            <div key={r.id} className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
+            <div key={r.id} className="bg-white border border-aq-border/60 rounded-2xl p-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                 <div className="flex items-center gap-3 flex-wrap">
-                  <h3 className="text-sm font-semibold text-[#0D2137] flex items-center gap-1.5"><Wrench className="w-4 h-4 text-[#1A73E8]" />{r.type}</h3>
+                  <h3 className="text-sm font-semibold text-aq-text flex items-center gap-1.5"><Wrench className="w-4 h-4 text-aq-blue" />{r.type}</h3>
                   <StatusBadge status={r.status} />
                 </div>
-                <span className="text-xs text-[#8B9DAF] flex items-center gap-1"><Calendar className="w-3 h-3" />{r.date}</span>
+                <span className="text-xs text-aq-muted flex items-center gap-1"><Calendar className="w-3 h-3" />{r.date}</span>
               </div>
-              <p className="text-sm text-[#5A6B7B] flex items-start gap-1.5"><FileText className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />{r.description}</p>
-              <p className="text-xs text-[#8B9DAF] mt-1.5 flex items-center gap-1"><MapPin className="w-3 h-3" />{r.address}</p>
+              <p className="text-sm text-aq-muted flex items-start gap-1.5"><FileText className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />{r.description}</p>
+              <p className="text-xs text-aq-muted mt-1.5 flex items-center gap-1"><MapPin className="w-3 h-3" />{r.address}</p>
             </div>
           ))}
         </div>

@@ -37,7 +37,7 @@ export default function AdminSubscriptionsPage() {
 
   return (
     <>
-      <h2 className="text-lg font-semibold text-[#0D2137] mb-5">Abonelikler</h2>
+      <h2 className="text-lg font-semibold text-aq-text mb-5">Abonelikler</h2>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
@@ -46,24 +46,24 @@ export default function AdminSubscriptionsPage() {
           { label: 'Duraklatılmış', value: String(stats.paused), icon: RefreshCw },
           { label: 'Aylık Gelir', value: `${stats.monthlyRevenue.toLocaleString('tr-TR')}₺`, icon: RefreshCw },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-[#E8F0FE] rounded-2xl p-4 text-center">
-            <s.icon className="w-5 h-5 text-[#1A73E8] mx-auto mb-1" />
-            <p className="text-xl font-bold text-[#0D2137]">{s.value}</p>
-            <p className="text-xs text-[#8B9DAF]">{s.label}</p>
+          <div key={s.label} className="bg-white border border-aq-border/60 rounded-2xl p-4 text-center">
+            <s.icon className="w-5 h-5 text-aq-blue mx-auto mb-1" />
+            <p className="text-xl font-semibold text-aq-text">{s.value}</p>
+            <p className="text-xs text-aq-muted">{s.label}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
+      <div className="bg-white border border-aq-border/60 rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="text-center py-12 text-sm text-[#8B9DAF]">Yükleniyor...</div>
+          <div className="text-center py-12 text-sm text-aq-muted">Yükleniyor...</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-[#F8FBFF]">
+                <tr className="bg-aq-ice">
                   {['Müşteri', 'Plan', 'Cihaz', 'Sonraki Teslimat', 'Tutar', 'Durum', 'İşlem'].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-[#8B9DAF] uppercase whitespace-nowrap">
+                    <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
                       {h}
                     </th>
                   ))}
@@ -73,12 +73,12 @@ export default function AdminSubscriptionsPage() {
                 {subs.map((s) => {
                   const st = statusLabels[s.status];
                   return (
-                    <tr key={s.id} className="border-b border-[#F0F6FF] last:border-0 hover:bg-[#F8FBFF]/50">
-                      <td className="px-4 py-3 text-sm font-medium text-[#0D2137]">{s.customer}</td>
-                      <td className="px-4 py-3 text-sm text-[#5A6B7B]">{s.plan}</td>
-                      <td className="px-4 py-3 text-sm text-[#5A6B7B]">{s.device}</td>
-                      <td className="px-4 py-3 text-sm text-[#8B9DAF]">{s.nextDelivery}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-[#0D2137]">{s.price.toLocaleString('tr-TR')}₺</td>
+                    <tr key={s.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
+                      <td className="px-4 py-3 text-sm font-medium text-aq-text">{s.customer}</td>
+                      <td className="px-4 py-3 text-sm text-aq-muted">{s.plan}</td>
+                      <td className="px-4 py-3 text-sm text-aq-muted">{s.device}</td>
+                      <td className="px-4 py-3 text-sm text-aq-muted">{s.nextDelivery}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-aq-text">{s.price.toLocaleString('tr-TR')}₺</td>
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${st.color}`}>{st.text}</span>
                       </td>
@@ -97,7 +97,7 @@ export default function AdminSubscriptionsPage() {
           </div>
         )}
         {!loading && subs.length === 0 && (
-          <div className="text-center py-8 text-sm text-[#8B9DAF]">Abonelik bulunmuyor</div>
+          <div className="text-center py-8 text-sm text-aq-muted">Abonelik bulunmuyor</div>
         )}
       </div>
     </>

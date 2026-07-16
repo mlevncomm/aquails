@@ -12,7 +12,7 @@ interface ProductPriceProps {
 
 const sizeClasses = {
   sm: { price: 'text-sm font-semibold', old: 'text-xs' },
-  md: { price: 'text-lg font-bold', old: 'text-sm' },
+  md: { price: 'text-lg font-semibold', old: 'text-sm' },
   lg: { price: 'text-2xl sm:text-3xl font-bold', old: 'text-lg' },
 };
 
@@ -24,13 +24,13 @@ export function ProductPrice({ product, size = 'md', showTaxHint = false, classN
   return (
     <div className={className}>
       <div className="flex flex-wrap items-center gap-2">
-        <span className={cn(sizes.price, 'text-aqua-secondary')}>{formattedGross}</span>
+        <span className={cn(sizes.price, 'text-aq-text')}>{formattedGross}</span>
         {grossOldPrice != null && formattedOldGross && (
-          <span className={cn(sizes.old, 'text-aqua-text-muted line-through')}>{formattedOldGross}</span>
+          <span className={cn(sizes.old, 'text-aq-muted line-through')}>{formattedOldGross}</span>
         )}
       </div>
       {showTaxHint && (
-        <p className="text-[11px] text-aqua-text-muted mt-1">KDV dahil (%{taxRate})</p>
+        <p className="text-[11px] text-aq-muted mt-1">KDV dahil (%{taxRate})</p>
       )}
     </div>
   );

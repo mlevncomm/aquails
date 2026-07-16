@@ -44,7 +44,7 @@ export default function AboutPage() {
       <section className="relative overflow-hidden">
         <div className="aspect-[21/9] md:aspect-[3/1] relative">
           <img src="/images/about-hero.jpg" alt="Aquails" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0D2137]/90 via-[#0D2137]/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-aq-deep/90 via-aq-deep/60 to-transparent" />
           <div className="absolute inset-0 flex items-center">
             <div className="page-container w-full">
               <div className="max-w-lg">
@@ -64,20 +64,20 @@ export default function AboutPage() {
         <ScrollReveal>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center mb-16">
             <div>
-              <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Marka Hikayemiz</span>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2 leading-tight">Daha Temiz Su İçin 15 Yıllık Yolculuk</h2>
-              <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-4 leading-relaxed">Aquails, 2011 yılında İstanbul\'da kurulan ve su arıtma sektöründe yenilikçi çözümler sunan bir teknoloji markasıdır. Misyonumuz, her haneye ve işletmeye en yüksek kalitede arıtılmış su ulaştırmaktır.</p>
-              <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-3 leading-relaxed">Ters ozmoz, UV sterilizasyon, mineral enjeksiyonu ve akıllı sensör teknolojilerini bir araya getirerek, kullanıcılarımıza sadece temiz su değil, aynı zamanda sağlıklı bir yaşam sunuyoruz.</p>
+              <span className="text-xs font-semibold text-aq-blue tracking-[0.15em] uppercase">Marka Hikayemiz</span>
+              <h2 className="text-2xl md:text-3xl font-bold text-aq-text mt-2 leading-tight">Daha Temiz Su İçin 15 Yıllık Yolculuk</h2>
+              <p className="text-sm sm:text-[15px] text-aq-muted mt-4 leading-relaxed">Aquails, 2011 yılında İstanbul\'da kurulan ve su arıtma sektöründe yenilikçi çözümler sunan bir teknoloji markasıdır. Misyonumuz, her haneye ve işletmeye en yüksek kalitede arıtılmış su ulaştırmaktır.</p>
+              <p className="text-sm sm:text-[15px] text-aq-muted mt-3 leading-relaxed">Ters ozmoz, UV sterilizasyon, mineral enjeksiyonu ve akıllı sensör teknolojilerini bir araya getirerek, kullanıcılarımıza sadece temiz su değil, aynı zamanda sağlıklı bir yaşam sunuyoruz.</p>
               <div className="flex flex-wrap gap-3 mt-6">
-                <Link to="/urunler" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all">Ürünleri İncele <ArrowRight className="w-4 h-4" /></Link>
-                <Link to="/iletisim" className="inline-flex items-center gap-2 border border-[#E8F0FE] text-[#5A6B7B] px-6 py-3 rounded-full font-medium text-sm hover:border-[#1A73E8] hover:text-[#1A73E8] transition-all">Bize Ulaşın</Link>
+                <Link to="/urunler" className="inline-flex items-center gap-2 bg-aq-blue text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-aq-deep hover:text-white transition-all">Ürünleri İncele <ArrowRight className="w-4 h-4" /></Link>
+                <Link to="/iletisim" className="inline-flex items-center gap-2 border border-aq-border/60 text-aq-muted px-6 py-3 rounded-xl font-semibold text-sm hover:border-aq-blue hover:text-aq-blue transition-all">Bize Ulaşın</Link>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-[#F0F6FF] rounded-2xl p-5 text-center"><Sparkles className="w-8 h-8 text-[#1A73E8] mx-auto mb-2" /><p className="text-2xl font-bold text-[#0D2137]">15+</p><p className="text-xs text-[#8B9DAF]">Yıllık Deneyim</p></div>
-              <div className="bg-[#F0F6FF] rounded-2xl p-5 text-center"><Zap className="w-8 h-8 text-[#1A73E8] mx-auto mb-2" /><p className="text-2xl font-bold text-[#0D2137]">%99</p><p className="text-xs text-[#8B9DAF]">Arıtma Oranı</p></div>
-              <div className="bg-[#F0F6FF] rounded-2xl p-5 text-center"><Users className="w-8 h-8 text-[#1A73E8] mx-auto mb-2" /><p className="text-2xl font-bold text-[#0D2137]">10K+</p><p className="text-xs text-[#8B9DAF]">Mutlu Müşteri</p></div>
-              <div className="bg-[#F0F6FF] rounded-2xl p-5 text-center"><Wrench className="w-8 h-8 text-[#1A73E8] mx-auto mb-2" /><p className="text-2xl font-bold text-[#0D2137]">500+</p><p className="text-xs text-[#8B9DAF]">Servis Noktası</p></div>
+              <div className="bg-aq-sky rounded-2xl p-5 text-center"><Sparkles className="w-8 h-8 text-aq-blue mx-auto mb-2" /><p className="text-2xl font-bold text-aq-text">15+</p><p className="text-xs text-aq-muted">Yıllık Deneyim</p></div>
+              <div className="bg-aq-sky rounded-2xl p-5 text-center"><Zap className="w-8 h-8 text-aq-blue mx-auto mb-2" /><p className="text-2xl font-bold text-aq-text">%99</p><p className="text-xs text-aq-muted">Arıtma Oranı</p></div>
+              <div className="bg-aq-sky rounded-2xl p-5 text-center"><Users className="w-8 h-8 text-aq-blue mx-auto mb-2" /><p className="text-2xl font-bold text-aq-text">10K+</p><p className="text-xs text-aq-muted">Mutlu Müşteri</p></div>
+              <div className="bg-aq-sky rounded-2xl p-5 text-center"><Wrench className="w-8 h-8 text-aq-blue mx-auto mb-2" /><p className="text-2xl font-bold text-aq-text">500+</p><p className="text-xs text-aq-muted">Servis Noktası</p></div>
             </div>
           </div>
         </ScrollReveal>
@@ -86,10 +86,10 @@ export default function AboutPage() {
         <StaggerContainer className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-16" staggerDelay={0.06}>
           {stats.map(s => (
             <StaggerItem key={s.label}>
-              <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5 text-center hover:shadow-md transition-all">
-                <s.icon className="w-6 h-6 text-[#1A73E8] mx-auto mb-2" />
-                <p className="text-xl font-bold text-[#0D2137]">{s.value}</p>
-                <p className="text-xs text-[#8B9DAF] mt-1">{s.label}</p>
+              <div className="bg-white border border-aq-border/60 rounded-2xl p-5 text-center transition-all">
+                <s.icon className="w-6 h-6 text-aq-blue mx-auto mb-2" />
+                <p className="text-xl font-semibold text-aq-text">{s.value}</p>
+                <p className="text-xs text-aq-muted mt-1">{s.label}</p>
               </div>
             </StaggerItem>
           ))}
@@ -98,19 +98,19 @@ export default function AboutPage() {
         {/* Milestones */}
         <ScrollReveal className="mb-16">
           <div className="text-center mb-10">
-            <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Yolculuğumuz</span>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">Önemli Dönüm Noktaları</h2>
+            <span className="text-xs font-semibold text-aq-blue tracking-[0.15em] uppercase">Yolculuğumuz</span>
+            <h2 className="text-2xl md:text-3xl font-bold text-aq-text mt-2">Önemli Dönüm Noktaları</h2>
           </div>
           <div className="relative">
-            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-[#E8F0FE] -translate-y-1/2" />
+            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-aq-ice -translate-y-1/2" />
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative">
               {milestones.map((m) => (
                 <div key={m.year} className="text-center relative">
-                  <div className="w-12 h-12 bg-[#1A73E8] rounded-full flex items-center justify-center mx-auto mb-3 relative z-10">
-                    <span className="text-sm font-bold text-white">{m.year.slice(2)}</span>
+                  <div className="w-12 h-12 bg-aq-aqua rounded-full flex items-center justify-center mx-auto mb-3 relative z-10">
+                    <span className="text-sm font-semibold text-aq-text">{m.year.slice(2)}</span>
                   </div>
-                  <h4 className="text-sm font-semibold text-[#0D2137]">{m.title}</h4>
-                  <p className="text-xs text-[#8B9DAF] mt-1">{m.desc}</p>
+                  <h4 className="text-sm font-semibold text-aq-text">{m.title}</h4>
+                  <p className="text-xs text-aq-muted mt-1">{m.desc}</p>
                 </div>
               ))}
             </div>
@@ -120,19 +120,19 @@ export default function AboutPage() {
         {/* Values */}
         <ScrollReveal className="mb-16">
           <div className="text-center mb-10">
-            <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Değerlerimiz</span>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">Bizi Biz Yapan Değerler</h2>
+            <span className="text-xs font-semibold text-aq-blue tracking-[0.15em] uppercase">Değerlerimiz</span>
+            <h2 className="text-2xl md:text-3xl font-bold text-aq-text mt-2">Bizi Biz Yapan Değerler</h2>
           </div>
         </ScrollReveal>
         <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" staggerDelay={0.08}>
           {degerler.map(v => (
             <StaggerItem key={v.title}>
-              <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6 hover:shadow-md hover:border-[#1A73E8]/20 transition-all h-full">
-                <div className="w-11 h-11 bg-[#F0F6FF] rounded-xl flex items-center justify-center mb-4">
-                  <v.icon className="w-5 h-5 text-[#1A73E8]" />
+              <div className="bg-white border border-aq-border/60 rounded-2xl p-6 hover:border-aq-blue/20 transition-all h-full">
+                <div className="w-11 h-11 bg-aq-sky rounded-xl flex items-center justify-center mb-4">
+                  <v.icon className="w-5 h-5 text-aq-blue" />
                 </div>
-                <h3 className="text-base font-semibold text-[#0D2137]">{v.title}</h3>
-                <p className="text-sm text-[#5A6B7B] mt-2 leading-relaxed">{v.desc}</p>
+                <h3 className="text-base font-semibold text-aq-text">{v.title}</h3>
+                <p className="text-sm text-aq-muted mt-2 leading-relaxed">{v.desc}</p>
               </div>
             </StaggerItem>
           ))}
@@ -140,14 +140,14 @@ export default function AboutPage() {
 
         {/* Service Network */}
         <ScrollReveal className="mt-16">
-          <div className="bg-gradient-to-r from-[#F0F6FF] to-[#F8FBFF] border border-[#E8F0FE] rounded-2xl p-8">
+          <div className="bg-gradient-to-r from-aq-sky to-aq-ice border border-aq-border/60 rounded-2xl p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div>
-                <h3 className="text-xl font-bold text-[#0D2137] mb-2">Türkiye Geneli Servis Ağı</h3>
-                <p className="text-sm text-[#5A6B7B] leading-relaxed">81 ilde yetkili servis noktalarımızla hızlı kurulum, bakım ve onarım hizmeti sunuyoruz. Servis talebiniz için hemen bize ulaşın.</p>
+                <h3 className="text-xl font-semibold text-aq-text mb-2">Türkiye Geneli Servis Ağı</h3>
+                <p className="text-sm text-aq-muted leading-relaxed">81 ilde yetkili servis noktalarımızla hızlı kurulum, bakım ve onarım hizmeti sunuyoruz. Servis talebiniz için hemen bize ulaşın.</p>
                 <div className="flex flex-wrap gap-3 mt-5">
-                  <Link to="/servis-randevusu" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all">Servis Talebi <ArrowRight className="w-4 h-4" /></Link>
-                  <a href="tel:08501234567" className="inline-flex items-center gap-2 border border-[#E8F0FE] text-[#5A6B7B] px-5 py-2.5 rounded-full text-sm font-medium hover:border-[#1A73E8] hover:text-[#1A73E8] transition-all"><Phone className="w-4 h-4" />0850 123 45 67</a>
+                  <Link to="/servis-randevusu" className="inline-flex items-center gap-2 bg-aq-blue text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all">Servis Talebi <ArrowRight className="w-4 h-4" /></Link>
+                  <a href="tel:08501234567" className="inline-flex items-center gap-2 border border-aq-border/60 text-aq-muted px-5 py-2.5 rounded-full text-sm font-semibold hover:border-aq-blue hover:text-aq-blue transition-all"><Phone className="w-4 h-4" />0850 123 45 67</a>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -157,9 +157,9 @@ export default function AboutPage() {
                   { value: '2 Saat', label: 'Ort. Yanıt Süresi' },
                   { value: '7/24', label: 'Destek Hattı' },
                 ].map(s => (
-                  <div key={s.label} className="bg-white rounded-xl p-4 text-center border border-[#E8F0FE]">
-                    <p className="text-lg font-bold text-[#1A73E8]">{s.value}</p>
-                    <p className="text-[11px] text-[#8B9DAF] mt-1">{s.label}</p>
+                  <div key={s.label} className="bg-white rounded-xl p-4 text-center border border-aq-border/60">
+                    <p className="text-lg font-semibold text-aq-blue">{s.value}</p>
+                    <p className="text-[11px] text-aq-muted mt-1">{s.label}</p>
                   </div>
                 ))}
               </div>
