@@ -137,7 +137,7 @@ export default function ProductWizardPage() {
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 right-20 w-64 h-64 bg-[#1A73E8] rounded-full blur-3xl" />
         </div>
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 relative text-center">
+        <div className="page-container relative text-center">
           <h1 className="text-2xl md:text-3xl font-bold text-white">Size En Uygun Su Arıtma Cihazını Birlikte Seçelim</h1>
           <p className="text-sm text-white/70 mt-2 max-w-lg mx-auto">Birkaç soruya cevap verin, eviniz veya iş yeriniz için en doğru Aquails sistemini önerelim.</p>
         </div>

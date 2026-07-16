@@ -44,13 +44,13 @@ export default function ServiceNetworkPage() {
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 right-20 w-64 h-64 bg-[#1A73E8] rounded-full blur-3xl" />
         </div>
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 relative text-center">
+        <div className="page-container relative text-center">
           <h1 className="text-2xl md:text-3xl font-bold text-white">Aquails Servis ve Kurulum Agi</h1>
           <p className="text-sm text-white/70 mt-2 max-w-lg mx-auto">Kurulum, filtre değişimi ve bakım hizmetlerinde size en yakın destek noktasıyla yanınızdayız.</p>
         </div>
       </section>
 
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-10">
+      <div className="page-container py-10">
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
           {[

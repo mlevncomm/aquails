@@ -79,7 +79,7 @@ export default function ContactPage() {
     <PageLayout>
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-[#EBF4FF] via-[#F0F8FF] to-[#E0F0FF] py-12 md:py-16">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="page-container">
           <div className="flex items-center gap-2 text-[13px] text-[#8B9DAF] mb-3">
             <Link to="/" className="hover:text-[#1A73E8]">Ana Sayfa</Link><span>/</span><span className="text-[#5A6B7B]">İletişim</span>
           </div>
@@ -88,7 +88,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-10">
+      <div className="page-container py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Info Sidebar */}
           <ScrollReveal className="lg:col-span-1">

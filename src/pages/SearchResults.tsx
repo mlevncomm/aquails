@@ -80,7 +80,7 @@ export default function SearchResults() {
 
   return (
     <PageLayout>
-      <div className="max-w-[1280px] mx-auto px-4 py-8">
+      <div className="page-container py-8">
         <div className="mb-6">
           <div className="flex items-center gap-2 text-[13px] text-[#8B9DAF] mb-2">
             <Link to="/" className="hover:text-[#1A73E8]">Ana Sayfa</Link>

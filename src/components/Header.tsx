@@ -173,7 +173,7 @@ export function Header() {
     <>
       {/* Top Bar */}
       <div className="bg-[#0D2137] text-white overflow-x-hidden">
-        <div className="max-w-[1280px] mx-auto px-4 h-8 flex items-center justify-between text-[11px] min-w-0 gap-2">
+        <div className="page-container h-8 flex items-center justify-between text-[11px] min-w-0 gap-2 !py-0">
           <p className="text-[#8B9DAF] truncate min-w-0">
             Ücretsiz Kargo — {freeShippingLimit.toLocaleString('tr-TR')}₺ ve üzeri siparişlerde
           </p>
@@ -198,7 +198,7 @@ export function Header() {
             : 'shadow-none',
         )}
       >
-        <div className="max-w-[1280px] mx-auto px-3 sm:px-4 min-w-0">
+        <div className="page-container min-w-0 !py-0">
           {/* ——— Mobile header ——— */}
           <div className="lg:hidden grid grid-cols-[auto_1fr_auto] items-center gap-2 h-[58px]">
             <HeaderIconButton
@@ -329,7 +329,7 @@ export function Header() {
               onMouseLeave={() => setIsMegaOpen(false)}
               className="hidden lg:block absolute left-0 right-0 top-full z-40 bg-white border-b border-[#E8F0FE] shadow-lg"
             >
-              <div className="max-w-[1280px] mx-auto px-4 py-6">
+              <div className="page-container py-6">
                 <div className="grid grid-cols-7 gap-3">
                   {categories.map(cat => {
                     const Icon = getCategoryIcon(cat.icon);

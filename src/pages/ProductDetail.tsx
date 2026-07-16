@@ -78,7 +78,7 @@ export default function ProductDetail() {
   if (loading) {
     return (
       <PageLayout>
-        <div className="max-w-[1280px] mx-auto px-6 py-20 flex justify-center">
+        <div className="page-container py-20 flex justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-aqua-primary" />
         </div>
       </PageLayout>
@@ -90,7 +90,7 @@ export default function ProductDetail() {
       <>
         <SEO title="Ürün Bulunamadı | Aquails" noindex />
         <PageLayout>
-          <div className="max-w-[1280px] mx-auto px-6 py-20 text-center">
+          <div className="page-container py-20 text-center">
             <h1 className="text-2xl font-bold text-aqua-secondary">Ürün bulunamadı</h1>
             <Link to="/urunler" className="text-aqua-primary hover:underline mt-4 inline-block">
               Ürünlere Dön
@@ -206,7 +206,7 @@ export default function ProductDetail() {
       />
       <PageLayout>
       {/* Breadcrumb */}
-      <div className="max-w-[1280px] mx-auto px-6 pt-6">
+      <div className="page-container pt-6">
         <nav className="text-[13px] text-aqua-text-muted">
           <Link to="/" className="text-aqua-primary hover:underline">Ana Sayfa</Link>
           <ChevronRight className="w-3 h-3 inline mx-1" />
@@ -219,7 +219,7 @@ export default function ProductDetail() {
       </div>
 
       {/* Product Main */}
-      <section className="max-w-[1280px] mx-auto px-6 py-8">
+      <section className="page-container py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left - Gallery */}
           <ScrollReveal x={-20}>
@@ -475,7 +475,7 @@ export default function ProductDetail() {
       </section>
 
       {/* Tabs */}
-      <section className="max-w-[1280px] mx-auto px-6 pb-12">
+      <section className="page-container pb-12">
         <div className="bg-white border border-aqua-border-light rounded-2xl overflow-hidden">
           {/* Tab Nav */}
           <div className="flex border-b border-aqua-border-light overflow-x-auto">
@@ -708,7 +708,7 @@ export default function ProductDetail() {
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <section className="max-w-[1280px] mx-auto px-6 pb-20">
+        <section className="page-container pb-20">
           <h2 className="text-xl md:text-2xl font-bold text-aqua-secondary mb-6">Benzer Ürünler</h2>
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" staggerDelay={0.08}>
             {relatedProducts.map((rp) => (
@@ -721,7 +721,7 @@ export default function ProductDetail() {
       )}
 
       {/* Recently Viewed */}
-      <section className="max-w-[1280px] mx-auto px-6 pb-20">
+      <section className="page-container pb-20">
         <h2 className="text-xl md:text-2xl font-bold text-aqua-secondary mb-6">Son Görüntüledikleriniz</h2>
         <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
           {relatedProducts.slice(0, 4).map((p) => (

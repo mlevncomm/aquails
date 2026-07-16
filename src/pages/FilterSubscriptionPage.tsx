@@ -27,7 +27,7 @@ export default function FilterSubscriptionPage() {
         canonical="/filtre-aboneligi"
       />
     <PageLayout>
-      <div className="max-w-[1280px] mx-auto px-4 py-8">
+      <div className="page-container py-8">
         {/* Hero */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 text-[13px] text-[#8B9DAF] mb-2">

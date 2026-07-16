@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  ArrowRight, ChevronDown, Users, ShieldCheck, Clock, Award,
+  Check, ArrowRight, ChevronDown, Users, ShieldCheck, Clock, Award,
   Droplet, Cpu, Zap, Shield, Wrench, RefreshCw, Sparkles,
   Package, Search, Calendar, ClipboardCheck,
   Home as HomeIcon, Monitor, Coffee, Filter, CircleDot, Settings, Plug, ChefHat, Activity, Building2,
@@ -12,7 +12,6 @@ import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/Scroll
 import { ProductCard } from '@/components/ProductCard';
 import { RatingStars } from '@/components/RatingStars';
 import { SEO } from '@/components/SEO';
-import { BrandLogo } from '@/components/BrandLogo';
 import { getOrganizationSchema, getWebsiteSchema } from '@/components/SchemaOrg';
 import { products as staticProducts, categories as staticCategories } from '@/data';
 import { useCatalog } from '@/hooks/useCatalog';
@@ -158,65 +157,64 @@ export default function Home() {
       />
       <PageLayout>
       {/* ========== HERO ========== */}
-      <section className="relative min-h-[88vh] md:min-h-[92vh] flex items-end md:items-center overflow-hidden">
-        <motion.div
-          aria-hidden
-          className="absolute inset-0"
-          initial={{ scale: 1.06, opacity: 0.85 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.4, ease: 'easeOut' }}
-        >
-          <img
-            src="/images/hero-bg.jpg"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#061628]/88 via-[#0D2137]/72 to-[#0D2137]/35" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#061628]/70 via-transparent to-[#061628]/25" />
-        </motion.div>
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#EBF4FF] via-[#F0F8FF] to-[#E8F4FF]">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#1A73E8]/[0.04] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#4FC3F7]/[0.06] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00D4C8]/[0.02] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute inset-0">
+          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-[#1A73E8]/[0.04] rounded-full blur-3xl" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-[#4FC3F7]/[0.06] rounded-full blur-3xl" />
+        </div>
+        <div className="page-container py-16 md:py-24 lg:py-28 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <div className="flex flex-wrap gap-2 mb-5">
+                {['Ücretsiz Keşif', 'Kurulum Desteği', '2 Yıl Garanti', 'Filtre Hatırlatma'].map(b => (
+                  <span key={b} className="inline-flex items-center gap-1 bg-white/70 backdrop-blur-sm text-[11px] font-medium text-[#1A73E8] px-2.5 py-1 rounded-full border border-[#E8F0FE]">
+                    <Check className="w-3 h-3" />{b}
+                  </span>
+                ))}
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#0D2137] leading-tight">
+                Daha Temiz Su,<br />
+                <span className="text-[#1A73E8]">Daha Akıllı Teknoloji</span>
+              </h1>
+              <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-5 leading-relaxed max-w-md">
+                Aquails, eviniz ve iş yeriniz için modern su arıtma cihazları, filtre çözümleri ve bakım hizmetlerini tek platformda sunar.
+              </p>
+              <div className="flex flex-wrap gap-3 mt-8">
+                <Link to="/urunler" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all shadow-lg shadow-[#1A73E8]/20">
+                  Ürünleri İncele <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link to="/servis-randevusu" className="inline-flex items-center gap-2 border-2 border-[#1A73E8] text-[#1A73E8] px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#1A73E8] hover:text-white transition-all">
+                  Servis Randevusu
+                </Link>
+              </div>
+              <div className="flex gap-6 sm:gap-8 mt-10">
+                {[{ v: '10.000+', l: 'Mutlu Müşteri' }, { v: '500+', l: 'Servis Noktası' }, { v: '%99', l: 'Memnuniyet' }].map(s => (
+                  <div key={s.l}><p className="text-xl sm:text-2xl font-bold text-[#0D2137]">{s.v}</p><p className="text-[11px] text-[#8B9DAF] mt-0.5">{s.l}</p></div>
+                ))}
+              </div>
+            </motion.div>
 
-        <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-24 lg:py-28">
-          <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
-            className="max-w-xl"
-          >
-            <div className="flex items-center gap-3 mb-6 md:mb-8">
-              <BrandLogo variant="icon" bare className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.25)]" />
-              <span className="text-2xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-sm">
-                Aquails
-              </span>
-            </div>
-            <h1 className="text-4xl sm:text-5xl md:text-[3.25rem] font-bold text-white leading-[1.1] tracking-tight">
-              Daha Temiz Su,<br />
-              Daha Akıllı Teknoloji
-            </h1>
-            <p className="mt-5 text-sm sm:text-base text-white/75 leading-relaxed max-w-md">
-              Aquails, eviniz ve iş yeriniz için modern su arıtma cihazları, filtre çözümleri ve bakım hizmetlerini tek platformda sunar.
-            </p>
-            <div className="flex flex-wrap gap-3 mt-8">
-              <Link
-                to="/urunler"
-                className="group inline-flex items-center gap-2 bg-[#1A73E8] text-white px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all duration-300 shadow-[0_8px_28px_rgba(26,115,232,0.45)] hover:-translate-y-0.5"
-              >
-                Ürünleri İncele
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <Link
-                to="/servis-randevusu"
-                className="inline-flex items-center gap-2 border border-white/35 text-white/95 px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-white/10 hover:border-white/55 transition-all duration-300"
-              >
-                Servis Randevusu
-              </Link>
-            </div>
-          </motion.div>
+            <motion.div initial={{ opacity: 0, x: 40, scale: 0.95 }} animate={{ opacity: 1, x: 0, scale: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="relative">
+              <div className="bg-white rounded-3xl shadow-xl p-3 sm:p-4 max-w-md mx-auto">
+                <img src="/images/hero-product.jpg" alt="Aquails Su Arıtma Cihazı" className="w-full aspect-square object-cover rounded-2xl" />
+              </div>
+              <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-lg p-4 hidden md:block">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-[#00C9A7]/10 rounded-lg flex items-center justify-center"><ShieldCheck className="w-4 h-4 text-[#00C9A7]" /></div>
+                  <div><p className="text-xs font-semibold text-[#0D2137]">5 Yıl Garanti</p><p className="text-[10px] text-[#8B9DAF]">Tam Kapsamlı</p></div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
       {/* ========== GUVEN BAR ========== */}
       <section className="bg-white/80 backdrop-blur-sm border-b border-[#E8F0FE]/60 py-6 relative">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="page-container">
           <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
             {trustBadges.map(b => (
               <div key={b.label} className="flex items-center gap-2.5">
@@ -231,7 +229,7 @@ export default function Home() {
       {/* ========== KATEGORILER ========== */}
       <section className="py-16 md:py-20 bg-[#F7FAFF] relative">
         <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#1A73E8]/[0.02] rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="page-container">
           <ScrollReveal className="text-center mb-12">
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Kategoriler</span>
             <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">İhtiyacınıza Uygun Çözümler</h2>
@@ -263,7 +261,7 @@ export default function Home() {
       {/* ========== SECMELI URUNLER ========== */}
       <section className="py-16 md:py-20 bg-white relative">
         <div className="absolute bottom-0 left-0 w-[250px] h-[250px] bg-[#4FC3F7]/[0.02] rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="page-container">
           <ScrollReveal className="text-center mb-10">
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Öne Çıkan Ürünler</span>
             <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">En Çok Tercih Edilenler</h2>
@@ -294,7 +292,7 @@ export default function Home() {
       {/* ========== NEDEN AQUAILS ========== */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-[#EEF6FF] to-[#F7FAFF] relative">
         <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#1A73E8]/[0.025] rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="page-container">
           <ScrollReveal className="text-center mb-12">
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Neden Aquails?</span>
             <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">Fark Yaratan Teknoloji</h2>
@@ -319,7 +317,7 @@ export default function Home() {
       {/* ========== NASIL CALISIR ========== */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-[#F0F6FF] via-[#F7FAFF] to-[#F8FBFF] relative">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#1A73E8]/[0.015] rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="page-container">
           <ScrollReveal className="text-center mb-12">
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Nasıl Çalışır?</span>
             <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">3 Adımda Temiz Su</h2>
@@ -345,7 +343,7 @@ export default function Home() {
       {/* ========== FILTRE ABONELIGI ========== */}
       <section className="py-16 md:py-20 bg-[#F7FAFF] relative">
         <div className="absolute top-0 left-0 w-[300px] h-[300px] bg-[#00D4C8]/[0.02] rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="page-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <ScrollReveal x={-20}>
               <img src="/images/filter-subscription.jpg" alt="Filtre Aboneliği" className="rounded-2xl shadow-lg w-full object-cover aspect-video" loading="lazy" />
@@ -381,7 +379,7 @@ export default function Home() {
       {/* ========== SERVIS & KURULUM ========== */}
       <section className="py-16 md:py-20 bg-white relative">
         <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-[#1A73E8]/[0.02] rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="page-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <ScrollReveal x={-20} className="order-2 lg:order-1">
               <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Servis & Kurulum</span>
@@ -412,7 +410,7 @@ export default function Home() {
       {/* ========== KAMPANYALAR ========== */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-[#F7FAFF] to-white relative">
         <div className="absolute top-0 left-0 w-[250px] h-[250px] bg-[#F59E0B]/[0.02] rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="page-container">
           <ScrollReveal className="text-center mb-12">
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Kampanyalar</span>
             <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">Kaçırılmayacak Fırsatlar</h2>
@@ -441,7 +439,7 @@ export default function Home() {
       {/* ========== MUSTERI YORUMLARI ========== */}
       <section className="py-16 md:py-20 bg-gradient-to-b from-[#EEF6FF] to-[#F0F6FF] relative">
         <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#1A73E8]/[0.02] rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="page-container">
           <ScrollReveal className="text-center mb-12">
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Müşteri Yorumları</span>
             <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">10.000&apos;den Fazla Mutlu Müşteri</h2>
@@ -477,7 +475,7 @@ export default function Home() {
       {/* ========== BLOG ========== */}
       <section className="py-16 md:py-20 bg-[#F7FAFF] relative">
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#4FC3F7]/[0.02] rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="page-container">
           <ScrollReveal className="flex justify-between items-end mb-10">
             <div>
               <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Blog & Bilgi Merkezi</span>
