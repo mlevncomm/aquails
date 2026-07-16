@@ -76,9 +76,9 @@ export async function earnPoints(
 export async function convertPointsToCoupon(
   points: number
 ): Promise<{ code: string; discount: number } | null> {
-  if (points < 100) return null;
-  const discount = Math.floor(points / 10);
-  return { code: `PUAN${points}`, discount };
+  const result = await redeemPoints('', points);
+  if (!result.success || !result.code) return null;
+  return { code: result.code, discount: Number(result.discount ?? 0) };
 }
 
 export async function redeemPoints(

@@ -43,7 +43,7 @@ export function analyzeTDS(input: TDSInput): TDSResult {
     level = 'ideal';
     label = 'İdeal Su Kalitesi';
     description = 'Suyunuzun mineral dengesi iyi. Temizlik için su arıtma kullanabilirsiniz.';
-    color = '#00C9A7';
+    color = '#1286D8';
     mineralFilterNeeded = false;
   } else if (tds <= 300) {
     level = 'medium';

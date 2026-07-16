@@ -55,13 +55,13 @@ export default function AdminPaymentSettingsPage() {
   };
 
   if (loading) {
-    return <div className="text-sm text-[#8B9DAF]">Yükleniyor...</div>;
+    return <div className="text-sm text-aq-muted">Yükleniyor...</div>;
   }
 
   return (
     <>
-      <h2 className="text-lg font-semibold text-[#0D2137] mb-2">Ödeme Ayarları</h2>
-      <p className="text-sm text-[#8B9DAF] mb-5">
+      <h2 className="text-lg font-semibold text-aq-text mb-2">Ödeme Ayarları</h2>
+      <p className="text-sm text-aq-muted mb-5">
         PayTR sanal POS bilgilerinizi girerek online kart ödemesi alabilirsiniz.
       </p>
 
@@ -73,18 +73,18 @@ export default function AdminPaymentSettingsPage() {
       )}
 
       <form onSubmit={handleSave} className="space-y-5">
-        <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6">
+        <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-[#0D2137] flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-[#1A73E8]" />
+            <h3 className="text-sm font-semibold text-aq-text flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-aq-blue" />
               PayTR Sanal POS
             </h3>
-            <label className="flex items-center gap-2 text-sm text-[#5A6B7B] cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-aq-muted cursor-pointer">
               <input
                 type="checkbox"
                 checked={paytr.enabled}
                 onChange={(e) => setPaytr({ ...paytr, enabled: e.target.checked })}
-                className="w-4 h-4 accent-[#1A73E8]"
+                className="w-4 h-4 accent-aq-deep"
               />
               Aktif
             </label>
@@ -105,29 +105,29 @@ export default function AdminPaymentSettingsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-[#8B9DAF] mb-1 block">Mağaza No (merchant_id)</label>
+              <label className="text-xs text-aq-muted mb-1 block">Mağaza No (merchant_id)</label>
               <input
                 value={paytr.merchantId}
                 onChange={(e) => setPaytr({ ...paytr, merchantId: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]"
+                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue"
                 placeholder="123456"
               />
             </div>
             <div>
-              <label className="text-xs text-[#8B9DAF] mb-1 block">Test Modu</label>
+              <label className="text-xs text-aq-muted mb-1 block">Test Modu</label>
               <select
                 value={paytr.testMode ? '1' : '0'}
                 onChange={(e) => setPaytr({ ...paytr, testMode: e.target.value === '1' })}
-                className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl bg-white"
+                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl bg-white"
               >
                 <option value="1">Test (Sandbox)</option>
                 <option value="0">Canlı (Production)</option>
               </select>
             </div>
             <div>
-              <label className="text-xs text-[#8B9DAF] mb-1 block flex items-center gap-1">
+              <label className="text-xs text-aq-muted mb-1 block flex items-center gap-1">
                 Mağaza Parolası (merchant_key)
-                <button type="button" onClick={() => setShowSecrets(!showSecrets)} className="text-[#8B9DAF]">
+                <button type="button" onClick={() => setShowSecrets(!showSecrets)} className="text-aq-muted">
                   {showSecrets ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                 </button>
               </label>
@@ -135,28 +135,28 @@ export default function AdminPaymentSettingsPage() {
                 type={showSecrets ? 'text' : 'password'}
                 value={paytr.merchantKey}
                 onChange={(e) => setPaytr({ ...paytr, merchantKey: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]"
+                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue"
               />
             </div>
             <div>
-              <label className="text-xs text-[#8B9DAF] mb-1 block">Gizli Anahtar (merchant_salt)</label>
+              <label className="text-xs text-aq-muted mb-1 block">Gizli Anahtar (merchant_salt)</label>
               <input
                 type={showSecrets ? 'text' : 'password'}
                 value={paytr.merchantSalt}
                 onChange={(e) => setPaytr({ ...paytr, merchantSalt: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]"
+                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue"
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-2 mt-4 text-xs text-[#8B9DAF]">
+          <div className="flex items-center gap-2 mt-4 text-xs text-aq-muted">
             <Shield className="w-3.5 h-3.5" />
             API bilgileri yalnızca admin kullanıcılar tarafından görülebilir.
           </div>
         </div>
 
-        <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6">
-          <h3 className="text-sm font-semibold text-[#0D2137] mb-4">Havale / EFT Banka Hesapları</h3>
+        <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+          <h3 className="text-sm font-semibold text-aq-text mb-4">Havale / EFT Banka Hesapları</h3>
           {banks.map((bank, i) => (
             <div key={i} className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
               <input
@@ -167,7 +167,7 @@ export default function AdminPaymentSettingsPage() {
                   setBanks(next);
                 }}
                 placeholder="Banka adı"
-                className="px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl"
+                className="px-3 py-2 text-sm border border-aq-border/60 rounded-xl"
               />
               <input
                 value={bank.accountName}
@@ -177,7 +177,7 @@ export default function AdminPaymentSettingsPage() {
                   setBanks(next);
                 }}
                 placeholder="Hesap sahibi"
-                className="px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl"
+                className="px-3 py-2 text-sm border border-aq-border/60 rounded-xl"
               />
               <input
                 value={bank.iban}
@@ -187,14 +187,14 @@ export default function AdminPaymentSettingsPage() {
                   setBanks(next);
                 }}
                 placeholder="IBAN"
-                className="px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl"
+                className="px-3 py-2 text-sm border border-aq-border/60 rounded-xl"
               />
             </div>
           ))}
           <button
             type="button"
             onClick={() => setBanks([...banks, { bankName: '', accountName: '', iban: '' }])}
-            className="text-xs text-[#1A73E8] font-medium hover:underline"
+            className="text-xs text-aq-blue font-medium hover:underline"
           >
             + Hesap ekle
           </button>
@@ -203,7 +203,7 @@ export default function AdminPaymentSettingsPage() {
         <button
           type="submit"
           disabled={saving}
-          className="flex items-center gap-2 bg-[#1A73E8] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#1557B0] transition-all disabled:opacity-60"
+          className="flex items-center gap-2 bg-aq-blue text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-aq-deep transition-all disabled:opacity-60"
         >
           <Save className="w-4 h-4" />
           {saving ? 'Kaydediliyor...' : 'Kaydet'}

@@ -261,6 +261,24 @@ export async function updateProduct(
   return { success: true };
 }
 
+export async function setProductPrimaryImage(
+  productId: string,
+  url: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  await supabase.from('product_images').delete().eq('product_id', productId).eq('sort_order', 0);
+  const { error } = await supabase.from('product_images').insert({
+    product_id: productId,
+    url,
+    sort_order: 0,
+    alt_text: null,
+  });
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
 export async function createProduct(
   input: AdminProductForm,
 ): Promise<{ success: boolean; id?: string; error?: string }> {

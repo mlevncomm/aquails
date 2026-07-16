@@ -45,20 +45,20 @@ function Toast({ message, type, onClose }: ToastItem & { onClose: () => void }) 
   const icons = {
     success: <CheckCircle className="w-4 h-4 text-emerald-500" />,
     error: <AlertCircle className="w-4 h-4 text-red-500" />,
-    info: <Info className="w-4 h-4 text-[#1A73E8]" />,
+    info: <Info className="w-4 h-4 text-aq-blue" />,
   };
 
   const borders = {
     success: 'border-l-emerald-500',
     error: 'border-l-red-500',
-    info: 'border-l-[#1A73E8]',
+    info: 'border-l-aq-deep',
   };
 
   return (
-    <div className={`bg-white border border-[#E8F0FE] border-l-4 ${borders[type]} rounded-xl shadow-lg p-3.5 flex items-start gap-2.5 animate-fade-in-up`}>
+    <div className={`bg-white border border-aq-border/60 border-l-4 ${borders[type]} rounded-xl shadow-sm p-3.5 flex items-start gap-2.5 animate-fade-in-up`}>
       {icons[type]}
-      <p className="text-sm text-[#0D2137] flex-1">{message}</p>
-      <button onClick={onClose} className="text-[#8B9DAF] hover:text-[#0D2137] transition-colors mt-0.5">
+      <p className="text-sm text-aq-text flex-1">{message}</p>
+      <button onClick={onClose} className="text-aq-muted hover:text-aq-text transition-colors mt-0.5">
         <X className="w-3.5 h-3.5" />
       </button>
     </div>

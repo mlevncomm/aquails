@@ -36,17 +36,17 @@ export default function AdminReviewsPage() {
 
   return (
     <>
-      <h2 className="text-lg font-semibold text-[#0D2137] mb-5">Yorum Yönetimi</h2>
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
+      <h2 className="text-lg font-semibold text-aq-text mb-5">Yorum Yönetimi</h2>
+      <div className="bg-white border border-aq-border/60 rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="text-center py-12 text-sm text-[#8B9DAF]">Yorumlar yükleniyor...</div>
+          <div className="text-center py-12 text-sm text-aq-muted">Yorumlar yükleniyor...</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-[#F8FBFF]">
+                <tr className="bg-aq-ice">
                   {['Müşteri', 'Ürün', 'Puan', 'Başlık', 'Tarih', 'Durum', 'İşlem'].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-[#8B9DAF] uppercase whitespace-nowrap">
+                    <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
                       {h}
                     </th>
                   ))}
@@ -54,17 +54,17 @@ export default function AdminReviewsPage() {
               </thead>
               <tbody>
                 {reviews.map((r) => (
-                  <tr key={r.id} className="border-b border-[#F0F6FF] last:border-0 hover:bg-[#F8FBFF]/50">
-                    <td className="px-4 py-3 text-sm font-medium text-[#0D2137]">{r.customer}</td>
-                    <td className="px-4 py-3 text-sm text-[#5A6B7B] line-clamp-1 max-w-[120px]">{r.product}</td>
+                  <tr key={r.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
+                    <td className="px-4 py-3 text-sm font-medium text-aq-text">{r.customer}</td>
+                    <td className="px-4 py-3 text-sm text-aq-muted line-clamp-1 max-w-[120px]">{r.product}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-0.5">
                         <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                        <span className="text-sm font-semibold text-[#0D2137]">{r.rating}</span>
+                        <span className="text-sm font-semibold text-aq-text">{r.rating}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-[#0D2137] line-clamp-1 max-w-[150px]">{r.title}</td>
-                    <td className="px-4 py-3 text-sm text-[#8B9DAF]">{r.date}</td>
+                    <td className="px-4 py-3 text-sm text-aq-text line-clamp-1 max-w-[150px]">{r.title}</td>
+                    <td className="px-4 py-3 text-sm text-aq-muted">{r.date}</td>
                     <td className="px-4 py-3">
                       <button
                         onClick={() => void toggleApprove(r.id, r.approved)}
@@ -75,12 +75,12 @@ export default function AdminReviewsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8]">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue">
                           <Eye className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => void remove(r.id)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-[#8B9DAF] hover:text-red-500"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -93,7 +93,7 @@ export default function AdminReviewsPage() {
           </div>
         )}
         {!loading && reviews.length === 0 && (
-          <div className="text-center py-8 text-sm text-[#8B9DAF]">Henüz yorum yok</div>
+          <div className="text-center py-8 text-sm text-aq-muted">Henüz yorum yok</div>
         )}
       </div>
     </>

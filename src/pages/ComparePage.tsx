@@ -1,10 +1,12 @@
-import { X, ShoppingCart, Check, Minus } from 'lucide-react';
+import { Link } from 'react-router';
+import { X, ShoppingCart, Check, GitCompare } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { EmptyState } from '@/components/EmptyState';
 import { useCompareStore } from '@/stores/compareStore';
 import { useCartStore } from '@/stores/cartStore';
 import { products } from '@/data';
 import { useToastStore } from '@/components/Toast';
+import { ProductPrice } from '@/components/ProductPrice';
 
 const specLabels: Record<string, string> = {
   asama: 'Aşama Sayısı',
@@ -21,7 +23,7 @@ const specDefaults: Record<string, Record<string, string>> = {
   '1': { asama: '7 Aşama', filtreOmru: '6-12 Ay', tankKapasite: '12 Litre', pompa: 'Var', mineral: 'Var', kurulum: 'Dahil', garanti: '5 Yıl', debi: '189 L/Gün' },
   '2': { asama: '5 Aşama', filtreOmru: '6-12 Ay', tankKapasite: '8 Litre', pompa: 'Var', mineral: 'Var', kurulum: 'Dahil', garanti: '5 Yıl', debi: '150 L/Gün' },
   '3': { asama: '4 Aşama', filtreOmru: '3-6 Ay', tankKapasite: '-', pompa: 'Yok', mineral: 'Yok', kurulum: '-', garanti: '2 Yıl', debi: '100 L/Gün' },
-  '4': { asama: '6 Aşama', filtreOmru: '6-12 Ay', tankKapasite: '15 Litre', pomba: 'Var', mineral: 'Var', kurulum: 'Dahil', garanti: '5 Yıl', debi: '250 L/Gün' },
+  '4': { asama: '6 Aşama', filtreOmru: '6-12 Ay', tankKapasite: '15 Litre', pompa: 'Var', mineral: 'Var', kurulum: 'Dahil', garanti: '5 Yıl', debi: '250 L/Gün' },
   '5': { asama: '5 Aşama', filtreOmru: '6-12 Ay', tankKapasite: '10 Litre', pompa: 'Var', mineral: 'Var', kurulum: 'Dahil', garanti: '5 Yıl', debi: '200 L/Gün' },
   '6': { asama: '7 Aşama', filtreOmru: '3-6 Ay', tankKapasite: '-', pompa: 'Yok', mineral: 'Var', kurulum: '-', garanti: '2 Yıl', debi: '80 L/Gün' },
 };
@@ -29,11 +31,11 @@ const specDefaults: Record<string, Record<string, string>> = {
 export default function ComparePage() {
   const { ids, remove, clear } = useCompareStore();
   const { addItem, openDrawer } = useCartStore();
-  const addToast = useToastStore(s => s.add);
+  const addToast = useToastStore((s) => s.add);
 
-  const compareProducts = products.filter(p => ids.includes(p.id));
+  const compareProducts = products.filter((p) => ids.includes(p.id));
 
-  const handleAddToCart = (product: typeof products[0]) => {
+  const handleAddToCart = (product: (typeof products)[0]) => {
     addItem(product);
     addToast(`${product.name} sepete eklendi`, 'success');
     openDrawer();
@@ -42,10 +44,20 @@ export default function ComparePage() {
   if (compareProducts.length === 0) {
     return (
       <PageLayout>
+        <div className="relative bg-gradient-to-br from-aq-ice via-white to-aq-sky/50 border-b border-aq-border/60">
+          <div className="page-container py-10 md:py-12">
+            <div className="flex items-center gap-2 text-[13px] text-aq-muted mb-2">
+              <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link>
+              <span>/</span>
+              <span className="text-aq-text">Karşılaştır</span>
+            </div>
+            <h1 className="text-xl md:text-2xl font-bold text-aq-text">Ürün Karşılaştırma</h1>
+            <p className="text-sm text-aq-muted mt-1.5">En fazla 4 ürünü yan yana karşılaştırın.</p>
+          </div>
+        </div>
         <div className="page-container py-8">
-          <h1 className="text-xl font-bold text-[#0D2137] mb-6">Ürün Karşılaştırma</h1>
           <EmptyState
-            icon={<Minus className="w-8 h-8" />}
+            icon={<GitCompare className="w-8 h-8" />}
             title="Karşılaştırma Listeniz Boş"
             description="Karşılaştırmak istediğiniz ürünleri ürün kartlarından ekleyebilirsiniz. En fazla 4 ürün karşılaştırabilirsiniz."
             action={{ label: 'Ürünleri Keşfet', href: '/urunler' }}
@@ -57,75 +69,114 @@ export default function ComparePage() {
 
   return (
     <PageLayout>
-      <div className="page-container py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold text-[#0D2137]">Ürün Karşılaştırma ({compareProducts.length}/4)</h1>
-          <button onClick={clear} className="text-sm text-[#E85454] font-medium hover:underline">Tümünü Temizle</button>
+      <div className="relative bg-gradient-to-br from-aq-ice via-white to-aq-sky/50 border-b border-aq-border/60">
+        <div className="page-container py-10 md:py-12">
+          <div className="flex items-center gap-2 text-[13px] text-aq-muted mb-2">
+            <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link>
+            <span>/</span>
+            <span className="text-aq-text">Karşılaştır</span>
+          </div>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-aq-text">
+                Ürün Karşılaştırma ({compareProducts.length}/4)
+              </h1>
+              <p className="text-sm text-aq-muted mt-1.5">Özellikleri yan yana inceleyin, doğru cihazı seçin.</p>
+            </div>
+            <button
+              type="button"
+              onClick={clear}
+              className="text-sm text-[#E85454] font-medium hover:underline"
+            >
+              Tümünü Temizle
+            </button>
+          </div>
         </div>
+      </div>
 
+      <div className="page-container py-8">
         <div className="overflow-x-auto -mx-4 px-4">
-          <table className="w-full min-w-[600px] bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
+          <table className="w-full min-w-[640px] bg-white border border-aq-border/60 rounded-2xl overflow-hidden shadow-sm">
             <thead>
               <tr>
-                <th className="text-left p-4 w-[160px] bg-[#F8FBFF] text-xs font-semibold text-[#8B9DAF] uppercase">Özellik</th>
-                {compareProducts.map(p => (
-                  <th key={p.id} className="p-4 bg-[#F8FBFF] min-w-[180px]">
-                    <div className="relative">
-                      <button
-                        onClick={() => remove(p.id)}
-                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-50 rounded-full flex items-center justify-center text-red-500 hover:bg-red-100"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                      <div className="w-20 h-20 bg-[#F0F6FF] rounded-xl flex items-center justify-center mx-auto mb-2">
-                        <ShoppingCart className="w-8 h-8 text-[#1A73E8]/20" />
+                <th className="text-left p-4 w-[160px] bg-aq-ice text-xs font-semibold text-aq-muted uppercase tracking-wide">
+                  Özellik
+                </th>
+                {compareProducts.map((p) => {
+                  const img = p.images?.[0] || '/images/products/placeholder.jpg';
+                  return (
+                    <th key={p.id} className="p-4 bg-aq-ice min-w-[200px]">
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => remove(p.id)}
+                          className="absolute -top-1 -right-1 w-6 h-6 bg-white border border-aq-border/60 rounded-full flex items-center justify-center text-[#E85454] hover:bg-red-50 z-10"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                        <Link to={`/urun/${p.slug}`} className="block group">
+                          <div className="w-24 h-24 bg-white border border-aq-border/60 rounded-2xl flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                            <img
+                              src={img}
+                              alt={p.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
+                            />
+                          </div>
+                          <p className="text-sm font-semibold text-aq-text line-clamp-2 group-hover:text-aq-blue transition-colors">
+                            {p.name}
+                          </p>
+                        </Link>
+                        <div className="mt-2 flex justify-center">
+                          <ProductPrice product={p} size="sm" />
+                        </div>
                       </div>
-                      <p className="text-sm font-semibold text-[#0D2137] line-clamp-2">{p.name}</p>
-                      <p className="text-lg font-bold text-[#1A73E8] mt-1">{p.price.toLocaleString('tr-TR')}₺</p>
-                    </div>
-                  </th>
-                ))}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
               {Object.entries(specLabels).map(([key, label]) => (
-                <tr key={key} className="border-t border-[#F0F6FF]">
-                  <td className="p-4 text-sm font-medium text-[#5A6B7B]">{label}</td>
-                  {compareProducts.map(p => (
-                    <td key={p.id} className="p-4 text-sm text-[#0D2137] text-center">
+                <tr key={key} className="border-t border-aq-border/60">
+                  <td className="p-4 text-sm font-medium text-aq-muted">{label}</td>
+                  {compareProducts.map((p) => (
+                    <td key={p.id} className="p-4 text-sm text-aq-text text-center">
                       {specDefaults[p.id]?.[key] || '-'}
                     </td>
                   ))}
                 </tr>
               ))}
-              {/* Rating */}
-              <tr className="border-t border-[#F0F6FF]">
-                <td className="p-4 text-sm font-medium text-[#5A6B7B]">Puan</td>
-                {compareProducts.map(p => (
-                  <td key={p.id} className="p-4 text-sm text-[#0D2137] text-center font-semibold">{p.rating} / 5</td>
+              <tr className="border-t border-aq-border/60">
+                <td className="p-4 text-sm font-medium text-aq-muted">Puan</td>
+                {compareProducts.map((p) => (
+                  <td key={p.id} className="p-4 text-sm text-aq-text text-center font-semibold">
+                    {p.rating} / 5
+                  </td>
                 ))}
               </tr>
-              {/* Stock */}
-              <tr className="border-t border-[#F0F6FF]">
-                <td className="p-4 text-sm font-medium text-[#5A6B7B]">Stok</td>
-                {compareProducts.map(p => (
+              <tr className="border-t border-aq-border/60">
+                <td className="p-4 text-sm font-medium text-aq-muted">Stok</td>
+                {compareProducts.map((p) => (
                   <td key={p.id} className="p-4 text-center">
-                    <span className="inline-flex items-center gap-1 text-xs font-medium bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium bg-aq-sky text-aq-blue px-2.5 py-1 rounded-full">
                       <Check className="w-3 h-3" /> Stokta ({p.stock})
                     </span>
                   </td>
                 ))}
               </tr>
-              {/* Add to cart */}
-              <tr className="border-t border-[#F0F6FF]">
+              <tr className="border-t border-aq-border/60">
                 <td className="p-4" />
-                {compareProducts.map(p => (
+                {compareProducts.map((p) => (
                   <td key={p.id} className="p-4">
                     <button
+                      type="button"
                       onClick={() => handleAddToCart(p)}
-                      className="w-full flex items-center justify-center gap-2 bg-[#1A73E8] text-white py-2.5 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all"
+                      aria-label="Sepete Ekle"
+                      title="Sepete Ekle"
+                      className="mx-auto w-11 h-11 flex items-center justify-center rounded-full border border-aq-border/60 text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-sky transition-all active:scale-[0.96]"
                     >
-                      <ShoppingCart className="w-4 h-4" /> Sepete Ekle
+                      <ShoppingCart className="w-4 h-4" />
                     </button>
                   </td>
                 ))}

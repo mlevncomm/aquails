@@ -80,14 +80,14 @@ export default function AdminBlogPage() {
 
       <AdminTableWrap>
         {loading ? (
-          <div className="py-12 text-center text-slate-400"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+          <div className="py-12 text-center text-aq-muted"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-[#F8FBFF]">
+                <tr className="bg-aq-ice">
                   {['Başlık', 'Kategori', 'Durum', 'Tarih', 'Görüntülenme', 'İşlem'].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-[#8B9DAF] uppercase whitespace-nowrap">
+                    <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
                       {h}
                     </th>
                   ))}
@@ -95,16 +95,16 @@ export default function AdminBlogPage() {
               </thead>
               <tbody>
                 {posts.map((p) => (
-                  <tr key={p.id} className="border-b border-[#F0F6FF] last:border-0 hover:bg-[#F8FBFF]/50">
+                  <tr key={p.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-[#F0F6FF] rounded-lg flex items-center justify-center">
-                          <BookOpen className="w-4 h-4 text-[#1A73E8]" />
+                        <div className="w-8 h-8 bg-aq-ice rounded-lg flex items-center justify-center">
+                          <BookOpen className="w-4 h-4 text-aq-blue" />
                         </div>
-                        <span className="text-sm font-medium text-[#0D2137] line-clamp-1 max-w-[200px]">{p.title}</span>
+                        <span className="text-sm font-medium text-aq-text line-clamp-1 max-w-[200px]">{p.title}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-[#5A6B7B]">{p.category}</td>
+                    <td className="px-4 py-3 text-sm text-aq-muted">{p.category}</td>
                     <td className="px-4 py-3">
                       <button
                         onClick={() => void toggleStatus(p.id, p.status)}
@@ -113,19 +113,19 @@ export default function AdminBlogPage() {
                         {p.status === 'published' ? 'Yayında' : 'Taslak'}
                       </button>
                     </td>
-                    <td className="px-4 py-3 text-sm text-[#8B9DAF]">{p.date}</td>
-                    <td className="px-4 py-3 text-sm text-[#0D2137]">{p.views.toLocaleString('tr-TR')}</td>
+                    <td className="px-4 py-3 text-sm text-aq-muted">{p.date}</td>
+                    <td className="px-4 py-3 text-sm text-aq-text">{p.views.toLocaleString('tr-TR')}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8]">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue">
                           <Eye className="w-3.5 h-3.5" />
                         </button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8]">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue">
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => void remove(p.id)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-[#8B9DAF] hover:text-red-500"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -138,7 +138,7 @@ export default function AdminBlogPage() {
           </div>
         )}
         {!loading && posts.length === 0 && (
-          <div className="text-center py-8 text-sm text-slate-400">Henüz blog yazısı yok</div>
+          <div className="text-center py-8 text-sm text-aq-muted">Henüz blog yazısı yok</div>
         )}
       </AdminTableWrap>
     </>

@@ -169,7 +169,7 @@ export const adminChartData = [
 
 export const categoryPieData = [
   { name: 'Ev Tipi', value: 45, color: '#1A73E8' },
-  { name: 'Tezgah Altı', value: 25, color: '#00C9A7' },
+  { name: 'Tezgah Altı', value: 25, color: '#1286D8' },
   { name: 'Endüstriyel', value: 10, color: '#F5A623' },
   { name: 'Filtre Seti', value: 12, color: '#8B5CF6' },
   { name: 'Yedek Parça', value: 8, color: '#E85454' },

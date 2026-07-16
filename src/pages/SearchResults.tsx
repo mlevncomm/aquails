@@ -36,7 +36,7 @@ export default function SearchResults() {
 
   const cats = useMemo(
     () => ['all', ...categories.map((c) => c.name)],
-    [categories]
+    [categories],
   );
 
   const filtered = useMemo(() => {
@@ -80,35 +80,37 @@ export default function SearchResults() {
 
   return (
     <PageLayout>
-      <div className="page-container py-8">
-        <div className="mb-6">
-          <div className="flex items-center gap-2 text-[13px] text-[#8B9DAF] mb-2">
-            <Link to="/" className="hover:text-[#1A73E8]">Ana Sayfa</Link>
+      <div className="relative bg-gradient-to-br from-aq-ice via-white to-aq-sky/50 border-b border-aq-border/60">
+        <div className="page-container py-10 md:py-12">
+          <div className="flex items-center gap-2 text-[13px] text-aq-muted mb-2">
+            <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link>
             <span>/</span>
-            <span className="text-[#5A6B7B]">Arama</span>
+            <span className="text-aq-text">Arama</span>
           </div>
-          <h1 className="text-xl md:text-2xl font-bold text-[#0D2137]">
+          <h1 className="text-xl md:text-2xl lg:text-[1.75rem] font-bold text-aq-text">
             {query ? `"${query}" arama sonuçları` : 'Tüm Ürünler'}
           </h1>
-          <p className="text-sm text-[#8B9DAF] mt-1">{filtered.length} ürün bulundu</p>
+          <p className="text-sm text-aq-muted mt-1.5">{filtered.length} ürün bulundu</p>
         </div>
+      </div>
 
+      <div className="page-container py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className={cn(
             'lg:w-[240px] flex-shrink-0',
-            showFilters ? 'fixed inset-0 z-50 bg-white p-5 overflow-y-auto lg:static lg:p-0 lg:bg-transparent' : 'hidden lg:block'
+            showFilters ? 'fixed inset-0 z-50 bg-white p-5 overflow-y-auto lg:static lg:p-0 lg:bg-transparent' : 'hidden lg:block',
           )}>
             <div className="flex items-center justify-between lg:hidden mb-4">
-              <h3 className="font-semibold text-[#0D2137]">Filtreler</h3>
-              <button onClick={() => setShowFilters(false)}><X className="w-5 h-5" /></button>
+              <h3 className="font-semibold text-aq-text">Filtreler</h3>
+              <button type="button" onClick={() => setShowFilters(false)}><X className="w-5 h-5" /></button>
             </div>
-            <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5 space-y-5">
+            <div className="bg-white border border-aq-border/60 rounded-2xl p-5 space-y-5 shadow-sm">
               <div>
-                <h4 className="text-sm font-semibold text-[#0D2137] mb-2">Kategori</h4>
+                <h4 className="text-sm font-semibold text-aq-text mb-2">Kategori</h4>
                 <select
                   value={catFilter}
                   onChange={(e) => setCatFilter(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg"
+                  className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/20 bg-white"
                 >
                   {cats.map((c) => (
                     <option key={c} value={c}>{c === 'all' ? 'Tümü' : c}</option>
@@ -116,39 +118,40 @@ export default function SearchResults() {
                 </select>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-[#0D2137] mb-2">Fiyat Aralığı</h4>
+                <h4 className="text-sm font-semibold text-aq-text mb-2">Fiyat Aralığı</h4>
                 <div className="flex gap-2">
                   <input
                     type="number"
                     value={priceRange[0]}
                     onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-                    className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg"
+                    className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue bg-white"
                   />
                   <input
                     type="number"
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-                    className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg"
+                    className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue bg-white"
                   />
                 </div>
               </div>
             </div>
           </aside>
 
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
               <button
+                type="button"
                 onClick={() => setShowFilters(true)}
-                className="lg:hidden flex items-center gap-2 px-4 py-2 border border-[#D6E3F0] rounded-lg text-sm"
+                className="lg:hidden flex items-center gap-2 px-4 py-2 border border-aq-border/60 rounded-full text-sm text-aq-muted hover:border-aq-blue hover:text-aq-blue transition-colors"
               >
                 <SlidersHorizontal className="w-4 h-4" /> Filtrele
               </button>
               <div className="flex items-center gap-2 ml-auto">
-                <ArrowUpDown className="w-4 h-4 text-[#8B9DAF]" />
+                <ArrowUpDown className="w-4 h-4 text-aq-muted" />
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
-                  className="px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg"
+                  className="px-3.5 py-2 text-sm border border-aq-border/60 rounded-full focus:outline-none focus:border-aq-blue bg-white"
                 >
                   {sortOptions.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -160,9 +163,9 @@ export default function SearchResults() {
             {activeFilters.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {activeFilters.map((f) => (
-                  <span key={f.label} className="inline-flex items-center gap-1 bg-[#F0F6FF] text-[#1A73E8] text-xs px-3 py-1.5 rounded-full">
+                  <span key={f.label} className="inline-flex items-center gap-1 bg-aq-sky text-aq-blue text-xs px-3 py-1.5 rounded-full border border-aq-blue/15">
                     {f.label}
-                    <button onClick={f.onRemove}><X className="w-3 h-3" /></button>
+                    <button type="button" onClick={f.onRemove}><X className="w-3 h-3" /></button>
                   </span>
                 ))}
               </div>
@@ -172,7 +175,7 @@ export default function SearchResults() {
               <ProductGridSkeleton count={8} />
             ) : filtered.length === 0 ? (
               <EmptyState
-                icon={<Search className="w-8 h-8 text-[#8B9DAF]" />}
+                icon={<Search className="w-8 h-8 text-aq-muted" />}
                 title="Sonuç bulunamadı"
                 description={query ? `"${query}" için ürün bulunamadı.` : 'Filtreleri değiştirmeyi deneyin.'}
                 action={{ label: 'Tüm Ürünleri Gör', href: '/urunler' }}

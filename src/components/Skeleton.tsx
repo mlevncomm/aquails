@@ -6,7 +6,7 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className, variant = 'rect' }: SkeletonProps) {
-  const base = 'animate-pulse bg-[#E8F0FE] rounded-lg';
+  const base = 'animate-pulse bg-aq-ice rounded-lg';
   const variants = {
     text: 'h-4 w-full rounded',
     circle: 'rounded-full',
@@ -18,7 +18,7 @@ export function Skeleton({ className, variant = 'rect' }: SkeletonProps) {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden p-4 space-y-3">
+    <div className="bg-white border border-aq-border/60 rounded-2xl overflow-hidden p-4 space-y-3">
       <Skeleton className="w-full aspect-square rounded-xl" />
       <Skeleton className="h-3 w-20" variant="text" />
       <Skeleton className="h-4 w-full" variant="text" />

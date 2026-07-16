@@ -12,19 +12,23 @@ export function QuantitySelector({ quantity, onIncrease, onDecrease, size = 'md'
   const inputClass = size === 'sm' ? 'text-sm' : 'text-base';
 
   return (
-    <div className="flex items-center border border-aqua-border rounded-xl overflow-hidden">
+    <div className="inline-flex items-center border border-aq-border/60 rounded-full overflow-hidden bg-white">
       <button
+        type="button"
         onClick={onDecrease}
-        className={`${btnClass} flex items-center justify-center bg-aqua-bg text-aqua-text-secondary hover:bg-aqua-border-light transition-colors`}
+        aria-label="Azalt"
+        className={`${btnClass} flex items-center justify-center bg-aq-ice text-aq-muted hover:bg-aq-sky hover:text-aq-blue transition-colors`}
       >
         <Minus className={size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'} />
       </button>
-      <span className={`${inputClass} font-semibold text-aqua-secondary w-10 text-center`}>
+      <span className={`${inputClass} font-semibold text-aq-text w-10 text-center`}>
         {quantity}
       </span>
       <button
+        type="button"
         onClick={onIncrease}
-        className={`${btnClass} flex items-center justify-center bg-aqua-bg text-aqua-text-secondary hover:bg-aqua-border-light transition-colors`}
+        aria-label="Artır"
+        className={`${btnClass} flex items-center justify-center bg-aq-ice text-aq-muted hover:bg-aq-sky hover:text-aq-blue transition-colors`}
       >
         <Plus className={size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'} />
       </button>

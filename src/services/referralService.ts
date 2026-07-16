@@ -1,3 +1,6 @@
+import { getSupabaseOrNull } from '@/lib/supabase';
+import { formatDateTR } from '@/lib/format';
+
 export interface ReferralData {
   code: string;
   link: string;
@@ -6,29 +9,54 @@ export interface ReferralData {
   history: Array<{ name: string; date: string; status: string }>;
 }
 
-export function getReferralData(): ReferralData {
-  const saved = localStorage.getItem('referral-data');
-  if (saved) return JSON.parse(saved);
-  const code = 'AQUAILS' + Math.floor(100 + Math.random() * 900);
-  return {
-    code,
-    link: `${window.location.origin}/kayit-ol?ref=${code}`,
+export async function getReferralData(): Promise<ReferralData> {
+  const supabase = getSupabaseOrNull();
+  const fallbackCode = 'AQUAILS';
+  const empty: ReferralData = {
+    code: fallbackCode,
+    link: `${window.location.origin}/kayit-ol?ref=${fallbackCode}`,
     invitedCount: 0,
     earnedCoupons: [],
     history: [],
   };
+
+  if (!supabase) return empty;
+
+  const { data: codeData, error: codeError } = await supabase.rpc('ensure_referral_code');
+  if (codeError || !codeData) return empty;
+
+  const code = String(codeData);
+  const { data: rows } = await supabase
+    .from('referrals')
+    .select('id, referred_email, status, reward_points, created_at')
+    .order('created_at', { ascending: false });
+
+  const history = (rows ?? []).map((r) => ({
+    name: r.referred_email || 'Davetli',
+    date: formatDateTR(r.created_at),
+    status: r.status === 'completed' ? 'Tamamlandı' : 'Bekliyor',
+  }));
+
+  const earnedCoupons = (rows ?? [])
+    .filter((r) => r.status === 'completed')
+    .map((r) => ({
+      code: `DAVET-${String(r.id).slice(0, 6).toUpperCase()}`,
+      value: r.reward_points,
+      date: formatDateTR(r.created_at),
+    }));
+
+  return {
+    code,
+    link: `${window.location.origin}/kayit-ol?ref=${code}`,
+    invitedCount: rows?.length ?? 0,
+    earnedCoupons,
+    history,
+  };
 }
 
-export function saveReferralData(data: ReferralData): void {
-  localStorage.setItem('referral-data', JSON.stringify(data));
-}
-
-export function trackReferralSignup(referralCode: string): void {
-  const data = getReferralData();
-  if (data.code === referralCode) {
-    data.invitedCount += 1;
-    data.earnedCoupons.push({ code: `DAVET${data.invitedCount * 50}`, value: 250, date: new Date().toISOString() });
-    data.history.push({ name: `Davetli ${data.invitedCount}`, date: new Date().toISOString(), status: 'Tamamlandı' });
-    saveReferralData(data);
-  }
+export async function trackReferralSignup(referralCode: string): Promise<void> {
+  if (!referralCode.trim()) return;
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return;
+  await supabase.rpc('track_referral_signup', { p_referral_code: referralCode.trim() });
 }

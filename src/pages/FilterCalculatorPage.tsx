@@ -48,7 +48,7 @@ export default function FilterCalculatorPage() {
   };
 
   const statusConfig = {
-    healthy: { icon: CheckCircle, bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', iconColor: 'text-emerald-500' },
+    healthy: { icon: CheckCircle, bg: 'bg-aq-sky', border: 'border-aq-aqua/30', text: 'text-aq-blue', iconColor: 'text-aq-aqua' },
     approaching: { icon: AlertTriangle, bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', iconColor: 'text-amber-500' },
     overdue: { icon: AlertTriangle, bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', iconColor: 'text-red-500' },
   };
@@ -61,13 +61,13 @@ export default function FilterCalculatorPage() {
         canonical="/filtre-hesaplayici"
       />
     <PageLayout>
-      <section className="relative bg-gradient-to-br from-[#EBF4FF] via-[#F0F8FF] to-[#E0F0FF] py-12 md:py-16">
+      <section className="relative bg-gradient-to-br from-aq-ice via-white to-aq-sky/40 py-12 md:py-16">
         <div className="page-container text-center">
-          <div className="w-14 h-14 bg-white rounded-2xl shadow-md mx-auto mb-4 flex items-center justify-center">
-            <Calculator className="w-7 h-7 text-[#1A73E8]" />
+          <div className="w-14 h-14 bg-white rounded-2xl shadow-sm mx-auto mb-4 flex items-center justify-center">
+            <Calculator className="w-7 h-7 text-aq-blue" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#0D2137]">Filtre Değişim Zamanınızı Hesaplayın</h1>
-          <p className="text-sm text-[#5A6B7B] mt-2 max-w-lg mx-auto">Cihaz modelinizi ve kullanım bilgilerinizi girin, bir sonraki filtre değişim tarihinizi öğrenin.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-aq-text">Filtre Değişim Zamanınızı Hesaplayın</h1>
+          <p className="text-sm text-aq-muted mt-2 max-w-lg mx-auto">Cihaz modelinizi ve kullanım bilgilerinizi girin, bir sonraki filtre değişim tarihinizi öğrenin.</p>
         </div>
       </section>
 
@@ -80,14 +80,14 @@ export default function FilterCalculatorPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onSubmit={handleCalculate}
-              className="bg-white border border-[#E8F0FE] rounded-2xl p-6 space-y-5"
+              className="bg-white border border-aq-border/60 rounded-2xl p-6 space-y-5"
             >
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Cihaz Modeli *</label>
+                <label className="text-xs font-medium text-aq-muted mb-1.5 block">Cihaz Modeli *</label>
                 <select
                   value={form.deviceModel}
                   onChange={e => setForm({ ...form, deviceModel: e.target.value })}
-                  className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
+                  className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue"
                 >
                   <option value="">Seçiniz</option>
                   {deviceModels.map(m => <option key={m} value={m}>{m}</option>)}
@@ -95,22 +95,22 @@ export default function FilterCalculatorPage() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Son Filtre Değişimi Tarihi *</label>
+                <label className="text-xs font-medium text-aq-muted mb-1.5 block">Son Filtre Değişimi Tarihi *</label>
                 <input
                   type="date"
                   value={form.lastChangeDate}
                   onChange={e => setForm({ ...form, lastChangeDate: e.target.value })}
-                  className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
+                  className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Kaç Kişi Kullanıyor?</label>
+                  <label className="text-xs font-medium text-aq-muted mb-1.5 block">Kaç Kişi Kullanıyor?</label>
                   <select
                     value={form.peopleCount}
                     onChange={e => setForm({ ...form, peopleCount: e.target.value })}
-                    className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
+                    className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue"
                   >
                     <option value="1-2">1-2 kişi</option>
                     <option value="3-4">3-4 kişi</option>
@@ -118,11 +118,11 @@ export default function FilterCalculatorPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Kullanım Yoğunluğu</label>
+                  <label className="text-xs font-medium text-aq-muted mb-1.5 block">Kullanım Yoğunluğu</label>
                   <select
                     value={form.usageIntensity}
                     onChange={e => setForm({ ...form, usageIntensity: e.target.value })}
-                    className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
+                    className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue"
                   >
                     <option value="low">Düşük</option>
                     <option value="medium">Orta</option>
@@ -132,7 +132,7 @@ export default function FilterCalculatorPage() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Su Tadında/Kokusunda Değişim Var Mı?</label>
+                <label className="text-xs font-medium text-aq-muted mb-1.5 block">Su Tadında/Kokusunda Değişim Var Mı?</label>
                 <div className="flex gap-3">
                   {[
                     { value: false, label: 'Hayır' },
@@ -144,8 +144,8 @@ export default function FilterCalculatorPage() {
                       onClick={() => setForm({ ...form, hasTasteIssue: opt.value })}
                       className={`flex-1 py-2.5 text-sm font-medium rounded-xl border-2 transition-all ${
                         form.hasTasteIssue === opt.value
-                          ? 'border-[#1A73E8] bg-[#F0F6FF] text-[#1A73E8]'
-                          : 'border-[#E8F0FE] text-[#5A6B7B]'
+                          ? 'border-aq-deep bg-aq-sky text-aq-blue'
+                          : 'border-aq-border/60 text-aq-muted'
                       }`}
                     >
                       {opt.label}
@@ -155,7 +155,7 @@ export default function FilterCalculatorPage() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Filtre Değişim Hatırlatıcısı Oluşturulsun Mu?</label>
+                <label className="text-xs font-medium text-aq-muted mb-1.5 block">Filtre Değişim Hatırlatıcısı Oluşturulsun Mu?</label>
                 <div className="flex gap-3">
                   {[
                     { value: true, label: 'Evet' },
@@ -167,8 +167,8 @@ export default function FilterCalculatorPage() {
                       onClick={() => setForm({ ...form, createReminder: opt.value })}
                       className={`flex-1 py-2.5 text-sm font-medium rounded-xl border-2 transition-all ${
                         form.createReminder === opt.value
-                          ? 'border-[#1A73E8] bg-[#F0F6FF] text-[#1A73E8]'
-                          : 'border-[#E8F0FE] text-[#5A6B7B]'
+                          ? 'border-aq-deep bg-aq-sky text-aq-blue'
+                          : 'border-aq-border/60 text-aq-muted'
                       }`}
                     >
                       {opt.label}
@@ -179,20 +179,20 @@ export default function FilterCalculatorPage() {
 
               {form.createReminder && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                  <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">E-posta Adresiniz</label>
+                  <label className="text-xs font-medium text-aq-muted mb-1.5 block">E-posta Adresiniz</label>
                   <input
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="Hatırlatıcı için e-posta"
-                    className="w-full px-4 py-2.5 text-sm border border-[#D6E3F0] rounded-xl bg-[#F8FBFF] focus:outline-none focus:border-[#1A73E8]"
+                    className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue"
                   />
                 </motion.div>
               )}
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 bg-[#1A73E8] text-white py-3.5 rounded-full text-sm font-semibold hover:bg-[#1557B0] transition-all"
+                className="w-full flex items-center justify-center gap-2 bg-aq-blue text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all"
               >
                 <Calculator className="w-4 h-4" /> Hesapla
               </button>
@@ -209,28 +209,28 @@ export default function FilterCalculatorPage() {
                   {/* Status Card */}
                   <div className={`${statusConfig[result.status].bg} border ${statusConfig[result.status].border} rounded-2xl p-6 text-center`}>
                     {(() => { const StatusIcon = statusConfig[result.status].icon; return <StatusIcon className={`w-12 h-12 ${statusConfig[result.status].iconColor} mx-auto mb-3`} />; })()}
-                    <h3 className={`text-lg font-bold ${statusConfig[result.status].text}`}>{result.statusLabel}</h3>
+                    <h3 className={`text-lg font-semibold ${statusConfig[result.status].text}`}>{result.statusLabel}</h3>
                     <div className="mt-4">
-                      <p className="text-3xl font-bold text-[#0D2137]">{result.daysRemaining > 0 ? `${result.daysRemaining} gün` : `${Math.abs(result.daysRemaining)} gün gecikme`}</p>
-                      <p className="text-xs text-[#8B9DAF] mt-1">Sonraki önerilen değişim: {result.nextChangeDate.toLocaleDateString('tr-TR')}</p>
+                      <p className="text-3xl font-bold text-aq-text">{result.daysRemaining > 0 ? `${result.daysRemaining} gün` : `${Math.abs(result.daysRemaining)} gün gecikme`}</p>
+                      <p className="text-xs text-aq-muted mt-1">Sonraki önerilen değişim: {result.nextChangeDate.toLocaleDateString('tr-TR')}</p>
                     </div>
                   </div>
 
                   {/* Recommended Filters */}
-                  <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
-                    <h4 className="text-sm font-semibold text-[#0D2137] mb-3">Önerilen Filtreler</h4>
+                  <div className="bg-white border border-aq-border/60 rounded-2xl p-5">
+                    <h4 className="text-sm font-semibold text-aq-text mb-3">Önerilen Filtreler</h4>
                     <div className="space-y-2">
                       {result.recommendedFilters.map((f, i) => (
-                        <div key={i} className="flex items-center gap-2 text-sm text-[#5A6B7B]">
-                          <Droplet className="w-4 h-4 text-[#1A73E8]" /> {f}
+                        <div key={i} className="flex items-center gap-2 text-sm text-aq-muted">
+                          <Droplet className="w-4 h-4 text-aq-blue" /> {f}
                         </div>
                       ))}
                     </div>
                     <div className="flex flex-wrap gap-2 mt-4">
-                      <Link to="/urunler?kategori=filtreler" className="flex items-center gap-1.5 bg-[#1A73E8] text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-[#1557B0] transition-all">
+                      <Link to="/urunler?kategori=filtreler" className="flex items-center gap-1.5 bg-aq-blue text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-aq-deep hover:text-white transition-all">
                         <ShoppingCart className="w-3 h-3" /> Filtre Al
                       </Link>
-                      <Link to="/filtre-aboneligi" className="flex items-center gap-1.5 border border-[#E8F0FE] text-[#5A6B7B] text-xs font-medium px-4 py-2 rounded-full hover:border-[#1A73E8] hover:text-[#1A73E8] transition-all">
+                      <Link to="/filtre-aboneligi" className="flex items-center gap-1.5 border border-aq-border/60 text-aq-muted text-xs font-semibold px-4 py-2 rounded-xl hover:border-aq-blue hover:text-aq-blue transition-all">
                         <RefreshCw className="w-3 h-3" /> Abonelik Oluştur
                       </Link>
                     </div>
@@ -238,7 +238,7 @@ export default function FilterCalculatorPage() {
 
                   <button
                     onClick={() => { setSubmitted(false); setResult(null); }}
-                    className="w-full text-sm font-medium text-[#5A6B7B] hover:text-[#0D2137] transition-all py-2"
+                    className="w-full text-sm font-medium text-aq-muted hover:text-aq-text transition-all py-2"
                   >
                     Yeniden Hesapla
                   </button>

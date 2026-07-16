@@ -26,10 +26,10 @@ const PIE_COLORS = ['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b', '#f43f5e', '#06b
 
 const statusStyles: Record<string, string> = {
   'Tamamlandı': 'bg-emerald-50 text-emerald-700',
-  'Kargoda': 'bg-sky-50 text-sky-700',
+  'Kargoda': 'bg-aq-sky text-aq-blue',
   'Hazırlanıyor': 'bg-amber-50 text-amber-700',
   'Yeni': 'bg-violet-50 text-violet-700',
-  'İptal Edildi': 'bg-slate-100 text-slate-500',
+  'İptal Edildi': 'bg-aq-ice text-aq-muted',
   'İade': 'bg-orange-50 text-orange-700',
 };
 
@@ -41,10 +41,10 @@ function formatCurrency(n: number) {
 
 function KpiSkeleton() {
   return (
-    <div className="animate-pulse bg-white rounded-2xl border border-slate-100 p-6 h-[132px]">
-      <div className="w-10 h-10 bg-slate-100 rounded-xl mb-4" />
-      <div className="h-7 w-24 bg-slate-100 rounded-lg mb-2" />
-      <div className="h-4 w-16 bg-slate-50 rounded" />
+    <div className="animate-pulse bg-white rounded-2xl border border-aq-border/60 p-6 h-[132px]">
+      <div className="w-10 h-10 bg-aq-ice rounded-xl mb-4" />
+      <div className="h-7 w-24 bg-aq-ice rounded-lg mb-2" />
+      <div className="h-4 w-16 bg-aq-ice rounded" />
     </div>
   );
 }
@@ -94,9 +94,9 @@ export default function AdminDashboard() {
           value: formatCurrency(stats.monthlyRevenue),
           sub: `${stats.monthlyOrders} sipariş`,
           icon: Banknote,
-          accent: 'from-sky-500 to-blue-600',
-          bg: 'bg-sky-50',
-          text: 'text-sky-700',
+          accent: 'from-aq-blue to-aq-navy',
+          bg: 'bg-aq-sky',
+          text: 'text-aq-blue',
           href: '/admin/raporlar',
         },
         {
@@ -167,23 +167,23 @@ export default function AdminDashboard() {
       {/* Welcome */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <p className="text-sm text-slate-500 capitalize">{todayLabel}</p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mt-1">
+          <p className="text-sm text-aq-muted capitalize">{todayLabel}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-aq-text tracking-tight mt-1">
             Hoş geldiniz{user?.name ? `, ${user.name.split(' ')[0]}` : ''}
           </h1>
-          <p className="text-slate-500 text-sm mt-1">Mağazanızın güncel özetine göz atın.</p>
+          <p className="text-aq-muted text-sm mt-1">Mağazanızın güncel özetine göz atın.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
             to="/admin/siparisler"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 text-white text-sm font-medium hover:bg-sky-700 transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-aq-blue text-white text-sm font-semibold hover:bg-aq-deep hover:text-white transition-colors shadow-sm"
           >
             <ShoppingBag className="w-4 h-4" />
             Siparişler
           </Link>
           <Link
             to="/admin/urunler"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-aq-border/60 text-aq-muted text-sm font-medium hover:bg-aq-ice transition-colors"
           >
             <Package className="w-4 h-4" />
             Ürünler
@@ -192,25 +192,25 @@ export default function AdminDashboard() {
       </div>
 
       {/* Primary KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)
           : primaryKpis.map((kpi) => (
             <Link
               key={kpi.label}
               to={kpi.href}
-              className="group relative bg-white rounded-2xl border border-slate-100 p-6 hover:border-slate-200 hover:shadow-md transition-all overflow-hidden"
+              className="group relative bg-white rounded-2xl border border-aq-border/60 p-6 hover:border-aq-blue/25 transition-all overflow-hidden"
             >
-              <div className={cn('absolute top-0 left-0 right-0 h-1 bg-gradient-to-r opacity-80', kpi.accent)} />
+              <div className={cn('absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r opacity-70', kpi.accent)} />
               <div className="flex items-start justify-between">
                 <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center', kpi.bg)}>
                   <kpi.icon className={cn('w-5 h-5', kpi.text)} />
                 </div>
-                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="w-4 h-4 text-aq-muted/60 group-hover:text-aq-muted group-hover:translate-x-0.5 transition-all" />
               </div>
-              <p className="text-2xl font-bold text-slate-900 mt-4 tracking-tight">{kpi.value}</p>
-              <p className="text-sm font-medium text-slate-700 mt-0.5">{kpi.label}</p>
-              <p className="text-xs text-slate-400 mt-1">{kpi.sub}</p>
+              <p className="text-2xl font-bold text-aq-text mt-4 tracking-tight">{kpi.value}</p>
+              <p className="text-sm font-medium text-aq-muted mt-0.5">{kpi.label}</p>
+              <p className="text-xs text-aq-muted mt-1">{kpi.sub}</p>
             </Link>
           ))}
       </div>
@@ -231,7 +231,7 @@ export default function AdminDashboard() {
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-amber-200 text-xs font-medium text-amber-900 hover:bg-amber-50 transition-colors"
                 >
                   {item.label}
-                  <span className="font-bold">{item.value}</span>
+                  <span className="font-semibold">{item.value}</span>
                 </Link>
               ))}
             </div>
@@ -244,10 +244,10 @@ export default function AdminDashboard() {
         <AdminCard className="xl:col-span-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
-              <h2 className="text-base font-semibold text-slate-900">Satış Trendi</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Dönemsel ciro grafiği</p>
+              <h2 className="text-base font-semibold text-aq-text">Satış Trendi</h2>
+              <p className="text-xs text-aq-muted mt-0.5">Dönemsel ciro grafiği</p>
             </div>
-            <div className="flex bg-slate-100 rounded-xl p-1 self-start">
+            <div className="flex bg-aq-ice rounded-xl p-1 self-start">
               {([
                 ['week', 'Haftalık'],
                 ['month', 'Aylık'],
@@ -260,8 +260,8 @@ export default function AdminDashboard() {
                   className={cn(
                     'px-3 py-1.5 text-xs font-medium rounded-lg transition-all',
                     chartRange === key
-                      ? 'bg-white text-sky-700 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700',
+                      ? 'bg-white text-aq-blue shadow-sm'
+                      : 'text-aq-muted hover:text-aq-muted',
                   )}
                 >
                   {label}
@@ -270,16 +270,16 @@ export default function AdminDashboard() {
             </div>
           </div>
           {loading ? (
-            <div className="h-[280px] flex items-center justify-center text-slate-400">
+            <div className="h-[280px] flex items-center justify-center text-aq-muted">
               <Loader2 className="w-6 h-6 animate-spin" />
             </div>
           ) : chartData.every((d) => d.sales === 0) ? (
             <div className="h-[280px] flex flex-col items-center justify-center text-center px-4">
-              <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center mb-3">
-                <TrendingUp className="w-6 h-6 text-slate-300" />
+              <div className="w-14 h-14 rounded-2xl bg-aq-ice flex items-center justify-center mb-3">
+                <TrendingUp className="w-6 h-6 text-aq-muted/60" />
               </div>
-              <p className="text-sm font-medium text-slate-600">Henüz satış verisi yok</p>
-              <p className="text-xs text-slate-400 mt-1">İlk siparişler geldiğinde grafik burada görünecek.</p>
+              <p className="text-sm font-medium text-aq-muted">Henüz satış verisi yok</p>
+              <p className="text-xs text-aq-muted mt-1">İlk siparişler geldiğinde grafik burada görünecek.</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={280}>
@@ -310,11 +310,11 @@ export default function AdminDashboard() {
         </AdminCard>
 
         <AdminCard>
-          <h2 className="text-base font-semibold text-slate-900">Katalog Dağılımı</h2>
-          <p className="text-xs text-slate-400 mt-0.5 mb-5">Ürün sayısına göre kategoriler</p>
+          <h2 className="text-base font-semibold text-aq-text">Katalog Dağılımı</h2>
+          <p className="text-xs text-aq-muted mt-0.5 mb-5">Ürün sayısına göre kategoriler</p>
           {loading ? (
             <div className="h-[220px] flex items-center justify-center">
-              <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+              <Loader2 className="w-6 h-6 animate-spin text-aq-muted" />
             </div>
           ) : pieData.length === 0 ? (
             <AdminEmpty message="Kategori verisi yok" />
@@ -339,10 +339,10 @@ export default function AdminDashboard() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-2xl font-bold text-slate-900">
+                  <span className="text-2xl font-bold text-aq-text">
                     {pieData.reduce((s, c) => s + c.value, 0)}
                   </span>
-                  <span className="text-[11px] text-slate-400">ürün</span>
+                  <span className="text-[11px] text-aq-muted">ürün</span>
                 </div>
               </div>
               <div className="space-y-2 mt-2 max-h-[160px] overflow-y-auto pr-1">
@@ -350,9 +350,9 @@ export default function AdminDashboard() {
                   <div key={cat.name} className="flex items-center justify-between text-xs gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
-                      <span className="text-slate-600 truncate">{cat.name}</span>
+                      <span className="text-aq-muted truncate">{cat.name}</span>
                     </div>
-                    <span className="font-semibold text-slate-800 flex-shrink-0">{cat.value}</span>
+                    <span className="font-semibold text-aq-text flex-shrink-0">{cat.value}</span>
                   </div>
                 ))}
               </div>
@@ -365,14 +365,14 @@ export default function AdminDashboard() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-base font-semibold text-slate-900">Operasyon Özeti</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Tüm metrikler — tıklayarak ilgili sayfaya gidin</p>
+            <h2 className="text-base font-semibold text-aq-text">Operasyon Özeti</h2>
+            <p className="text-xs text-aq-muted mt-0.5">Tüm metrikler — tıklayarak ilgili sayfaya gidin</p>
           </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {loading
             ? Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="animate-pulse h-24 bg-white rounded-xl border border-slate-100" />
+              <div key={i} className="animate-pulse h-24 bg-white rounded-xl border border-aq-border/60" />
             ))
             : operations.map((op) => (
               <Link
@@ -380,16 +380,16 @@ export default function AdminDashboard() {
                 to={op.href}
                 className={cn(
                   'flex flex-col justify-between p-4 rounded-xl border bg-white transition-all hover:shadow-sm hover:-translate-y-0.5 min-h-[96px]',
-                  op.urgent ? 'border-amber-200 bg-amber-50/30' : 'border-slate-100 hover:border-slate-200',
+                  op.urgent ? 'border-amber-200 bg-amber-50/30' : 'border-aq-border/60 hover:border-aq-border/60',
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <op.icon className={cn('w-4 h-4', op.urgent ? 'text-amber-600' : 'text-slate-400')} />
+                  <op.icon className={cn('w-4 h-4', op.urgent ? 'text-amber-600' : 'text-aq-muted')} />
                   {op.urgent && <span className="w-2 h-2 rounded-full bg-amber-500" />}
                 </div>
                 <div className="mt-3">
-                  <p className="text-xl font-bold text-slate-900 leading-none">{op.value}</p>
-                  <p className="text-[11px] text-slate-500 mt-1.5 leading-snug">{op.label}</p>
+                  <p className="text-xl font-semibold text-aq-text leading-none">{op.value}</p>
+                  <p className="text-[11px] text-aq-muted mt-1.5 leading-snug">{op.label}</p>
                 </div>
               </Link>
             ))}
@@ -399,25 +399,25 @@ export default function AdminDashboard() {
       {/* Recent orders + low stock */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 lg:gap-6">
         <AdminTableWrap className="xl:col-span-2">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-aq-border/60">
             <div>
-              <h2 className="text-base font-semibold text-slate-900">Son Siparişler</h2>
-              <p className="text-xs text-slate-400">En son gelen siparişler</p>
+              <h2 className="text-base font-semibold text-aq-text">Son Siparişler</h2>
+              <p className="text-xs text-aq-muted">En son gelen siparişler</p>
             </div>
-            <Link to="/admin/siparisler" className="text-xs font-medium text-sky-600 hover:text-sky-700 flex items-center gap-1">
+            <Link to="/admin/siparisler" className="text-xs font-medium text-aq-blue hover:text-aq-navy flex items-center gap-1">
               Tümünü gör <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
           {loading ? (
-            <div className="py-16 flex justify-center text-slate-400"><Loader2 className="w-6 h-6 animate-spin" /></div>
+            <div className="py-16 flex justify-center text-aq-muted"><Loader2 className="w-6 h-6 animate-spin" /></div>
           ) : recentOrders.length === 0 ? (
             <AdminEmpty message="Henüz sipariş yok" />
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="bg-slate-50/80">
+                <tr className="bg-aq-ice/80">
                   {['Sipariş', 'Müşteri', 'Tutar', 'Durum', ''].map((h) => (
-                    <th key={h} className="text-left px-5 py-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                    <th key={h} className="text-left px-5 py-3 text-[10px] font-semibold text-aq-muted uppercase tracking-wider">
                       {h}
                     </th>
                   ))}
@@ -428,33 +428,33 @@ export default function AdminDashboard() {
                   const statusTr = orderStatusToTr(order.status);
                   const customerName = (order.profiles as { name?: string } | null)?.name ?? 'Müşteri';
                   return (
-                    <tr key={order.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50">
+                    <tr key={order.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
                       <td className="px-5 py-3.5">
-                        <p className="text-sm font-semibold text-sky-700">{order.order_number}</p>
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-sm font-semibold text-aq-blue">{order.order_number}</p>
+                        <p className="text-[11px] text-aq-muted">
                           {new Date(order.created_at).toLocaleDateString('tr-TR')}
                         </p>
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 bg-sky-50 rounded-full flex items-center justify-center text-xs font-bold text-sky-700">
+                          <div className="w-7 h-7 bg-aq-sky rounded-full flex items-center justify-center text-xs font-medium text-aq-blue">
                             {customerName[0]}
                           </div>
-                          <span className="text-sm text-slate-700">{customerName}</span>
+                          <span className="text-sm text-aq-muted">{customerName}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-semibold text-slate-900">
+                      <td className="px-5 py-3.5 text-sm font-semibold text-aq-text">
                         {Number(order.total).toLocaleString('tr-TR')}₺
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className={cn('text-[11px] font-medium px-2 py-0.5 rounded-full', statusStyles[statusTr] ?? 'bg-slate-100 text-slate-600')}>
+                        <span className={cn('text-[11px] font-medium px-2 py-0.5 rounded-full', statusStyles[statusTr] ?? 'bg-aq-ice text-aq-muted')}>
                           {statusTr}
                         </span>
                       </td>
                       <td className="px-5 py-3.5">
                         <Link
                           to={`/admin/siparisler/${order.id}`}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-sky-50 text-slate-400 hover:text-sky-600 transition-colors"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-sky text-aq-muted hover:text-aq-blue transition-colors"
                         >
                           <Eye className="w-4 h-4" />
                         </Link>
@@ -470,26 +470,26 @@ export default function AdminDashboard() {
         <AdminCard>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-base font-semibold text-slate-900">Düşük Stok</h2>
-              <p className="text-xs text-slate-400">10 adet ve altı</p>
+              <h2 className="text-base font-semibold text-aq-text">Düşük Stok</h2>
+              <p className="text-xs text-aq-muted">10 adet ve altı</p>
             </div>
             {lowStock.length > 0 && (
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-600">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600">
                 {lowStock.length}
               </span>
             )}
           </div>
           {loading ? (
-            <div className="py-12 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>
+            <div className="py-12 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-aq-muted" /></div>
           ) : lowStock.length === 0 ? (
             <div className="text-center py-10">
-              <Package className="w-8 h-8 text-slate-200 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">Stoklar yeterli</p>
+              <Package className="w-8 h-8 text-aq-border mx-auto mb-2" />
+              <p className="text-sm text-aq-muted">Stoklar yeterli</p>
             </div>
           ) : (
             <div className="space-y-2">
               {lowStock.slice(0, 6).map((p) => (
-                <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+                <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-aq-ice transition-colors">
                   <div className={cn(
                     'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
                     p.stock <= 3 ? 'bg-red-50' : 'bg-amber-50',
@@ -497,11 +497,11 @@ export default function AdminDashboard() {
                     <Package className={cn('w-4 h-4', p.stock <= 3 ? 'text-red-500' : 'text-amber-500')} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-slate-800 line-clamp-1">{p.name}</p>
-                    <p className="text-[10px] text-slate-400">{p.sku}</p>
+                    <p className="text-sm font-medium text-aq-text line-clamp-1">{p.name}</p>
+                    <p className="text-[10px] text-aq-muted">{p.sku}</p>
                   </div>
                   <span className={cn(
-                    'text-sm font-bold flex-shrink-0',
+                    'text-sm font-semibold flex-shrink-0',
                     p.stock <= 3 ? 'text-red-600' : 'text-amber-600',
                   )}>
                     {p.stock}
@@ -512,7 +512,7 @@ export default function AdminDashboard() {
           )}
           <Link
             to="/admin/stok"
-            className="flex items-center justify-center gap-1.5 mt-5 pt-4 border-t border-slate-100 text-xs font-semibold text-sky-600 hover:text-sky-700"
+            className="flex items-center justify-center gap-1.5 mt-5 pt-4 border-t border-aq-border/60 text-xs font-semibold text-aq-blue hover:text-aq-navy"
           >
             Stok yönetimi <ArrowRight className="w-3.5 h-3.5" />
           </Link>

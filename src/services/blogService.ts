@@ -19,6 +19,7 @@ export interface PublicBlogPost {
   excerpt: string;
   image: string;
   readTime: string;
+  date: string;
 }
 
 const BLOG_IMAGE_CYCLE = [
@@ -59,6 +60,7 @@ function mapPublicPost(row: DbBlogPost, index: number): PublicBlogPost {
     excerpt: excerptFromContent(row.content),
     image: BLOG_IMAGE_CYCLE[index % BLOG_IMAGE_CYCLE.length],
     readTime: estimateReadTime(row.content),
+    date: formatDateTR(row.created_at),
   };
 }
 
@@ -75,7 +77,7 @@ export async function getBlogPosts(): Promise<BlogPostListItem[]> {
   return (data as DbBlogPost[]).map(mapPost);
 }
 
-export async function getPublishedBlogPosts(limit = 3): Promise<PublicBlogPost[]> {
+export async function getPublishedBlogPosts(limit = 50): Promise<PublicBlogPost[]> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return [];
 
@@ -88,6 +90,29 @@ export async function getPublishedBlogPosts(limit = 3): Promise<PublicBlogPost[]
 
   if (error || !data) return [];
   return (data as DbBlogPost[]).map(mapPublicPost);
+}
+
+export interface PublicBlogPostDetail extends PublicBlogPost {
+  content: string;
+}
+
+export async function getBlogPostBySlug(slug: string): Promise<PublicBlogPostDetail | null> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase || !slug) return null;
+
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .maybeSingle();
+
+  if (error || !data) return null;
+  const row = data as DbBlogPost;
+  return {
+    ...mapPublicPost(row, 0),
+    content: row.content || '',
+  };
 }
 
 export async function createBlogPost(input: {

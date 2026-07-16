@@ -25,7 +25,7 @@ export function RatingStars({ rating, size = 'md', showCount = false, count, cla
               <Star
                 className={cn(
                   starSize,
-                  filled ? 'text-[#F5A623] fill-[#F5A623]' : 'text-aqua-border'
+                  filled ? 'text-[#F5A623] fill-[#F5A623]' : 'text-aq-border'
                 )}
               />
               {halfFilled && (
@@ -38,7 +38,7 @@ export function RatingStars({ rating, size = 'md', showCount = false, count, cla
         })}
       </div>
       {showCount && count !== undefined && (
-        <span className="text-xs text-aqua-text-muted ml-1">({count})</span>
+        <span className="text-xs text-aq-muted ml-1">({count})</span>
       )}
     </div>
   );

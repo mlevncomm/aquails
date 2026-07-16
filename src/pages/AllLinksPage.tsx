@@ -65,8 +65,8 @@ function LinkRow({
   const className = cn(
     'w-full flex items-center gap-3.5 rounded-2xl px-4 py-3.5 text-left transition-all duration-200 group',
     featured
-      ? 'bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-lg shadow-sky-500/20 hover:shadow-xl hover:shadow-sky-500/25 hover:-translate-y-0.5'
-      : 'bg-white/90 backdrop-blur-sm border border-white/80 hover:border-sky-200 shadow-sm hover:shadow-md hover:-translate-y-0.5',
+      ? 'bg-gradient-to-r from-aq-blue to-aq-navy text-white shadow-sm shadow-aq-deep/20 hover:shadow-aq-deep/25 hover:-translate-y-0.5'
+      : 'bg-white/90 backdrop-blur-sm border border-white/80 hover:border-aq-blue/20 shadow-sm hover:-translate-y-0.5',
   );
 
   const inner = (
@@ -74,16 +74,16 @@ function LinkRow({
       <div
         className={cn(
           'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors',
-          featured ? 'bg-white/20' : 'bg-sky-50 group-hover:bg-sky-600',
+          featured ? 'bg-white/20' : 'bg-aq-sky group-hover:bg-aq-deep',
         )}
       >
-        <Icon className={cn('w-[18px] h-[18px]', featured ? 'text-white' : 'text-sky-600 group-hover:text-white')} />
+        <Icon className={cn('w-[18px] h-[18px]', featured ? 'text-white' : 'text-aq-blue group-hover:text-white')} />
       </div>
-      <span className={cn('text-sm font-semibold flex-1', featured ? 'text-white' : 'text-slate-800')}>{label}</span>
+      <span className={cn('text-sm font-semibold flex-1', featured ? 'text-white' : 'text-aq-text')}>{label}</span>
       {external ? (
-        <ExternalLink className={cn('w-4 h-4 flex-shrink-0', featured ? 'text-white/70' : 'text-slate-300 group-hover:text-sky-500')} />
+        <ExternalLink className={cn('w-4 h-4 flex-shrink-0', featured ? 'text-white/70' : 'text-aq-muted group-hover:text-aq-blue')} />
       ) : (
-        <ChevronRight className={cn('w-4 h-4 flex-shrink-0 transition-transform group-hover:translate-x-0.5', featured ? 'text-white/70' : 'text-slate-300 group-hover:text-sky-500')} />
+        <ChevronRight className={cn('w-4 h-4 flex-shrink-0 transition-transform group-hover:translate-x-0.5', featured ? 'text-white/70' : 'text-aq-muted group-hover:text-aq-blue')} />
       )}
     </>
   );
@@ -152,10 +152,10 @@ export default function AllLinksPage() {
         noindex
       />
 
-      <div className="min-h-[100dvh] bg-[#f0f7ff] relative overflow-x-hidden">
+      <div className="min-h-[100dvh] bg-aq-ice relative overflow-x-hidden">
         {/* Background */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[520px] h-[520px] bg-sky-400/10 rounded-full blur-3xl" />
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[520px] h-[520px] bg-aq-deep/10 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-cyan-400/10 rounded-full blur-3xl" />
           <div
             className="absolute inset-0 opacity-[0.35]"
@@ -174,15 +174,15 @@ export default function AllLinksPage() {
             className="text-center mb-8"
           >
             <div className="relative w-[88px] h-[88px] mx-auto mb-4">
-              <div className="absolute inset-0 rounded-[28px] bg-gradient-to-br from-sky-400 via-blue-500 to-cyan-400 p-[3px] shadow-lg shadow-sky-500/20">
+              <div className="absolute inset-0 rounded-[28px] bg-gradient-to-br from-aq-navy via-aq-deep to-aq-aqua p-[3px] shadow-sm shadow-aq-deep/20">
                 <div className="w-full h-full bg-white rounded-[25px] flex items-center justify-center overflow-hidden">
                   <BrandLogo variant="icon" className="w-14 h-14" />
                 </div>
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Aquails</h1>
-            <p className="text-sm font-medium text-sky-600 mt-1">Daha Temiz Su, Daha Akıllı Teknoloji</p>
-            <p className="text-xs text-slate-500 mt-2 leading-relaxed max-w-[280px] mx-auto">
+            <h1 className="text-2xl font-bold text-aq-text tracking-tight">Aquails</h1>
+            <p className="text-sm font-medium text-aq-blue mt-1">Daha Temiz Su, Daha Akıllı Teknoloji</p>
+            <p className="text-xs text-aq-muted mt-2 leading-relaxed max-w-[280px] mx-auto">
               Su arıtma cihazları, filtre aboneliği ve servis desteği — tek tıkla ulaşın.
             </p>
 
@@ -190,9 +190,9 @@ export default function AllLinksPage() {
               {['Güvenli Alışveriş', 'Ücretsiz Kurulum Desteği', 'Filtre Hatırlatma'].map((label) => (
                 <span
                   key={label}
-                  className="inline-flex items-center gap-1 bg-white/80 text-[10px] font-medium text-slate-500 px-2.5 py-1 rounded-full border border-sky-100 shadow-sm"
+                  className="inline-flex items-center gap-1 bg-white/80 text-[10px] font-medium text-aq-muted px-2.5 py-1 rounded-full border border-aq-border/60 shadow-sm"
                 >
-                  <ShieldCheck className="w-3 h-3 text-sky-500" />
+                  <ShieldCheck className="w-3 h-3 text-aq-blue" />
                   {label}
                 </span>
               ))}
@@ -210,7 +210,7 @@ export default function AllLinksPage() {
               href={getWhatsAppUrl('Merhaba, Aquails hakkında bilgi almak istiyorum.')}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-[0.98]"
+              className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-aq-blue hover:bg-aq-deep text-white font-semibold text-sm hover:-translate-y-0.5 transition-all active:scale-[0.98]"
             >
               <MessageCircle className="w-5 h-5" />
               WhatsApp ile Hemen Yazın
@@ -249,7 +249,7 @@ export default function AllLinksPage() {
               transition={{ delay: 0.35 }}
               className="mb-8"
             >
-              <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase mb-3 px-1">Kategoriler</p>
+              <p className="text-[10px] font-semibold text-aq-muted tracking-[0.2em] uppercase mb-3 px-1">Kategoriler</p>
               <div className="flex flex-wrap gap-2">
                 {categories.map((cat) => {
                   const Icon = categoryIconMap[cat.icon] ?? Droplet;
@@ -257,11 +257,11 @@ export default function AllLinksPage() {
                     <Link
                       key={cat.id}
                       to={`/urunler?kategori=${cat.id}`}
-                      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-sky-100 text-xs font-medium text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 shadow-sm transition-all"
+                      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-aq-border/60 text-xs font-medium text-aq-muted hover:border-aq-blue/30 hover:bg-aq-sky hover:text-aq-blue shadow-sm transition-all"
                     >
-                      <Icon className="w-3.5 h-3.5 text-sky-500" />
+                      <Icon className="w-3.5 h-3.5 text-aq-blue" />
                       {cat.name}
-                      <span className="text-slate-400 font-normal">({cat.productCount})</span>
+                      <span className="text-aq-muted font-normal">({cat.productCount})</span>
                     </Link>
                   );
                 })}
@@ -278,8 +278,8 @@ export default function AllLinksPage() {
               className="mb-8"
             >
               <div className="flex items-center justify-between mb-3 px-1">
-                <p className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">Öne Çıkanlar</p>
-                <Link to="/urunler" className="text-[11px] font-medium text-sky-600 hover:underline flex items-center gap-0.5">
+                <p className="text-[10px] font-semibold text-aq-muted tracking-[0.2em] uppercase">Öne Çıkanlar</p>
+                <Link to="/urunler" className="text-[11px] font-medium text-aq-blue hover:underline flex items-center gap-0.5">
                   Tümü <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -288,9 +288,9 @@ export default function AllLinksPage() {
                   <Link
                     key={p!.id}
                     to={`/urun/${p!.slug}`}
-                    className="flex-shrink-0 w-[148px] snap-start bg-white rounded-2xl border border-sky-100 overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group"
+                    className="flex-shrink-0 w-[148px] snap-start bg-white rounded-2xl border border-aq-border/60 overflow-hidden shadow-sm hover:-translate-y-0.5 transition-all group"
                   >
-                    <div className="aspect-square bg-slate-50 overflow-hidden">
+                    <div className="aspect-square bg-aq-ice overflow-hidden">
                       <img
                         src={p!.images[0] || '/images/products/placeholder.jpg'}
                         alt={p!.name}
@@ -299,11 +299,11 @@ export default function AllLinksPage() {
                       />
                     </div>
                     <div className="p-3">
-                      <p className="text-[11px] font-semibold text-slate-800 line-clamp-2 leading-snug min-h-[2.5rem]">{p!.name}</p>
+                      <p className="text-[11px] font-semibold text-aq-text line-clamp-2 leading-snug min-h-[2.5rem]">{p!.name}</p>
                       <div className="flex items-baseline gap-1.5 mt-2">
-                        <span className="text-sm font-bold text-sky-600">{p!.price.toLocaleString('tr-TR')} ₺</span>
+                        <span className="text-sm font-semibold text-aq-blue">{p!.price.toLocaleString('tr-TR')} ₺</span>
                         {p!.oldPrice != null && (
-                          <span className="text-[10px] text-slate-400 line-through">{p!.oldPrice.toLocaleString('tr-TR')} ₺</span>
+                          <span className="text-[10px] text-aq-muted line-through">{p!.oldPrice.toLocaleString('tr-TR')} ₺</span>
                         )}
                       </div>
                     </div>
@@ -318,13 +318,13 @@ export default function AllLinksPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55 }}
-            className="mb-8 relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-sky-900 p-5 text-white shadow-xl"
+            className="mb-8 relative overflow-hidden rounded-2xl bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep p-5 text-white shadow-sm"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/20 rounded-full blur-2xl" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-aq-aqua/20 rounded-full blur-2xl" />
             <div className="relative">
-              <p className="text-[10px] font-bold text-sky-300/80 tracking-[0.15em] uppercase">Instagram&apos;a Özel</p>
-              <h2 className="text-xl font-bold mt-1">%10 İndirim</h2>
-              <p className="text-xs text-slate-300 mt-1">AQUAILS10 kodu ile seçili ürünlerde geçerli.</p>
+              <p className="text-[10px] font-semibold text-aq-aqua/80 tracking-[0.15em] uppercase">Instagram&apos;a Özel</p>
+              <h2 className="text-xl font-semibold mt-1">%10 İndirim</h2>
+              <p className="text-xs text-white/70 mt-1">AQUAILS10 kodu ile seçili ürünlerde geçerli.</p>
               <div className="flex flex-wrap items-center gap-2 mt-4">
                 <button
                   type="button"
@@ -335,7 +335,7 @@ export default function AllLinksPage() {
                 </button>
                 <Link
                   to="/kampanyalar"
-                  className="inline-flex items-center gap-1 bg-white text-slate-900 text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-sky-50 transition-colors"
+                  className="inline-flex items-center gap-1 bg-white text-aq-text text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-aq-sky transition-colors"
                 >
                   Kampanyalar <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -352,9 +352,9 @@ export default function AllLinksPage() {
           >
             {trustItems.map((t) => (
               <div key={t.label} className="text-center p-2 rounded-xl bg-white/60 border border-white/80">
-                <t.icon className="w-4 h-4 text-sky-500 mx-auto mb-1" />
-                <p className="text-[10px] font-bold text-slate-800">{t.value}</p>
-                <p className="text-[9px] text-slate-400 leading-tight">{t.label}</p>
+                <t.icon className="w-4 h-4 text-aq-blue mx-auto mb-1" />
+                <p className="text-[10px] font-semibold text-aq-text">{t.value}</p>
+                <p className="text-[9px] text-aq-muted leading-tight">{t.label}</p>
               </div>
             ))}
           </motion.div>
@@ -381,26 +381,26 @@ export default function AllLinksPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     title={s.label}
-                    className="w-10 h-10 bg-white border border-sky-100 rounded-full flex items-center justify-center hover:border-sky-300 hover:bg-sky-50 transition-all shadow-sm"
+                    className="w-10 h-10 bg-white border border-aq-border/60 rounded-full flex items-center justify-center hover:border-aq-blue/30 hover:bg-aq-sky transition-all shadow-sm"
                   >
-                    <s.icon className="w-4 h-4 text-slate-400 hover:text-sky-600" />
+                    <s.icon className="w-4 h-4 text-aq-muted hover:text-aq-blue" />
                   </a>
                 ) : (
                   <Link
                     key={s.label}
                     to={s.href}
                     title={s.label}
-                    className="w-10 h-10 bg-white border border-sky-100 rounded-full flex items-center justify-center hover:border-sky-300 hover:bg-sky-50 transition-all shadow-sm"
+                    className="w-10 h-10 bg-white border border-aq-border/60 rounded-full flex items-center justify-center hover:border-aq-blue/30 hover:bg-aq-sky transition-all shadow-sm"
                   >
-                    <s.icon className="w-4 h-4 text-slate-400" />
+                    <s.icon className="w-4 h-4 text-aq-muted" />
                   </Link>
                 ),
               )}
             </div>
-            <Link to="/" className="text-xs font-medium text-sky-600 hover:underline">
+            <Link to="/" className="text-xs font-medium text-aq-blue hover:underline">
               aquails.com.tr ana sayfa
             </Link>
-            <p className="text-[10px] text-slate-400 mt-3">© 2026 Aquails. Tüm hakları saklıdır.</p>
+            <p className="text-[10px] text-aq-muted mt-3">© 2026 Aquails. Tüm hakları saklıdır.</p>
           </motion.footer>
         </div>
       </div>

@@ -78,10 +78,10 @@ export default function AdminCouponsPage() {
   return (
     <>
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-semibold text-[#0D2137]">Kupon / Kampanya Yönetimi</h2>
+        <h2 className="text-lg font-semibold text-aq-text">Kupon / Kampanya Yönetimi</h2>
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0]"
+          className="flex items-center gap-2 bg-aq-blue text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-aq-deep"
         >
           <Plus className="w-4 h-4" /> Yeni Kupon
         </button>
@@ -90,19 +90,19 @@ export default function AdminCouponsPage() {
       {showForm && (
         <form
           onSubmit={(e) => void handleSubmit(e)}
-          className="bg-[#0A1929] border border-[#1A3A5C] rounded-xl p-4 mb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
+          className="bg-aq-deep border border-aq-navy rounded-xl p-4 mb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
         >
           <input
             required
             value={form.code}
             onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
             placeholder="Kupon Kodu"
-            className="px-3 py-2 text-sm bg-[#0D2137] border border-[#1A3A5C] rounded-lg text-white placeholder-[#8B9DAF]"
+            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white placeholder-aq-muted"
           />
           <select
             value={form.type}
             onChange={(e) => setForm({ ...form, type: e.target.value as 'percent' | 'fixed' })}
-            className="px-3 py-2 text-sm bg-[#0D2137] border border-[#1A3A5C] rounded-lg text-white"
+            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white"
           >
             <option value="percent">Yüzde (%)</option>
             <option value="fixed">Sabit Tutar (₺)</option>
@@ -113,7 +113,7 @@ export default function AdminCouponsPage() {
             value={form.value}
             onChange={(e) => setForm({ ...form, value: e.target.value })}
             placeholder={form.type === 'percent' ? 'İndirim %' : 'İndirim ₺'}
-            className="px-3 py-2 text-sm bg-[#0D2137] border border-[#1A3A5C] rounded-lg text-white placeholder-[#8B9DAF]"
+            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white placeholder-aq-muted"
           />
           <input
             required
@@ -121,7 +121,7 @@ export default function AdminCouponsPage() {
             value={form.minOrder}
             onChange={(e) => setForm({ ...form, minOrder: e.target.value })}
             placeholder="Min. Sepet ₺"
-            className="px-3 py-2 text-sm bg-[#0D2137] border border-[#1A3A5C] rounded-lg text-white placeholder-[#8B9DAF]"
+            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white placeholder-aq-muted"
           />
           <input
             required
@@ -129,43 +129,43 @@ export default function AdminCouponsPage() {
             value={form.usageLimit}
             onChange={(e) => setForm({ ...form, usageLimit: e.target.value })}
             placeholder="Kullanım Limiti"
-            className="px-3 py-2 text-sm bg-[#0D2137] border border-[#1A3A5C] rounded-lg text-white placeholder-[#8B9DAF]"
+            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white placeholder-aq-muted"
           />
           <input
             required
             type="date"
             value={form.start}
             onChange={(e) => setForm({ ...form, start: e.target.value })}
-            className="px-3 py-2 text-sm bg-[#0D2137] border border-[#1A3A5C] rounded-lg text-white"
+            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white"
           />
           <input
             required
             type="date"
             value={form.end}
             onChange={(e) => setForm({ ...form, end: e.target.value })}
-            className="px-3 py-2 text-sm bg-[#0D2137] border border-[#1A3A5C] rounded-lg text-white"
+            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white"
           />
           <div className="flex gap-2">
-            <button type="submit" className="bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm">
+            <button type="submit" className="bg-aq-blue hover:bg-aq-deep text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors">
               Kaydet
             </button>
-            <button type="button" onClick={() => setShowForm(false)} className="border border-[#1A3A5C] text-[#8B9DAF] px-4 py-2 rounded-lg text-sm">
+            <button type="button" onClick={() => setShowForm(false)} className="border border-aq-navy text-aq-muted px-4 py-2 rounded-lg text-sm">
               İptal
             </button>
           </div>
         </form>
       )}
 
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
+      <div className="bg-white border border-aq-border/60 rounded-2xl overflow-hidden">
         {loading ? (
-          <div className="text-center py-12 text-sm text-[#8B9DAF]">Kuponlar yükleniyor...</div>
+          <div className="text-center py-12 text-sm text-aq-muted">Kuponlar yükleniyor...</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-[#F8FBFF]">
+                <tr className="bg-aq-ice">
                   {['Kod', 'Tip', 'Değer', 'Min. Sipariş', 'Kullanım', 'Tarih Aralığı', 'Durum', 'İşlem'].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-[#8B9DAF] uppercase whitespace-nowrap">
+                    <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
                       {h}
                     </th>
                   ))}
@@ -173,34 +173,34 @@ export default function AdminCouponsPage() {
               </thead>
               <tbody>
                 {coupons.map((c) => (
-                  <tr key={c.id} className="border-b border-[#F0F6FF] last:border-0 hover:bg-[#F8FBFF]/50">
+                  <tr key={c.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1.5 bg-[#EBF3FF] text-[#1A73E8] text-sm font-bold px-3 py-1 rounded-lg">
+                      <span className="inline-flex items-center gap-1.5 bg-aq-sky text-aq-blue text-sm font-semibold px-3 py-1 rounded-lg">
                         <Tag className="w-3.5 h-3.5" />
                         {c.code}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       {c.type === 'percent' ? (
-                        <span className="flex items-center gap-1 text-sm text-[#5A6B7B]">
+                        <span className="flex items-center gap-1 text-sm text-aq-muted">
                           <Percent className="w-3.5 h-3.5" />
                           Yüzde
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1 text-sm text-[#5A6B7B]">
+                        <span className="flex items-center gap-1 text-sm text-aq-muted">
                           <CircleDollarSign className="w-3.5 h-3.5" />
                           Sabit
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-[#0D2137]">
+                    <td className="px-4 py-3 text-sm font-semibold text-aq-text">
                       {c.type === 'percent' ? `%${c.value}` : `${c.value.toLocaleString('tr-TR')}₺`}
                     </td>
-                    <td className="px-4 py-3 text-sm text-[#5A6B7B]">{c.minOrder.toLocaleString('tr-TR')}₺</td>
-                    <td className="px-4 py-3 text-sm text-[#5A6B7B]">
+                    <td className="px-4 py-3 text-sm text-aq-muted">{c.minOrder.toLocaleString('tr-TR')}₺</td>
+                    <td className="px-4 py-3 text-sm text-aq-muted">
                       {c.used} / {c.usageLimit}
                     </td>
-                    <td className="px-4 py-3 text-[13px] text-[#8B9DAF] whitespace-nowrap">
+                    <td className="px-4 py-3 text-[13px] text-aq-muted whitespace-nowrap">
                       {c.start} - {c.end}
                     </td>
                     <td className="px-4 py-3">
@@ -213,12 +213,12 @@ export default function AdminCouponsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8]">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue">
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => void remove(c.id)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-[#8B9DAF] hover:text-red-500"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -231,7 +231,7 @@ export default function AdminCouponsPage() {
           </div>
         )}
         {!loading && coupons.length === 0 && (
-          <div className="text-center py-8 text-sm text-[#8B9DAF]">Henüz kupon yok</div>
+          <div className="text-center py-8 text-sm text-aq-muted">Henüz kupon yok</div>
         )}
       </div>
     </>

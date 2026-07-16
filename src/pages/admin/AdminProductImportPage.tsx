@@ -76,25 +76,25 @@ export default function AdminProductImportPage() {
       <AdminPageHeader title="Ürün Yükleme" description="CSV dosyası ile toplu ürün import" />
 
       <AdminCard className="max-w-2xl mb-6">
-        <h3 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
-          <FileSpreadsheet className="w-4 h-4 text-sky-600" />CSV Format
+        <h3 className="text-sm font-semibold text-aq-text mb-3 flex items-center gap-2">
+          <FileSpreadsheet className="w-4 h-4 text-aq-blue" />CSV Format
         </h3>
-        <pre className="text-xs bg-slate-50 p-4 rounded-xl overflow-x-auto text-slate-600">
+        <pre className="text-xs bg-aq-ice p-4 rounded-xl overflow-x-auto text-aq-muted">
 {`name,slug,category,price,stock,sku,description
 Aquails Pro, aquails-pro, su-aritma, 85900, 10, AQ-001, Açıklama...`}
         </pre>
-        <p className="text-xs text-slate-400 mt-2">category = kategori slug (su-aritma, filtre, vb.)</p>
+        <p className="text-xs text-aq-muted mt-2">category = kategori slug (su-aritma, filtre, vb.)</p>
       </AdminCard>
 
       <AdminCard className="max-w-2xl">
-        <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-10 cursor-pointer hover:border-sky-400 transition-colors">
+        <label className="flex flex-col items-center justify-center border-2 border-dashed border-aq-border/60 rounded-xl p-10 cursor-pointer hover:border-aq-blue transition-colors">
           {importing ? (
-            <Loader2 className="w-8 h-8 animate-spin text-sky-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-aq-blue" />
           ) : (
             <>
-              <Upload className="w-8 h-8 text-slate-400 mb-3" />
-              <span className="text-sm font-medium text-slate-700">CSV dosyası seçin veya sürükleyin</span>
-              <span className="text-xs text-slate-400 mt-1">.csv formatında</span>
+              <Upload className="w-8 h-8 text-aq-muted mb-3" />
+              <span className="text-sm font-medium text-aq-muted">CSV dosyası seçin veya sürükleyin</span>
+              <span className="text-xs text-aq-muted mt-1">.csv formatında</span>
             </>
           )}
           <input

@@ -274,41 +274,63 @@ export async function trackOrderByNumberAndEmail(
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Sipariş servisi yapılandırılmamış.' };
 
-  const query = emailOrPhone.trim().toLowerCase();
-  const { data, error } = await supabase
-    .from('orders')
-    .select(`${ORDER_SELECT}`)
-    .eq('order_number', orderNo.trim())
-    .maybeSingle();
+  const { data, error } = await supabase.rpc('track_order_by_number_and_contact', {
+    p_order_number: orderNo.trim(),
+    p_email_or_phone: emailOrPhone.trim(),
+  });
 
   if (error || !data) {
     return { success: false, error: 'Sipariş bulunamadı. Numara ve e-posta/telefonu kontrol edin.' };
   }
 
-  const row = data as unknown as OrderWithProfile;
-  const profileEmail = row.profiles?.email?.toLowerCase() ?? '';
-  const profilePhone = (row.profiles?.phone ?? '').replace(/\s/g, '');
-  const queryPhone = query.replace(/\s/g, '');
+  const row = data as {
+    order_number: string;
+    status: string;
+    payment_status: string;
+    cargo_company?: string | null;
+    tracking_number?: string | null;
+    shipping_address?: { address?: string; fullAddress?: string } | null;
+    created_at: string;
+    items?: Array<{ name: string; qty: number; price: number }>;
+  };
 
-  if (profileEmail !== query && profilePhone !== queryPhone && !profilePhone.endsWith(queryPhone.slice(-10))) {
-    return { success: false, error: 'Sipariş bilgileri eşleşmedi.' };
-  }
+  const address =
+    row.shipping_address?.fullAddress ||
+    row.shipping_address?.address ||
+    '—';
 
-  const detail = mapOrderDetail(row);
   return {
     success: true,
     order: {
-      orderNo: detail.orderNo,
-      status: detail.status,
-      statusLabel: orderStatusToTr(detail.status),
-      paymentStatus: detail.paymentStatus,
-      carrier: detail.cargoCompany ?? '—',
-      trackingNo: detail.trackingNumber ?? '—',
-      address: detail.shipping.address,
-      items: detail.products.map((p) => ({ name: p.name, qty: p.qty, price: p.price })),
-      timeline: buildTimeline(detail.status, detail.paymentStatus, row.created_at),
+      orderNo: row.order_number,
+      status: row.status,
+      statusLabel: orderStatusToTr(row.status),
+      paymentStatus: row.payment_status,
+      carrier: row.cargo_company ?? '—',
+      trackingNo: row.tracking_number ?? '—',
+      address,
+      items: (row.items ?? []).map((p) => ({ name: p.name, qty: p.qty, price: Number(p.price) })),
+      timeline: buildTimeline(row.status, row.payment_status, row.created_at),
     },
   };
+}
+
+export async function adminConfirmOfflinePayment(
+  orderId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Sipariş servisi yapılandırılmamış.' };
+
+  const { data, error } = await supabase.rpc('admin_confirm_offline_payment', {
+    p_order_id: orderId,
+  });
+
+  if (error) return { success: false, error: error.message };
+  const result = data as { success?: boolean; error?: string } | null;
+  if (result && result.success === false) {
+    return { success: false, error: result.error ?? 'Ödeme onaylanamadı.' };
+  }
+  return { success: true };
 }
 
 export interface CreateOrderInput {

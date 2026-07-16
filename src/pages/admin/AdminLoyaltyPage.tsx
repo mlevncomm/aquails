@@ -14,8 +14,8 @@ export default function AdminLoyaltyPage() {
 
   return (
     <div className="p-4 md:p-6">
-      <h1 className="text-xl md:text-2xl font-bold text-[#0D2137] mb-1">Sadakat Yönetimi</h1>
-      <p className="text-sm text-[#8B9DAF] mb-6">Müşteri puanlarını görüntüleyin ve kuralları yönetin.</p>
+      <h1 className="text-xl md:text-2xl font-bold text-aq-text mb-1">Sadakat Yönetimi</h1>
+      <p className="text-sm text-aq-muted mb-6">Müşteri puanlarını görüntüleyin ve kuralları yönetin.</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         {[
@@ -23,21 +23,21 @@ export default function AdminLoyaltyPage() {
           { label: 'Kullanılabilir', value: data.availablePoints, icon: Gift },
           { label: 'Kullanılan', value: data.totalRedeemed, icon: TrendingUp },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-[#E8F0FE] rounded-xl p-4">
-            <s.icon className="w-5 h-5 text-[#1A73E8] mb-2" />
-            <p className="text-lg font-bold text-[#0D2137]">{s.value}</p>
-            <p className="text-xs text-[#8B9DAF]">{s.label}</p>
+          <div key={s.label} className="bg-white border border-aq-border/60 rounded-xl p-4">
+            <s.icon className="w-5 h-5 text-aq-blue mb-2" />
+            <p className="text-lg font-semibold text-aq-text">{s.value}</p>
+            <p className="text-xs text-aq-muted">{s.label}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5 mb-6">
-        <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Manuel Puan İşlemi</h3>
-        <p className="text-sm text-[#8B9DAF] mb-3">
+      <div className="bg-white border border-aq-border/60 rounded-2xl p-5 mb-6">
+        <h3 className="text-sm font-semibold text-aq-text mb-3">Manuel Puan İşlemi</h3>
+        <p className="text-sm text-aq-muted mb-3">
           Müşteri bazlı puan işlemleri için müşteri profilinden yönetim yapılabilir.
         </p>
         <div className="flex gap-3 opacity-50 pointer-events-none">
-          <input type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} className="w-24 px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg bg-[#F8FBFF]" />
+          <input type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} className="w-24 px-3 py-2 text-sm border border-aq-border/60 rounded-lg bg-aq-ice" />
           <button className="flex items-center gap-1 bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm">
             <Plus className="w-4 h-4" /> Ekle
           </button>
@@ -47,20 +47,20 @@ export default function AdminLoyaltyPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
-        <h3 className="text-sm font-semibold text-[#0D2137] mb-3">Puan Kazanma Kuralları</h3>
+      <div className="bg-white border border-aq-border/60 rounded-2xl p-5">
+        <h3 className="text-sm font-semibold text-aq-text mb-3">Puan Kazanma Kuralları</h3>
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[#E8F0FE]">
-              <th className="text-left px-3 py-2 text-xs font-semibold text-[#8B9DAF]">İşlem</th>
-              <th className="text-right px-3 py-2 text-xs font-semibold text-[#8B9DAF]">Puan</th>
+            <tr className="border-b border-aq-border/60">
+              <th className="text-left px-3 py-2 text-xs font-semibold text-aq-muted">İşlem</th>
+              <th className="text-right px-3 py-2 text-xs font-semibold text-aq-muted">Puan</th>
             </tr>
           </thead>
           <tbody>
             {EARN_RULES.map((r) => (
-              <tr key={r.action} className="border-b border-[#F0F6FF] last:border-0">
-                <td className="px-3 py-2.5 text-sm text-[#5A6B7B]">{r.action}</td>
-                <td className="px-3 py-2.5 text-sm font-semibold text-[#1A73E8] text-right">{r.points}</td>
+              <tr key={r.action} className="border-b border-aq-border/60 last:border-0">
+                <td className="px-3 py-2.5 text-sm text-aq-muted">{r.action}</td>
+                <td className="px-3 py-2.5 text-sm font-semibold text-aq-blue text-right">{r.points}</td>
               </tr>
             ))}
           </tbody>

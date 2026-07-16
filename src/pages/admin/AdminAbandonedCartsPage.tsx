@@ -50,7 +50,7 @@ export default function AdminAbandonedCartsPage() {
   };
 
   const statusColor: Record<string, string> = {
-    new: 'text-[#1A73E8] bg-[#F0F6FF]',
+    new: 'text-aq-blue bg-aq-ice',
     'reminder-sent': 'text-amber-600 bg-amber-50',
     converted: 'text-emerald-600 bg-emerald-50',
   };
@@ -63,8 +63,8 @@ export default function AdminAbandonedCartsPage() {
 
   return (
     <div className="p-4 md:p-6">
-      <h1 className="text-xl md:text-2xl font-bold text-[#0D2137] mb-1">Terk Edilmiş Sepetler</h1>
-      <p className="text-sm text-[#8B9DAF] mb-6">Sepeti terk eden müşterileri takip edin, hatırlatıcı gönderin.</p>
+      <h1 className="text-xl md:text-2xl font-bold text-aq-text mb-1">Terk Edilmiş Sepetler</h1>
+      <p className="text-sm text-aq-muted mb-6">Sepeti terk eden müşterileri takip edin, hatırlatıcı gönderin.</p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
@@ -73,43 +73,43 @@ export default function AdminAbandonedCartsPage() {
           { label: 'Hatırlatıcı', value: stats.reminderSent },
           { label: 'Dönüşüm', value: stats.converted },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-[#E8F0FE] rounded-xl p-4">
-            <p className="text-xs text-[#8B9DAF]">{s.label}</p>
-            <p className="text-xl font-bold text-[#0D2137]">{s.value}</p>
+          <div key={s.label} className="bg-white border border-aq-border/60 rounded-xl p-4">
+            <p className="text-xs text-aq-muted">{s.label}</p>
+            <p className="text-xl font-semibold text-aq-text">{s.value}</p>
           </div>
         ))}
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-sm text-[#8B9DAF]">Yükleniyor...</div>
+        <div className="text-center py-12 text-sm text-aq-muted">Yükleniyor...</div>
       ) : carts.length === 0 ? (
-        <div className="bg-white border border-[#E8F0FE] rounded-2xl p-8 text-center text-sm text-[#8B9DAF]">
+        <div className="bg-white border border-aq-border/60 rounded-2xl p-8 text-center text-sm text-aq-muted">
           Terk edilmiş sepet bulunmuyor.
         </div>
       ) : (
         <div className="space-y-3">
           {carts.map((cart) => (
-            <div key={cart.id} className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
+            <div key={cart.id} className="bg-white border border-aq-border/60 rounded-2xl p-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                 <div>
-                  <p className="text-sm font-semibold text-[#0D2137]">{cart.customerName}</p>
-                  {cart.customerEmail && <p className="text-xs text-[#8B9DAF]">{cart.customerEmail}</p>}
+                  <p className="text-sm font-semibold text-aq-text">{cart.customerName}</p>
+                  {cart.customerEmail && <p className="text-xs text-aq-muted">{cart.customerEmail}</p>}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor[cart.status]}`}>
                     {statusLabel[cart.status]}
                   </span>
-                  <span className="text-sm font-bold text-[#0D2137]">{cart.total.toLocaleString('tr-TR')}₺</span>
+                  <span className="text-sm font-semibold text-aq-text">{cart.total.toLocaleString('tr-TR')}₺</span>
                 </div>
               </div>
-              <p className="text-xs text-[#8B9DAF] mb-3">
+              <p className="text-xs text-aq-muted mb-3">
                 {cart.items.length} ürün · Son aktivite: {new Date(cart.lastActivity).toLocaleString('tr-TR')}
               </p>
               <div className="flex gap-2">
                 {cart.status === 'new' && (
                   <button
                     onClick={() => void handleSendReminder(cart.id)}
-                    className="flex items-center gap-1.5 text-xs bg-[#1A73E8] text-white px-3 py-1.5 rounded-lg hover:bg-[#1557B0]"
+                    className="flex items-center gap-1.5 text-xs bg-aq-blue text-white px-3 py-1.5 rounded-xl hover:bg-aq-deep"
                   >
                     <Send className="w-3.5 h-3.5" /> Hatırlat
                   </button>
@@ -117,7 +117,7 @@ export default function AdminAbandonedCartsPage() {
                 {cart.status !== 'converted' && (
                   <button
                     onClick={() => void handleConvert(cart.id)}
-                    className="flex items-center gap-1.5 text-xs border border-[#D6E3F0] text-[#5A6B7B] px-3 py-1.5 rounded-lg hover:border-emerald-400 hover:text-emerald-600"
+                    className="flex items-center gap-1.5 text-xs border border-aq-border/60 text-aq-muted px-3 py-1.5 rounded-lg hover:border-emerald-400 hover:text-emerald-600"
                   >
                     <RotateCcw className="w-3.5 h-3.5" /> Dönüştü
                   </button>
