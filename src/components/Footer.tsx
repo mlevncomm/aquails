@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { motion } from 'framer-motion';
-import { ArrowRight, Phone, ShieldCheck, Wrench, Users } from 'lucide-react';
+import { ArrowRight, Phone, ShieldCheck, Wrench, Users, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 import { BrandLogo } from '@/components/BrandLogo';
-import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
+import { useCatalog } from '@/hooks/useCatalog';
+import { categories as staticCategories } from '@/data';
+import { getSiteConfig, type SiteConfig } from '@/services/settingsService';
 
 const quickLinks = [
   { label: 'Ana Sayfa', href: '/' },
@@ -10,14 +13,7 @@ const quickLinks = [
   { label: 'Kampanyalar', href: '/kampanyalar' },
   { label: 'Blog', href: '/blog' },
   { label: 'SSS', href: '/sss' },
-];
-
-const categoryLinks = [
-  { label: 'Ev Tipi Cihazlar', href: '/urunler?kategori=ev-tipi' },
-  { label: 'Tezgah Altı Sistemler', href: '/urunler?kategori=tezgah-alti' },
-  { label: 'Endüstriyel Arıtma', href: '/urunler?kategori=endustriyel' },
-  { label: 'Filtre Setleri', href: '/urunler?kategori=filtre' },
-  { label: 'Yedek Parçalar', href: '/urunler?kategori=yedek-parca' },
+  { label: 'Hakkımızda', href: '/hakkimizda' },
 ];
 
 const trustItems = [
@@ -27,12 +23,35 @@ const trustItems = [
   { icon: Phone, label: '7/24 Teknik Destek' },
 ];
 
+const socialIcons = [
+  { key: 'facebook' as const, Icon: Facebook, label: 'Facebook' },
+  { key: 'instagram' as const, Icon: Instagram, label: 'Instagram' },
+  { key: 'twitter' as const, Icon: Twitter, label: 'Twitter' },
+  { key: 'youtube' as const, Icon: Youtube, label: 'YouTube' },
+];
+
 export function Footer() {
+  const { categories: loadedCategories } = useCatalog();
+  const categories = (loadedCategories.length > 0 ? loadedCategories : staticCategories).slice(0, 5);
+  const [site, setSite] = useState<SiteConfig | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSiteConfig().then((cfg) => {
+      if (!cancelled) setSite(cfg);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const phone = site?.phone || '0850 123 45 67';
+  const email = site?.email || 'info@aquails.com.tr';
+  const address = site?.address || 'Teknopark İstanbul, Pendik/İstanbul';
+  const year = new Date().getFullYear();
+
   return (
     <footer>
       {/* ── Unified CTA Band ── */}
       <div className="relative overflow-hidden bg-gradient-to-br from-[#061628] via-[#0D2137] to-[#0B1D3A]">
-        {/* Decorative glows */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-24 right-0 w-[500px] h-[500px] rounded-full bg-[#1A73E8]/12 blur-[100px]" />
           <div className="absolute -bottom-20 left-0 w-[400px] h-[400px] rounded-full bg-[#00D4C8]/8 blur-[80px]" />
@@ -41,8 +60,6 @@ export function Footer() {
 
         <div className="relative max-w-[1280px] mx-auto px-4 sm:px-6 py-20 md:py-28">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
-            {/* Left — headline + CTA */}
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -78,7 +95,6 @@ export function Footer() {
               </div>
             </motion.div>
 
-            {/* Right — trust grid */}
             <motion.div
               initial={{ opacity: 0, x: 24 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -110,28 +126,33 @@ export function Footer() {
       <div className="bg-[#061220] pt-14 pb-8">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 min-w-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
-            {/* Brand */}
             <div>
               <div className="mb-4">
                 <BrandLogo variant="logo" inverted className="h-8" />
               </div>
               <p className="text-sm text-[#5A7A9A] leading-relaxed">
-                2008'den beri su arıtma teknolojilerinde güvenilir çözüm ortağınız.
+                2008&apos;den beri su arıtma teknolojilerinde güvenilir çözüm ortağınız.
               </p>
               <div className="flex items-center gap-3 mt-5">
-                {[Facebook, Instagram, Twitter, Youtube].map((Icon, i) => (
-                  <a
-                    key={i}
-                    href="#"
-                    className="w-8 h-8 rounded-full border border-[#1A3A5C] flex items-center justify-center text-[#5A7A9A] hover:text-white hover:border-[#1A73E8] transition-all duration-300"
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                  </a>
-                ))}
+                {socialIcons.map(({ key, Icon, label }) => {
+                  const href = site?.[key];
+                  if (!href) return null;
+                  return (
+                    <a
+                      key={key}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
+                      className="w-8 h-8 rounded-full border border-[#1A3A5C] flex items-center justify-center text-[#5A7A9A] hover:text-white hover:border-[#1A73E8] transition-all duration-300"
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </a>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Quick Links */}
             <div>
               <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-4">
                 Hızlı Linkler
@@ -147,42 +168,52 @@ export function Footer() {
               </ul>
             </div>
 
-            {/* Categories */}
             <div>
               <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-4">
                 Kategoriler
               </h4>
               <ul className="space-y-2.5">
-                {categoryLinks.map(({ label, href }) => (
-                  <li key={label}>
-                    <Link to={href} className="text-sm text-[#5A7A9A] hover:text-white hover:pl-1 transition-all duration-200">
-                      {label}
+                {categories.map((cat) => (
+                  <li key={cat.id}>
+                    <Link
+                      to={`/urunler?kategori=${cat.id}`}
+                      className="text-sm text-[#5A7A9A] hover:text-white hover:pl-1 transition-all duration-200"
+                    >
+                      {cat.name}
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Contact */}
             <div>
               <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-4">
                 İletişim
               </h4>
               <div className="space-y-3 text-sm text-[#5A7A9A]">
-                <p>Merkez: Teknopark İstanbul, Pendik/İstanbul</p>
-                <p>0850 123 45 67</p>
-                <p>info@aquails.com.tr</p>
+                <p>Merkez: {address}</p>
+                <p>
+                  <a href={`tel:${phone.replace(/\s/g, '')}`} className="hover:text-white transition-colors">
+                    {phone}
+                  </a>
+                </p>
+                <p>
+                  <a href={`mailto:${email}`} className="hover:text-white transition-colors">
+                    {email}
+                  </a>
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Bottom Line */}
           <div className="mt-12 pt-6 border-t border-[#0F2840] flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-[#3D5A78]">
-            <p>&copy; 2025 Aquails. Tüm hakları saklıdır.</p>
-            <div className="flex gap-4">
-              <a href="#" className="hover:text-white transition-colors">Gizlilik Politikası</a>
-              <span>|</span>
-              <a href="#" className="hover:text-white transition-colors">Kullanım Koşulları</a>
+            <p>&copy; {year} Aquails. Tüm hakları saklıdır.</p>
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+              <Link to="/gizlilik" className="hover:text-white transition-colors">Gizlilik Politikası</Link>
+              <span className="text-[#1A3A5C]">|</span>
+              <Link to="/mesafeli-satis" className="hover:text-white transition-colors">Mesafeli Satış</Link>
+              <span className="text-[#1A3A5C]">|</span>
+              <Link to="/kvkk" className="hover:text-white transition-colors">KVKK</Link>
             </div>
           </div>
         </div>

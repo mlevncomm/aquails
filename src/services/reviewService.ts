@@ -31,6 +31,16 @@ function mapReview(row: ReviewWithProduct): AdminReview {
   };
 }
 
+export interface PublicReview {
+  id: string;
+  name: string;
+  city: string;
+  rating: number;
+  product: string;
+  text: string;
+  verified: boolean;
+}
+
 export async function getReviews(): Promise<AdminReview[]> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return [];
@@ -42,6 +52,30 @@ export async function getReviews(): Promise<AdminReview[]> {
 
   if (error || !data) return [];
   return (data as unknown as ReviewWithProduct[]).map(mapReview);
+}
+
+export async function getPublishedReviews(limit = 6): Promise<PublicReview[]> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*, products(name), profiles(name)')
+    .eq('is_published', true)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error || !data) return [];
+
+  return (data as unknown as ReviewWithProduct[]).map((row) => ({
+    id: row.id,
+    name: row.profiles?.name ?? 'Müşteri',
+    city: 'Türkiye',
+    rating: row.rating,
+    product: row.products?.name ?? 'Aquails Ürünü',
+    text: row.content,
+    verified: true,
+  }));
 }
 
 export async function toggleReviewPublished(

@@ -1,24 +1,47 @@
 import { Link } from 'react-router';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Check, ArrowRight, ChevronDown, Users, ShieldCheck, Clock, Award,
+  ArrowRight, ChevronDown, Users, ShieldCheck, Clock, Award,
   Droplet, Cpu, Zap, Shield, Wrench, RefreshCw, Sparkles,
   Package, Search, Calendar, ClipboardCheck,
-  Home as HomeIcon, Monitor, Coffee, Filter, CircleDot, Settings, Plug, ChefHat, Activity, Building2
+  Home as HomeIcon, Monitor, Coffee, Filter, CircleDot, Settings, Plug, ChefHat, Activity, Building2,
 } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
 import { ProductCard } from '@/components/ProductCard';
 import { RatingStars } from '@/components/RatingStars';
 import { SEO } from '@/components/SEO';
+import { BrandLogo } from '@/components/BrandLogo';
 import { getOrganizationSchema, getWebsiteSchema } from '@/components/SchemaOrg';
 import { products as staticProducts, categories as staticCategories } from '@/data';
 import { useCatalog } from '@/hooks/useCatalog';
+import { getPublishedBlogPosts, type PublicBlogPost } from '@/services/blogService';
+import { getPublishedReviews, type PublicReview } from '@/services/reviewService';
+import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, React.ElementType> = {
-  Droplet, Zap, Monitor, Coffee, Filter, CircleDot, Settings, Wrench, Plug, Sparkles, ChefHat, Activity, Home: HomeIcon,
+  Droplet, Zap, Monitor, Coffee, Filter, CircleDot, Settings, Wrench, Plug, Sparkles,
+  ChefHat, Activity, Home: HomeIcon, Building2,
+};
+
+const DEVICE_CATEGORY_SLUGS = new Set([
+  'direkt-akis-ro',
+  'klasik-ro-sistemleri',
+  'soft-kompakt',
+  'sebiller',
+  'bina-giris-filtrasyon',
+]);
+
+const categoryImages: Record<string, string> = {
+  'direkt-akis-ro': '/images/products/direkt-akis-su-aritma.jpg',
+  'klasik-ro-sistemleri': '/images/products/su-aritma-cihazlari.jpg',
+  'soft-kompakt': '/images/products/dijital-su-aritma.jpg',
+  sebiller: '/images/products/sebiller.jpg',
+  'bina-giris-filtrasyon': '/images/products/bina-girisi-filtrasyon.jpg',
+  'filtreler-membranlar': '/images/products/filtreler.jpg',
+  'musluklar-aksesuarlar': '/images/products/musluklar.jpg',
 };
 
 const trustBadges = [
@@ -45,24 +68,24 @@ const nasilCalisir = [
 ];
 
 const kampanyalar = [
-  { title: 'Direkt Akış Cihazlarda Özel İndirim', desc: 'Tankless su arıtma cihazlarında %20\'ye varan indirim fırsatı.', code: 'DIREKT20', bg: 'from-[#1A73E8] to-[#4A90E2]', image: '/images/campaign-1.jpg' },
-  { title: 'Filtre Setlerinde 2. Ürüne İndirim', desc: 'İkinci filtre setinde %50 indirim avantajı.', code: 'FILTRE50', bg: 'from-[#0D2137] to-[#1A3A5C]', image: '/images/campaign-3.jpg' },
-  { title: 'Ücretsiz Kurulum Fırsatı', desc: 'Tüm su arıtma cihazlarında profesyonel kurulum bedava.', code: 'KURULUM0', bg: 'from-[#00BFA5] to-[#00D9B5]', image: '/images/campaign-2.jpg' },
+  { title: 'Direkt Akış Cihazlarda Özel İndirim', desc: 'Tankless su arıtma cihazlarında %20\'ye varan indirim fırsatı.', code: 'DIREKT20', slug: 'yaz-indirimi', image: '/images/campaign-1.jpg' },
+  { title: 'Filtre Setlerinde 2. Ürüne İndirim', desc: 'İkinci filtre setinde %50 indirim avantajı.', code: 'FILTRE50', slug: 'filtre-kampanya', image: '/images/campaign-3.jpg' },
+  { title: 'Ücretsiz Kurulum Fırsatı', desc: 'Tüm su arıtma cihazlarında profesyonel kurulum bedava.', code: 'KURULUM0', slug: 'ucretsiz-kargo', image: '/images/campaign-2.jpg' },
 ];
 
-const yorumlar = [
-  { name: 'Mehmet K.', city: 'İstanbul', rating: 5, product: 'Aquails Smart RO Pro', text: '3 aydır kullanıyorum, suyun tadı inanılmaz değişti. Kurulum ekibi çok profesyoneldi. Filtre değişim hatırlatması da çok pratik.', verified: true },
-  { name: 'Ayşe Y.', city: 'Ankara', rating: 5, product: 'Aquails DirectFlow 400GPD', text: 'Direkt akış cihaz aldım, tank sorunu olmadan anında su. Çocuklarım artık daha çok su içiyor. Kesinlikle tavsiye ederim.', verified: true },
-  { name: 'Fatih S.', city: 'İzmir', rating: 4, product: 'Aquails Compact UnderSink', text: 'Tezgah altı çok yer kaplamıyor, sessiz çalışıyor. Fiyat performans olarak harika bir ürün.', verified: true },
-  { name: 'Selin D.', city: 'Bursa', rating: 5, product: 'Aquails Smart RO Pro', text: 'İkinci kez alıyorum, annem için de aldım. Akıllı sensör özelliği çok pratik, telefona bildirim geliyor. Servis hızı mükemmel.', verified: true },
-  { name: 'Ali R.', city: 'Antalya', rating: 5, product: 'Aquails DirectFlow 600GPD', text: 'İş yerimiz için aldık, çok memnunuz. Yüksek kapasite, düşük su atığı. Teknik destek harika.', verified: true },
-  { name: 'Zeynep B.', city: 'Adana', rating: 4, product: 'Aquails Compact UnderSink', text: 'Kurulum aynı gün yapıldı. Cihaz çok şık görünüyor, su kalitesi muazzam. Filtre değişimi de çok kolay.', verified: true },
+const FALLBACK_YORUMLAR: PublicReview[] = [
+  { id: '1', name: 'Mehmet K.', city: 'İstanbul', rating: 5, product: 'Aquails Smart RO Pro', text: '3 aydır kullanıyorum, suyun tadı inanılmaz değişti. Kurulum ekibi çok profesyoneldi. Filtre değişim hatırlatması da çok pratik.', verified: true },
+  { id: '2', name: 'Ayşe Y.', city: 'Ankara', rating: 5, product: 'Aquails DirectFlow 400GPD', text: 'Direkt akış cihaz aldım, tank sorunu olmadan anında su. Çocuklarım artık daha çok su içiyor. Kesinlikle tavsiye ederim.', verified: true },
+  { id: '3', name: 'Fatih S.', city: 'İzmir', rating: 4, product: 'Aquails Compact UnderSink', text: 'Tezgah altı çok yer kaplamıyor, sessiz çalışıyor. Fiyat performans olarak harika bir ürün.', verified: true },
+  { id: '4', name: 'Selin D.', city: 'Bursa', rating: 5, product: 'Aquails Smart RO Pro', text: 'İkinci kez alıyorum, annem için de aldım. Akıllı sensör özelliği çok pratik, telefona bildirim geliyor. Servis hızı mükemmel.', verified: true },
+  { id: '5', name: 'Ali R.', city: 'Antalya', rating: 5, product: 'Aquails DirectFlow 600GPD', text: 'İş yerimiz için aldık, çok memnunuz. Yüksek kapasite, düşük su atığı. Teknik destek harika.', verified: true },
+  { id: '6', name: 'Zeynep B.', city: 'Adana', rating: 4, product: 'Aquails Compact UnderSink', text: 'Kurulum aynı gün yapıldı. Cihaz çok şık görünüyor, su kalitesi muazzam. Filtre değişimi de çok kolay.', verified: true },
 ];
 
-const blogYazilar = [
-  { title: 'Su Arıtma Cihazı Seçerken Nelere Dikkat Edilmeli?', category: 'Rehber', readTime: '5 dk', image: '/images/blog-1.jpg', excerpt: 'Eviniz için en uygun su arıtma cihazını seçerken dikkat etmeniz gereken 7 kritik faktör...' },
-  { title: 'Filtre Değişimi Ne Zaman Yapılmalı?', category: 'Bakım', readTime: '3 dk', image: '/images/blog-2.jpg', excerpt: 'Filtrelerinizin ömrünü uzatmanın yolları ve değişim sıklığı hakkında bilmeniz gerekenler...' },
-  { title: 'Direkt Akış Su Arıtma Nedir?', category: 'Teknoloji', readTime: '4 dk', image: '/images/blog-3.jpg', excerpt: 'Tankless su arıtma sistemlerinin avantajları ve klasik sistemlerden farkları...' },
+const FALLBACK_BLOG: PublicBlogPost[] = [
+  { id: '1', slug: 'su-aritma-secerken', title: 'Su Arıtma Cihazı Seçerken Nelere Dikkat Edilmeli?', category: 'Rehber', readTime: '5 dk', image: '/images/blog-1.jpg', excerpt: 'Eviniz için en uygun su arıtma cihazını seçerken dikkat etmeniz gereken 7 kritik faktör...' },
+  { id: '2', slug: 'filtre-degisim-sikligi', title: 'Filtre Değişimi Ne Zaman Yapılmalı?', category: 'Bakım', readTime: '3 dk', image: '/images/blog-2.jpg', excerpt: 'Filtrelerinizin ömrünü uzatmanın yolları ve değişim sıklığı hakkında bilmeniz gerekenler...' },
+  { id: '3', slug: 'direkt-akis-nedir', title: 'Direkt Akış Su Arıtma Nedir?', category: 'Teknoloji', readTime: '4 dk', image: '/images/blog-3.jpg', excerpt: 'Tankless su arıtma sistemlerinin avantajları ve klasik sistemlerden farkları...' },
 ];
 
 const faqAnasayfa = [
@@ -73,9 +96,10 @@ const faqAnasayfa = [
   { q: 'Garanti süresi nedir?', a: 'Tüm Aquails su arıtma cihazlarında 5 yıl ana cihaz garantisi, 2 yıl elektronik parça garantisi ve ömür boyu teknik destek sunuyoruz.' },
 ];
 
-const categoryImages: Record<string, string> = {
-  'su-aritma': '/images/products/su-aritma-cihazlari.jpg',
-};
+function pickProducts(list: Product[], fallback: Product[], limit = 4): Product[] {
+  if (list.length > 0) return list.slice(0, limit);
+  return fallback.slice(0, limit);
+}
 
 export default function Home() {
   const { products, categories } = useCatalog();
@@ -83,15 +107,46 @@ export default function Home() {
   const catalogCategories = categories.length > 0 ? categories : staticCategories;
   const [activeTab, setActiveTab] = useState('cok-satanlar');
   const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const [blogPosts, setBlogPosts] = useState<PublicBlogPost[]>(FALLBACK_BLOG);
+  const [reviews, setReviews] = useState<PublicReview[]>(FALLBACK_YORUMLAR);
 
-  const tabProducts: Record<string, typeof products> = {
-    'cok-satanlar': catalogProducts.filter(p => p.rating >= 4.5).slice(0, 4),
-    'yeni-gelenler': catalogProducts.filter(p => p.badge === 'new').slice(0, 4),
-    'kampanyali': catalogProducts.filter(p => p.discountPercent && p.discountPercent > 0).slice(0, 4),
-    'su-aritma': catalogProducts.filter(p => p.categorySlug === 'su-aritma').slice(0, 4),
-  };
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [publishedBlog, publishedReviews] = await Promise.all([
+        getPublishedBlogPosts(3),
+        getPublishedReviews(6),
+      ]);
+      if (cancelled) return;
+      if (publishedBlog.length > 0) setBlogPosts(publishedBlog);
+      if (publishedReviews.length > 0) setReviews(publishedReviews);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
-  const shownCategories = catalogCategories.filter(c => categoryImages[c.id]).slice(0, 6);
+  const shownCategories = catalogCategories.slice(0, 6);
+
+  const tabProducts = useMemo(() => {
+    const fallback = catalogProducts;
+    const bestsellers = [...catalogProducts].sort((a, b) => (b.rating * b.reviewCount) - (a.rating * a.reviewCount));
+    const newOnes = catalogProducts.filter((p) => p.badge === 'new');
+    const discounted = catalogProducts.filter((p) => (p.discountPercent ?? 0) > 0);
+    const devices = catalogProducts.filter((p) => DEVICE_CATEGORY_SLUGS.has(p.categorySlug));
+
+    return {
+      'cok-satanlar': pickProducts(
+        bestsellers.filter((p) => p.rating >= 4.5),
+        bestsellers.length > 0 ? bestsellers : fallback,
+      ),
+      'yeni-gelenler': pickProducts(newOnes, fallback),
+      kampanyali: pickProducts(discounted, fallback),
+      cihazlar: pickProducts(devices, fallback),
+    } satisfies Record<string, Product[]>;
+  }, [catalogProducts]);
+
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : '4.9';
 
   return (
     <>
@@ -103,58 +158,59 @@ export default function Home() {
       />
       <PageLayout>
       {/* ========== HERO ========== */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#EBF4FF] via-[#F0F8FF] to-[#E8F4FF]">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#1A73E8]/[0.04] rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#4FC3F7]/[0.06] rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00D4C8]/[0.02] rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute inset-0">
-          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-[#1A73E8]/[0.04] rounded-full blur-3xl" />
-          <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-[#4FC3F7]/[0.06] rounded-full blur-3xl" />
-        </div>
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-24 lg:py-28 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <div className="flex flex-wrap gap-2 mb-5">
-                {['Ücretsiz Keşif', 'Kurulum Desteği', '2 Yıl Garanti', 'Filtre Hatırlatma'].map(b => (
-                  <span key={b} className="inline-flex items-center gap-1 bg-white/70 backdrop-blur-sm text-[11px] font-medium text-[#1A73E8] px-2.5 py-1 rounded-full border border-[#E8F0FE]">
-                    <Check className="w-3 h-3" />{b}
-                  </span>
-                ))}
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#0D2137] leading-tight">
-                Daha Temiz Su,<br />
-                <span className="text-[#1A73E8]">Daha Akıllı Teknoloji</span>
-              </h1>
-              <p className="text-sm sm:text-[15px] text-[#5A6B7B] mt-5 leading-relaxed max-w-md">
-                Aquails, eviniz ve iş yeriniz için modern su arıtma cihazları, filtre çözümleri ve bakım hizmetlerini tek platformda sunar.
-              </p>
-              <div className="flex flex-wrap gap-3 mt-8">
-                <Link to="/urunler" className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all shadow-lg shadow-[#1A73E8]/20">
-                  Ürünleri İncele <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link to="/servis-randevusu" className="inline-flex items-center gap-2 border-2 border-[#1A73E8] text-[#1A73E8] px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#1A73E8] hover:text-white transition-all">
-                  Servis Randevusu
-                </Link>
-              </div>
-              <div className="flex gap-6 sm:gap-8 mt-10">
-                {[{ v: '10.000+', l: 'Mutlu Müşteri' }, { v: '500+', l: 'Servis Noktası' }, { v: '%99', l: 'Memnuniyet' }].map(s => (
-                  <div key={s.l}><p className="text-xl sm:text-2xl font-bold text-[#0D2137]">{s.v}</p><p className="text-[11px] text-[#8B9DAF] mt-0.5">{s.l}</p></div>
-                ))}
-              </div>
-            </motion.div>
+      <section className="relative min-h-[88vh] md:min-h-[92vh] flex items-end md:items-center overflow-hidden">
+        <motion.div
+          aria-hidden
+          className="absolute inset-0"
+          initial={{ scale: 1.06, opacity: 0.85 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.4, ease: 'easeOut' }}
+        >
+          <img
+            src="/images/hero-bg.jpg"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#061628]/88 via-[#0D2137]/72 to-[#0D2137]/35" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#061628]/70 via-transparent to-[#061628]/25" />
+        </motion.div>
 
-            <motion.div initial={{ opacity: 0, x: 40, scale: 0.95 }} animate={{ opacity: 1, x: 0, scale: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="relative">
-              <div className="bg-white rounded-3xl shadow-xl p-3 sm:p-4 max-w-md mx-auto">
-                <img src="/images/hero-product.jpg" alt="Aquails Su Arıtma Cihazı" className="w-full aspect-square object-cover rounded-2xl" />
-              </div>
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-lg p-4 hidden md:block">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-[#00C9A7]/10 rounded-lg flex items-center justify-center"><ShieldCheck className="w-4 h-4 text-[#00C9A7]" /></div>
-                  <div><p className="text-xs font-semibold text-[#0D2137]">5 Yıl Garanti</p><p className="text-[10px] text-[#8B9DAF]">Tam Kapsamlı</p></div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+        <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-24 lg:py-28">
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+            className="max-w-xl"
+          >
+            <div className="flex items-center gap-3 mb-6 md:mb-8">
+              <BrandLogo variant="icon" bare className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.25)]" />
+              <span className="text-2xl sm:text-3xl font-bold text-white tracking-tight drop-shadow-sm">
+                Aquails
+              </span>
+            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-[3.25rem] font-bold text-white leading-[1.1] tracking-tight">
+              Daha Temiz Su,<br />
+              Daha Akıllı Teknoloji
+            </h1>
+            <p className="mt-5 text-sm sm:text-base text-white/75 leading-relaxed max-w-md">
+              Aquails, eviniz ve iş yeriniz için modern su arıtma cihazları, filtre çözümleri ve bakım hizmetlerini tek platformda sunar.
+            </p>
+            <div className="flex flex-wrap gap-3 mt-8">
+              <Link
+                to="/urunler"
+                className="group inline-flex items-center gap-2 bg-[#1A73E8] text-white px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#1557B0] transition-all duration-300 shadow-[0_8px_28px_rgba(26,115,232,0.45)] hover:-translate-y-0.5"
+              >
+                Ürünleri İncele
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                to="/servis-randevusu"
+                className="inline-flex items-center gap-2 border border-white/35 text-white/95 px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-white/10 hover:border-white/55 transition-all duration-300"
+              >
+                Servis Randevusu
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -188,7 +244,7 @@ export default function Home() {
               return (
                 <StaggerItem key={cat.id}>
                   <Link to={`/urunler?kategori=${cat.id}`} className="group block bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden hover:border-[#1A73E8] hover:shadow-lg transition-all duration-300">
-                    <div className="aspect-[4/3] overflow-hidden">
+                    <div className="aspect-[4/3] overflow-hidden bg-[#F0F6FF]">
                       <img src={img} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                     </div>
                     <div className="p-3 text-center">
@@ -217,15 +273,15 @@ export default function Home() {
               { key: 'cok-satanlar', label: 'Çok Satanlar' },
               { key: 'yeni-gelenler', label: 'Yeni Gelenler' },
               { key: 'kampanyali', label: 'Kampanyalı' },
-              { key: 'su-aritma', label: 'Su Arıtma Cihazları' },
+              { key: 'cihazlar', label: 'Su Arıtma Cihazları' },
             ].map(t => (
-              <button key={t.key} onClick={() => setActiveTab(t.key)} className={cn('px-4 py-2 rounded-full text-sm font-medium transition-all', activeTab === t.key ? 'bg-[#1A73E8] text-white' : 'bg-white text-[#5A6B7B] border border-[#E8F0FE] hover:border-[#1A73E8]')}>
+              <button key={t.key} type="button" onClick={() => setActiveTab(t.key)} className={cn('px-4 py-2 rounded-full text-sm font-medium transition-all', activeTab === t.key ? 'bg-[#1A73E8] text-white' : 'bg-white text-[#5A6B7B] border border-[#E8F0FE] hover:border-[#1A73E8]')}>
                 {t.label}
               </button>
             ))}
           </ScrollReveal>
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" staggerDelay={0.08} key={activeTab}>
-            {(tabProducts[activeTab] || catalogProducts.slice(0, 4)).map(p => (
+            {(tabProducts[activeTab as keyof typeof tabProducts] ?? catalogProducts.slice(0, 4)).map(p => (
               <StaggerItem key={p.id}><ProductCard product={p} /></StaggerItem>
             ))}
           </StaggerContainer>
@@ -372,7 +428,7 @@ export default function Home() {
                     <p className="text-sm text-white/80 mt-1">{k.desc}</p>
                     <div className="flex items-center justify-between mt-4">
                       <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full">{k.code}</span>
-                      <Link to="/kampanyalar" className="text-white text-xs font-semibold flex items-center gap-1 hover:underline">İncele <ArrowRight className="w-3 h-3" /></Link>
+                      <Link to={`/kampanya/${k.slug}`} className="text-white text-xs font-semibold flex items-center gap-1 hover:underline">İncele <ArrowRight className="w-3 h-3" /></Link>
                     </div>
                   </div>
                 </div>
@@ -388,14 +444,14 @@ export default function Home() {
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
           <ScrollReveal className="text-center mb-12">
             <span className="text-xs font-semibold text-[#1A73E8] tracking-[0.15em] uppercase">Müşteri Yorumları</span>
-            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">10.000'den Fazla Mutlu Müşteri</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#0D2137] mt-2">10.000&apos;den Fazla Mutlu Müşteri</h2>
             <div className="flex items-center justify-center gap-2 mt-3">
-              <RatingStars rating={5} size="md" /><span className="font-bold text-lg text-[#0D2137] ml-2">4.9 / 5.0</span>
+              <RatingStars rating={5} size="md" /><span className="font-bold text-lg text-[#0D2137] ml-2">{avgRating} / 5.0</span>
             </div>
           </ScrollReveal>
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" staggerDelay={0.08}>
-            {yorumlar.slice(0, 6).map((y, i) => (
-              <StaggerItem key={i}>
+            {reviews.slice(0, 6).map((y) => (
+              <StaggerItem key={y.id}>
                 <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6 h-full">
                   <div className="flex items-center gap-2 mb-3">
                     <RatingStars rating={y.rating} size="sm" />
@@ -430,9 +486,9 @@ export default function Home() {
             <Link to="/blog" className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-[#5A6B7B] hover:text-[#1A73E8] transition-colors">Tüm Yazılar <ArrowRight className="w-4 h-4" /></Link>
           </ScrollReveal>
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6" staggerDelay={0.1}>
-            {blogYazilar.map((b, i) => (
-              <StaggerItem key={i}>
-                <Link to="/blog" className="group block bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            {blogPosts.slice(0, 3).map((b) => (
+              <StaggerItem key={b.id}>
+                <Link to={`/blog/${b.slug}`} className="group block bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                   <div className="aspect-[16/9] overflow-hidden">
                     <img src={b.image} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                   </div>
@@ -463,7 +519,7 @@ export default function Home() {
             {faqAnasayfa.map((f, i) => (
               <ScrollReveal key={i} y={10} delay={i * 0.05}>
                 <div className={cn('bg-white rounded-2xl overflow-hidden transition-all', openFaq === String(i) ? 'shadow-md ring-1 ring-[#1A73E8]/10' : 'shadow-sm border border-[#E8F0FE]')}>
-                  <button onClick={() => setOpenFaq(openFaq === String(i) ? null : String(i))} className="w-full flex items-center justify-between px-5 py-4 text-left">
+                  <button type="button" onClick={() => setOpenFaq(openFaq === String(i) ? null : String(i))} className="w-full flex items-center justify-between px-5 py-4 text-left">
                     <span className={cn('text-sm font-semibold pr-4', openFaq === String(i) ? 'text-[#1A73E8]' : 'text-[#0D2137]')}>{f.q}</span>
                     <div className={cn('w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all', openFaq === String(i) ? 'bg-[#1A73E8] text-white rotate-180' : 'bg-[#F0F6FF] text-[#8B9DAF]')}><ChevronDown className="w-3.5 h-3.5" /></div>
                   </button>
@@ -473,6 +529,11 @@ export default function Home() {
                 </div>
               </ScrollReveal>
             ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link to="/sss" className="inline-flex items-center gap-2 text-sm font-semibold text-[#1A73E8] hover:underline">
+              Tüm SSS <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
