@@ -54,7 +54,9 @@ export default function RegisterPage() {
     setLoading(false);
   };
 
-  const Input = ({ label, icon: Icon, type = 'text', field, placeholder }: { label: string; icon: React.ElementType; type?: string; field: string; placeholder: string }) => (
+  // Duz fonksiyon olarak render edilir (bilesen degil); aksi halde her renderda
+  // yeni bilesen tipi olusur, input DOM'dan sokulur ve odak kaybolur.
+  const renderInput = ({ label, icon: Icon, type = 'text', field, placeholder }: { label: string; icon: React.ElementType; type?: string; field: string; placeholder: string }) => (
     <div>
       <label className="text-xs font-medium text-aq-muted mb-1.5 block">{label}</label>
       <div className="relative">
@@ -80,9 +82,9 @@ export default function RegisterPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
-          <Input label="Ad Soyad" icon={User} field="name" placeholder="Adınız Soyadınız" />
-          <Input label="E-posta" icon={Mail} type="email" field="email" placeholder="ornek@email.com" />
-          <Input label="Telefon" icon={Phone} type="tel" field="phone" placeholder="05XX XXX XX XX" />
+          {renderInput({ label: 'Ad Soyad', icon: User, field: 'name', placeholder: 'Adınız Soyadınız' })}
+          {renderInput({ label: 'E-posta', icon: Mail, type: 'email', field: 'email', placeholder: 'ornek@email.com' })}
+          {renderInput({ label: 'Telefon', icon: Phone, type: 'tel', field: 'phone', placeholder: '05XX XXX XX XX' })}
 
           <div>
             <label className="text-xs font-medium text-aq-muted mb-1.5 block">Şifre</label>
