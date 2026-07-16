@@ -58,7 +58,7 @@ export function Footer() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] rounded-full bg-[#1A73E8]/5 blur-[60px]" />
         </div>
 
-        <div className="relative max-w-[1280px] mx-auto px-4 sm:px-6 py-20 md:py-28">
+        <div className="relative page-container py-20 md:py-28">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
@@ -124,7 +124,7 @@ export function Footer() {
 
       {/* ── Main Footer ── */}
       <div className="bg-[#061220] pt-14 pb-8">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 min-w-0">
+        <div className="page-container min-w-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
             <div>
               <div className="mb-4">

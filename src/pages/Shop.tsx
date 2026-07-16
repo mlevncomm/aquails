@@ -279,7 +279,7 @@ export default function Shop() {
       <div className="relative bg-gradient-to-br from-[#EBF4FF] via-[#F0F8FF] to-[#E8F4FF] py-10 overflow-hidden">
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#1A73E8]/[0.04] rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-[#4FC3F7]/[0.05] rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-[1280px] mx-auto px-6 relative">
+        <div className="page-container relative">
           <nav className="text-[13px] text-aqua-text-muted mb-2">
             <Link to="/" className="text-aqua-primary hover:underline">Ana Sayfa</Link>
             <span className="mx-2">/</span>
@@ -328,7 +328,7 @@ export default function Shop() {
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-6 py-8">
+      <div className="page-container py-8">
         {/* Search Bar */}
         <div className="mb-6 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-aqua-text-muted" />

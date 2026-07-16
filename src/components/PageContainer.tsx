@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 interface PageContainerProps {
   children: ReactNode;
   className?: string;
-  /** 1440px geniş container */
+  /** 1600px geniş container */
   wide?: boolean;
   /** Section padding (py-12 md:py-16 lg:py-20) */
   section?: boolean;

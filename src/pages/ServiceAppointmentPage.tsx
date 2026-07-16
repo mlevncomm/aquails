@@ -56,7 +56,7 @@ export default function ServiceAppointmentPage() {
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 right-20 w-64 h-64 bg-[#1A73E8] rounded-full blur-3xl" />
         </div>
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 relative">
+        <div className="page-container relative">
           <div className="flex items-center gap-2 text-[13px] text-white/50 mb-3">
             <Link to="/" className="hover:text-white">Ana Sayfa</Link><span>/</span><span className="text-white/70">Servis Randevusu</span>
           </div>
@@ -65,7 +65,7 @@ export default function ServiceAppointmentPage() {
         </div>
       </section>
 
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-10">
+      <div className="page-container py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Form */}
           <div className="lg:col-span-2">

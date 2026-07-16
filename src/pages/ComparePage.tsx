@@ -42,7 +42,7 @@ export default function ComparePage() {
   if (compareProducts.length === 0) {
     return (
       <PageLayout>
-        <div className="max-w-[1280px] mx-auto px-4 py-8">
+        <div className="page-container py-8">
           <h1 className="text-xl font-bold text-[#0D2137] mb-6">Ürün Karşılaştırma</h1>
           <EmptyState
             icon={<Minus className="w-8 h-8" />}
@@ -57,7 +57,7 @@ export default function ComparePage() {
 
   return (
     <PageLayout>
-      <div className="max-w-[1280px] mx-auto px-4 py-8">
+      <div className="page-container py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-bold text-[#0D2137]">Ürün Karşılaştırma ({compareProducts.length}/4)</h1>
           <button onClick={clear} className="text-sm text-[#E85454] font-medium hover:underline">Tümünü Temizle</button>

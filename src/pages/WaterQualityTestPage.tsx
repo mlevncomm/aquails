@@ -68,7 +68,7 @@ export default function WaterQualityTestPage() {
       />
     <PageLayout>
       <section className="relative bg-gradient-to-br from-[#EBF4FF] via-[#F0F8FF] to-[#E0F0FF] py-12 md:py-16">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 text-center">
+        <div className="page-container text-center">
           <div className="w-14 h-14 bg-white rounded-2xl shadow-md mx-auto mb-4 flex items-center justify-center">
             <FlaskConical className="w-7 h-7 text-[#1A73E8]" />
           </div>

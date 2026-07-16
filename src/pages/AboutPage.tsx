@@ -46,7 +46,7 @@ export default function AboutPage() {
           <img src="/images/about-hero.jpg" alt="Aquails" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#0D2137]/90 via-[#0D2137]/60 to-transparent" />
           <div className="absolute inset-0 flex items-center">
-            <div className="max-w-[1280px] mx-auto px-4 sm:px-6 w-full">
+            <div className="page-container w-full">
               <div className="max-w-lg">
                 <div className="flex items-center gap-2 text-[13px] text-white/50 mb-3">
                   <Link to="/" className="hover:text-white">Ana Sayfa</Link><span>/</span><span className="text-white/70">Hakkımızda</span>
@@ -59,7 +59,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-12">
+      <div className="page-container py-12">
         {/* Story */}
         <ScrollReveal>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center mb-16">
