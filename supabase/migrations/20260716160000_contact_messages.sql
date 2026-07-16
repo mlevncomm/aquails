@@ -18,23 +18,31 @@ CREATE INDEX IF NOT EXISTS contact_messages_status_idx
 
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 
+GRANT INSERT ON public.contact_messages TO anon, authenticated;
+GRANT SELECT, UPDATE, DELETE ON public.contact_messages TO authenticated;
+
+DROP POLICY IF EXISTS "contact_messages_insert_public" ON public.contact_messages;
 CREATE POLICY "contact_messages_insert_public" ON public.contact_messages
   FOR INSERT
+  TO anon, authenticated
   WITH CHECK (
     char_length(trim(name)) >= 2
     AND char_length(trim(email)) >= 5
     AND char_length(trim(message)) >= 5
   );
 
+DROP POLICY IF EXISTS "contact_messages_select_admin" ON public.contact_messages;
 CREATE POLICY "contact_messages_select_admin" ON public.contact_messages
   FOR SELECT
   USING (public.is_admin());
 
+DROP POLICY IF EXISTS "contact_messages_update_admin" ON public.contact_messages;
 CREATE POLICY "contact_messages_update_admin" ON public.contact_messages
   FOR UPDATE
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "contact_messages_delete_admin" ON public.contact_messages;
 CREATE POLICY "contact_messages_delete_admin" ON public.contact_messages
   FOR DELETE
   USING (public.is_admin());

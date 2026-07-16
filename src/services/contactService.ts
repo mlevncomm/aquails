@@ -26,6 +26,7 @@ export async function submitContactMessage(
     return { success: false, error: 'İletişim servisi yapılandırılmamış. Lütfen daha sonra tekrar deneyin.' };
   }
 
+  // Do not .select() after insert — SELECT is admin-only under RLS.
   const { error } = await supabase.from('contact_messages').insert({
     name,
     email,
