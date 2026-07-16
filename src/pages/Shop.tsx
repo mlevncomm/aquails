@@ -154,7 +154,9 @@ export default function Shop() {
     stockStatus !== 'all' ||
     !!searchQuery;
 
-  const FilterContent = () => (
+  // Bilesen olarak degil duz fonksiyon olarak render edilir; aksi halde
+  // fiyat inputlari her tus vurusunda remount olup odak kaybeder.
+  const renderFilterContent = () => (
     <div className="space-y-6">
       <div>
         <h4 className="text-sm font-semibold text-aq-text pb-3 border-b border-aq-border/60">Kategoriler</h4>
@@ -393,7 +395,7 @@ export default function Shop() {
                     </button>
                   )}
                 </div>
-                <FilterContent />
+                {renderFilterContent()}
               </div>
             </aside>
 
@@ -420,7 +422,7 @@ export default function Shop() {
                         <X className="w-5 h-5" />
                       </button>
                     </div>
-                    <FilterContent />
+                    {renderFilterContent()}
                   </motion.div>
                 </>
               )}

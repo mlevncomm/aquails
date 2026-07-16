@@ -5,6 +5,19 @@ import { getTaxConfig, saveTaxConfig, type TaxConfig } from '@/services/shipping
 import { useToastStore } from '@/components/Toast';
 import { AdminPageHeader, AdminCard, AdminInput, AdminLabel, AdminButton } from '@/components/admin/admin-ui';
 
+// Bilesen icinde tanimlanirsa her renderda yeni tip olusur ve icindeki
+// inputlar remount olup odak kaybeder; bu yuzden modul seviyesinde.
+function Section({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
+  return (
+    <AdminCard className="mb-6">
+      <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
+        <Icon className="w-4 h-4 text-aq-blue" />{title}
+      </h3>
+      {children}
+    </AdminCard>
+  );
+}
+
 function TaxSection() {
   const addToast = useToastStore((s) => s.add);
   const [tax, setTax] = useState<TaxConfig | null>(null);
@@ -86,15 +99,6 @@ export default function AdminSettingsPage() {
       </div>
     );
   }
-
-  const Section = ({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) => (
-    <AdminCard className="mb-6">
-      <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
-        <Icon className="w-4 h-4 text-aq-blue" />{title}
-      </h3>
-      {children}
-    </AdminCard>
-  );
 
   return (
     <>
