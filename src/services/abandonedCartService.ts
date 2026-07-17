@@ -1,5 +1,4 @@
 import { getSupabaseOrNull } from '@/lib/supabase';
-import { getCurrentUser } from '@/services/authService';
 
 interface CartItem {
   productId: string;
@@ -64,33 +63,12 @@ export async function syncAbandonedCart(
   if (!supabase) return;
 
   const sessionId = getSessionId();
-  const user = await getCurrentUser();
-  const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-
-  const { data: existing } = await supabase
-    .from('abandoned_carts')
-    .select('id, status, reminder_sent_at')
-    .eq('session_id', sessionId)
-    .neq('status', 'converted')
-    .maybeSingle();
-
-  const payload = {
-    session_id: sessionId,
-    user_id: user?.id ?? null,
-    customer_name: customerName,
-    customer_email: customerEmail ?? null,
-    items,
-    total,
-    last_activity: new Date().toISOString(),
-    status: (existing?.status ?? 'new') as AbandonedCart['status'],
-    reminder_sent_at: existing?.reminder_sent_at ?? null,
-  };
-
-  if (existing?.id) {
-    await supabase.from('abandoned_carts').update(payload).eq('id', existing.id);
-  } else {
-    await supabase.from('abandoned_carts').insert(payload);
-  }
+  await supabase.rpc('sync_abandoned_cart', {
+    p_session_id: sessionId,
+    p_customer_name: customerName,
+    p_customer_email: customerEmail ?? null,
+    p_items: items as unknown as Record<string, unknown>[],
+  });
 }
 
 /** @deprecated Use syncAbandonedCart instead */
@@ -126,15 +104,11 @@ export async function sendReminder(id: string): Promise<{ success: boolean; erro
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase
-    .from('abandoned_carts')
-    .update({
-      status: 'reminder-sent',
-      reminder_sent_at: new Date().toISOString(),
-    })
-    .eq('id', id);
+  const { data, error } = await supabase.rpc('queue_abandoned_cart_reminder', { p_cart_id: id });
 
   if (error) return { success: false, error: error.message };
+  const result = data as { success?: boolean; error?: string } | null;
+  if (!result?.success) return { success: false, error: result?.error === 'missing_email' ? 'Müşteri e-postası bulunmuyor.' : 'Hatırlatıcı kuyruğa alınamadı.' };
   return { success: true };
 }
 

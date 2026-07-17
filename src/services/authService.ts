@@ -99,7 +99,7 @@ export async function signIn(credentials: LoginCredentials): Promise<{ success: 
   return { success: true, user };
 }
 
-export async function signUp(data: RegisterData): Promise<{ success: boolean; user?: User; error?: string }> {
+export async function signUp(data: RegisterData): Promise<{ success: boolean; user?: User; requiresEmailConfirmation?: boolean; error?: string }> {
   const missing = supabaseRequired();
   if (missing) return missing;
 
@@ -121,8 +121,11 @@ export async function signUp(data: RegisterData): Promise<{ success: boolean; us
     phone: data.phone,
     role: 'customer',
   };
+  if (!authData.session) {
+    return { success: true, requiresEmailConfirmation: true };
+  }
   useAuthStore.getState().setUser(user);
-  return { success: true, user };
+  return { success: true, user, requiresEmailConfirmation: false };
 }
 
 export async function signOut(): Promise<void> {

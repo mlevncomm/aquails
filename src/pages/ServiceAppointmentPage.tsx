@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
-import { Wrench, Calendar, CheckCircle, ShieldCheck, Phone, Package, ChevronDown } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
+import { Wrench, Calendar, CheckCircle, ShieldCheck, Phone, Package, ChevronDown, Loader2 } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { useToastStore } from '@/components/Toast';
 import { SEO } from '@/components/SEO';
+import { useAuthStore } from '@/stores/authStore';
+import { createServiceRequest } from '@/services/serviceRequestService';
 
 
 const serviceTypes = [
@@ -28,17 +30,41 @@ const serviceSss = [
 ];
 
 export default function ServiceAppointmentPage() {
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const addToast = useToastStore(s => s.add);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [requestNo, setRequestNo] = useState('');
   const [type, setType] = useState('installation');
   const [form, setForm] = useState({ name: '', phone: '', address: '', device: '', date: '', notes: '' });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.phone || !form.address) {
       addToast('Lütfen zorunlu alanları doldurun.', 'error');
       return;
     }
+    if (!user) {
+      addToast('Servis talebi oluşturmak için giriş yapmalısınız.', 'info');
+      navigate('/giris?redirect=/servis-randevusu');
+      return;
+    }
+    setSubmitting(true);
+    const result = await createServiceRequest({
+      userId: user.id,
+      type: type === 'filter' ? 'filter_change' : type as 'installation' | 'maintenance' | 'repair',
+      address: form.address.trim(),
+      deviceName: form.device.trim() || undefined,
+      preferredDate: form.date ? new Date(`${form.date}T12:00:00`).toISOString() : undefined,
+      description: `İletişim: ${form.name.trim()} / ${form.phone.trim()}${form.notes.trim() ? ` | ${form.notes.trim()}` : ''}`,
+    });
+    setSubmitting(false);
+    if (!result.success) {
+      addToast(result.error ?? 'Servis talebi oluşturulamadı.', 'error');
+      return;
+    }
+    setRequestNo(`SR-${Date.now().toString().slice(-6)}`);
     setSubmitted(true);
     addToast('Servis randevunuz oluşturuldu! En kısa sürede size dönüş yapacağız.', 'success');
   };
@@ -76,7 +102,7 @@ export default function ServiceAppointmentPage() {
                 </div>
                 <h2 className="text-lg font-semibold text-aq-text mb-2">Randevunuz Alindi!</h2>
                 <p className="text-sm text-aq-muted mb-4">Servis ekibimiz 24 saat içinde size dönüş yapacaktır.</p>
-                <p className="text-xs text-aq-muted bg-aq-ice rounded-xl p-3 inline-block">Randevu No: <strong>SR-{Date.now().toString().slice(-6)}</strong></p>
+                <p className="text-xs text-aq-muted bg-aq-ice rounded-xl p-3 inline-block">Talep No: <strong>{requestNo}</strong></p>
                 <div className="mt-6 flex justify-center gap-3">
                   <Link to="/" className="text-sm font-medium text-aq-blue hover:underline">Ana Sayfaya Don</Link>
                   <Link to="/urunler" className="text-sm font-medium text-aq-blue hover:underline">Ürünleri İncele</Link>
@@ -131,8 +157,8 @@ export default function ServiceAppointmentPage() {
                   <label className="text-xs font-medium text-aq-muted mb-1.5 block">Açıklama</label>
                   <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={3} placeholder="Sorunuzu kısaca açıklayın..." className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue resize-none" />
                 </div>
-                <button type="submit" className="flex items-center justify-center gap-2 w-full bg-aq-blue text-white py-3 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all">
-                  <Calendar className="w-4 h-4" /> Randevu Oluştur
+                <button type="submit" disabled={submitting} className="flex items-center justify-center gap-2 w-full bg-aq-blue text-white py-3 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all disabled:opacity-60">
+                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calendar className="w-4 h-4" />} Randevu Oluştur
                 </button>
               </form>
             )}

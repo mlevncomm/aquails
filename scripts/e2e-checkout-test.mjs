@@ -25,11 +25,20 @@ function loadEnv() {
 }
 
 const env = { ...loadEnv(), ...process.env };
-const email = env.TEST_EMAIL ?? 'aquails.test.musteri@gmail.com';
-const password = env.TEST_PASSWORD ?? 'AquailsTest2026!';
+const email = env.TEST_EMAIL;
+const password = env.TEST_PASSWORD;
 const url = env.VITE_SUPABASE_URL;
 const anonKey = env.VITE_SUPABASE_ANON_KEY;
 const dbUrl = env.DATABASE_URL;
+
+if (!email || !password || !url || !anonKey || !dbUrl) {
+  console.error('TEST_EMAIL, TEST_PASSWORD, VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY ve DATABASE_URL gereklidir.');
+  process.exit(1);
+}
+if (env.E2E_ALLOW_MUTATION !== 'true') {
+  console.error('Bu test veri yazar. Yalnızca izole test ortamında E2E_ALLOW_MUTATION=true ile çalıştırın.');
+  process.exit(1);
+}
 
 const supabase = createClient(url, anonKey);
 const results = [];
@@ -71,73 +80,43 @@ if (!product) {
 pass('product', `${product.name} stock=${product.stock}`);
 
 const stockBefore = product.stock;
-const orderNumber = `AQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 const qty = 1;
 const subtotal = Number(product.price);
 const shipping = 0;
 const total = subtotal + shipping;
 
-// 4. Create order
-const { data: order, error: orderErr } = await supabase
-  .from('orders')
-  .insert({
-    user_id: auth.user.id,
-    order_number: orderNumber,
-    status: 'pending',
-    subtotal,
-    shipping_cost: shipping,
-    cod_fee: 150,
-    discount: 0,
-    total: total + 150,
-    payment_method: 'Kapıda Ödeme',
-    payment_status: 'pending',
-    shipping_address: {
+// 4. Create order through the production atomic checkout RPC
+const { data: orderResult, error: orderErr } = await supabase.rpc('create_checkout_order', {
+  p_items: [{ product_id: product.id, quantity: qty }],
+  p_shipping_address: {
       title: 'Ev',
       city: 'İstanbul',
       district: 'Kadıköy',
       full_address: 'Test Mah. Test Sok. No:1',
       phone: '05321234567',
       name: 'Test Müşteri',
-    },
-    billing_address: {
+  },
+  p_billing_address: {
       title: 'Ev',
       city: 'İstanbul',
       district: 'Kadıköy',
       full_address: 'Test Mah. Test Sok. No:1',
-    },
-    notes: 'E2E test siparişi',
-  })
-  .select('id')
-  .single();
+  },
+  p_payment_method: 'cod',
+  p_shipping_method: 'standard',
+  p_coupon_code: null,
+  p_notes: 'E2E test siparişi',
+  p_service_slot_id: null,
+});
+const order = orderResult?.success ? { id: orderResult.order_id } : null;
+const orderNumber = orderResult?.order_number;
 
 if (orderErr || !order) {
   fail('create order', orderErr?.message);
   process.exit(1);
 }
 pass('create order', orderNumber);
-
-// 5. Order items
-const { error: itemErr } = await supabase.from('order_items').insert({
-  order_id: order.id,
-  product_id: product.id,
-  product_name: product.name,
-  quantity: qty,
-  unit_price: product.price,
-  total_price: Number(product.price) * qty,
-});
-if (itemErr) {
-  fail('order items', itemErr.message);
-  process.exit(1);
-}
-pass('order items');
-
-// 6. Confirm fulfillment RPC
-const { error: fulfillErr } = await supabase.rpc('confirm_order_fulfillment', { p_order_id: order.id });
-if (fulfillErr) {
-  fail('confirm_order_fulfillment', fulfillErr.message);
-} else {
-  pass('confirm_order_fulfillment');
-}
+pass('order items and stock reserved atomically');
 
 // 7. Verify order status + stock
 const pool = new pg.Pool({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
@@ -190,7 +169,7 @@ const hookRes = await fetch('https://aquails.vercel.app/api/payment-webhook', {
 });
 const hookText = await hookRes.text();
 if (hookRes.status === 400 && hookText.includes('bad hash')) pass('webhook hash validation');
-else if (hookRes.status === 500 && hookText.includes('PAYTR settings missing')) pass('webhook reachable', 'PayTR not configured');
+else if (hookRes.status === 500 && hookText.includes('Server not configured')) pass('webhook reachable', 'PayTR not configured');
 else fail('webhook', `${hookRes.status} ${hookText}`);
 
 const failed = results.filter((r) => !r.ok);

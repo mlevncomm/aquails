@@ -24,8 +24,17 @@ const env = { ...loadEnv(), ...process.env };
 const url = env.VITE_SUPABASE_URL;
 const anonKey = env.VITE_SUPABASE_ANON_KEY;
 const dbUrl = env.DATABASE_URL;
-const email = env.TEST_EMAIL ?? 'aquails.test.musteri@gmail.com';
-const password = env.TEST_PASSWORD ?? 'AquailsTest2026!';
+const email = env.TEST_EMAIL;
+const password = env.TEST_PASSWORD;
+
+if (!email || !password || !url || !anonKey || !dbUrl) {
+  console.error('TEST_EMAIL, TEST_PASSWORD, VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY ve DATABASE_URL gereklidir.');
+  process.exit(1);
+}
+if (env.E2E_ALLOW_MUTATION !== 'true') {
+  console.error('Bu test veri yazar. Yalnızca izole test ortamında E2E_ALLOW_MUTATION=true ile çalıştırın.');
+  process.exit(1);
+}
 
 const supabase = createClient(url, anonKey);
 const results = [];

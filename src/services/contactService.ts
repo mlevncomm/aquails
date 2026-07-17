@@ -26,19 +26,20 @@ export async function submitContactMessage(
     return { success: false, error: 'İletişim servisi yapılandırılmamış. Lütfen daha sonra tekrar deneyin.' };
   }
 
-  // Do not .select() after insert — SELECT is admin-only under RLS.
-  const { error } = await supabase.from('contact_messages').insert({
-    name,
-    email,
-    phone,
-    subject,
-    message,
-    status: 'new',
+  const { data, error } = await supabase.rpc('submit_contact_message', {
+    p_name: name,
+    p_email: email,
+    p_phone: phone,
+    p_subject: subject,
+    p_message: message,
   });
 
   if (error) {
     return { success: false, error: error.message || 'Mesaj gönderilemedi.' };
   }
+
+  const result = data as { success?: boolean } | null;
+  if (!result?.success) return { success: false, error: 'Mesaj gönderilemedi.' };
 
   return { success: true };
 }

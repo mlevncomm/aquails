@@ -18,8 +18,37 @@ export default function AdminReportsPage() {
     });
   }, [range]);
 
-  const handleExport = (type: string) => {
-    addToast(`${type} dışa aktarma hazırlanıyor.`, 'info');
+  const handleExport = (type: 'CSV' | 'PDF') => {
+    if (!stats) return;
+    if (type === 'CSV') {
+      const rows = [
+        ['Metrik', 'Değer'],
+        ['Toplam Satış', stats.totalSales],
+        ['Sipariş Sayısı', stats.orderCount],
+        ['Yeni Müşteri', stats.newCustomers],
+        ['Ortalama Sepet', stats.avgBasket],
+        [],
+        ['Gün', 'Satış'],
+        ...stats.dailySales.map((day) => [day.label, day.amount]),
+      ];
+      const csv = `\uFEFF${rows.map((row) => row.map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`).join(';')).join('\n')}`;
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `aquails-rapor-${range}-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      addToast('CSV raporu indirildi.', 'success');
+      return;
+    }
+    const report = window.open('', '_blank');
+    if (!report) {
+      addToast('PDF görünümü açılamadı. Açılır pencere iznini kontrol edin.', 'error');
+      return;
+    }
+    report.opener = null;
+    report.document.write(`<!doctype html><html><head><title>Aquails Satış Raporu</title><style>body{font:14px Arial;padding:32px;color:#123}h1{font-size:24px}table{border-collapse:collapse;width:100%;margin-top:20px}td,th{border:1px solid #ccd;padding:8px;text-align:left}</style></head><body><h1>Aquails Satış Raporu</h1><p>Dönem: ${range}</p><table><tr><th>Toplam Satış</th><th>Sipariş</th><th>Yeni Müşteri</th><th>Ort. Sepet</th></tr><tr><td>₺${stats.totalSales.toLocaleString('tr-TR')}</td><td>${stats.orderCount}</td><td>${stats.newCustomers}</td><td>₺${stats.avgBasket.toLocaleString('tr-TR')}</td></tr></table><script>window.print();</script></body></html>`);
+    report.document.close();
   };
 
   const maxDaily = Math.max(...(stats?.dailySales.map((d) => d.amount) ?? [1]), 1);
@@ -41,10 +70,10 @@ export default function AdminReportsPage() {
               <option value="month">Bu Ay</option>
               <option value="year">Bu Yıl</option>
             </select>
-            <button onClick={() => handleExport('CSV')} className="flex items-center gap-2 bg-aq-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-aq-deep hover:text-white">
+            <button onClick={() => handleExport('CSV')} disabled={!stats} className="flex items-center gap-2 bg-aq-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-aq-deep hover:text-white disabled:opacity-60">
               <Download className="w-4 h-4" /> CSV
             </button>
-            <button onClick={() => handleExport('PDF')} className="flex items-center gap-2 border border-aq-border/60 text-aq-muted px-4 py-2.5 rounded-xl text-sm hover:border-aq-aqua/50">
+            <button onClick={() => handleExport('PDF')} disabled={!stats} className="flex items-center gap-2 border border-aq-border/60 text-aq-muted px-4 py-2.5 rounded-xl text-sm hover:border-aq-aqua/50 disabled:opacity-60">
               <FileText className="w-4 h-4" /> PDF
             </button>
           </div>

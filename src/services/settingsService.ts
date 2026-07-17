@@ -30,9 +30,6 @@ export interface SiteSettings {
 
 export interface PaytrSettings {
   enabled: boolean;
-  merchantId: string;
-  merchantKey: string;
-  merchantSalt: string;
   testMode: boolean;
 }
 
@@ -184,24 +181,11 @@ export async function getPaytrPublicStatus(): Promise<PaytrPublicStatus> {
 }
 
 export async function getPaytrSettings(): Promise<PaytrSettings> {
-  return getSetting<PaytrSettings>('paytr', {
-    enabled: false,
-    merchantId: '',
-    merchantKey: '',
-    merchantSalt: '',
-    testMode: true,
-  });
+  return getPaytrPublicStatus();
 }
 
 export async function savePaytrSettings(settings: PaytrSettings): Promise<{ success: boolean; error?: string }> {
-  const result = await setSetting('paytr', settings as unknown as Record<string, unknown>);
-  if (result.success) {
-    await setSetting('paytr_public', {
-      enabled: settings.enabled,
-      testMode: settings.testMode,
-    });
-  }
-  return result;
+  return setSetting('paytr_public', { enabled: settings.enabled, testMode: settings.testMode });
 }
 
 export async function getNavLinks(): Promise<NavLinkItem[]> {

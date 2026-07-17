@@ -26,7 +26,7 @@ export default function AdminStockNotificationsPage() {
   const markSent = async (id: string) => {
     const result = await markNotified(id);
     if (result.success) {
-      addToast('Bildirim gönderildi olarak işaretlendi.', 'success');
+      addToast('Stok e-postası gönderim kuyruğuna alındı.', 'success');
       void load();
     }
   };
@@ -72,7 +72,7 @@ export default function AdminStockNotificationsPage() {
                       <span
                         className={`text-xs font-medium px-2 py-0.5 rounded-full ${item.notified ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}
                       >
-                        {item.notified ? 'Gönderildi' : 'Bekliyor'}
+                        {item.notified ? 'Kuyrukta' : 'Bekliyor'}
                       </span>
                     </td>
                     <td className="px-4 py-3">

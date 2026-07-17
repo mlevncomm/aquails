@@ -1,5 +1,4 @@
 import { getSupabase } from '@/lib/supabase';
-import type { PaytrSettings } from '@/services/settingsService';
 
 export interface PaytrInitResult {
   success: boolean;
@@ -80,12 +79,4 @@ export function sanitizeMerchantOid(orderNumber: string): string {
 
 export function formatPaymentAmountKurus(total: number): number {
   return Math.round(total * 100);
-}
-
-export function maskPaytrSettings(settings: PaytrSettings): PaytrSettings {
-  return {
-    ...settings,
-    merchantKey: settings.merchantKey ? '••••••••' : '',
-    merchantSalt: settings.merchantSalt ? '••••••••' : '',
-  };
 }

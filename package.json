@@ -15,7 +15,8 @@
     "test:user": "node scripts/create-test-user.mjs",
     "test:e2e": "node scripts/e2e-checkout-test.mjs",
     "test:full": "node scripts/e2e-full-system-test.mjs",
-    "test:kdv": "node scripts/test-kdv.mjs"
+    "test:kdv": "node scripts/test-kdv.mjs",
+    "test:security": "node scripts/test-security-hardening.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -46,7 +47,6 @@
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@supabase/supabase-js": "^2.110.2",
-    "@vercel/node": "^5.8.23",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -74,6 +74,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
+    "@vercel/node": "^5.8.26",
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.23",
     "eslint": "^9.39.1",
@@ -90,5 +91,8 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4"
+  },
+  "overrides": {
+    "lodash": "^4.18.1"
   }
 }

@@ -53,6 +53,7 @@ export async function earnPoints(
   amount: number,
   _reason?: string
 ): Promise<{ success: boolean; error?: string }> {
+  void _reason;
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
@@ -86,6 +87,8 @@ export async function redeemPoints(
   amount: number,
   _reason?: string
 ): Promise<{ success: boolean; error?: string; code?: string; discount?: number }> {
+  void _userId;
+  void _reason;
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 

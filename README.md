@@ -55,6 +55,9 @@ Uygulama `http://localhost:3000` adresinde çalışır.
 | `DATABASE_URL` | Pooler (transaction mode, port 6543) | `.env` only — **commit etmeyin** |
 | `DIRECT_URL` | Pooler (session mode, port 5432) | `.env` only — migration için |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role (API / scripts) | Vercel server env, CI |
+| `PAYTR_MERCHANT_ID` | PayTR mağaza numarası | Vercel server env |
+| `PAYTR_MERCHANT_KEY` / `PAYTR_MERCHANT_SALT` | PayTR imza sırları | Vercel server env |
+| `PAYTR_TEST_MODE` | Test için `1`, canlı için `0` | Vercel server env |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `npm run admin:create` | local `.env` only |
 | `TEST_EMAIL` / `TEST_PASSWORD` | e2e scriptleri | local `.env` only |
 
@@ -170,29 +173,28 @@ Migration dosyası: `supabase/migrations/20260709160000_initial_schema.sql`
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Edge Function secrets |
 | `IYZICO_API_KEY` | Supabase Edge Function secrets |
 | `IYZICO_SECRET_KEY` | Supabase Edge Function secrets |
-| `PAYTR_MERCHANT_ID` | Supabase Edge Function secrets |
-| `PAYTR_MERCHANT_KEY` | Supabase Edge Function secrets |
-| `PAYTR_MERCHANT_SALT` | Supabase Edge Function secrets |
+| `PAYTR_MERCHANT_ID` | Vercel server environment |
+| `PAYTR_MERCHANT_KEY` | Vercel server environment |
+| `PAYTR_MERCHANT_SALT` | Vercel server environment |
 
 6. `vercel.json` SPA fallback rewrite'ları içerir
 
 > Uygulama şu an `HashRouter` kullanır (`/#/urunler`). Vercel rewrite'ları BrowserRouter'a geçiş için hazırdır.
 
-### Supabase Edge Function Secrets
+### Ödeme Sunucusu Secret'ları
 
-Ödeme entegrasyonu için secret'lar **yalnızca** Supabase tarafında tanımlanır:
+Ödeme entegrasyonu için secret'lar **yalnızca** Vercel proje ayarlarında server environment olarak tanımlanır:
 
 ```bash
-# Örnek (ileride ödeme entegrasyonu)
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-supabase secrets set IYZICO_API_KEY=your-iyzico-api-key
-supabase secrets set IYZICO_SECRET_KEY=your-iyzico-secret
-supabase secrets set PAYTR_MERCHANT_ID=your-merchant-id
-supabase secrets set PAYTR_MERCHANT_KEY=your-merchant-key
-supabase secrets set PAYTR_MERCHANT_SALT=your-merchant-salt
+# Vercel dashboard > Project Settings > Environment Variables
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+PAYTR_MERCHANT_ID=your-merchant-id
+PAYTR_MERCHANT_KEY=your-merchant-key
+PAYTR_MERCHANT_SALT=your-merchant-salt
+PAYTR_TEST_MODE=1
 ```
 
-Bu secret'lar Edge Functions içinde `Deno.env.get('...')` ile okunur; frontend veya Vercel public env'e yazılmaz.
+Bu secret'lar yalnızca Vercel Functions tarafından okunur; frontend'e, `VITE_*` değişkenlerine veya `site_settings` tablosuna yazılmaz.
 
 ## Veri Katmanı
 
@@ -215,6 +217,9 @@ Supabase yapılandırılmamışsa katalog servisleri statik `src/data` fallback'
 | `npm run build` | Production build |
 | `npm run preview` | Build önizleme |
 | `npm run lint` | ESLint |
+| `npm run test:kdv` | Vergi ve sepet toplam testleri |
+| `npm run test:security` | Kritik RLS/RPC sertleştirme kontrolleri |
+| `npm run test:e2e` | İzole Supabase test projesinde checkout testi (`E2E_ALLOW_MUTATION=true`) |
 
 ## Proje Yapısı
 

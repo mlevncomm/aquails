@@ -87,6 +87,13 @@ function formatAddress(addr: Record<string, unknown> | null | undefined): string
   return parts.join(', ') || '—';
 }
 
+function paymentMethodLabel(method: string | null): string {
+  if (method === 'card') return 'Kredi Kartı (PayTR)';
+  if (method === 'transfer') return 'Havale/EFT';
+  if (method === 'cod') return 'Kapıda Ödeme';
+  return method ?? '—';
+}
+
 function buildTimeline(status: string, paymentStatus: string, createdAt: string): OrderTrackingResult['timeline'] {
   const date = formatDateTimeTR(createdAt);
   const paid = paymentStatus === 'paid';
@@ -118,7 +125,7 @@ function mapCustomerOrder(row: OrderWithProfile): CustomerOrder {
       qty: i.quantity,
       price: Number(i.unit_price),
     })),
-    paymentMethod: row.payment_method ?? '—',
+    paymentMethod: paymentMethodLabel(row.payment_method),
     shippingAddress: formatAddress(row.shipping_address as Record<string, unknown>),
   };
 }
@@ -167,7 +174,7 @@ function mapOrderDetail(row: OrderWithProfile): OrderDetail {
       title: String(billing?.title ?? 'Fatura'),
       address: formatAddress(billing),
     },
-    payment: row.payment_method ?? '—',
+    payment: paymentMethodLabel(row.payment_method),
     subtotal: Number(row.subtotal),
     shippingCost: Number(row.shipping_cost),
     codFee: Number(orderRow.cod_fee ?? 0),
@@ -348,6 +355,8 @@ export interface CreateOrderInput {
   notes?: string;
   installationSlot?: string;
   deferStockUntilPaid?: boolean;
+  shippingMethod: string;
+  couponCode?: string;
 }
 
 export async function createOrder(
@@ -355,74 +364,29 @@ export async function createOrder(
 ): Promise<{ success: boolean; order?: CustomerOrder; orderId?: string; error?: string }> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Sipariş servisi yapılandırılmamış.' };
+  const { data, error } = await supabase.rpc('create_checkout_order', {
+    p_items: input.items.map((item) => ({ product_id: item.productId, quantity: item.qty })),
+    p_shipping_address: input.shippingAddress,
+    p_billing_address: input.billingAddress ?? input.shippingAddress,
+    p_payment_method: input.paymentMethod,
+    p_shipping_method: input.shippingMethod,
+    p_coupon_code: input.couponCode ?? null,
+    p_notes: input.notes ?? null,
+    p_service_slot_id: input.installationSlot ?? null,
+  });
 
-  const resolvedItems: { productId: string | null; name: string; qty: number; price: number }[] = [];
-  for (const item of input.items) {
-    const productId = await resolveProductId(item.productId, item.slug);
-    if (!productId) {
-      return { success: false, error: `"${item.name}" ürünü veritabanında bulunamadı. Sepeti güncelleyip tekrar deneyin.` };
-    }
-    resolvedItems.push({ productId, name: item.name, qty: item.qty, price: item.price });
+  if (error) return { success: false, error: error.message || 'Sipariş oluşturulamadı.' };
+  const result = data as { success?: boolean; order_id?: string; order_number?: string } | null;
+  if (!result?.success || !result.order_id) {
+    return { success: false, error: 'Sipariş oluşturulamadı.' };
   }
 
-  const orderNumber = generateOrderNo();
-  const paymentStatus = input.paymentStatus ?? (input.deferStockUntilPaid ? 'pending' : 'paid');
-
-  const { data: order, error: orderError } = await supabase
-    .from('orders')
-    .insert({
-      user_id: input.userId,
-      order_number: orderNumber,
-      status: 'pending',
-      subtotal: input.subtotal,
-      shipping_cost: input.shippingCost,
-      cod_fee: input.codFee ?? 0,
-      discount: input.discount,
-      total: input.total,
-      payment_method: input.paymentMethod,
-      payment_status: paymentStatus,
-      shipping_address: input.shippingAddress,
-      billing_address: input.billingAddress ?? input.shippingAddress,
-      notes: input.notes,
-      installation_slot: input.installationSlot ?? null,
-    })
-    .select('id')
-    .single();
-
-  if (orderError || !order) {
-    return { success: false, error: orderError?.message ?? 'Sipariş oluşturulamadı.' };
-  }
-
-  const orderItems = resolvedItems.map((item) => ({
-    order_id: order.id,
-    product_id: item.productId,
-    product_name: item.name,
-    quantity: item.qty,
-    unit_price: item.price,
-    total_price: item.price * item.qty,
-  }));
-
-  const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-  if (itemsError) {
-    await supabase.from('orders').delete().eq('id', order.id);
-    return { success: false, error: itemsError.message };
-  }
-
-  if (!input.deferStockUntilPaid) {
-    const { error: fulfillError } = await supabase.rpc('confirm_order_fulfillment', {
-      p_order_id: order.id,
-    });
-    if (fulfillError) {
-      console.warn('confirm_order_fulfillment:', fulfillError.message);
-    }
-  }
-
-  const full = await getOrderById(order.id);
-  if (!full) return { success: true, orderId: order.id };
+  const full = await getOrderById(result.order_id);
+  if (!full) return { success: true, orderId: result.order_id };
 
   return {
     success: true,
-    orderId: order.id,
+    orderId: result.order_id,
     order: {
       id: full.id,
       orderNo: full.orderNo,
@@ -447,6 +411,17 @@ export async function updateOrderStatus(
   const { error } = await supabase.from('orders').update({ status }).eq('id', id);
   if (error) return { success: false, error: error.message };
   return { success: true };
+}
+
+export async function cancelMyOrder(id: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+  const { data, error } = await supabase.rpc('cancel_my_order', { p_order_id: id });
+  if (error) return { success: false, error: error.message };
+  const result = data as { success?: boolean; error?: string } | null;
+  return result?.success
+    ? { success: true }
+    : { success: false, error: result?.error === 'not_cancellable' ? 'Bu sipariş artık iptal edilemez.' : 'İptal işlemi başarısız.' };
 }
 
 export async function updateOrderShipping(
@@ -494,5 +469,6 @@ export async function pollOrderPaymentStatus(
 
 /** @deprecated Use createOrder instead */
 export function saveOrder(_order: CustomerOrder): void {
+  void _order;
   console.warn('saveOrder is deprecated — use createOrder with Supabase');
 }

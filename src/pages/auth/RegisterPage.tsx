@@ -45,9 +45,14 @@ export default function RegisterPage() {
     setLoading(true);
     const res = await register({ name: form.name, email: form.email, phone: form.phone, password: form.password });
     if (res.success) {
-      if (refCode) await trackReferralSignup(refCode);
-      addToast('Kayıt başarılı! Hoş geldiniz.', 'success');
-      navigate(redirectTo.startsWith('/') ? redirectTo : '/hesabim', { replace: true });
+      if (res.requiresEmailConfirmation) {
+        addToast('Kayıt oluşturuldu. E-postanızdaki doğrulama bağlantısını açın.', 'success');
+        navigate('/giris', { replace: true });
+      } else {
+        if (refCode) await trackReferralSignup(refCode);
+        addToast('Kayıt başarılı! Hoş geldiniz.', 'success');
+        navigate(redirectTo.startsWith('/') ? redirectTo : '/hesabim', { replace: true });
+      }
     } else {
       addToast(res.error || 'Kayıt başarısız.', 'error');
     }

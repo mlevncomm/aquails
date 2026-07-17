@@ -65,8 +65,13 @@ export async function updateSubscriptionStatus(
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase.from('subscriptions').update({ status }).eq('id', id);
+  const { data, error } = await supabase.rpc('set_my_subscription_status', {
+    p_subscription_id: id,
+    p_status: status,
+  });
   if (error) return { success: false, error: error.message };
+  const result = data as { success?: boolean; error?: string } | null;
+  if (!result?.success) return { success: false, error: result?.error ?? 'İşlem başarısız.' };
   return { success: true };
 }
 
@@ -110,18 +115,13 @@ export async function createSubscription(input: {
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const next = new Date();
-  next.setMonth(next.getMonth() + 6);
-
-  const { error } = await supabase.from('subscriptions').insert({
-    user_id: input.userId,
-    plan: input.plan,
-    device_name: input.deviceName,
-    price: input.price,
-    next_delivery: next.toISOString(),
-    status: 'active',
+  const { data, error } = await supabase.rpc('create_my_subscription', {
+    p_plan: input.plan,
+    p_device_name: input.deviceName,
   });
 
   if (error) return { success: false, error: error.message };
+  const result = data as { success?: boolean; error?: string } | null;
+  if (!result?.success) return { success: false, error: result?.error ?? 'Abonelik oluşturulamadı.' };
   return { success: true };
 }

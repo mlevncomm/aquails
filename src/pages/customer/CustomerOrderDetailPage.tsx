@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router';
 import {
   ArrowLeft, Package, Truck, CheckCircle, Clock, MapPin,
-  CreditCard, Calendar, Box, Loader2
+  CreditCard, Calendar, Box, Loader2, XCircle
 } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import { getOrderById, type OrderDetail } from '@/services/orderService';
+import { cancelMyOrder, getOrderById, type OrderDetail } from '@/services/orderService';
 import { orderStatusToTr } from '@/lib/orderStatus';
+import { useToastStore } from '@/components/Toast';
 
 function buildTimeline(order: OrderDetail) {
   const paid = order.paymentStatus === 'paid';
@@ -23,6 +24,19 @@ export default function CustomerOrderDetailPage() {
   const { id } = useParams();
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
+  const addToast = useToastStore((s) => s.add);
+
+  const cancelOrder = async () => {
+    if (!order || !window.confirm('Bu siparişi iptal etmek istediğinize emin misiniz?')) return;
+    setCancelling(true);
+    const result = await cancelMyOrder(order.id);
+    setCancelling(false);
+    if (!result.success) { addToast(result.error ?? 'Sipariş iptal edilemedi.', 'error'); return; }
+    addToast('Sipariş iptal edildi; stok, kupon ve randevu rezervasyonları geri alındı.', 'success');
+    const refreshed = await getOrderById(order.id);
+    setOrder(refreshed);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -168,6 +182,11 @@ export default function CustomerOrderDetailPage() {
           <Link to="/urunler" className="block w-full py-3 bg-aq-blue text-white rounded-xl text-sm font-semibold text-center hover:bg-aq-deep hover:text-white">
             Tekrar Sipariş Ver
           </Link>
+          {order.status === 'pending' && order.paymentStatus === 'pending' && (
+            <button onClick={() => void cancelOrder()} disabled={cancelling} className="flex items-center justify-center gap-2 w-full py-3 border border-red-200 text-red-600 rounded-xl text-sm font-semibold hover:bg-red-50 disabled:opacity-60">
+              {cancelling ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />} Siparişi İptal Et
+            </button>
+          )}
         </div>
       </div>
     </>
