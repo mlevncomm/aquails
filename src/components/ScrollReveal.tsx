@@ -1,5 +1,6 @@
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -106,7 +107,7 @@ export function StaggerItem({ children, className = '' }: { children: ReactNode;
           transition: { duration: reduceMotion ? 0 : 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
         },
       }}
-      className={className}
+      className={cn('min-w-0 max-w-full', className)}
     >
       {children}
     </motion.div>
