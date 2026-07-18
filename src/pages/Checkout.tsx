@@ -10,7 +10,7 @@ import type { ServiceSlot } from '@/services/serviceCalendarService';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { useCartStore } from '@/stores/cartStore';
-import { validateCoupon, incrementCouponUsage } from '@/services/couponService';
+import { validateCoupon } from '@/services/couponService';
 import { createOrder } from '@/services/orderService';
 import { completeAbandonedCart, syncAbandonedCart } from '@/services/abandonedCartService';
 import { useAuthStore } from '@/stores/authStore';
@@ -37,13 +37,16 @@ const paymentMethods = [
   { id: 'cod', label: 'Kapıda Ödeme', desc: 'Nakit veya kredi kartı ile kapıda ödeme (+150₺)', icon: Truck },
 ];
 
-const paymentMethodLabels: Record<string, string> = {
-  card: 'Kredi Kartı (PayTR)',
-  transfer: 'Havale/EFT',
-  cod: 'Kapıda Ödeme',
-};
-
-const TURKISH_CITIES = ['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 'Adana', 'Kocaeli', 'Gaziantep'];
+const TURKISH_CITIES = [
+  'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Aksaray', 'Amasya', 'Ankara', 'Antalya', 'Ardahan', 'Artvin',
+  'Aydın', 'Balıkesir', 'Bartın', 'Batman', 'Bayburt', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa',
+  'Çanakkale', 'Çankırı', 'Çorum', 'Denizli', 'Diyarbakır', 'Düzce', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum',
+  'Eskişehir', 'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkâri', 'Hatay', 'Iğdır', 'Isparta', 'İstanbul', 'İzmir',
+  'Kahramanmaraş', 'Karabük', 'Karaman', 'Kars', 'Kastamonu', 'Kayseri', 'Kilis', 'Kırıkkale', 'Kırklareli',
+  'Kırşehir', 'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa', 'Mardin', 'Mersin', 'Muğla', 'Muş', 'Nevşehir',
+  'Niğde', 'Ordu', 'Osmaniye', 'Rize', 'Sakarya', 'Samsun', 'Şanlıurfa', 'Siirt', 'Sinop', 'Şırnak', 'Sivas',
+  'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak',
+];
 
 interface ContactForm {
   name: string;
@@ -59,6 +62,8 @@ interface AddressForm {
   fullAddress: string;
   sameBilling: boolean;
 }
+
+type BillingForm = Omit<AddressForm, 'sameBilling'>;
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -99,6 +104,9 @@ export default function Checkout() {
     district: '',
     fullAddress: '',
     sameBilling: true,
+  });
+  const [billingAddress, setBillingAddress] = useState<BillingForm>({
+    title: 'Fatura', city: 'İstanbul', district: '', fullAddress: '',
   });
 
   const subtotal = getSubtotal();
@@ -194,6 +202,9 @@ export default function Checkout() {
     if (!contact.phone.trim()) { addToast('Telefon girin.', 'error'); return false; }
     if (!address.fullAddress.trim()) { addToast('Teslimat adresi girin.', 'error'); return false; }
     if (!address.district.trim()) { addToast('İlçe girin.', 'error'); return false; }
+    if (!address.sameBilling && (!billingAddress.fullAddress.trim() || !billingAddress.district.trim())) {
+      addToast('Fatura adresini eksiksiz girin.', 'error'); return false;
+    }
     if (paymentMethod === 'card' && !paytrEnabled) {
       addToast('Online kart ödemesi henüz yapılandırılmamış. Havale veya kapıda ödeme seçin.', 'error');
       return false;
@@ -210,14 +221,21 @@ export default function Checkout() {
     name: contact.name,
   });
 
+  const buildBillingAddress = () => address.sameBilling ? buildShippingAddress() : ({
+    title: billingAddress.title,
+    city: billingAddress.city,
+    district: billingAddress.district,
+    full_address: billingAddress.fullAddress,
+    name: contact.name,
+  });
+
   const finishOrder = useCallback(async (orderNo: string, clear = true) => {
-    if (appliedCoupon?.code) await incrementCouponUsage(appliedCoupon.code);
     await completeAbandonedCart();
     if (clear) clearCart();
     setCompletedOrderNo(orderNo);
     setIsCompleted(true);
     setPaytrIframeUrl(null);
-  }, [appliedCoupon, clearCart]);
+  }, [clearCart]);
 
   const handleCompleteOrder = async () => {
     if (submitting) return;
@@ -251,12 +269,14 @@ export default function Checkout() {
       codFee,
       discount,
       total,
-      paymentMethod: paymentMethodLabels[paymentMethod] ?? paymentMethod,
+      paymentMethod,
+      shippingMethod,
+      couponCode: appliedCoupon?.code,
       paymentStatus: isCard ? 'pending' : 'pending',
       shippingAddress: shippingAddr,
-      billingAddress: address.sameBilling ? shippingAddr : shippingAddr,
+      billingAddress: buildBillingAddress(),
       notes: contact.note || undefined,
-      installationSlot: selectedSlot || selectedDate || undefined,
+      installationSlot: selectedSlot || undefined,
       deferStockUntilPaid: isCard,
     });
 
@@ -275,7 +295,7 @@ export default function Checkout() {
         userName: contact.name,
         userPhone: contact.phone,
         userAddress: `${address.fullAddress}, ${address.district}/${address.city}`,
-        paymentAmount: formatPaymentAmountKurus(total),
+        paymentAmount: formatPaymentAmountKurus(result.order.total),
         userBasket: buildPaytrBasket(items.map((i) => ({
           name: i.product.name,
           price: getProductGrossPrice(i.product, taxConfig.rate),
@@ -538,6 +558,31 @@ export default function Checkout() {
                     <textarea value={address.fullAddress} onChange={(e) => setAddress({ ...address, fullAddress: e.target.value })} rows={2} className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue resize-none" />
                   </div>
                 </div>
+                {!address.sameBilling && (
+                  <div className="mt-5 pt-5 border-t border-aq-border/60">
+                    <h4 className="text-sm font-semibold text-aq-text mb-3">Fatura Adresi</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-aq-text mb-1 block">Adres Başlığı</label>
+                        <input value={billingAddress.title} onChange={(e) => setBillingAddress({ ...billingAddress, title: e.target.value })} className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-aq-text mb-1 block">Şehir</label>
+                        <select value={billingAddress.city} onChange={(e) => setBillingAddress({ ...billingAddress, city: e.target.value })} className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-white">
+                          {TURKISH_CITIES.map((city) => <option key={city}>{city}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-aq-text mb-1 block">İlçe *</label>
+                        <input value={billingAddress.district} onChange={(e) => setBillingAddress({ ...billingAddress, district: e.target.value })} className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="text-sm font-medium text-aq-text mb-1 block">Açık Adres *</label>
+                        <textarea value={billingAddress.fullAddress} onChange={(e) => setBillingAddress({ ...billingAddress, fullAddress: e.target.value })} rows={2} className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl resize-none" />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </ScrollReveal>
 

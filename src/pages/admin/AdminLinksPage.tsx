@@ -23,7 +23,7 @@ const iconOptions = [
   { value: 'ExternalLink', label: 'Dis Link', icon: ExternalLink },
 ];
 
-interface LinkItem extends NavLinkItem {}
+type LinkItem = NavLinkItem;
 
 export default function AdminLinksPage() {
   const addToast = useToastStore(s => s.add);

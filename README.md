@@ -27,7 +27,7 @@ Aquails, su arıtma cihazları ve yedek parçaları için geliştirilmiş bir e-
 
 Aşağıdaki işlemler **yalnızca server-side** (Edge Function / Vercel Function) üzerinden yapılmalıdır:
 
-- Ödeme oturumu oluşturma (Iyzico / PayTR)
+- Ödeme oturumu oluşturma (PayTR)
 - Ödeme webhook doğrulama
 - Sipariş oluşturma ve stok düşme (atomik)
 - Kargo entegrasyonu ve takip numarası
@@ -55,10 +55,32 @@ Uygulama `http://localhost:3000` adresinde çalışır.
 | `DATABASE_URL` | Pooler (transaction mode, port 6543) | `.env` only — **commit etmeyin** |
 | `DIRECT_URL` | Pooler (session mode, port 5432) | `.env` only — migration için |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role (API / scripts) | Vercel server env, CI |
+| `PAYTR_MERCHANT_ID` | PayTR mağaza numarası | Vercel server env |
+| `PAYTR_MERCHANT_KEY` / `PAYTR_MERCHANT_SALT` | PayTR imza sırları | Vercel server env |
+| `PAYTR_TEST_MODE` | Test için `1`, canlı için `0` | Vercel server env |
+| `RESEND_API_KEY` / `EMAIL_FROM` | Transactional e-posta | Vercel server env |
+| `CRON_SECRET` | E-posta outbox Bearer secret | Vercel server env + Supabase Vault |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `npm run admin:create` | local `.env` only |
 | `TEST_EMAIL` / `TEST_PASSWORD` | e2e scriptleri | local `.env` only |
 
 > **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` ve PayTR secret'ları **asla** frontend'e veya `VITE_*` env'e konmamalıdır.
+
+### E-posta outbox zamanlama (Supabase pg_cron)
+
+Vercel Hobby planı saatlik Cron Job'lara izin vermez; `vercel.json` içinde Cron tanımı yoktur.
+Outbox worker (`/api/process-email-outbox`) her 10 dakikada bir Supabase `pg_cron` + `pg_net` ile tetiklenir.
+
+1. Vercel'e `SITE_URL`, `CRON_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM` ekleyin.
+2. Aynı `SITE_URL` ve `CRON_SECRET` değerlerini Supabase Vault'a yazın (**SQL migration içine yazmayın**):
+
+```sql
+select vault.create_secret('https://www.aquails.com', 'aquails_site_url');
+select vault.create_secret('your-cron-secret', 'aquails_cron_secret');
+```
+
+3. Migration `20260718000200_email_outbox_pg_cron.sql` uygulandığında job `aquails-process-email-outbox` oluşturulur.
+4. Vault secret'ları eksikse istek **gönderilmez** (fail-closed); secret değerleri loglanmaz.
+5. Endpoint `Authorization: Bearer <CRON_SECRET>` olmadan 401 döner.
 
 ### PayTR yerel test
 
@@ -162,37 +184,37 @@ Migration dosyası: `supabase/migrations/20260709160000_initial_schema.sql`
 |----------|-------|---------|
 | `VITE_SUPABASE_URL` | Production, Preview, Development | Evet (build-time) |
 | `VITE_SUPABASE_ANON_KEY` | Production, Preview, Development | Evet (build-time) |
+| `SITE_URL` | Production, Preview | Hayır (server) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Production, Preview | Hayır (server) — PayTR + email worker |
+| `PAYTR_MERCHANT_ID` | Production, Preview | Hayır (server) |
+| `PAYTR_MERCHANT_KEY` | Production, Preview | Hayır (server) |
+| `PAYTR_MERCHANT_SALT` | Production, Preview | Hayır (server) |
+| `PAYTR_TEST_MODE` | Production, Preview | Hayır (server) |
+| `RESEND_API_KEY` / `EMAIL_FROM` / `CRON_SECRET` | Production, Preview | Hayır (server) |
 
-**Vercel'e EKLENMEYECEK değişkenler:**
-
-| Değişken | Nerede tutulmalı |
-|----------|------------------|
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Edge Function secrets |
-| `IYZICO_API_KEY` | Supabase Edge Function secrets |
-| `IYZICO_SECRET_KEY` | Supabase Edge Function secrets |
-| `PAYTR_MERCHANT_ID` | Supabase Edge Function secrets |
-| `PAYTR_MERCHANT_KEY` | Supabase Edge Function secrets |
-| `PAYTR_MERCHANT_SALT` | Supabase Edge Function secrets |
+> `SUPABASE_SERVICE_ROLE_KEY` **Vercel server-only** env olmalıdır (`api/paytr-init.ts`, `api/payment-webhook.ts`, `api/process-email-outbox.ts`). Frontend'e veya `VITE_*` olarak eklenmez.
 
 6. `vercel.json` SPA fallback rewrite'ları içerir
 
 > Uygulama şu an `HashRouter` kullanır (`/#/urunler`). Vercel rewrite'ları BrowserRouter'a geçiş için hazırdır.
 
-### Supabase Edge Function Secrets
+### Ödeme ve e-posta worker secret'ları
 
-Ödeme entegrasyonu için secret'lar **yalnızca** Supabase tarafında tanımlanır:
+PayTR ve email outbox worker secret'ları **yalnızca** Vercel proje ayarlarında server environment olarak tanımlanır:
 
 ```bash
-# Örnek (ileride ödeme entegrasyonu)
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-supabase secrets set IYZICO_API_KEY=your-iyzico-api-key
-supabase secrets set IYZICO_SECRET_KEY=your-iyzico-secret
-supabase secrets set PAYTR_MERCHANT_ID=your-merchant-id
-supabase secrets set PAYTR_MERCHANT_KEY=your-merchant-key
-supabase secrets set PAYTR_MERCHANT_SALT=your-merchant-salt
+# Vercel dashboard > Project Settings > Environment Variables
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+PAYTR_MERCHANT_ID=your-merchant-id
+PAYTR_MERCHANT_KEY=your-merchant-key
+PAYTR_MERCHANT_SALT=your-merchant-salt
+PAYTR_TEST_MODE=1
+RESEND_API_KEY=your-resend-key
+EMAIL_FROM=Aquails <noreply@example.com>
+CRON_SECRET=your-cron-secret
 ```
 
-Bu secret'lar Edge Functions içinde `Deno.env.get('...')` ile okunur; frontend veya Vercel public env'e yazılmaz.
+Bu secret'lar yalnızca Vercel Functions tarafından okunur; frontend'e, `VITE_*` değişkenlerine veya `site_settings` tablosuna yazılmaz.
 
 ## Veri Katmanı
 
@@ -215,6 +237,9 @@ Supabase yapılandırılmamışsa katalog servisleri statik `src/data` fallback'
 | `npm run build` | Production build |
 | `npm run preview` | Build önizleme |
 | `npm run lint` | ESLint |
+| `npm run test:kdv` | Vergi ve sepet toplam testleri |
+| `npm run test:security` | Kritik RLS/RPC sertleştirme kontrolleri |
+| `npm run test:e2e` | İzole Supabase test projesinde checkout testi (`E2E_ALLOW_MUTATION=true`) |
 
 ## Proje Yapısı
 

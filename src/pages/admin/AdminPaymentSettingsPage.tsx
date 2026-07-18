@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CreditCard, Save, CheckCircle, Shield, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import { CreditCard, Save, CheckCircle, Shield, AlertTriangle } from 'lucide-react';
 import {
   getPaytrSettings,
   savePaytrSettings,
@@ -15,12 +15,8 @@ export default function AdminPaymentSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [showSecrets, setShowSecrets] = useState(false);
   const [paytr, setPaytr] = useState<PaytrSettings>({
     enabled: false,
-    merchantId: '',
-    merchantKey: '',
-    merchantSalt: '',
     testMode: true,
   });
   const [banks, setBanks] = useState<BankAccount[]>([
@@ -62,7 +58,7 @@ export default function AdminPaymentSettingsPage() {
     <>
       <h2 className="text-lg font-semibold text-aq-text mb-2">Ödeme Ayarları</h2>
       <p className="text-sm text-aq-muted mb-5">
-        PayTR sanal POS bilgilerinizi girerek online kart ödemesi alabilirsiniz.
+        PayTR durumunu yönetin. Gizli anahtarlar yalnızca sunucu ortam değişkenlerinde saklanır.
       </p>
 
       {saved && (
@@ -93,7 +89,7 @@ export default function AdminPaymentSettingsPage() {
           <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 mb-4">
             <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <p>
-              Mağaza No, Parola ve Gizli Anahtar bilgilerini PayTR Mağaza Paneli → Bilgi sayfasından alın.
+              Vercel üzerinde PAYTR_MERCHANT_ID, PAYTR_MERCHANT_KEY ve PAYTR_MERCHANT_SALT değişkenlerini tanımlayın.
               Bildirim URL:{' '}
               <code className="bg-white px-1 rounded">
                 {typeof window !== 'undefined'
@@ -105,15 +101,6 @@ export default function AdminPaymentSettingsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-aq-muted mb-1 block">Mağaza No (merchant_id)</label>
-              <input
-                value={paytr.merchantId}
-                onChange={(e) => setPaytr({ ...paytr, merchantId: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue"
-                placeholder="123456"
-              />
-            </div>
-            <div>
               <label className="text-xs text-aq-muted mb-1 block">Test Modu</label>
               <select
                 value={paytr.testMode ? '1' : '0'}
@@ -124,34 +111,11 @@ export default function AdminPaymentSettingsPage() {
                 <option value="0">Canlı (Production)</option>
               </select>
             </div>
-            <div>
-              <label className="text-xs text-aq-muted mb-1 block flex items-center gap-1">
-                Mağaza Parolası (merchant_key)
-                <button type="button" onClick={() => setShowSecrets(!showSecrets)} className="text-aq-muted">
-                  {showSecrets ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                </button>
-              </label>
-              <input
-                type={showSecrets ? 'text' : 'password'}
-                value={paytr.merchantKey}
-                onChange={(e) => setPaytr({ ...paytr, merchantKey: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-aq-muted mb-1 block">Gizli Anahtar (merchant_salt)</label>
-              <input
-                type={showSecrets ? 'text' : 'password'}
-                value={paytr.merchantSalt}
-                onChange={(e) => setPaytr({ ...paytr, merchantSalt: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue"
-              />
-            </div>
           </div>
 
           <div className="flex items-center gap-2 mt-4 text-xs text-aq-muted">
             <Shield className="w-3.5 h-3.5" />
-            API bilgileri yalnızca admin kullanıcılar tarafından görülebilir.
+            Gizli bilgiler tarayıcıya veya veritabanı ayar tablosuna aktarılmaz.
           </div>
         </div>
 

@@ -31,7 +31,7 @@ export default function AdminAbandonedCartsPage() {
   const handleSendReminder = async (id: string) => {
     const result = await sendReminder(id);
     if (result.success) {
-      addToast('Hatırlatıcı gönderildi.', 'success');
+      addToast('Hatırlatıcı e-posta kuyruğuna alındı.', 'success');
       void refresh();
     }
   };
@@ -57,7 +57,7 @@ export default function AdminAbandonedCartsPage() {
 
   const statusLabel: Record<string, string> = {
     new: 'Yeni',
-    'reminder-sent': 'Hatırlatıcı Gönderildi',
+    'reminder-sent': 'Hatırlatıcı Kuyrukta',
     converted: 'Dönüştü',
   };
 

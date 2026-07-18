@@ -25,15 +25,19 @@ function loadEnv() {
 }
 
 const env = { ...loadEnv(), ...process.env };
-const email = env.TEST_EMAIL ?? 'aquails.test.musteri@gmail.com';
-const password = env.TEST_PASSWORD ?? 'AquailsTest2026!';
+const email = env.TEST_EMAIL;
+const password = env.TEST_PASSWORD;
 const name = env.TEST_NAME ?? 'Test Müşteri';
 const url = env.VITE_SUPABASE_URL;
 const anonKey = env.VITE_SUPABASE_ANON_KEY;
 const directUrl = env.DIRECT_URL;
 
-if (!directUrl || !url || !anonKey) {
-  console.error('DIRECT_URL, VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY required.');
+if (!directUrl || !url || !anonKey || !email || !password) {
+  console.error('DIRECT_URL, VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, TEST_EMAIL ve TEST_PASSWORD gereklidir.');
+  process.exit(1);
+}
+if (env.E2E_ALLOW_MUTATION !== 'true') {
+  console.error('Test kullanıcısı yalnızca izole test ortamında E2E_ALLOW_MUTATION=true ile oluşturulabilir.');
   process.exit(1);
 }
 

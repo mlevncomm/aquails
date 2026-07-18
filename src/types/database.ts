@@ -229,6 +229,12 @@ export interface Database {
           cargo_company: string | null;
           tracking_number: string | null;
           cod_fee: number;
+          coupon_code: string | null;
+          service_slot_id: string | null;
+          stock_reserved: boolean;
+          stock_released: boolean;
+          coupon_released: boolean;
+          service_slot_released: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -250,6 +256,12 @@ export interface Database {
           cargo_company?: string | null;
           tracking_number?: string | null;
           cod_fee?: number;
+          coupon_code?: string | null;
+          service_slot_id?: string | null;
+          stock_reserved?: boolean;
+          stock_released?: boolean;
+          coupon_released?: boolean;
+          service_slot_released?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -271,6 +283,12 @@ export interface Database {
           cargo_company?: string | null;
           tracking_number?: string | null;
           cod_fee?: number;
+          coupon_code?: string | null;
+          service_slot_id?: string | null;
+          stock_reserved?: boolean;
+          stock_released?: boolean;
+          coupon_released?: boolean;
+          service_slot_released?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -897,6 +915,56 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      create_checkout_order: {
+        Args: {
+          p_items: Record<string, unknown>[];
+          p_shipping_address: Record<string, unknown>;
+          p_billing_address: Record<string, unknown>;
+          p_payment_method: string;
+          p_shipping_method: string;
+          p_coupon_code?: string | null;
+          p_notes?: string | null;
+          p_service_slot_id?: string | null;
+        };
+        Returns: Record<string, unknown>;
+      };
+      cancel_my_order: {
+        Args: { p_order_id: string };
+        Returns: Record<string, unknown>;
+      };
+      create_my_subscription: {
+        Args: { p_plan: string; p_device_name: string };
+        Returns: Record<string, unknown>;
+      };
+      set_my_subscription_status: {
+        Args: { p_subscription_id: string; p_status: string };
+        Returns: Record<string, unknown>;
+      };
+      sync_abandoned_cart: {
+        Args: {
+          p_session_id: string;
+          p_customer_name: string;
+          p_customer_email: string | null;
+          p_items: Record<string, unknown>[];
+        };
+        Returns: undefined;
+      };
+      subscribe_stock_notification: {
+        Args: { p_product_id: string; p_email: string };
+        Returns: Record<string, unknown>;
+      };
+      queue_abandoned_cart_reminder: {
+        Args: { p_cart_id: string };
+        Returns: Record<string, unknown>;
+      };
+      queue_stock_notification: {
+        Args: { p_notification_id: string };
+        Returns: Record<string, unknown>;
+      };
+      submit_contact_message: {
+        Args: { p_name: string; p_email: string; p_phone: string; p_subject: string; p_message: string };
+        Returns: Record<string, unknown>;
+      };
       mark_abandoned_cart_converted: {
         Args: { p_session_id: string };
         Returns: undefined;
@@ -927,6 +995,10 @@ export interface Database {
           p_total_amount: string;
           p_hash: string;
         };
+        Returns: string;
+      };
+      finalize_paytr_payment: {
+        Args: { p_merchant_oid: string; p_status: string; p_total_amount: string };
         Returns: string;
       };
       redeem_loyalty_points: {

@@ -1,8 +1,12 @@
-import { Link } from 'react-router';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
-import { RefreshCw, Check, Truck, Shield, Clock, ArrowRight } from 'lucide-react';
+import { RefreshCw, Check, Truck, Shield, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
+import { useAuthStore } from '@/stores/authStore';
+import { useToastStore } from '@/components/Toast';
+import { createSubscription } from '@/services/subscriptionService';
 
 
 const plans = [
@@ -19,6 +23,33 @@ const benefits = [
 ];
 
 export default function FilterSubscriptionPage() {
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
+  const addToast = useToastStore((s) => s.add);
+  const [submittingPlan, setSubmittingPlan] = useState<string | null>(null);
+
+  const subscribe = async (plan: (typeof plans)[number]) => {
+    if (!user) {
+      addToast('Abonelik oluşturmak için giriş yapmalısınız.', 'info');
+      navigate('/giris?redirect=/filtre-aboneligi');
+      return;
+    }
+    setSubmittingPlan(plan.id);
+    const result = await createSubscription({
+      userId: user.id,
+      plan: plan.id,
+      deviceName: 'Aquails Cihazım',
+      price: plan.price,
+    });
+    setSubmittingPlan(null);
+    if (!result.success) {
+      addToast(result.error ?? 'Abonelik oluşturulamadı.', 'error');
+      return;
+    }
+    addToast('Aboneliğiniz oluşturuldu.', 'success');
+    navigate('/hesabim/abonelikler');
+  };
+
   return (
     <>
       <SEO
@@ -89,14 +120,17 @@ export default function FilterSubscriptionPage() {
                   </li>
                 ))}
               </ul>
-              <Link
-                to="/urunler"
+              <button
+                type="button"
+                onClick={() => void subscribe(plan)}
+                disabled={submittingPlan !== null}
                 className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-all ${
                   plan.popular ? 'bg-aq-blue text-white hover:bg-aq-deep' : 'border-2 border-aq-deep text-aq-blue hover:bg-aq-sky'
-                }`}
+                } disabled:opacity-60`}
               >
-                Abone Ol <ArrowRight className="w-4 h-4" />
-              </Link>
+                {submittingPlan === plan.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
+                Abone Ol
+              </button>
             </motion.div>
           ))}
         </div>
