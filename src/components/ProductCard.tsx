@@ -41,20 +41,37 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
 
   if (compact) {
     return (
-      <Link to={`/urun/${product.slug}`} className="block group flex-shrink-0 w-[200px]">
-        <div className="bg-aq-ice rounded-2xl aspect-square flex items-center justify-center mb-2 transition-all duration-300 overflow-hidden border border-aq-border/60">
+      <Link
+        to={`/urun/${product.slug}`}
+        className="group flex flex-col h-full min-w-0 bg-white border border-aq-border/60 rounded-2xl overflow-hidden shadow-[0_1px_2px_rgba(7,24,39,0.03)] hover:border-aq-blue/25 hover:shadow-[0_8px_24px_rgba(18,134,216,0.1)] transition-all duration-300"
+      >
+        <div className="relative bg-aq-ice aspect-square overflow-hidden">
           <img
             src={primaryImage}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
             loading="lazy"
             onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
           />
+          {product.discountPercent ? (
+            <span className="absolute top-2.5 left-2.5 bg-white/95 text-[#E85454] text-[10px] font-semibold px-2 py-0.5 rounded-full border border-[#E85454]/15">
+              %{product.discountPercent}
+            </span>
+          ) : null}
         </div>
-        <h4 className="text-[13px] font-medium text-aq-text line-clamp-1 group-hover:text-aq-blue transition-colors">
-          {product.name}
-        </h4>
-        <ProductPrice product={product} size="sm" />
+        <div className="p-3.5 sm:p-4 flex flex-col flex-1 min-w-0">
+          {product.category && (
+            <span className="text-[10px] font-medium uppercase tracking-wide text-aq-blue/80 mb-1 truncate">
+              {product.category}
+            </span>
+          )}
+          <h4 className="text-[13px] sm:text-sm font-semibold text-aq-text line-clamp-2 leading-snug group-hover:text-aq-blue transition-colors min-h-[2.5em]">
+            {product.name}
+          </h4>
+          <div className="mt-auto pt-2.5">
+            <ProductPrice product={product} size="sm" />
+          </div>
+        </div>
       </Link>
     );
   }

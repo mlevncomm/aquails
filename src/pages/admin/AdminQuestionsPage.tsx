@@ -7,6 +7,16 @@ import {
   deleteQuestion,
   type ProductQuestion,
 } from '@/services/productQuestionService';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminCard,
+  AdminInput,
+  AdminButton,
+  AdminLoading,
+  AdminEmpty,
+  AdminBadge,
+} from '@/components/admin/admin-ui';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('tr-TR');
@@ -49,19 +59,22 @@ export default function AdminQuestionsPage() {
   };
 
   return (
-    <>
-      <h2 className="text-lg font-semibold text-aq-text mb-5">Soru & Cevap Yönetimi</h2>
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Soru & Cevap Yönetimi"
+        description="Müşteri ürün sorularını yanıtlayın."
+      />
 
       {loading ? (
-        <div className="text-center py-12 text-sm text-aq-muted">Yükleniyor...</div>
+        <AdminLoading label="Sorular yükleniyor..." />
       ) : items.length === 0 ? (
-        <div className="bg-white border border-aq-border/60 rounded-2xl p-8 text-center text-sm text-aq-muted">
-          Henüz müşteri sorusu bulunmuyor.
-        </div>
+        <AdminCard padding={false}>
+          <AdminEmpty icon={HelpCircle} message="Henüz müşteri sorusu bulunmuyor." />
+        </AdminCard>
       ) : (
         <div className="space-y-4">
           {items.map((q) => (
-            <div key={q.id} className="bg-white border border-aq-border/60 rounded-2xl p-5">
+            <AdminCard key={q.id}>
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-aq-ice rounded-lg flex items-center justify-center">
@@ -74,11 +87,9 @@ export default function AdminQuestionsPage() {
                     </p>
                   </div>
                 </div>
-                <span
-                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${q.status === 'answered' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}
-                >
+                <AdminBadge tone={q.status === 'answered' ? 'success' : 'warning'}>
                   {q.status === 'answered' ? (q.isPublic ? 'Yayında' : 'Cevaplandı') : 'Bekliyor'}
-                </span>
+                </AdminBadge>
               </div>
               <p className="text-sm text-aq-muted mb-3 pl-10">{q.question}</p>
               {q.answer && (
@@ -92,32 +103,30 @@ export default function AdminQuestionsPage() {
               )}
               {q.status === 'pending' && (
                 <div className="ml-10 flex gap-2">
-                  <input
+                  <AdminInput
                     value={answerForm.id === q.id ? answerForm.text : ''}
                     onChange={(e) => setAnswerForm({ id: q.id, text: e.target.value })}
                     placeholder="Cevabınızı yazın..."
-                    className="flex-1 px-3 py-2 text-sm border border-aq-border/60 rounded-lg bg-aq-ice focus:outline-none focus:border-aq-blue"
+                    className="flex-1"
                   />
-                  <button
-                    onClick={() => void submitAnswer(q.id)}
-                    className="flex items-center gap-1 bg-aq-blue text-white px-4 py-2 rounded-xl text-sm hover:bg-aq-deep"
-                  >
+                  <AdminButton onClick={() => void submitAnswer(q.id)}>
                     <Check className="w-4 h-4" /> Gönder
-                  </button>
+                  </AdminButton>
                 </div>
               )}
               <div className="ml-10 mt-3">
                 <button
+                  type="button"
                   onClick={() => void remove(q.id)}
                   className="flex items-center gap-1 text-xs text-red-500 hover:text-red-600"
                 >
                   <Trash2 className="w-3.5 h-3.5" /> Sil
                 </button>
               </div>
-            </div>
+            </AdminCard>
           ))}
         </div>
       )}
-    </>
+    </AdminPageShell>
   );
 }

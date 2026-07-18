@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Upload, FileSpreadsheet, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 import { importProductsBatch, getCategoryOptions, type AdminProductForm } from '@/services/productService';
 import { useToastStore } from '@/components/Toast';
-import { AdminPageHeader, AdminCard } from '@/components/admin/admin-ui';
+import { AdminPageShell, AdminPageHeader, AdminCard } from '@/components/admin/admin-ui';
 
 function slugify(text: string): string {
   return text
@@ -72,7 +72,7 @@ export default function AdminProductImportPage() {
   };
 
   return (
-    <>
+    <AdminPageShell>
       <AdminPageHeader title="Ürün Yükleme" description="CSV dosyası ile toplu ürün import" />
 
       <AdminCard className="max-w-2xl mb-6">
@@ -120,6 +120,6 @@ Aquails Pro, aquails-pro, su-aritma, 85900, 10, AQ-001, Açıklama...`}
           </div>
         )}
       </AdminCard>
-    </>
+    </AdminPageShell>
   );
 }

@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Download, FileText, TrendingUp, ShoppingCart, Users, Package, Loader2 } from 'lucide-react';
+import { Download, FileText, TrendingUp, ShoppingCart, Users, Package } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
 import { getReportStats } from '@/services/adminStatsService';
-import { AdminPageHeader, AdminCard, AdminStatCard } from '@/components/admin/admin-ui';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminCard,
+  AdminStatCard,
+  AdminSelect,
+  AdminButton,
+  AdminLoading,
+} from '@/components/admin/admin-ui';
 
 export default function AdminReportsPage() {
   const [range, setRange] = useState<'day' | 'week' | 'month' | 'year'>('month');
@@ -54,34 +62,34 @@ export default function AdminReportsPage() {
   const maxDaily = Math.max(...(stats?.dailySales.map((d) => d.amount) ?? [1]), 1);
 
   return (
-    <>
+    <AdminPageShell>
       <AdminPageHeader
         title="Raporlar"
         description="Satış ve katalog istatistikleri"
         action={
-          <div className="flex gap-2">
-            <select
+          <div className="flex flex-wrap gap-2">
+            <AdminSelect
               value={range}
               onChange={(e) => setRange(e.target.value as typeof range)}
-              className="px-4 py-2.5 text-sm bg-white border border-aq-border/60 rounded-xl text-aq-text focus:outline-none focus:ring-2 focus:ring-aq-aqua/30"
+              className="w-auto"
             >
               <option value="day">Bugün</option>
               <option value="week">Bu Hafta</option>
               <option value="month">Bu Ay</option>
               <option value="year">Bu Yıl</option>
-            </select>
-            <button onClick={() => handleExport('CSV')} disabled={!stats} className="flex items-center gap-2 bg-aq-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-aq-deep hover:text-white disabled:opacity-60">
+            </AdminSelect>
+            <AdminButton onClick={() => handleExport('CSV')} disabled={!stats}>
               <Download className="w-4 h-4" /> CSV
-            </button>
-            <button onClick={() => handleExport('PDF')} disabled={!stats} className="flex items-center gap-2 border border-aq-border/60 text-aq-muted px-4 py-2.5 rounded-xl text-sm hover:border-aq-aqua/50 disabled:opacity-60">
+            </AdminButton>
+            <AdminButton variant="secondary" onClick={() => handleExport('PDF')} disabled={!stats}>
               <FileText className="w-4 h-4" /> PDF
-            </button>
+            </AdminButton>
           </div>
         }
       />
 
       {loading ? (
-        <div className="flex justify-center py-16 text-aq-muted"><Loader2 className="w-6 h-6 animate-spin" /></div>
+        <AdminLoading variant="spinner" label="Rapor yükleniyor..." />
       ) : stats && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -134,6 +142,6 @@ export default function AdminReportsPage() {
           </div>
         </>
       )}
-    </>
+    </AdminPageShell>
   );
 }

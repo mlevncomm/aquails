@@ -20,18 +20,9 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts';
-import { AdminCard, AdminTableWrap, AdminEmpty } from '@/components/admin/admin-ui';
+import { AdminCard, AdminTableWrap, AdminEmpty, AdminPageShell, AdminPageHeader, AdminButton, AdminOrderStatusBadge } from '@/components/admin/admin-ui';
 
 const PIE_COLORS = ['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b', '#f43f5e', '#06b6d4', '#6366f1'];
-
-const statusStyles: Record<string, string> = {
-  'Tamamlandı': 'bg-emerald-50 text-emerald-700',
-  'Kargoda': 'bg-aq-sky text-aq-blue',
-  'Hazırlanıyor': 'bg-amber-50 text-amber-700',
-  'Yeni': 'bg-violet-50 text-violet-700',
-  'İptal Edildi': 'bg-aq-ice text-aq-muted',
-  'İade': 'bg-orange-50 text-orange-700',
-};
 
 function formatCurrency(n: number) {
   if (n >= 1_000_000) return `₺${(n / 1_000_000).toFixed(1)}M`;
@@ -163,33 +154,27 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-8 pb-4">
-      {/* Welcome */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <div>
-          <p className="text-sm text-aq-muted capitalize">{todayLabel}</p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-aq-text tracking-tight mt-1">
-            Hoş geldiniz{user?.name ? `, ${user.name.split(' ')[0]}` : ''}
-          </h1>
-          <p className="text-aq-muted text-sm mt-1">Mağazanızın güncel özetine göz atın.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/admin/siparisler"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-aq-blue text-white text-sm font-semibold hover:bg-aq-deep hover:text-white transition-colors shadow-sm"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            Siparişler
-          </Link>
-          <Link
-            to="/admin/urunler"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-aq-border/60 text-aq-muted text-sm font-medium hover:bg-aq-ice transition-colors"
-          >
-            <Package className="w-4 h-4" />
-            Ürünler
-          </Link>
-        </div>
-      </div>
+    <AdminPageShell className="space-y-8 pb-4">
+      <AdminPageHeader
+        title={`Hoş geldiniz${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`}
+        description={`${todayLabel.charAt(0).toUpperCase() + todayLabel.slice(1)} · Mağazanızın güncel özetine göz atın.`}
+        action={
+          <>
+            <Link to="/admin/siparisler">
+              <AdminButton>
+                <ShoppingBag className="w-4 h-4" />
+                Siparişler
+              </AdminButton>
+            </Link>
+            <Link to="/admin/urunler">
+              <AdminButton variant="secondary">
+                <Package className="w-4 h-4" />
+                Ürünler
+              </AdminButton>
+            </Link>
+          </>
+        }
+      />
 
       {/* Primary KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6">
@@ -379,17 +364,17 @@ export default function AdminDashboard() {
                 key={op.label}
                 to={op.href}
                 className={cn(
-                  'flex flex-col justify-between p-4 rounded-xl border bg-white transition-all hover:shadow-sm hover:-translate-y-0.5 min-h-[96px]',
-                  op.urgent ? 'border-amber-200 bg-amber-50/30' : 'border-aq-border/60 hover:border-aq-border/60',
+                  'flex flex-col justify-between p-4 rounded-xl border bg-white transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-aq-blue/30 min-h-[96px] group',
+                  op.urgent ? 'border-amber-200 bg-amber-50/30' : 'border-aq-border/60',
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <op.icon className={cn('w-4 h-4', op.urgent ? 'text-amber-600' : 'text-aq-muted')} />
+                  <op.icon className={cn('w-4 h-4 transition-colors', op.urgent ? 'text-amber-600' : 'text-aq-muted group-hover:text-aq-blue')} />
                   {op.urgent && <span className="w-2 h-2 rounded-full bg-amber-500" />}
                 </div>
                 <div className="mt-3">
                   <p className="text-xl font-semibold text-aq-text leading-none">{op.value}</p>
-                  <p className="text-[11px] text-aq-muted mt-1.5 leading-snug">{op.label}</p>
+                  <p className="text-[11px] text-aq-muted mt-1.5 leading-snug group-hover:text-aq-text transition-colors">{op.label}</p>
                 </div>
               </Link>
             ))}
@@ -447,9 +432,7 @@ export default function AdminDashboard() {
                         {Number(order.total).toLocaleString('tr-TR')}₺
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className={cn('text-[11px] font-medium px-2 py-0.5 rounded-full', statusStyles[statusTr] ?? 'bg-aq-ice text-aq-muted')}>
-                          {statusTr}
-                        </span>
+                        <AdminOrderStatusBadge status={statusTr} />
                       </td>
                       <td className="px-5 py-3.5">
                         <Link
@@ -518,6 +501,6 @@ export default function AdminDashboard() {
           </Link>
         </AdminCard>
       </div>
-    </div>
+    </AdminPageShell>
   );
 }

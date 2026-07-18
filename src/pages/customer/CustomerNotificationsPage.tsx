@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { EmptyState } from '@/components/EmptyState';
-import { Package, Truck, Filter, Wrench, Tag, Info, Bell, Loader2 } from 'lucide-react';
+import { Package, Truck, Filter, Wrench, Tag, Info, Bell } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import {
   getNotifications,
@@ -8,6 +7,15 @@ import {
   markAllNotificationsRead,
   type Notification,
 } from '@/services/notificationService';
+import {
+  CustomerPageShell,
+  CustomerPageHeader,
+  CustomerCard,
+  CustomerEmpty,
+  CustomerLoading,
+  CustomerButton,
+} from '@/components/customer/customer-ui';
+import { cn } from '@/lib/utils';
 
 const typeIcons: Record<string, React.ElementType> = {
   order: Package,
@@ -19,15 +27,16 @@ const typeIcons: Record<string, React.ElementType> = {
   system: Info,
   info: Info,
 };
+
 const typeColors: Record<string, string> = {
   order: 'bg-aq-sky text-aq-blue',
-  shipping: 'bg-purple-50 text-purple-600',
-  filter: 'bg-emerald-50 text-emerald-600',
-  service: 'bg-orange-50 text-orange-600',
-  campaign: 'bg-pink-50 text-pink-600',
-  promo: 'bg-pink-50 text-pink-600',
-  system: 'bg-gray-100 text-gray-500',
-  info: 'bg-gray-100 text-gray-500',
+  shipping: 'bg-aq-ice text-aq-deep',
+  filter: 'bg-aq-sky/70 text-aq-blue',
+  service: 'bg-amber-50 text-amber-700',
+  campaign: 'bg-aq-sky text-aq-blue',
+  promo: 'bg-aq-sky text-aq-blue',
+  system: 'bg-aq-ice text-aq-muted',
+  info: 'bg-aq-ice text-aq-muted',
 };
 
 export default function CustomerNotificationsPage() {
@@ -59,54 +68,80 @@ export default function CustomerNotificationsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16 text-aq-muted">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Yükleniyor...
-      </div>
+      <CustomerPageShell>
+        <CustomerLoading rows={4} />
+      </CustomerPageShell>
     );
   }
 
+  const hasUnread = notifications.some((n) => !n.isRead);
+
   return (
-    <>
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-semibold text-aq-text">Bildirimlerim</h2>
-        {notifications.some((n) => !n.isRead) && (
-          <button onClick={() => void handleMarkAllRead()} className="text-xs font-medium text-aq-blue hover:underline">
-            Tümünü Okundu İşaretle
-          </button>
-        )}
-      </div>
-      <div className="space-y-2">
-        {notifications.length === 0 ? (
-          <EmptyState
-            icon={<Bell className="w-8 h-8" />}
-            title="Bildirim Bulunmuyor"
-            description="Yeni bildirimleriniz olduğunda burada görünecek."
+    <CustomerPageShell>
+      <CustomerPageHeader
+        title="Bildirimlerim"
+        description="Sipariş, servis ve kampanya güncellemeleri"
+        action={
+          hasUnread ? (
+            <CustomerButton variant="ghost" onClick={() => void handleMarkAllRead()}>
+              Tümünü okundu işaretle
+            </CustomerButton>
+          ) : undefined
+        }
+      />
+
+      {notifications.length === 0 ? (
+        <CustomerCard padding={false}>
+          <CustomerEmpty
+            icon={Bell}
+            title="Bildirim yok"
+            message="Yeni bildirimleriniz olduğunda burada görünecek."
           />
-        ) : (
-          notifications.map((n) => {
+        </CustomerCard>
+      ) : (
+        <div className="space-y-2">
+          {notifications.map((n) => {
             const Icon = typeIcons[n.type] || Info;
             return (
-              <div
+              <button
                 key={n.id}
+                type="button"
                 onClick={() => void handleMarkRead(n.id)}
-                className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                  n.isRead ? 'bg-white border border-aq-border/60' : 'bg-aq-ice border border-aq-deep/20'
-                }`}
+                className={cn(
+                  'flex items-start gap-3 p-4 rounded-2xl w-full text-left transition-all border',
+                  n.isRead
+                    ? 'bg-white border-aq-border/60'
+                    : 'bg-white border-aq-blue/20 shadow-[0_1px_2px_rgba(18,134,216,0.06)]',
+                )}
               >
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${typeColors[n.type] ?? typeColors.info}`}>
+                <div
+                  className={cn(
+                    'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
+                    typeColors[n.type] ?? typeColors.info,
+                  )}
+                >
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm ${n.isRead ? 'text-aq-muted' : 'text-aq-text font-medium'}`}>{n.title}</p>
-                  <p className="text-xs text-aq-muted mt-0.5">{n.message}</p>
-                  <p className="text-[10px] text-aq-muted mt-1">{n.date}</p>
+                  <p
+                    className={cn(
+                      'text-sm',
+                      n.isRead ? 'text-aq-muted' : 'text-aq-text font-semibold',
+                    )}
+                  >
+                    {n.title}
+                  </p>
+                  <p className="text-xs text-aq-muted mt-0.5 leading-relaxed">{n.message}</p>
+                  <p className="text-[10px] text-aq-muted mt-1.5">{n.date}</p>
                 </div>
-                {!n.isRead && <div className="w-2 h-2 bg-aq-deep rounded-full flex-shrink-0 mt-1.5" />}
-              </div>
+                {!n.isRead && (
+                  <div className="w-2 h-2 bg-aq-blue rounded-full flex-shrink-0 mt-2" />
+                )}
+              </button>
             );
-          })
-        )}
-      </div>
-    </>
+          })}
+        </div>
+      )}
+    </CustomerPageShell>
   );
 }

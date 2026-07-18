@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { Heart, ShoppingCart, Loader2 } from 'lucide-react';
-import { EmptyState } from '@/components/shared/EmptyState';
+import { Heart, ShoppingCart } from 'lucide-react';
 import { ProductPrice } from '@/components/ProductPrice';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/components/Toast';
 import { getFavoriteProducts, removeFavorite } from '@/services/favoriteService';
 import type { Product } from '@/types';
+import {
+  CustomerPageShell,
+  CustomerPageHeader,
+  CustomerCard,
+  CustomerEmpty,
+  CustomerLoading,
+  CustomerButton,
+} from '@/components/customer/customer-ui';
 
 export default function CustomerFavoritesPage() {
   const user = useAuthStore((s) => s.user);
@@ -45,69 +52,85 @@ export default function CustomerFavoritesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16 text-aq-muted">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Yükleniyor...
-      </div>
+      <CustomerPageShell>
+        <CustomerLoading rows={3} />
+      </CustomerPageShell>
     );
   }
 
   return (
-    <>
-      <h2 className="text-lg font-semibold text-aq-text mb-5">Favorilerim ({favorites.length})</h2>
+    <CustomerPageShell>
+      <CustomerPageHeader
+        title="Favorilerim"
+        description={
+          favorites.length > 0
+            ? `${favorites.length} ürün favorilerinizde`
+            : 'Beğendiğiniz ürünleri buradan takip edin'
+        }
+      />
 
       {favorites.length === 0 ? (
-        <div className="bg-white border border-aq-border/60 rounded-2xl">
-          <EmptyState
-            icon={<Heart className="w-7 h-7 text-rose-300" />}
+        <CustomerCard padding={false}>
+          <CustomerEmpty
+            icon={Heart}
             title="Favoriniz yok"
-            description="Beğendiğiniz ürünleri favorilere ekleyin."
+            message="Beğendiğiniz ürünleri favorilere ekleyin."
             action={
-              <Link to="/urunler" className="bg-aq-blue text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white">
-                Ürünleri Keşfet
+              <Link to="/urunler">
+                <CustomerButton>Ürünleri Keşfet</CustomerButton>
               </Link>
             }
           />
-        </div>
+        </CustomerCard>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {favorites.map((p) => (
-            <div key={p.id} className="bg-white border border-aq-border/60 rounded-2xl p-4 flex gap-4 transition-shadow">
-              <Link to={`/urun/${p.slug}`} className="w-20 h-20 bg-aq-ice rounded-xl flex-shrink-0 overflow-hidden">
+            <CustomerCard key={p.id} className="!p-4 flex gap-4">
+              <Link
+                to={`/urun/${p.slug}`}
+                className="w-20 h-20 bg-aq-ice rounded-xl flex-shrink-0 overflow-hidden"
+              >
                 <img
                   src={p.images?.[0] || '/images/products/placeholder.jpg'}
                   alt={p.name}
                   className="w-full h-full object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg';
+                  }}
                 />
               </Link>
               <div className="flex-1 min-w-0">
-                <Link to={`/urun/${p.slug}`} className="text-sm font-semibold text-aq-text line-clamp-1 hover:text-aq-blue transition-colors">
+                <Link
+                  to={`/urun/${p.slug}`}
+                  className="text-sm font-semibold text-aq-text line-clamp-1 hover:text-aq-blue transition-colors"
+                >
                   {p.name}
                 </Link>
                 <p className="text-xs text-aq-muted mt-0.5">{p.category}</p>
                 <ProductPrice product={p} size="sm" className="mt-2" />
                 <div className="flex gap-1.5 mt-2.5">
                   <button
+                    type="button"
                     onClick={() => handleAddToCart(p)}
                     aria-label="Sepete Ekle"
-                    title="Sepete Ekle"
-                    className="w-8 h-8 flex items-center justify-center rounded-full border border-aq-border/60 text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-sky transition-all"
+                    className="w-9 h-9 flex items-center justify-center rounded-xl border border-aq-border/60 text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-sky transition-all"
                   >
                     <ShoppingCart className="w-3.5 h-3.5" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => void handleRemove(p.id)}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-rose-500 transition-all"
+                    className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-red-50 text-aq-blue transition-all"
                     aria-label="Favorilerden çıkar"
                   >
                     <Heart className="w-3.5 h-3.5 fill-current" />
                   </button>
                 </div>
               </div>
-            </div>
+            </CustomerCard>
           ))}
         </div>
       )}
-    </>
+    </CustomerPageShell>
   );
 }

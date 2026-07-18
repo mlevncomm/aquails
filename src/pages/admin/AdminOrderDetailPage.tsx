@@ -2,16 +2,15 @@ import { Link, useParams } from 'react-router';
 import {
   ArrowLeft, Package, MapPin, CreditCard, Printer, ChevronDown,
   CheckCircle, Truck, User, Phone, Mail, Receipt, Tag,
-  Percent, Calendar, Loader2, Save,
+  Percent, Loader2, Save,
 } from 'lucide-react';
-import { StatusBadge } from '@/components/shared/StatusBadge';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { getOrderById, updateOrderStatus, updateOrderShipping, adminConfirmOfflinePayment } from '@/services/orderService';
 import type { OrderDetail } from '@/services/orderService';
 import { ADMIN_ORDER_STATUS_OPTIONS, orderStatusFromTr, orderStatusToTr } from '@/lib/orderStatus';
 import { useToastStore } from '@/components/Toast';
-import { AdminCard } from '@/components/admin/admin-ui';
+import { AdminCard, AdminLoading, AdminEmpty, AdminBreadcrumb, AdminPageShell, AdminPageHeader, AdminButton, AdminOrderStatusBadge, AdminBadge, AdminInput } from '@/components/admin/admin-ui';
 
 const TIMELINE_STEPS = [
   { key: 'pending', step: 'Sipariş Alındı', icon: Receipt },
@@ -110,79 +109,81 @@ export default function AdminOrderDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24 text-aq-muted">
-        <Loader2 className="w-6 h-6 animate-spin" />
-      </div>
+      <AdminPageShell>
+        <AdminLoading variant="spinner" label="Sipariş yükleniyor..." />
+      </AdminPageShell>
     );
   }
 
   if (!order) {
     return (
-      <>
-        <Link to="/admin/siparisler" className="inline-flex items-center gap-1.5 text-sm text-aq-muted hover:text-aq-blue mb-6">
-          <ArrowLeft className="w-4 h-4" /> Siparişlere Dön
-        </Link>
-        <AdminCard>
-          <p className="text-center py-12 text-aq-muted">Sipariş bulunamadı.</p>
+      <AdminPageShell>
+        <AdminBreadcrumb items={[{ label: 'Siparişler', to: '/admin/siparisler' }, { label: 'Detay' }]} />
+        <AdminCard padding={false}>
+          <AdminEmpty message="Bu sipariş bulunamadı veya silinmiş olabilir." title="Sipariş bulunamadı" />
         </AdminCard>
-      </>
+      </AdminPageShell>
     );
   }
 
   const timeline = buildTimeline(currentStatus, order.date, order.paymentStatus);
   const doneSteps = timeline.filter((t) => t.done).length;
   const progress = (doneSteps / timeline.length) * 100;
+  const statusTr = orderStatusToTr(currentStatus);
 
   return (
-    <>
-      <Link to="/admin/siparisler" className="inline-flex items-center gap-1.5 text-sm text-aq-muted hover:text-aq-blue mb-6">
-        <ArrowLeft className="w-4 h-4" /> Siparişlere Dön
-      </Link>
+    <AdminPageShell>
+      <AdminBreadcrumb
+        items={[
+          { label: 'Siparişler', to: '/admin/siparisler' },
+          { label: order.orderNo },
+        ]}
+      />
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="w-10 h-10 bg-aq-sky rounded-xl flex items-center justify-center">
-            <Receipt className="w-5 h-5 text-aq-blue" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-aq-text">{order.orderNo}</h2>
-            <p className="text-xs text-aq-muted flex items-center gap-1"><Calendar className="w-3 h-3" />{order.date}</p>
-          </div>
-          <StatusBadge status={currentStatus} />
-          <span className="text-xs text-aq-muted bg-aq-ice px-2 py-0.5 rounded-full">Ödeme: {order.paymentStatus}</span>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          {order.paymentStatus !== 'paid' && (
-            <button
-              type="button"
-              onClick={() => void handleConfirmPayment()}
-              disabled={confirmingPayment}
-              className="flex items-center gap-2 bg-aq-blue text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-aq-deep disabled:opacity-60"
-            >
-              {confirmingPayment ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-              Ödemeyi Onayla
-            </button>
-          )}
-          <div className="relative">
-            <select
-              value={orderStatusToTr(currentStatus)}
-              onChange={(e) => void handleStatusChange(e.target.value)}
-              className="appearance-none cursor-pointer pl-4 pr-10 py-2.5 text-sm font-medium bg-white border border-aq-border/60 rounded-xl text-aq-text focus:outline-none focus:ring-2 focus:ring-aq-aqua/30 min-w-[160px]"
-            >
-              {ADMIN_ORDER_STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-            <ChevronDown className="w-4 h-4 text-aq-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-          <button
+      <AdminPageHeader
+        title={order.orderNo}
+        description={order.date}
+        action={
+          <>
+            <AdminOrderStatusBadge status={statusTr} />
+            <AdminBadge tone={order.paymentStatus === 'paid' ? 'success' : 'warning'}>
+              Ödeme: {order.paymentStatus}
+            </AdminBadge>
+          </>
+        }
+      />
+
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Link to="/admin/siparisler">
+          <AdminButton variant="ghost" className="!px-3">
+            <ArrowLeft className="w-4 h-4" /> Geri
+          </AdminButton>
+        </Link>
+        {order.paymentStatus !== 'paid' && (
+          <AdminButton
             type="button"
-            onClick={() => window.print()}
-            className="flex items-center gap-2 bg-white border border-aq-border/60 text-aq-muted px-4 py-2.5 rounded-xl text-sm font-medium hover:border-aq-aqua/50 hover:text-aq-blue"
+            onClick={() => void handleConfirmPayment()}
+            disabled={confirmingPayment}
           >
-            <Printer className="w-4 h-4" /> Yazdır
-          </button>
+            {confirmingPayment ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+            Ödemeyi Onayla
+          </AdminButton>
+        )}
+        <div className="relative">
+          <select
+            value={orderStatusToTr(currentStatus)}
+            onChange={(e) => void handleStatusChange(e.target.value)}
+            className="appearance-none cursor-pointer pl-4 pr-10 py-2.5 text-sm font-medium bg-white border border-aq-border/60 rounded-xl text-aq-text focus:outline-none focus:ring-2 focus:ring-aq-aqua/30 min-w-[160px] min-h-[40px]"
+          >
+            {ADMIN_ORDER_STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <ChevronDown className="w-4 h-4 text-aq-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
+        <AdminButton type="button" variant="secondary" onClick={() => window.print()}>
+          <Printer className="w-4 h-4" /> Yazdır
+        </AdminButton>
       </div>
 
       <AdminCard className="mb-6">
@@ -274,27 +275,25 @@ export default function AdminOrderDetailPage() {
               <p className="text-sm text-aq-muted leading-relaxed">{order.shipping.address || '—'}</p>
             </div>
             <div className="space-y-2">
-              <input
+              <AdminInput
                 value={cargoCompany}
                 onChange={(e) => setCargoCompany(e.target.value)}
                 placeholder="Kargo firması (örn: Yurtiçi Kargo)"
-                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue"
               />
-              <input
+              <AdminInput
                 value={trackingNo}
                 onChange={(e) => setTrackingNo(e.target.value)}
                 placeholder="Takip numarası"
-                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue"
               />
-              <button
+              <AdminButton
                 type="button"
                 onClick={() => void handleSaveShipping()}
                 disabled={saving}
-                className="flex items-center justify-center gap-2 w-full bg-aq-blue text-white py-2.5 rounded-xl text-sm font-medium hover:bg-aq-deep hover:text-white disabled:opacity-60"
+                className="w-full"
               >
                 <Save className="w-4 h-4" />
                 {saving ? 'Kaydediliyor...' : 'Kargo Bilgisi Kaydet'}
-              </button>
+              </AdminButton>
             </div>
           </AdminCard>
 
@@ -329,6 +328,6 @@ export default function AdminOrderDetailPage() {
           </AdminCard>
         </div>
       </div>
-    </>
+    </AdminPageShell>
   );
 }

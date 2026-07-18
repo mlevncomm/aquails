@@ -1,8 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Trash2, Tag, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Tag } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
 import { getCoupons, createCoupon, toggleCouponActive, deleteCoupon, type AdminCoupon } from '@/services/couponService';
-import { AdminPageHeader, AdminCard, AdminInput, AdminButton, AdminTableWrap } from '@/components/admin/admin-ui';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminCard,
+  AdminInput,
+  AdminSelect,
+  AdminButton,
+  AdminTableWrap,
+  AdminLoading,
+  AdminEmpty,
+  AdminBadge,
+} from '@/components/admin/admin-ui';
 
 export default function AdminCampaignsPage() {
   const [items, setItems] = useState<AdminCoupon[]>([]);
@@ -55,7 +66,7 @@ export default function AdminCampaignsPage() {
   };
 
   return (
-    <>
+    <AdminPageShell>
       <AdminPageHeader
         title="Kampanya Yönetimi"
         description="İndirim kuponları ve kampanyalar (Supabase kuponları)"
@@ -71,10 +82,10 @@ export default function AdminCampaignsPage() {
           <form onSubmit={(e) => void handleSubmit(e)} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <AdminInput required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Kampanya adı (not)" />
             <AdminInput required value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="Kupon kodu" />
-            <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as 'percent' | 'fixed' })} className="px-4 py-2.5 rounded-xl border border-aq-border/60 text-sm">
+            <AdminSelect value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as 'percent' | 'fixed' })}>
               <option value="percent">Yüzde</option>
               <option value="fixed">Sabit</option>
-            </select>
+            </AdminSelect>
             <AdminInput required type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder="Değer" />
             <AdminInput required type="date" value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })} />
             <AdminInput required type="date" value={form.end} onChange={(e) => setForm({ ...form, end: e.target.value })} />
@@ -86,10 +97,14 @@ export default function AdminCampaignsPage() {
         </AdminCard>
       )}
 
-      <AdminTableWrap>
-        {loading ? (
-          <div className="py-12 text-center text-aq-muted"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
-        ) : (
+      {loading ? (
+        <AdminLoading label="Kampanyalar yükleniyor..." />
+      ) : items.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty message="Henüz kampanya veya kupon yok." />
+        </AdminCard>
+      ) : (
+        <AdminTableWrap stickyFirst>
           <table className="w-full">
             <thead>
               <tr className="bg-aq-ice border-b border-aq-border/60">
@@ -114,12 +129,12 @@ export default function AdminCampaignsPage() {
                   <td className="px-4 py-3 text-sm text-aq-muted">{c.end}</td>
                   <td className="px-4 py-3 text-sm text-aq-muted">{c.used}/{c.usageLimit || '∞'}</td>
                   <td className="px-4 py-3">
-                    <button onClick={() => void toggle(c.id, c.active)} className={`text-xs font-medium px-2 py-0.5 rounded-full ${c.active ? 'bg-emerald-50 text-emerald-600' : 'bg-aq-ice text-aq-muted'}`}>
-                      {c.active ? 'Aktif' : 'Pasif'}
+                    <button type="button" onClick={() => void toggle(c.id, c.active)}>
+                      <AdminBadge tone={c.active ? 'success' : 'neutral'}>{c.active ? 'Aktif' : 'Pasif'}</AdminBadge>
                     </button>
                   </td>
                   <td className="px-4 py-3">
-                    <button onClick={() => void remove(c.id)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500">
+                    <button type="button" onClick={() => void remove(c.id)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </td>
@@ -127,8 +142,8 @@ export default function AdminCampaignsPage() {
               ))}
             </tbody>
           </table>
-        )}
-      </AdminTableWrap>
-    </>
+        </AdminTableWrap>
+      )}
+    </AdminPageShell>
   );
 }

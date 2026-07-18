@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router';
 import { ArrowLeft, Plus, X, Save, ImageIcon, Package, Loader2 } from 'lucide-react';
-import { EmptyState } from '@/components/shared/EmptyState';
 import { useToastStore } from '@/components/Toast';
 import {
   getAdminProductById,
@@ -11,7 +10,7 @@ import {
   setProductPrimaryImage,
 } from '@/services/productService';
 import { uploadProductImage } from '@/services/storageService';
-import { AdminCard, AdminInput, AdminLabel, AdminSelect, AdminTextarea, AdminButton } from '@/components/admin/admin-ui';
+import { AdminCard, AdminInput, AdminLabel, AdminSelect, AdminTextarea, AdminButton, AdminPageShell, AdminPageHeader, AdminBreadcrumb, AdminLoading, AdminEmpty } from '@/components/admin/admin-ui';
 
 function specsFromProduct(specs: Record<string, string>) {
   const entries = Object.entries(specs);
@@ -154,43 +153,51 @@ export default function AdminProductEditPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24 text-aq-muted">
-        <Loader2 className="w-6 h-6 animate-spin" />
-      </div>
+      <AdminPageShell>
+        <AdminLoading variant="spinner" label="Ürün yükleniyor..." />
+      </AdminPageShell>
     );
   }
 
   if (!isNew && notFound) {
     return (
-      <>
-        <Link to="/admin/urunler" className="inline-flex items-center gap-1.5 text-sm text-aq-muted hover:text-aq-blue mb-6">
-          <ArrowLeft className="w-4 h-4" /> Ürünlere Dön
-        </Link>
-        <AdminCard>
-          <EmptyState
-            icon={<Package className="w-8 h-8 text-aq-muted" />}
+      <AdminPageShell>
+        <AdminBreadcrumb items={[{ label: 'Ürünler', to: '/admin/urunler' }, { label: 'Düzenle' }]} />
+        <AdminCard padding={false}>
+          <AdminEmpty
+            icon={Package}
             title="Ürün bulunamadı"
-            description="Düzenlemek istediğiniz ürün mevcut değil veya silinmiş olabilir."
+            message="Düzenlemek istediğiniz ürün mevcut değil veya silinmiş olabilir."
             action={
-              <Link to="/admin/urunler" className="bg-aq-blue text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white">
-                Ürün Listesine Dön
+              <Link to="/admin/urunler">
+                <AdminButton>Ürün Listesine Dön</AdminButton>
               </Link>
             }
           />
         </AdminCard>
-      </>
+      </AdminPageShell>
     );
   }
 
   return (
-    <>
-      <Link to="/admin/urunler" className="inline-flex items-center gap-1.5 text-sm text-aq-muted hover:text-aq-blue mb-6">
-        <ArrowLeft className="w-4 h-4" /> Ürünlere Dön
-      </Link>
-
-      <h2 className="text-xl font-semibold text-aq-text mb-6">
-        {isNew ? 'Yeni Ürün Ekle' : 'Ürün Düzenle'}
-      </h2>
+    <AdminPageShell>
+      <AdminBreadcrumb
+        items={[
+          { label: 'Ürünler', to: '/admin/urunler' },
+          { label: isNew ? 'Yeni Ürün' : 'Düzenle' },
+        ]}
+      />
+      <AdminPageHeader
+        title={isNew ? 'Yeni Ürün Ekle' : 'Ürün Düzenle'}
+        description={isNew ? 'Kataloğa yeni ürün ekleyin.' : 'Ürün bilgilerini güncelleyin.'}
+        action={
+          <Link to="/admin/urunler">
+            <AdminButton variant="ghost" className="!px-3">
+              <ArrowLeft className="w-4 h-4" /> Geri
+            </AdminButton>
+          </Link>
+        }
+      />
 
       <form onSubmit={(e) => void handleSave(e)} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -310,6 +317,6 @@ export default function AdminProductEditPage() {
           </AdminButton>
         </div>
       </form>
-    </>
+    </AdminPageShell>
   );
 }

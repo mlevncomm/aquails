@@ -1,8 +1,16 @@
-import { EmptyState } from '@/components/EmptyState';
-import { Tag, Copy, Check, Loader2 } from 'lucide-react';
+import { Tag, Copy, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router';
 import { useToastStore } from '@/components/Toast';
 import { getActiveCouponsForCustomer, type Coupon } from '@/services/couponService';
+import {
+  CustomerPageShell,
+  CustomerPageHeader,
+  CustomerCard,
+  CustomerEmpty,
+  CustomerLoading,
+  CustomerButton,
+} from '@/components/customer/customer-ui';
 
 function formatDiscount(c: Coupon): string {
   if (c.type === 'percent') return `%${c.value} İndirim`;
@@ -36,36 +44,51 @@ export default function CustomerCouponsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16 text-aq-muted">
-        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Yükleniyor...
-      </div>
+      <CustomerPageShell>
+        <CustomerLoading rows={2} />
+      </CustomerPageShell>
     );
   }
 
   return (
-    <>
-      <h2 className="text-lg font-semibold text-aq-text mb-5">Kuponlarım</h2>
+    <CustomerPageShell>
+      <CustomerPageHeader
+        title="Kuponlarım"
+        description="Aktif indirim kodlarınızı kopyalayıp ödemede kullanın."
+      />
 
       {coupons.length === 0 ? (
-        <EmptyState icon={<Tag className="w-8 h-8" />} title="Aktif Kuponunuz Yok" description="Kampanyaları takip ederek kupon kazanabilirsiniz." action={{ label: 'Kampanyalar', href: '/kampanyalar' }} />
+        <CustomerCard padding={false}>
+          <CustomerEmpty
+            icon={Tag}
+            title="Aktif kuponunuz yok"
+            message="Kampanyaları takip ederek kupon kazanabilirsiniz."
+            action={
+              <Link to="/kampanyalar">
+                <CustomerButton>Kampanyalar</CustomerButton>
+              </Link>
+            }
+          />
+        </CustomerCard>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {coupons.map((c) => (
-            <div key={c.code} className="bg-white border border-aq-border/60 rounded-2xl p-5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-aq-ice rounded-bl-full" />
-              <p className="text-lg font-semibold text-aq-text mb-1">{formatDiscount(c)}</p>
-              <p className="text-xs text-aq-muted mb-3">Min. sipariş: {formatMin(c)}</p>
+            <CustomerCard key={c.code} className="relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-aq-sky/50 rounded-bl-full" />
+              <p className="text-lg font-semibold text-aq-text mb-1 relative">{formatDiscount(c)}</p>
+              <p className="text-xs text-aq-muted mb-3 relative">Min. sipariş: {formatMin(c)}</p>
               <button
+                type="button"
                 onClick={() => copyCode(c.code)}
-                className="flex items-center gap-2 bg-aq-ice text-aq-blue px-4 py-2 rounded-xl text-sm font-semibold hover:bg-aq-sky transition-all"
+                className="relative flex items-center gap-2 bg-aq-ice text-aq-blue px-4 py-2 rounded-xl text-sm font-semibold hover:bg-aq-sky transition-all"
               >
                 {copied === c.code ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 {c.code}
               </button>
-            </div>
+            </CustomerCard>
           ))}
         </div>
       )}
-    </>
+    </CustomerPageShell>
   );
 }

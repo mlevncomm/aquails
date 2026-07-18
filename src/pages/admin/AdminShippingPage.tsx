@@ -3,7 +3,15 @@ import { Truck, Save, Loader2, Plus, Trash2 } from 'lucide-react';
 import { getShippingConfig, saveShippingConfig, type ShippingMethod } from '@/services/shippingService';
 import { getSiteSettings, saveSiteSettings } from '@/services/settingsService';
 import { useToastStore } from '@/components/Toast';
-import { AdminPageHeader, AdminCard, AdminInput, AdminLabel, AdminButton } from '@/components/admin/admin-ui';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminCard,
+  AdminInput,
+  AdminLabel,
+  AdminButton,
+  AdminLoading,
+} from '@/components/admin/admin-ui';
 
 export default function AdminShippingPage() {
   const addToast = useToastStore((s) => s.add);
@@ -50,11 +58,15 @@ export default function AdminShippingPage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-aq-muted" /></div>;
+    return (
+      <AdminPageShell>
+        <AdminLoading variant="spinner" label="Kargo ayarları yükleniyor..." />
+      </AdminPageShell>
+    );
   }
 
   return (
-    <>
+    <AdminPageShell>
       <AdminPageHeader title="Kargo Modülü" description="Kargo yöntemleri, kapıda ödeme ücreti ve ücretsiz kargo limiti" />
 
       <form onSubmit={(e) => void handleSave(e)}>
@@ -77,7 +89,9 @@ export default function AdminShippingPage() {
         <AdminCard className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-aq-text">Kargo Yöntemleri</h3>
-            <button type="button" onClick={addMethod} className="text-xs text-aq-blue flex items-center gap-1"><Plus className="w-3.5 h-3.5" />Ekle</button>
+            <AdminButton type="button" variant="ghost" onClick={addMethod} className="text-xs min-h-0 py-1.5 px-3">
+              <Plus className="w-3.5 h-3.5" />Ekle
+            </AdminButton>
           </div>
           <div className="space-y-4">
             {methods.map((m, idx) => (
@@ -99,6 +113,6 @@ export default function AdminShippingPage() {
           Kaydet
         </AdminButton>
       </form>
-    </>
+    </AdminPageShell>
   );
 }
