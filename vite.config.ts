@@ -20,10 +20,12 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
+          // Keep recharts with the app graph — splitting it into charts-vendor
+          // creates a circular chunk with react-vendor and crashes boot:
+          // "Cannot access 'S' before initialization".
           if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-router/')) return 'react-vendor';
           if (id.includes('/@supabase/')) return 'supabase-vendor';
           if (id.includes('/framer-motion/')) return 'motion-vendor';
-          if (id.includes('/recharts/')) return 'charts-vendor';
           if (id.includes('/lucide-react/')) return 'icons-vendor';
           return undefined;
         },
