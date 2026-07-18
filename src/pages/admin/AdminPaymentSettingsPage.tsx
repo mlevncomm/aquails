@@ -9,6 +9,16 @@ import {
   type BankAccount,
 } from '@/services/settingsService';
 import { useToastStore } from '@/components/Toast';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminCard,
+  AdminInput,
+  AdminSelect,
+  AdminLabel,
+  AdminButton,
+  AdminLoading,
+} from '@/components/admin/admin-ui';
 
 export default function AdminPaymentSettingsPage() {
   const addToast = useToastStore((s) => s.add);
@@ -51,25 +61,29 @@ export default function AdminPaymentSettingsPage() {
   };
 
   if (loading) {
-    return <div className="text-sm text-aq-muted">Yükleniyor...</div>;
+    return (
+      <AdminPageShell>
+        <AdminLoading variant="spinner" />
+      </AdminPageShell>
+    );
   }
 
   return (
-    <>
-      <h2 className="text-lg font-semibold text-aq-text mb-2">Ödeme Ayarları</h2>
-      <p className="text-sm text-aq-muted mb-5">
-        PayTR durumunu yönetin. Gizli anahtarlar yalnızca sunucu ortam değişkenlerinde saklanır.
-      </p>
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Ödeme Ayarları"
+        description="PayTR durumunu yönetin. Gizli anahtarlar yalnızca sunucu ortam değişkenlerinde saklanır."
+      />
 
       {saved && (
-        <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-600 px-4 py-3 rounded-xl text-sm font-medium mb-5">
+        <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-3 rounded-xl text-sm font-medium mb-5">
           <CheckCircle className="w-4 h-4" />
           Ayarlar kaydedildi.
         </div>
       )}
 
-      <form onSubmit={handleSave} className="space-y-5">
-        <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+      <form onSubmit={(e) => void handleSave(e)} className="space-y-5">
+        <AdminCard>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-aq-text flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-aq-blue" />
@@ -101,15 +115,14 @@ export default function AdminPaymentSettingsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-aq-muted mb-1 block">Test Modu</label>
-              <select
+              <AdminLabel>Test Modu</AdminLabel>
+              <AdminSelect
                 value={paytr.testMode ? '1' : '0'}
                 onChange={(e) => setPaytr({ ...paytr, testMode: e.target.value === '1' })}
-                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl bg-white"
               >
                 <option value="1">Test (Sandbox)</option>
                 <option value="0">Canlı (Production)</option>
-              </select>
+              </AdminSelect>
             </div>
           </div>
 
@@ -117,13 +130,13 @@ export default function AdminPaymentSettingsPage() {
             <Shield className="w-3.5 h-3.5" />
             Gizli bilgiler tarayıcıya veya veritabanı ayar tablosuna aktarılmaz.
           </div>
-        </div>
+        </AdminCard>
 
-        <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+        <AdminCard>
           <h3 className="text-sm font-semibold text-aq-text mb-4">Havale / EFT Banka Hesapları</h3>
           {banks.map((bank, i) => (
             <div key={i} className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-              <input
+              <AdminInput
                 value={bank.bankName}
                 onChange={(e) => {
                   const next = [...banks];
@@ -131,9 +144,8 @@ export default function AdminPaymentSettingsPage() {
                   setBanks(next);
                 }}
                 placeholder="Banka adı"
-                className="px-3 py-2 text-sm border border-aq-border/60 rounded-xl"
               />
-              <input
+              <AdminInput
                 value={bank.accountName}
                 onChange={(e) => {
                   const next = [...banks];
@@ -141,9 +153,8 @@ export default function AdminPaymentSettingsPage() {
                   setBanks(next);
                 }}
                 placeholder="Hesap sahibi"
-                className="px-3 py-2 text-sm border border-aq-border/60 rounded-xl"
               />
-              <input
+              <AdminInput
                 value={bank.iban}
                 onChange={(e) => {
                   const next = [...banks];
@@ -151,28 +162,24 @@ export default function AdminPaymentSettingsPage() {
                   setBanks(next);
                 }}
                 placeholder="IBAN"
-                className="px-3 py-2 text-sm border border-aq-border/60 rounded-xl"
               />
             </div>
           ))}
-          <button
+          <AdminButton
             type="button"
+            variant="ghost"
+            className="text-xs min-h-0 py-1.5 px-3"
             onClick={() => setBanks([...banks, { bankName: '', accountName: '', iban: '' }])}
-            className="text-xs text-aq-blue font-medium hover:underline"
           >
             + Hesap ekle
-          </button>
-        </div>
+          </AdminButton>
+        </AdminCard>
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="flex items-center gap-2 bg-aq-blue text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-aq-deep transition-all disabled:opacity-60"
-        >
+        <AdminButton type="submit" disabled={saving}>
           <Save className="w-4 h-4" />
           {saving ? 'Kaydediliyor...' : 'Kaydet'}
-        </button>
+        </AdminButton>
       </form>
-    </>
+    </AdminPageShell>
   );
 }

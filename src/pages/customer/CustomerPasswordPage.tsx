@@ -2,6 +2,14 @@ import { useState } from 'react';
 import { Lock, Eye, EyeOff, Shield, CheckCircle } from 'lucide-react';
 import { updatePassword } from '@/services/authService';
 import { useToastStore } from '@/components/Toast';
+import {
+  CustomerPageShell,
+  CustomerPageHeader,
+  CustomerCard,
+  CustomerLabel,
+  CustomerButton,
+} from '@/components/customer/customer-ui';
+import { cn } from '@/lib/utils';
 
 export default function CustomerPasswordPage() {
   const addToast = useToastStore((s) => s.add);
@@ -36,52 +44,112 @@ export default function CustomerPasswordPage() {
     }
   };
 
-  const strength = form.newPass.length === 0 ? 0 : form.newPass.length < 8 ? 1 : !/[A-Z]/.test(form.newPass) || !/[0-9]/.test(form.newPass) ? 2 : 3;
+  const strength =
+    form.newPass.length === 0
+      ? 0
+      : form.newPass.length < 8
+        ? 1
+        : !/[A-Z]/.test(form.newPass) || !/[0-9]/.test(form.newPass)
+          ? 2
+          : 3;
+
+  const fieldClass = (hasError?: string) =>
+    cn(
+      'w-full px-4 py-2.5 pr-10 text-sm rounded-xl border bg-aq-ice/50 focus:outline-none focus:ring-2 focus:ring-aq-aqua/20 focus:border-aq-blue focus:bg-white transition-colors',
+      hasError ? 'border-red-300' : 'border-aq-border/60',
+    );
 
   return (
-      <>      <div className="max-w-md">
-        <h2 className="text-lg font-semibold text-aq-text mb-5">Şifre Değiştir</h2>
+    <CustomerPageShell className="max-w-md">
+      <CustomerPageHeader
+        title="Şifre Değiştir"
+        description="Hesabınızın güvenliği için güçlü bir şifre kullanın."
+      />
 
-        {saved && (
-          <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium mb-5">
-            <CheckCircle className="w-4 h-4" /> Şifreniz başarıyla güncellendi.
-          </div>
-        )}
+      {saved && (
+        <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium mb-5 border border-emerald-100">
+          <CheckCircle className="w-4 h-4 flex-shrink-0" /> Şifreniz başarıyla güncellendi.
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="bg-white border border-aq-border/60 rounded-2xl p-6 space-y-4">
-          {/* Current Password */}
+      <CustomerCard>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-aq-text mb-1.5 flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-aq-muted" />Mevcut Şifre</label>
+            <CustomerLabel>
+              <span className="inline-flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5" /> Mevcut Şifre
+              </span>
+            </CustomerLabel>
             <div className="relative">
-              <input type={show.current ? 'text' : 'password'} value={form.current} onChange={e => setForm({ ...form, current: e.target.value })} className={`w-full px-4 py-2.5 pr-10 text-sm border rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/30 ${errors.current ? 'border-red-300' : 'border-aq-border/60'}`} />
-              <button type="button" onClick={() => setShow({ ...show, current: !show.current })} className="absolute right-3 top-1/2 -translate-y-1/2 text-aq-muted">{show.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+              <input
+                type={show.current ? 'text' : 'password'}
+                value={form.current}
+                onChange={(e) => setForm({ ...form, current: e.target.value })}
+                className={fieldClass(errors.current)}
+              />
+              <button
+                type="button"
+                onClick={() => setShow({ ...show, current: !show.current })}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-aq-muted"
+              >
+                {show.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
             {errors.current && <p className="text-xs text-red-500 mt-1">{errors.current}</p>}
           </div>
 
-          {/* New Password */}
           <div>
-            <label className="text-sm font-medium text-aq-text mb-1.5 flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-aq-muted" />Yeni Şifre</label>
+            <CustomerLabel>
+              <span className="inline-flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5" /> Yeni Şifre
+              </span>
+            </CustomerLabel>
             <div className="relative">
-              <input type={show.new ? 'text' : 'password'} value={form.newPass} onChange={e => setForm({ ...form, newPass: e.target.value })} className={`w-full px-4 py-2.5 pr-10 text-sm border rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/30 ${errors.newPass ? 'border-red-300' : 'border-aq-border/60'}`} />
-              <button type="button" onClick={() => setShow({ ...show, new: !show.new })} className="absolute right-3 top-1/2 -translate-y-1/2 text-aq-muted">{show.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+              <input
+                type={show.new ? 'text' : 'password'}
+                value={form.newPass}
+                onChange={(e) => setForm({ ...form, newPass: e.target.value })}
+                className={fieldClass(errors.newPass)}
+              />
+              <button
+                type="button"
+                onClick={() => setShow({ ...show, new: !show.new })}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-aq-muted"
+              >
+                {show.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
             {errors.newPass && <p className="text-xs text-red-500 mt-1">{errors.newPass}</p>}
-            {/* Strength indicator */}
             {form.newPass && (
               <div className="mt-2">
-                <div className="flex gap-1 h-1"><div className={`flex-1 rounded-full ${strength >= 1 ? 'bg-red-400' : 'bg-gray-200'}`} /><div className={`flex-1 rounded-full ${strength >= 2 ? 'bg-amber-400' : 'bg-gray-200'}`} /><div className={`flex-1 rounded-full ${strength >= 3 ? 'bg-emerald-400' : 'bg-gray-200'}`} /></div>
-                <p className="text-[10px] text-aq-muted mt-1">{strength === 1 ? 'Zayıf' : strength === 2 ? 'Orta' : 'Güçlü'}</p>
+                <div className="flex gap-1 h-1">
+                  <div className={`flex-1 rounded-full ${strength >= 1 ? 'bg-red-400' : 'bg-aq-border'}`} />
+                  <div className={`flex-1 rounded-full ${strength >= 2 ? 'bg-amber-400' : 'bg-aq-border'}`} />
+                  <div className={`flex-1 rounded-full ${strength >= 3 ? 'bg-emerald-400' : 'bg-aq-border'}`} />
+                </div>
+                <p className="text-[10px] text-aq-muted mt-1">
+                  {strength === 1 ? 'Zayıf' : strength === 2 ? 'Orta' : 'Güçlü'}
+                </p>
               </div>
             )}
           </div>
 
-          {/* Confirm Password */}
           <div>
-            <label className="text-sm font-medium text-aq-text mb-1.5">Yeni Şifre Tekrar</label>
+            <CustomerLabel>Yeni Şifre Tekrar</CustomerLabel>
             <div className="relative">
-              <input type={show.confirm ? 'text' : 'password'} value={form.confirm} onChange={e => setForm({ ...form, confirm: e.target.value })} className={`w-full px-4 py-2.5 pr-10 text-sm border rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/30 ${errors.confirm ? 'border-red-300' : 'border-aq-border/60'}`} />
-              <button type="button" onClick={() => setShow({ ...show, confirm: !show.confirm })} className="absolute right-3 top-1/2 -translate-y-1/2 text-aq-muted">{show.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+              <input
+                type={show.confirm ? 'text' : 'password'}
+                value={form.confirm}
+                onChange={(e) => setForm({ ...form, confirm: e.target.value })}
+                className={fieldClass(errors.confirm)}
+              />
+              <button
+                type="button"
+                onClick={() => setShow({ ...show, confirm: !show.confirm })}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-aq-muted"
+              >
+                {show.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
             {errors.confirm && <p className="text-xs text-red-500 mt-1">{errors.confirm}</p>}
           </div>
@@ -93,11 +161,11 @@ export default function CustomerPasswordPage() {
             <p className={/[0-9]/.test(form.newPass) ? 'text-emerald-600' : ''}>• En az 1 rakam</p>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full bg-aq-blue text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all disabled:opacity-60">
+          <CustomerButton type="submit" disabled={loading} className="w-full">
             {loading ? 'Güncelleniyor...' : 'Şifremi Güncelle'}
-          </button>
+          </CustomerButton>
         </form>
-      </div>
-      </>
+      </CustomerCard>
+    </CustomerPageShell>
   );
 }

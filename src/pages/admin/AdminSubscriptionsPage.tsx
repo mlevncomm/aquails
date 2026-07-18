@@ -2,11 +2,21 @@ import { useState, useEffect } from 'react';
 import { RefreshCw, Users } from 'lucide-react';
 import { getSubscriptions, getSubscriptionStats, updateSubscriptionStatus, type AdminSubscription } from '@/services/subscriptionService';
 import { useToastStore } from '@/components/Toast';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminStatCard,
+  AdminTableWrap,
+  AdminLoading,
+  AdminEmpty,
+  AdminBadge,
+  AdminCard,
+} from '@/components/admin/admin-ui';
 
-const statusLabels: Record<string, { text: string; color: string }> = {
-  active: { text: 'Aktif', color: 'bg-emerald-50 text-emerald-600' },
-  paused: { text: 'Duraklatıldı', color: 'bg-amber-50 text-amber-600' },
-  cancelled: { text: 'İptal', color: 'bg-gray-100 text-gray-500' },
+const statusLabels: Record<string, { text: string; tone: 'success' | 'warning' | 'neutral' }> = {
+  active: { text: 'Aktif', tone: 'success' },
+  paused: { text: 'Duraklatıldı', tone: 'warning' },
+  cancelled: { text: 'İptal', tone: 'neutral' },
 };
 
 export default function AdminSubscriptionsPage() {
@@ -36,70 +46,64 @@ export default function AdminSubscriptionsPage() {
   };
 
   return (
-    <>
-      <h2 className="text-lg font-semibold text-aq-text mb-5">Abonelikler</h2>
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Abonelikler"
+        description="Filtre aboneliklerini ve gelir özetini yönetin."
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {[
-          { label: 'Toplam Abone', value: String(stats.total), icon: Users },
-          { label: 'Aktif', value: String(stats.active), icon: RefreshCw },
-          { label: 'Duraklatılmış', value: String(stats.paused), icon: RefreshCw },
-          { label: 'Aylık Gelir', value: `${stats.monthlyRevenue.toLocaleString('tr-TR')}₺`, icon: RefreshCw },
-        ].map((s) => (
-          <div key={s.label} className="bg-white border border-aq-border/60 rounded-2xl p-4 text-center">
-            <s.icon className="w-5 h-5 text-aq-blue mx-auto mb-1" />
-            <p className="text-xl font-semibold text-aq-text">{s.value}</p>
-            <p className="text-xs text-aq-muted">{s.label}</p>
-          </div>
-        ))}
+        <AdminStatCard label="Toplam Abone" value={stats.total} icon={<Users className="w-5 h-5" />} />
+        <AdminStatCard label="Aktif" value={stats.active} icon={<RefreshCw className="w-5 h-5" />} />
+        <AdminStatCard label="Duraklatılmış" value={stats.paused} icon={<RefreshCw className="w-5 h-5" />} />
+        <AdminStatCard label="Aylık Gelir" value={`${stats.monthlyRevenue.toLocaleString('tr-TR')}₺`} icon={<RefreshCw className="w-5 h-5" />} />
       </div>
 
-      <div className="bg-white border border-aq-border/60 rounded-2xl overflow-hidden">
-        {loading ? (
-          <div className="text-center py-12 text-sm text-aq-muted">Yükleniyor...</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-aq-ice">
-                  {['Müşteri', 'Plan', 'Cihaz', 'Sonraki Teslimat', 'Tutar', 'Durum', 'İşlem'].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {subs.map((s) => {
-                  const st = statusLabels[s.status];
-                  return (
-                    <tr key={s.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
-                      <td className="px-4 py-3 text-sm font-medium text-aq-text">{s.customer}</td>
-                      <td className="px-4 py-3 text-sm text-aq-muted">{s.plan}</td>
-                      <td className="px-4 py-3 text-sm text-aq-muted">{s.device}</td>
-                      <td className="px-4 py-3 text-sm text-aq-muted">{s.nextDelivery}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-aq-text">{s.price.toLocaleString('tr-TR')}₺</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${st.color}`}>{st.text}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-1 text-xs">
-                          {s.status !== 'active' && <button onClick={() => void setStatus(s.id, 'active')} className="px-2 py-1 rounded bg-emerald-50 text-emerald-600">Aktif</button>}
-                          {s.status !== 'paused' && <button onClick={() => void setStatus(s.id, 'paused')} className="px-2 py-1 rounded bg-amber-50 text-amber-600">Duraklat</button>}
-                          {s.status !== 'cancelled' && <button onClick={() => void setStatus(s.id, 'cancelled')} className="px-2 py-1 rounded bg-red-50 text-red-600">İptal</button>}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-        {!loading && subs.length === 0 && (
-          <div className="text-center py-8 text-sm text-aq-muted">Abonelik bulunmuyor</div>
-        )}
-      </div>
-    </>
+      {loading ? (
+        <AdminLoading />
+      ) : subs.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty icon={Users} message="Abonelik bulunmuyor" />
+        </AdminCard>
+      ) : (
+        <AdminTableWrap stickyFirst>
+          <table className="w-full">
+            <thead>
+              <tr className="bg-aq-ice border-b border-aq-border/60">
+                {['Müşteri', 'Plan', 'Cihaz', 'Sonraki Teslimat', 'Tutar', 'Durum', 'İşlem'].map((h) => (
+                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {subs.map((s) => {
+                const st = statusLabels[s.status];
+                return (
+                  <tr key={s.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
+                    <td className="px-4 py-3 text-sm font-medium text-aq-text">{s.customer}</td>
+                    <td className="px-4 py-3 text-sm text-aq-muted">{s.plan}</td>
+                    <td className="px-4 py-3 text-sm text-aq-muted">{s.device}</td>
+                    <td className="px-4 py-3 text-sm text-aq-muted">{s.nextDelivery}</td>
+                    <td className="px-4 py-3 text-sm font-semibold text-aq-text">{s.price.toLocaleString('tr-TR')}₺</td>
+                    <td className="px-4 py-3">
+                      <AdminBadge tone={st.tone}>{st.text}</AdminBadge>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-1 text-xs">
+                        {s.status !== 'active' && <button type="button" onClick={() => void setStatus(s.id, 'active')} className="px-2 py-1 rounded bg-emerald-50 text-emerald-600">Aktif</button>}
+                        {s.status !== 'paused' && <button type="button" onClick={() => void setStatus(s.id, 'paused')} className="px-2 py-1 rounded bg-amber-50 text-amber-600">Duraklat</button>}
+                        {s.status !== 'cancelled' && <button type="button" onClick={() => void setStatus(s.id, 'cancelled')} className="px-2 py-1 rounded bg-red-50 text-red-600">İptal</button>}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </AdminTableWrap>
+      )}
+    </AdminPageShell>
   );
 }

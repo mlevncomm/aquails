@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Send, RotateCcw, Trash2 } from 'lucide-react';
+import { Send, RotateCcw, Trash2, ShoppingCart } from 'lucide-react';
 import {
   getAbandonedCarts,
   getStats,
@@ -9,6 +9,28 @@ import {
   type AbandonedCart,
 } from '@/services/abandonedCartService';
 import { useToastStore } from '@/components/Toast';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminStatCard,
+  AdminLoading,
+  AdminEmpty,
+  AdminCard,
+  AdminBadge,
+  AdminButton,
+} from '@/components/admin/admin-ui';
+
+const statusTone: Record<string, 'info' | 'warning' | 'success'> = {
+  new: 'info',
+  'reminder-sent': 'warning',
+  converted: 'success',
+};
+
+const statusLabel: Record<string, string> = {
+  new: 'Yeni',
+  'reminder-sent': 'Hatırlatıcı Kuyrukta',
+  converted: 'Dönüştü',
+};
 
 export default function AdminAbandonedCartsPage() {
   const addToast = useToastStore((s) => s.add);
@@ -49,90 +71,78 @@ export default function AdminAbandonedCartsPage() {
     if (result.success) void refresh();
   };
 
-  const statusColor: Record<string, string> = {
-    new: 'text-aq-blue bg-aq-ice',
-    'reminder-sent': 'text-amber-600 bg-amber-50',
-    converted: 'text-emerald-600 bg-emerald-50',
-  };
-
-  const statusLabel: Record<string, string> = {
-    new: 'Yeni',
-    'reminder-sent': 'Hatırlatıcı Kuyrukta',
-    converted: 'Dönüştü',
-  };
-
   return (
-    <div className="p-4 md:p-6">
-      <h1 className="text-xl md:text-2xl font-bold text-aq-text mb-1">Terk Edilmiş Sepetler</h1>
-      <p className="text-sm text-aq-muted mb-6">Sepeti terk eden müşterileri takip edin, hatırlatıcı gönderin.</p>
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Terk Edilmiş Sepetler"
+        description="Sepeti terk eden müşterileri takip edin, hatırlatıcı gönderin."
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: 'Toplam', value: stats.total },
-          { label: 'Yeni', value: stats.new },
-          { label: 'Hatırlatıcı', value: stats.reminderSent },
-          { label: 'Dönüşüm', value: stats.converted },
-        ].map((s) => (
-          <div key={s.label} className="bg-white border border-aq-border/60 rounded-xl p-4">
-            <p className="text-xs text-aq-muted">{s.label}</p>
-            <p className="text-xl font-semibold text-aq-text">{s.value}</p>
-          </div>
-        ))}
+        <AdminStatCard label="Toplam" value={stats.total} />
+        <AdminStatCard label="Yeni" value={stats.new} />
+        <AdminStatCard label="Hatırlatıcı" value={stats.reminderSent} />
+        <AdminStatCard label="Dönüşüm" value={stats.converted} />
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-sm text-aq-muted">Yükleniyor...</div>
+        <AdminLoading />
       ) : carts.length === 0 ? (
-        <div className="bg-white border border-aq-border/60 rounded-2xl p-8 text-center text-sm text-aq-muted">
-          Terk edilmiş sepet bulunmuyor.
-        </div>
+        <AdminCard padding={false}>
+          <AdminEmpty icon={ShoppingCart} message="Terk edilmiş sepet bulunmuyor." />
+        </AdminCard>
       ) : (
         <div className="space-y-3">
           {carts.map((cart) => (
-            <div key={cart.id} className="bg-white border border-aq-border/60 rounded-2xl p-5">
+            <AdminCard key={cart.id}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                 <div>
                   <p className="text-sm font-semibold text-aq-text">{cart.customerName}</p>
                   {cart.customerEmail && <p className="text-xs text-aq-muted">{cart.customerEmail}</p>}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColor[cart.status]}`}>
-                    {statusLabel[cart.status]}
-                  </span>
+                  <AdminBadge tone={statusTone[cart.status] ?? 'neutral'}>
+                    {statusLabel[cart.status] ?? cart.status}
+                  </AdminBadge>
                   <span className="text-sm font-semibold text-aq-text">{cart.total.toLocaleString('tr-TR')}₺</span>
                 </div>
               </div>
               <p className="text-xs text-aq-muted mb-3">
                 {cart.items.length} ürün · Son aktivite: {new Date(cart.lastActivity).toLocaleString('tr-TR')}
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {cart.status === 'new' && (
-                  <button
+                  <AdminButton
+                    type="button"
+                    className="text-xs min-h-0 py-1.5 px-3"
                     onClick={() => void handleSendReminder(cart.id)}
-                    className="flex items-center gap-1.5 text-xs bg-aq-blue text-white px-3 py-1.5 rounded-xl hover:bg-aq-deep"
                   >
                     <Send className="w-3.5 h-3.5" /> Hatırlat
-                  </button>
+                  </AdminButton>
                 )}
                 {cart.status !== 'converted' && (
-                  <button
+                  <AdminButton
+                    type="button"
+                    variant="secondary"
+                    className="text-xs min-h-0 py-1.5 px-3"
                     onClick={() => void handleConvert(cart.id)}
-                    className="flex items-center gap-1.5 text-xs border border-aq-border/60 text-aq-muted px-3 py-1.5 rounded-lg hover:border-emerald-400 hover:text-emerald-600"
                   >
                     <RotateCcw className="w-3.5 h-3.5" /> Dönüştü
-                  </button>
+                  </AdminButton>
                 )}
-                <button
+                <AdminButton
+                  type="button"
+                  variant="danger"
+                  className="text-xs min-h-0 py-1.5 px-3"
                   onClick={() => void handleDelete(cart.id)}
-                  className="flex items-center gap-1.5 text-xs border border-red-200 text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-50"
                 >
                   <Trash2 className="w-3.5 h-3.5" /> Sil
-                </button>
+                </AdminButton>
               </div>
-            </div>
+            </AdminCard>
           ))}
         </div>
       )}
-    </div>
+    </AdminPageShell>
   );
 }

@@ -3,7 +3,15 @@ import { Globe, Phone, Truck, Save, Loader2, Receipt } from 'lucide-react';
 import { getSiteSettings, saveSiteSettings, type SiteSettings } from '@/services/settingsService';
 import { getTaxConfig, saveTaxConfig, type TaxConfig } from '@/services/shippingService';
 import { useToastStore } from '@/components/Toast';
-import { AdminPageHeader, AdminCard, AdminInput, AdminLabel, AdminButton } from '@/components/admin/admin-ui';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminCard,
+  AdminInput,
+  AdminLabel,
+  AdminButton,
+  AdminLoading,
+} from '@/components/admin/admin-ui';
 
 // Bilesen icinde tanimlanirsa her renderda yeni tip olusur ve icindeki
 // inputlar remount olup odak kaybeder; bu yuzden modul seviyesinde.
@@ -94,14 +102,14 @@ export default function AdminSettingsPage() {
 
   if (!settings) {
     return (
-      <div className="flex items-center justify-center py-24 text-aq-muted">
-        <Loader2 className="w-6 h-6 animate-spin" />
-      </div>
+      <AdminPageShell>
+        <AdminLoading variant="spinner" label="Ayarlar yükleniyor..." />
+      </AdminPageShell>
     );
   }
 
   return (
-    <>
+    <AdminPageShell>
       <AdminPageHeader title="Site Ayarları" description="İletişim ve genel site bilgileri" />
 
       <form onSubmit={(e) => void handleSave(e)}>
@@ -171,6 +179,6 @@ export default function AdminSettingsPage() {
           Ayarları Kaydet
         </AdminButton>
       </form>
-    </>
+    </AdminPageShell>
   );
 }

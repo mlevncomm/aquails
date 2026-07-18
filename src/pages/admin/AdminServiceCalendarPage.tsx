@@ -1,14 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Wrench, MapPin, User, Loader2 } from 'lucide-react';
+import { Wrench, MapPin, User } from 'lucide-react';
 import { getServiceRequests } from '@/services/serviceRequestService';
 import type { AdminServiceRequest } from '@/services/serviceRequestService';
-import { AdminPageHeader, AdminTableWrap, AdminEmpty } from '@/components/admin/admin-ui';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminTableWrap,
+  AdminEmpty,
+  AdminLoading,
+  AdminBadge,
+  AdminCard,
+} from '@/components/admin/admin-ui';
 
-const statusColors: Record<string, string> = {
-  scheduled: 'bg-emerald-50 text-emerald-600',
-  pending: 'bg-amber-50 text-amber-600',
-  completed: 'bg-aq-ice text-aq-muted',
-  cancelled: 'bg-red-50 text-red-500',
+const statusTones: Record<string, 'success' | 'warning' | 'neutral' | 'danger'> = {
+  scheduled: 'success',
+  pending: 'warning',
+  completed: 'neutral',
+  cancelled: 'danger',
 };
 
 const statusLabels: Record<string, string> = {
@@ -37,7 +45,7 @@ export default function AdminServiceCalendarPage() {
   });
 
   return (
-    <>
+    <AdminPageShell>
       <AdminPageHeader title="Servis Takvimi" description="Planlanmış servis randevuları" />
 
       <div className="grid grid-cols-7 gap-2 mb-6">
@@ -57,10 +65,14 @@ export default function AdminServiceCalendarPage() {
         })}
       </div>
 
-      <AdminTableWrap>
-        {loading ? (
-          <div className="py-12 text-center text-aq-muted"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
-        ) : (
+      {loading ? (
+        <AdminLoading label="Randevular yükleniyor..." />
+      ) : appointments.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty icon={Wrench} message="Planlanmış randevu yok" />
+        </AdminCard>
+      ) : (
+        <AdminTableWrap stickyFirst>
           <table className="w-full">
             <thead>
               <tr className="bg-aq-ice border-b border-aq-border/60">
@@ -70,9 +82,7 @@ export default function AdminServiceCalendarPage() {
               </tr>
             </thead>
             <tbody>
-              {appointments.length === 0 ? (
-                <tr><td colSpan={6}><AdminEmpty message="Planlanmış randevu yok" /></td></tr>
-              ) : appointments.map((a) => (
+              {appointments.map((a) => (
                 <tr key={a.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -93,16 +103,16 @@ export default function AdminServiceCalendarPage() {
                   </td>
                   <td className="px-4 py-3 text-sm text-aq-muted">{a.tech || '—'}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColors[a.status] ?? 'bg-aq-ice text-aq-muted'}`}>
+                    <AdminBadge tone={statusTones[a.status] ?? 'neutral'}>
                       {statusLabels[a.status] ?? a.status}
-                    </span>
+                    </AdminBadge>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )}
-      </AdminTableWrap>
-    </>
+        </AdminTableWrap>
+      )}
+    </AdminPageShell>
   );
 }

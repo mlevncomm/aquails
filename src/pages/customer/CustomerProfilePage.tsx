@@ -3,13 +3,21 @@ import { User, Mail, Phone, Save, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { updateProfile } from '@/services/authService';
 import { useToastStore } from '@/components/Toast';
+import {
+  CustomerPageShell,
+  CustomerPageHeader,
+  CustomerCard,
+  CustomerInput,
+  CustomerLabel,
+  CustomerButton,
+} from '@/components/customer/customer-ui';
 
 export default function CustomerProfilePage() {
   const user = useAuthStore((s) => s.user);
   const addToast = useToastStore((s) => s.add);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', tc: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '' });
 
   useEffect(() => {
     if (user) {
@@ -17,7 +25,6 @@ export default function CustomerProfilePage() {
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
-        tc: '',
       });
     }
   }, [user]);
@@ -37,37 +44,59 @@ export default function CustomerProfilePage() {
   };
 
   return (
-      <>      <div className="max-w-xl">
-        <h2 className="text-lg font-semibold text-aq-text mb-5">Profil Bilgilerim</h2>
+    <CustomerPageShell className="max-w-xl">
+      <CustomerPageHeader
+        title="Profilim"
+        description="İletişim bilgilerinizi güncel tutun."
+      />
 
-        {saved && (
-          <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium mb-5">
-            <CheckCircle className="w-4 h-4" /> Profil bilgileriniz güncellendi.
-          </div>
-        )}
+      {saved && (
+        <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium mb-5 border border-emerald-100">
+          <CheckCircle className="w-4 h-4 flex-shrink-0" /> Profil bilgileriniz güncellendi.
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="bg-white border border-aq-border/60 rounded-2xl p-6 space-y-4">
+      <CustomerCard>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-aq-text mb-1.5 flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-aq-muted" />Ad Soyad</label>
-            <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/30" />
+            <CustomerLabel>
+              <span className="inline-flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5" /> Ad Soyad
+              </span>
+            </CustomerLabel>
+            <CustomerInput
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+            />
           </div>
           <div>
-            <label className="text-sm font-medium text-aq-text mb-1.5 flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-aq-muted" />E-posta</label>
-            <input type="email" value={form.email} readOnly className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice text-aq-muted" />
+            <CustomerLabel>
+              <span className="inline-flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5" /> E-posta
+              </span>
+            </CustomerLabel>
+            <CustomerInput type="email" value={form.email} readOnly className="bg-aq-ice text-aq-muted cursor-not-allowed" />
+            <p className="text-[11px] text-aq-muted mt-1.5">E-posta adresi değiştirilemez.</p>
           </div>
           <div>
-            <label className="text-sm font-medium text-aq-text mb-1.5 flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-aq-muted" />Telefon</label>
-            <input type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/30" />
+            <CustomerLabel>
+              <span className="inline-flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5" /> Telefon
+              </span>
+            </CustomerLabel>
+            <CustomerInput
+              type="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              placeholder="05xx xxx xx xx"
+            />
           </div>
-          <div>
-            <label className="text-sm font-medium text-aq-muted mb-1.5">TC Kimlik / Vergi No (Opsiyonel)</label>
-            <input value={form.tc} onChange={e => setForm({ ...form, tc: e.target.value })} placeholder="12345678901" className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/30" />
-          </div>
-          <button type="submit" disabled={loading} className="flex items-center gap-2 bg-aq-blue text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all disabled:opacity-60">
+          <CustomerButton type="submit" disabled={loading} className="w-full sm:w-auto">
             <Save className="w-4 h-4" /> {loading ? 'Kaydediliyor...' : 'Bilgilerimi Güncelle'}
-          </button>
+          </CustomerButton>
         </form>
-      </div>
-      </>
+      </CustomerCard>
+    </CustomerPageShell>
   );
 }

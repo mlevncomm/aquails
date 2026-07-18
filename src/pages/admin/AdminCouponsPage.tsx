@@ -8,6 +8,18 @@ import {
   deleteCoupon,
   type AdminCoupon,
 } from '@/services/couponService';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminCard,
+  AdminInput,
+  AdminSelect,
+  AdminButton,
+  AdminTableWrap,
+  AdminLoading,
+  AdminEmpty,
+  AdminBadge,
+} from '@/components/admin/admin-ui';
 
 export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState<AdminCoupon[]>([]);
@@ -76,164 +88,154 @@ export default function AdminCouponsPage() {
   };
 
   return (
-    <>
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-semibold text-aq-text">Kupon / Kampanya Yönetimi</h2>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 bg-aq-blue text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-aq-deep"
-        >
-          <Plus className="w-4 h-4" /> Yeni Kupon
-        </button>
-      </div>
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Kupon / Kampanya Yönetimi"
+        description="İndirim kuponlarını oluşturun ve yönetin."
+        action={
+          <AdminButton onClick={() => setShowForm(true)}>
+            <Plus className="w-4 h-4" /> Yeni Kupon
+          </AdminButton>
+        }
+      />
 
       {showForm && (
-        <form
-          onSubmit={(e) => void handleSubmit(e)}
-          className="bg-aq-deep border border-aq-navy rounded-xl p-4 mb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
-        >
-          <input
-            required
-            value={form.code}
-            onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
-            placeholder="Kupon Kodu"
-            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white placeholder-aq-muted"
-          />
-          <select
-            value={form.type}
-            onChange={(e) => setForm({ ...form, type: e.target.value as 'percent' | 'fixed' })}
-            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white"
+        <AdminCard className="mb-6">
+          <form
+            onSubmit={(e) => void handleSubmit(e)}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
           >
-            <option value="percent">Yüzde (%)</option>
-            <option value="fixed">Sabit Tutar (₺)</option>
-          </select>
-          <input
-            required
-            type="number"
-            value={form.value}
-            onChange={(e) => setForm({ ...form, value: e.target.value })}
-            placeholder={form.type === 'percent' ? 'İndirim %' : 'İndirim ₺'}
-            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white placeholder-aq-muted"
-          />
-          <input
-            required
-            type="number"
-            value={form.minOrder}
-            onChange={(e) => setForm({ ...form, minOrder: e.target.value })}
-            placeholder="Min. Sepet ₺"
-            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white placeholder-aq-muted"
-          />
-          <input
-            required
-            type="number"
-            value={form.usageLimit}
-            onChange={(e) => setForm({ ...form, usageLimit: e.target.value })}
-            placeholder="Kullanım Limiti"
-            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white placeholder-aq-muted"
-          />
-          <input
-            required
-            type="date"
-            value={form.start}
-            onChange={(e) => setForm({ ...form, start: e.target.value })}
-            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white"
-          />
-          <input
-            required
-            type="date"
-            value={form.end}
-            onChange={(e) => setForm({ ...form, end: e.target.value })}
-            className="px-3 py-2 text-sm bg-aq-deep border border-aq-navy rounded-lg text-white"
-          />
-          <div className="flex gap-2">
-            <button type="submit" className="bg-aq-blue hover:bg-aq-deep text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors">
-              Kaydet
-            </button>
-            <button type="button" onClick={() => setShowForm(false)} className="border border-aq-navy text-aq-muted px-4 py-2 rounded-lg text-sm">
-              İptal
-            </button>
-          </div>
-        </form>
+            <AdminInput
+              required
+              value={form.code}
+              onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+              placeholder="Kupon Kodu"
+            />
+            <AdminSelect
+              value={form.type}
+              onChange={(e) => setForm({ ...form, type: e.target.value as 'percent' | 'fixed' })}
+            >
+              <option value="percent">Yüzde (%)</option>
+              <option value="fixed">Sabit Tutar (₺)</option>
+            </AdminSelect>
+            <AdminInput
+              required
+              type="number"
+              value={form.value}
+              onChange={(e) => setForm({ ...form, value: e.target.value })}
+              placeholder={form.type === 'percent' ? 'İndirim %' : 'İndirim ₺'}
+            />
+            <AdminInput
+              required
+              type="number"
+              value={form.minOrder}
+              onChange={(e) => setForm({ ...form, minOrder: e.target.value })}
+              placeholder="Min. Sepet ₺"
+            />
+            <AdminInput
+              required
+              type="number"
+              value={form.usageLimit}
+              onChange={(e) => setForm({ ...form, usageLimit: e.target.value })}
+              placeholder="Kullanım Limiti"
+            />
+            <AdminInput
+              required
+              type="date"
+              value={form.start}
+              onChange={(e) => setForm({ ...form, start: e.target.value })}
+            />
+            <AdminInput
+              required
+              type="date"
+              value={form.end}
+              onChange={(e) => setForm({ ...form, end: e.target.value })}
+            />
+            <div className="flex gap-2">
+              <AdminButton type="submit">Kaydet</AdminButton>
+              <AdminButton type="button" variant="ghost" onClick={() => setShowForm(false)}>
+                İptal
+              </AdminButton>
+            </div>
+          </form>
+        </AdminCard>
       )}
 
-      <div className="bg-white border border-aq-border/60 rounded-2xl overflow-hidden">
-        {loading ? (
-          <div className="text-center py-12 text-sm text-aq-muted">Kuponlar yükleniyor...</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-aq-ice">
-                  {['Kod', 'Tip', 'Değer', 'Min. Sipariş', 'Kullanım', 'Tarih Aralığı', 'Durum', 'İşlem'].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {coupons.map((c) => (
-                  <tr key={c.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1.5 bg-aq-sky text-aq-blue text-sm font-semibold px-3 py-1 rounded-lg">
-                        <Tag className="w-3.5 h-3.5" />
-                        {c.code}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {c.type === 'percent' ? (
-                        <span className="flex items-center gap-1 text-sm text-aq-muted">
-                          <Percent className="w-3.5 h-3.5" />
-                          Yüzde
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-sm text-aq-muted">
-                          <CircleDollarSign className="w-3.5 h-3.5" />
-                          Sabit
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-aq-text">
-                      {c.type === 'percent' ? `%${c.value}` : `${c.value.toLocaleString('tr-TR')}₺`}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-aq-muted">{c.minOrder.toLocaleString('tr-TR')}₺</td>
-                    <td className="px-4 py-3 text-sm text-aq-muted">
-                      {c.used} / {c.usageLimit}
-                    </td>
-                    <td className="px-4 py-3 text-[13px] text-aq-muted whitespace-nowrap">
-                      {c.start} - {c.end}
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => void toggleActive(c.id, c.active)}
-                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${c.active ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}
-                      >
-                        {c.active ? 'Aktif' : 'Pasif'}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-1">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue">
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => void remove(c.id)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+      {loading ? (
+        <AdminLoading label="Kuponlar yükleniyor..." />
+      ) : coupons.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty message="Henüz kupon yok" />
+        </AdminCard>
+      ) : (
+        <AdminTableWrap stickyFirst>
+          <table className="w-full">
+            <thead>
+              <tr className="bg-aq-ice border-b border-aq-border/60">
+                {['Kod', 'Tip', 'Değer', 'Min. Sipariş', 'Kullanım', 'Tarih Aralığı', 'Durum', 'İşlem'].map((h) => (
+                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
+                    {h}
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-        {!loading && coupons.length === 0 && (
-          <div className="text-center py-8 text-sm text-aq-muted">Henüz kupon yok</div>
-        )}
-      </div>
-    </>
+              </tr>
+            </thead>
+            <tbody>
+              {coupons.map((c) => (
+                <tr key={c.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
+                  <td className="px-4 py-3">
+                    <span className="inline-flex items-center gap-1.5 bg-aq-sky text-aq-blue text-sm font-semibold px-3 py-1 rounded-lg">
+                      <Tag className="w-3.5 h-3.5" />
+                      {c.code}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {c.type === 'percent' ? (
+                      <span className="flex items-center gap-1 text-sm text-aq-muted">
+                        <Percent className="w-3.5 h-3.5" />
+                        Yüzde
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-sm text-aq-muted">
+                        <CircleDollarSign className="w-3.5 h-3.5" />
+                        Sabit
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm font-semibold text-aq-text">
+                    {c.type === 'percent' ? `%${c.value}` : `${c.value.toLocaleString('tr-TR')}₺`}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{c.minOrder.toLocaleString('tr-TR')}₺</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">
+                    {c.used} / {c.usageLimit}
+                  </td>
+                  <td className="px-4 py-3 text-[13px] text-aq-muted whitespace-nowrap">
+                    {c.start} - {c.end}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button type="button" onClick={() => void toggleActive(c.id, c.active)}>
+                      <AdminBadge tone={c.active ? 'success' : 'neutral'}>{c.active ? 'Aktif' : 'Pasif'}</AdminBadge>
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-1">
+                      <button type="button" className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue">
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void remove(c.id)}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </AdminTableWrap>
+      )}
+    </AdminPageShell>
   );
 }

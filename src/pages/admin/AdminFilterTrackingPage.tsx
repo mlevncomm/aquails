@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { getServiceRequests } from '@/services/serviceRequestService';
 import type { AdminServiceRequest } from '@/services/serviceRequestService';
-import { AdminPageHeader, AdminTableWrap, AdminEmpty } from '@/components/admin/admin-ui';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminTableWrap,
+  AdminEmpty,
+  AdminLoading,
+  AdminBadge,
+  AdminCard,
+} from '@/components/admin/admin-ui';
 
 export default function AdminFilterTrackingPage() {
   const [requests, setRequests] = useState<AdminServiceRequest[]>([]);
@@ -16,16 +24,20 @@ export default function AdminFilterTrackingPage() {
   }, []);
 
   return (
-    <>
+    <AdminPageShell>
       <AdminPageHeader
         title="Filtre Değişim Takipleri"
         description="Filtre değişim servis talepleri"
       />
 
-      <AdminTableWrap>
-        {loading ? (
-          <div className="py-12 text-center text-aq-muted"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
-        ) : (
+      {loading ? (
+        <AdminLoading />
+      ) : requests.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty icon={Filter} message="Filtre değişim talebi bulunamadı" />
+        </AdminCard>
+      ) : (
+        <AdminTableWrap stickyFirst>
           <table className="w-full">
             <thead>
               <tr className="bg-aq-ice border-b border-aq-border/60">
@@ -35,24 +47,22 @@ export default function AdminFilterTrackingPage() {
               </tr>
             </thead>
             <tbody>
-              {requests.length === 0 ? (
-                <tr><td colSpan={6}><AdminEmpty message="Filtre değişim talebi bulunamadı" /></td></tr>
-              ) : requests.map((f) => (
+              {requests.map((f) => (
                 <tr key={f.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
                   <td className="px-4 py-3 text-sm font-medium text-aq-text">{f.customer}</td>
                   <td className="px-4 py-3 text-sm text-aq-muted">{f.device}</td>
                   <td className="px-4 py-3 text-sm text-aq-muted max-w-[200px] truncate">{f.address}</td>
                   <td className="px-4 py-3 text-sm text-aq-muted">{f.date}</td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-aq-sky text-aq-blue">{f.status}</span>
+                    <AdminBadge tone="info">{f.status}</AdminBadge>
                   </td>
                   <td className="px-4 py-3 text-sm text-aq-muted">{f.tech || '—'}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )}
-      </AdminTableWrap>
-    </>
+        </AdminTableWrap>
+      )}
+    </AdminPageShell>
   );
 }

@@ -2,7 +2,15 @@ import { useEffect, useState } from 'react';
 import { Percent, Loader2 } from 'lucide-react';
 import { bulkUpdateProductPrices, getCategoryOptions } from '@/services/productService';
 import { useToastStore } from '@/components/Toast';
-import { AdminPageHeader, AdminCard, AdminLabel, AdminButton, AdminInput } from '@/components/admin/admin-ui';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminCard,
+  AdminLabel,
+  AdminButton,
+  AdminInput,
+  AdminSelect,
+} from '@/components/admin/admin-ui';
 
 export default function AdminBulkPricePage() {
   const addToast = useToastStore((s) => s.add);
@@ -29,7 +37,7 @@ export default function AdminBulkPricePage() {
   };
 
   return (
-    <>
+    <AdminPageShell>
       <AdminPageHeader title="Toplu Fiyat Güncelleme" description="Kategori bazlı fiyat veya KDV oranı güncelleme" />
 
       <form onSubmit={(e) => void handleSubmit(e)}>
@@ -37,28 +45,23 @@ export default function AdminBulkPricePage() {
           <div className="space-y-4">
             <div>
               <AdminLabel>Kategori (boş = tümü)</AdminLabel>
-              <select
-                value={categorySlug}
-                onChange={(e) => setCategorySlug(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-lg"
-              >
+              <AdminSelect value={categorySlug} onChange={(e) => setCategorySlug(e.target.value)}>
                 <option value="">Tüm Kategoriler</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.slug}>{c.name}</option>
                 ))}
-              </select>
+              </AdminSelect>
             </div>
             <div>
               <AdminLabel>İşlem Türü</AdminLabel>
-              <select
+              <AdminSelect
                 value={mode}
                 onChange={(e) => setMode(e.target.value as typeof mode)}
-                className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-lg"
               >
                 <option value="percent">Yüzde değiştir (+/- %)</option>
                 <option value="fixed_add">Sabit tutar ekle (₺)</option>
                 <option value="set_tax">KDV oranı ata (%)</option>
-              </select>
+              </AdminSelect>
             </div>
             <div>
               <AdminLabel>Değer {mode === 'percent' ? '(%)' : mode === 'set_tax' ? '(KDV %)' : '(₺)'}</AdminLabel>
@@ -72,6 +75,6 @@ export default function AdminBulkPricePage() {
           </div>
         </AdminCard>
       </form>
-    </>
+    </AdminPageShell>
   );
 }
