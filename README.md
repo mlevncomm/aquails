@@ -58,10 +58,29 @@ Uygulama `http://localhost:3000` adresinde çalışır.
 | `PAYTR_MERCHANT_ID` | PayTR mağaza numarası | Vercel server env |
 | `PAYTR_MERCHANT_KEY` / `PAYTR_MERCHANT_SALT` | PayTR imza sırları | Vercel server env |
 | `PAYTR_TEST_MODE` | Test için `1`, canlı için `0` | Vercel server env |
+| `RESEND_API_KEY` / `EMAIL_FROM` | Transactional e-posta | Vercel server env |
+| `CRON_SECRET` | E-posta outbox Bearer secret | Vercel server env + Supabase Vault |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `npm run admin:create` | local `.env` only |
 | `TEST_EMAIL` / `TEST_PASSWORD` | e2e scriptleri | local `.env` only |
 
 > **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` ve PayTR secret'ları **asla** frontend'e veya `VITE_*` env'e konmamalıdır.
+
+### E-posta outbox zamanlama (Supabase pg_cron)
+
+Vercel Hobby planı saatlik Cron Job'lara izin vermez; `vercel.json` içinde Cron tanımı yoktur.
+Outbox worker (`/api/process-email-outbox`) her 10 dakikada bir Supabase `pg_cron` + `pg_net` ile tetiklenir.
+
+1. Vercel'e `SITE_URL`, `CRON_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM` ekleyin.
+2. Aynı `SITE_URL` ve `CRON_SECRET` değerlerini Supabase Vault'a yazın (**SQL migration içine yazmayın**):
+
+```sql
+select vault.create_secret('https://www.aquails.com', 'aquails_site_url');
+select vault.create_secret('your-cron-secret', 'aquails_cron_secret');
+```
+
+3. Migration `20260718000200_email_outbox_pg_cron.sql` uygulandığında job `aquails-process-email-outbox` oluşturulur.
+4. Vault secret'ları eksikse istek **gönderilmez** (fail-closed); secret değerleri loglanmaz.
+5. Endpoint `Authorization: Bearer <CRON_SECRET>` olmadan 401 döner.
 
 ### PayTR yerel test
 
