@@ -27,7 +27,7 @@ Aquails, su arıtma cihazları ve yedek parçaları için geliştirilmiş bir e-
 
 Aşağıdaki işlemler **yalnızca server-side** (Edge Function / Vercel Function) üzerinden yapılmalıdır:
 
-- Ödeme oturumu oluşturma (Iyzico / PayTR)
+- Ödeme oturumu oluşturma (PayTR)
 - Ödeme webhook doğrulama
 - Sipariş oluşturma ve stok düşme (atomik)
 - Kargo entegrasyonu ve takip numarası
@@ -184,25 +184,23 @@ Migration dosyası: `supabase/migrations/20260709160000_initial_schema.sql`
 |----------|-------|---------|
 | `VITE_SUPABASE_URL` | Production, Preview, Development | Evet (build-time) |
 | `VITE_SUPABASE_ANON_KEY` | Production, Preview, Development | Evet (build-time) |
+| `SITE_URL` | Production, Preview | Hayır (server) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Production, Preview | Hayır (server) — PayTR + email worker |
+| `PAYTR_MERCHANT_ID` | Production, Preview | Hayır (server) |
+| `PAYTR_MERCHANT_KEY` | Production, Preview | Hayır (server) |
+| `PAYTR_MERCHANT_SALT` | Production, Preview | Hayır (server) |
+| `PAYTR_TEST_MODE` | Production, Preview | Hayır (server) |
+| `RESEND_API_KEY` / `EMAIL_FROM` / `CRON_SECRET` | Production, Preview | Hayır (server) |
 
-**Vercel'e EKLENMEYECEK değişkenler:**
-
-| Değişken | Nerede tutulmalı |
-|----------|------------------|
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Edge Function secrets |
-| `IYZICO_API_KEY` | Supabase Edge Function secrets |
-| `IYZICO_SECRET_KEY` | Supabase Edge Function secrets |
-| `PAYTR_MERCHANT_ID` | Vercel server environment |
-| `PAYTR_MERCHANT_KEY` | Vercel server environment |
-| `PAYTR_MERCHANT_SALT` | Vercel server environment |
+> `SUPABASE_SERVICE_ROLE_KEY` **Vercel server-only** env olmalıdır (`api/paytr-init.ts`, `api/payment-webhook.ts`, `api/process-email-outbox.ts`). Frontend'e veya `VITE_*` olarak eklenmez.
 
 6. `vercel.json` SPA fallback rewrite'ları içerir
 
 > Uygulama şu an `HashRouter` kullanır (`/#/urunler`). Vercel rewrite'ları BrowserRouter'a geçiş için hazırdır.
 
-### Ödeme Sunucusu Secret'ları
+### Ödeme ve e-posta worker secret'ları
 
-Ödeme entegrasyonu için secret'lar **yalnızca** Vercel proje ayarlarında server environment olarak tanımlanır:
+PayTR ve email outbox worker secret'ları **yalnızca** Vercel proje ayarlarında server environment olarak tanımlanır:
 
 ```bash
 # Vercel dashboard > Project Settings > Environment Variables
@@ -211,6 +209,9 @@ PAYTR_MERCHANT_ID=your-merchant-id
 PAYTR_MERCHANT_KEY=your-merchant-key
 PAYTR_MERCHANT_SALT=your-merchant-salt
 PAYTR_TEST_MODE=1
+RESEND_API_KEY=your-resend-key
+EMAIL_FROM=Aquails <noreply@example.com>
+CRON_SECRET=your-cron-secret
 ```
 
 Bu secret'lar yalnızca Vercel Functions tarafından okunur; frontend'e, `VITE_*` değişkenlerine veya `site_settings` tablosuna yazılmaz.

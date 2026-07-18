@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 
 const migration = readFileSync('supabase/migrations/20260718000100_production_hardening.sql', 'utf8');
 const cronMigration = readFileSync('supabase/migrations/20260718000200_email_outbox_pg_cron.sql', 'utf8');
+const reliabilityMigration = readFileSync('supabase/migrations/20260718000300_email_outbox_reliability.sql', 'utf8');
 const emailWorker = readFileSync('api/process-email-outbox.ts', 'utf8');
 const vercelConfig = readFileSync('vercel.json', 'utf8');
 
@@ -22,6 +23,18 @@ const checks = [
   ['pg_cron idempotent unschedule', /cron\.unschedule\(j\.jobid\)[\s\S]*jobname = 'aquails-process-email-outbox'/, cronMigration],
   ['pg_cron ten-minute schedule', /cron\.schedule\(\s*'aquails-process-email-outbox',\s*'\*\/10 \* \* \* \*'/, cronMigration],
   ['no hourly vercel cron', (src) => !/"schedule"\s*:\s*"0 \* \* \* \*"/.test(src) && !/"crons"\s*:/.test(src), vercelConfig],
+  ['claimed_at column', /ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMPTZ/, reliabilityMigration],
+  ['stale processing recovery', /status = 'processing'[\s\S]*claimed_at < now\(\) - interval '15 minutes'/, reliabilityMigration],
+  ['FOR UPDATE SKIP LOCKED', /FOR UPDATE SKIP LOCKED/, reliabilityMigration],
+  ['attempts limit', /attempts < 5/, reliabilityMigration],
+  ['claim sets processing claimed_at attempts', /status = 'processing'[\s\S]*claimed_at = now\(\)[\s\S]*attempts = e\.attempts \+ 1/, reliabilityMigration],
+  ['claim RPC service_role only', /REVOKE ALL ON FUNCTION public\.claim_email_outbox\(INT\) FROM PUBLIC, anon, authenticated;[\s\S]*GRANT EXECUTE ON FUNCTION public\.claim_email_outbox\(INT\) TO service_role;/, reliabilityMigration],
+  ['Resend Idempotency-Key', /['"]Idempotency-Key['"]\s*:\s*idempotencyKeyFor\(job\)/, emailWorker],
+  ['idempotency uses dedupe_key or id', /job\.dedupe_key \|\| job\.id/, emailWorker],
+  ['idempotency key max 256', /\.slice\(0,\s*256\)/, emailWorker],
+  ['sent clears claimed_at', /status:\s*'sent'[\s\S]*claimed_at:\s*null/, emailWorker],
+  ['failed clears claimed_at', /status:\s*'failed'[\s\S]*claimed_at:\s*null/, emailWorker],
+  ['DB update errors not swallowed', /updateFailures > 0/, emailWorker],
 ];
 
 const forbiddenInCronSql = [
