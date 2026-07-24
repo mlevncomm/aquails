@@ -16,7 +16,7 @@ import { completeAbandonedCart, syncAbandonedCart } from '@/services/abandonedCa
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/components/Toast';
 import { getAddresses, type Address } from '@/services/addressService';
-import { getPaytrPublicStatus, getBankAccounts, isPaytrConfigured } from '@/services/settingsService';
+import { getPaytrPublicStatus, getBankAccounts, isPaytrConfigured, hasConfiguredBankAccounts } from '@/services/settingsService';
 import { initPaytrPayment, buildPaytrBasket, formatPaymentAmountKurus } from '@/services/paymentService';
 import { getShippingConfig } from '@/services/shippingService';
 import { useCartPricing } from '@/hooks/useCartPricing';
@@ -87,6 +87,7 @@ export default function Checkout() {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [paytrEnabled, setPaytrEnabled] = useState(false);
   const [bankAccounts, setBankAccounts] = useState<{ bankName: string; accountName: string; iban: string }[]>([]);
+  const [bankTransferConfigured, setBankTransferConfigured] = useState(false);
   const [showBankInfo, setShowBankInfo] = useState(false);
   const [shippingMethods, setShippingMethods] = useState<{ id: string; label: string; desc: string; price: number; priceLabel: string }[]>([]);
   const [codFeeSetting, setCodFeeSetting] = useState(150);
@@ -125,7 +126,10 @@ export default function Checkout() {
 
   useEffect(() => {
     void getPaytrPublicStatus().then((s) => setPaytrEnabled(isPaytrConfigured(s)));
-    void getBankAccounts().then(setBankAccounts);
+    void getBankAccounts().then((accounts) => {
+      setBankAccounts(accounts);
+      setBankTransferConfigured(hasConfiguredBankAccounts(accounts));
+    });
     void getShippingConfig().then((cfg) => {
       setCodFeeSetting(cfg.codFee);
       setShippingMethods(
@@ -207,6 +211,10 @@ export default function Checkout() {
     }
     if (paymentMethod === 'card' && !paytrEnabled) {
       addToast('Online kart ödemesi henüz yapılandırılmamış. Havale veya kapıda ödeme seçin.', 'error');
+      return false;
+    }
+    if (paymentMethod === 'transfer' && !bankTransferConfigured) {
+      addToast('Havale hesabı yapılandırılmamış. Başka bir ödeme yöntemi seçin.', 'error');
       return false;
     }
     return true;
@@ -629,7 +637,9 @@ export default function Checkout() {
                   Ödeme Yöntemi
                 </h3>
                 <div className="mt-4 space-y-2.5">
-                  {paymentMethods.map((method) => (
+                  {paymentMethods
+                    .filter((method) => method.id !== 'transfer' || bankTransferConfigured)
+                    .map((method) => (
                     <div key={method.id} onClick={() => setPaymentMethod(method.id)} className={cn('flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all', paymentMethod === method.id ? 'border-aq-deep bg-aq-ice/50' : 'border-aq-border/60 hover:border-aq-border/60')}>
                       <div className={cn('w-5 h-5 rounded-full border-2 flex items-center justify-center', paymentMethod === method.id ? 'border-aq-deep' : 'border-aq-border/60')}>
                         {paymentMethod === method.id && <div className="w-2.5 h-2.5 bg-aq-deep rounded-full" />}
@@ -641,6 +651,11 @@ export default function Checkout() {
                       </div>
                     </div>
                   ))}
+                  {!bankTransferConfigured && (
+                    <p className="text-xs text-aq-muted p-3 bg-aq-ice rounded-xl">
+                      Havale / EFT şu an yapılandırılmamış.
+                    </p>
+                  )}
                 </div>
                 {paymentMethod === 'card' && (
                   <p className="text-xs text-aq-muted mt-4 p-3 bg-aq-ice rounded-xl">

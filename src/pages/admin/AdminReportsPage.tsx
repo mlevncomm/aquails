@@ -109,7 +109,7 @@ export default function AdminReportsPage() {
                   {stats.dailySales.map((d, i) => (
                     <div key={i} className="flex-1 flex flex-col items-center gap-1">
                       <div
-                        className="w-full bg-aq-sky0 rounded-t-sm min-h-[4px] transition-all"
+                        className="w-full bg-aq-sky rounded-t-sm min-h-[4px] transition-all"
                         style={{ height: `${(d.amount / maxDaily) * 100}%` }}
                         title={`₺${d.amount.toLocaleString('tr-TR')}`}
                       />
@@ -124,7 +124,7 @@ export default function AdminReportsPage() {
               <h3 className="text-sm font-semibold text-aq-text mb-4">Kategori Dağılımı (Ürün)</h3>
               <div className="space-y-3">
                 {stats.categoryBreakdown.map((c, i) => {
-                  const colors = ['bg-aq-sky0', 'bg-emerald-500', 'bg-violet-500', 'bg-amber-500', 'bg-rose-500', 'bg-teal-500', 'bg-indigo-500'];
+                  const colors = ['bg-aq-sky', 'bg-emerald-500', 'bg-violet-500', 'bg-amber-500', 'bg-rose-500', 'bg-teal-500', 'bg-indigo-500'];
                   return (
                     <div key={c.name}>
                       <div className="flex justify-between text-xs mb-1">

@@ -55,6 +55,8 @@ export default function AdminAbandonedCartsPage() {
     if (result.success) {
       addToast('Hatırlatıcı e-posta kuyruğuna alındı.', 'success');
       void refresh();
+    } else {
+      addToast(result.error ?? 'Hatırlatıcı gönderilemedi.', 'error');
     }
   };
 
@@ -63,12 +65,16 @@ export default function AdminAbandonedCartsPage() {
     if (result.success) {
       addToast('Dönüştürüldü olarak işaretlendi.', 'success');
       void refresh();
+    } else {
+      addToast(result.error ?? 'Güncellenemedi.', 'error');
     }
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm('Bu sepet kaydını silmek istediğinize emin misiniz?')) return;
     const result = await deleteAbandonedCart(id);
     if (result.success) void refresh();
+    else addToast(result.error ?? 'Silinemedi.', 'error');
   };
 
   return (

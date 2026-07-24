@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
 import { cn } from '@/lib/utils';
-import { getNavLinks, saveNavLinks, type NavLinkItem } from '@/services/settingsService';
+import { getAdminNavLinks, saveNavLinks, type NavLinkItem } from '@/services/settingsService';
 import {
   AdminPageShell,
   AdminPageHeader,
@@ -55,11 +55,16 @@ export default function AdminLinksPage() {
   });
 
   useEffect(() => {
-    void getNavLinks().then((data) => {
-      setLinks(data);
+    void getAdminNavLinks().then((result) => {
+      if (!result.ok) {
+        addToast(result.error, 'error');
+        setLoading(false);
+        return;
+      }
+      setLinks(result.data);
       setLoading(false);
     });
-  }, []);
+  }, [addToast]);
 
   const persistLinks = async (next: LinkItem[], successMessage: string) => {
     const res = await saveNavLinks(next);

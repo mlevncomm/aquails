@@ -11,7 +11,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,5 +22,10 @@ jobs:
       - run: npm run lint
       - run: npm run test:kdv
       - run: npm run test:security
+      - run: npm run test:product
+      - run: npm run test:admin
+      - run: npm run test:unit
+      - run: npm run test:sql
       - run: npm run build
+      - run: npm run test:smoke
       - run: npm audit --omit=dev --audit-level=high

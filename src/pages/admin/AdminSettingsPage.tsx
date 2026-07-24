@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Globe, Phone, Truck, Save, Loader2, Receipt } from 'lucide-react';
-import { getSiteSettings, saveSiteSettings, type SiteSettings } from '@/services/settingsService';
+import { getAdminSiteSettings, saveSiteSettings, type SiteSettings } from '@/services/settingsService';
 import { getTaxConfig, saveTaxConfig, type TaxConfig } from '@/services/shippingService';
 import { useToastStore } from '@/components/Toast';
 import {
@@ -13,8 +13,6 @@ import {
   AdminLoading,
 } from '@/components/admin/admin-ui';
 
-// Bilesen icinde tanimlanirsa her renderda yeni tip olusur ve icindeki
-// inputlar remount olup odak kaybeder; bu yuzden modul seviyesinde.
 function Section({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
   return (
     <AdminCard className="mb-6">
@@ -80,25 +78,41 @@ function TaxSection() {
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const addToast = useToastStore((s) => s.add);
 
   useEffect(() => {
-    void getSiteSettings().then(setSettings);
+    void getAdminSiteSettings().then((result) => {
+      if (!result.ok) {
+        setLoadError(result.error);
+        return;
+      }
+      setSettings(result.data);
+    });
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!settings) return;
+    if (!settings || saving) return;
     setSaving(true);
-    try {
-      await saveSiteSettings(settings);
-      addToast('Ayarlar kaydedildi.', 'success');
-    } catch {
-      addToast('Kayıt başarısız.', 'error');
-    }
+    const res = await saveSiteSettings(settings);
     setSaving(false);
+    if (!res.success) {
+      addToast(res.error ?? 'Kayıt başarısız.', 'error');
+      return;
+    }
+    addToast('Ayarlar kaydedildi.', 'success');
   };
+
+  if (loadError) {
+    return (
+      <AdminPageShell>
+        <AdminPageHeader title="Site Ayarları" description={loadError} />
+        <AdminButton type="button" onClick={() => window.location.reload()}>Tekrar Dene</AdminButton>
+      </AdminPageShell>
+    );
+  }
 
   if (!settings) {
     return (
@@ -110,7 +124,7 @@ export default function AdminSettingsPage() {
 
   return (
     <AdminPageShell>
-      <AdminPageHeader title="Site Ayarları" description="İletişim ve genel site bilgileri" />
+      <AdminPageHeader title="Site Ayarları" description="İletişim ve genel site bilgileri (Header/Footer/Checkout ile aynı şema)" />
 
       <form onSubmit={(e) => void handleSave(e)}>
         <Section title="Genel" icon={Globe}>
@@ -130,7 +144,7 @@ export default function AdminSettingsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <AdminLabel>Telefon</AdminLabel>
-              <AdminInput value={settings.contactPhone} onChange={(e) => setSettings({ ...settings, contactPhone: e.target.value })} />
+              <AdminInput value={settings.phone} onChange={(e) => setSettings({ ...settings, phone: e.target.value })} />
             </div>
             <div>
               <AdminLabel>WhatsApp</AdminLabel>
@@ -138,7 +152,7 @@ export default function AdminSettingsPage() {
             </div>
             <div>
               <AdminLabel>E-posta</AdminLabel>
-              <AdminInput value={settings.contactEmail} onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })} />
+              <AdminInput value={settings.email} onChange={(e) => setSettings({ ...settings, email: e.target.value })} />
             </div>
             <div>
               <AdminLabel>Adres</AdminLabel>
@@ -165,8 +179,8 @@ export default function AdminSettingsPage() {
             <AdminLabel>Ücretsiz Kargo Limiti (₺)</AdminLabel>
             <AdminInput
               type="number"
-              value={settings.freeShippingThreshold}
-              onChange={(e) => setSettings({ ...settings, freeShippingThreshold: Number(e.target.value) })}
+              value={settings.freeShippingLimit}
+              onChange={(e) => setSettings({ ...settings, freeShippingLimit: Number(e.target.value) })}
             />
             <p className="text-xs text-aq-muted mt-1">Detaylı kargo yöntemleri için Kargo Modülü sayfasını kullanın.</p>
           </div>

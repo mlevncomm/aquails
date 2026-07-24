@@ -37,6 +37,8 @@ export default function AdminStockNotificationsPage() {
     if (result.success) {
       addToast('Stok e-postası gönderim kuyruğuna alındı.', 'success');
       void load();
+    } else {
+      addToast(result.error ?? 'İşlem başarısız.', 'error');
     }
   };
 
@@ -45,6 +47,8 @@ export default function AdminStockNotificationsPage() {
     if (result.success) {
       addToast('Kayıt silindi.', 'success');
       void load();
+    } else {
+      addToast(result.error ?? 'Silinemedi.', 'error');
     }
   };
 

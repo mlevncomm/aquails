@@ -5,6 +5,7 @@ import type { DbBlogPost } from '@/types/database';
 export interface BlogPostListItem {
   id: string;
   title: string;
+  slug: string;
   category: string;
   status: 'draft' | 'published';
   date: string;
@@ -44,6 +45,7 @@ function mapPost(row: DbBlogPost): BlogPostListItem {
   return {
     id: row.id,
     title: row.title,
+    slug: row.slug,
     category: row.category,
     status: row.status,
     date: formatDateTR(row.created_at),

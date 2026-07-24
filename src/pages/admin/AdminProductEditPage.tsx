@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import {
   ArrowLeft, Plus, X, Save, ImageIcon, Package, Loader2,
@@ -44,6 +44,7 @@ export default function AdminProductEditPage() {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [images, setImages] = useState<DbProductImage[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [galleryBusy, setGalleryBusy] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [notFound, setNotFound] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -62,7 +63,7 @@ export default function AdminProductEditPage() {
     stock: '',
     isActive: true,
   });
-  const uploadedFingerprints = useRef<Set<string>>(new Set());
+  const busy = saving || uploadingImage || galleryBusy;
 
   const setFormField = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
     setDirty(true);
@@ -131,58 +132,56 @@ export default function AdminProductEditPage() {
 
   const fingerprint = (file: File) => `${file.name}:${file.size}:${file.lastModified}`;
 
-  const reloadImages = async (productId: string) => {
+  const reloadImages = async (productId: string): Promise<boolean> => {
     const result = await getAdminProductById(productId);
-    if (result.ok) setImages(result.product.imageRecords);
+    if (!result.ok) return false;
+    setImages(result.product.imageRecords);
+    return true;
   };
 
   const handleImageUpload = async (file: File | null, productId: string) => {
-    if (!file) return;
+    if (!file || busy) return;
     const validation = validateProductImageFile(file);
     if (validation) {
       addToast(validation, 'error');
       return;
     }
-    const fp = fingerprint(file);
-    if (uploadedFingerprints.current.has(fp)) {
-      addToast('Bu dosya zaten yüklendi.', 'error');
-      return;
-    }
 
     setUploadingImage(true);
-    const uploaded = await uploadProductImage(file, productId);
-    if (!uploaded.success) {
-      setUploadingImage(false);
-      addToast(uploaded.error ?? 'Görsel yüklenemedi.', 'error');
-      return;
-    }
-    if (!uploaded.data) {
-      setUploadingImage(false);
-      addToast('Görsel yüklenemedi.', 'error');
-      return;
-    }
+    try {
+      const uploaded = await uploadProductImage(file, productId);
+      if (!uploaded.success || !uploaded.data) {
+        addToast(!uploaded.success ? uploaded.error : 'Görsel yüklenemedi.', 'error');
+        return;
+      }
 
-    const saved = await addProductImageRecord(productId, uploaded.data.url);
-    if (!saved.success) {
-      const cleanup = await bestEffortDeleteUploadedObject(uploaded.data.path);
-      setUploadingImage(false);
-      addToast(
-        cleanup.cleaned
-          ? (saved.error ?? 'Görsel kaydı oluşturulamadı. Yüklenen dosya temizlendi.')
-          : `${saved.error ?? 'Görsel kaydı oluşturulamadı.'} Depolama temizliği de başarısız oldu.`,
-        'error',
-      );
-      return;
-    }
+      const saved = await addProductImageRecord(productId, uploaded.data.url);
+      if (!saved.success) {
+        const cleanup = await bestEffortDeleteUploadedObject(uploaded.data.path);
+        addToast(
+          cleanup.cleaned
+            ? (saved.error ?? 'Görsel kaydı oluşturulamadı. Yüklenen dosya temizlendi.')
+            : `${saved.error ?? 'Görsel kaydı oluşturulamadı.'} Depolama temizliği de başarısız oldu.`,
+          'error',
+        );
+        return;
+      }
 
-    uploadedFingerprints.current.add(fp);
-    await reloadImages(productId);
-    setUploadingImage(false);
-    addToast('Görsel eklendi.', 'success');
+      const reloaded = await reloadImages(productId);
+      if (!reloaded) {
+        addToast('Görsel kaydedildi ancak liste yenilenemedi. Sayfayı yenileyin.', 'error');
+        return;
+      }
+      addToast('Görsel eklendi.', 'success');
+    } catch {
+      addToast('Görsel yüklenirken beklenmeyen bir hata oluştu.', 'error');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handlePendingFiles = (files: FileList | null) => {
-    if (!files?.length) return;
+    if (!files?.length || busy) return;
     const next = [...pendingFiles];
     for (const file of Array.from(files)) {
       const validation = validateProductImageFile(file);
@@ -198,56 +197,83 @@ export default function AdminProductEditPage() {
   };
 
   const makePrimary = async (imageId: string) => {
-    if (!id) return;
-    const result = await setProductPrimaryImage(id, imageId);
-    if (!result.success) {
-      addToast(result.error ?? 'Ana görsel ayarlanamadı.', 'error');
-      return;
+    if (!id || busy) return;
+    setGalleryBusy(true);
+    try {
+      const result = await setProductPrimaryImage(id, imageId);
+      if (!result.success) {
+        addToast(result.error ?? 'Ana görsel ayarlanamadı.', 'error');
+        return;
+      }
+      const reloaded = await reloadImages(id);
+      if (!reloaded) {
+        addToast('Ana görsel güncellendi ancak liste yenilenemedi.', 'error');
+        return;
+      }
+      addToast('Ana görsel güncellendi.', 'success');
+    } catch {
+      addToast('Ana görsel ayarlanamadı.', 'error');
+    } finally {
+      setGalleryBusy(false);
     }
-    await reloadImages(id);
-    addToast('Ana görsel güncellendi.', 'success');
   };
 
   const removeImage = async (image: DbProductImage) => {
-    if (!id) return;
+    if (!id || busy) return;
     if (!window.confirm('Bu görseli silmek istediğinize emin misiniz?')) return;
-    const deleted = await deleteProductImageRecord(image.id);
-    if (!deleted.success) {
-      addToast(deleted.error ?? 'Görsel silinemedi.', 'error');
-      return;
-    }
-    if (!deleted.data) {
+    setGalleryBusy(true);
+    try {
+      const deleted = await deleteProductImageRecord(image.id);
+      if (!deleted.success || !deleted.data) {
+        addToast(!deleted.success ? deleted.error : 'Görsel silinemedi.', 'error');
+        return;
+      }
+      const cleanup = await bestEffortDeleteUploadedObject(deleted.data.url);
+      const reloaded = await reloadImages(id);
+      if (!reloaded) {
+        addToast('Görsel silindi ancak liste yenilenemedi.', 'error');
+        return;
+      }
+      addToast(
+        cleanup.cleaned ? 'Görsel silindi.' : 'Görsel kaydı silindi; depolama temizliği tamamlanamadı.',
+        cleanup.cleaned ? 'success' : 'error',
+      );
+    } catch {
       addToast('Görsel silinemedi.', 'error');
-      return;
+    } finally {
+      setGalleryBusy(false);
     }
-    const cleanup = await bestEffortDeleteUploadedObject(deleted.data.url);
-    await reloadImages(id);
-    addToast(
-      cleanup.cleaned ? 'Görsel silindi.' : 'Görsel kaydı silindi; depolama temizliği tamamlanamadı.',
-      cleanup.cleaned ? 'success' : 'error',
-    );
   };
 
   const moveImage = async (index: number, direction: -1 | 1) => {
-    if (!id) return;
+    if (!id || busy) return;
     const target = index + direction;
     if (target < 0 || target >= images.length) return;
     const ordered = images.map((img) => img.id);
     const tmp = ordered[index];
     ordered[index] = ordered[target];
     ordered[target] = tmp;
-    const result = await reorderProductImages(id, ordered);
-    if (!result.success) {
-      addToast(result.error ?? 'Sıralama güncellenemedi.', 'error');
-      return;
+    setGalleryBusy(true);
+    try {
+      const result = await reorderProductImages(id, ordered);
+      if (!result.success) {
+        addToast(result.error ?? 'Sıralama güncellenemedi.', 'error');
+        return;
+      }
+      const reloaded = await reloadImages(id);
+      if (!reloaded) addToast('Sıralama güncellendi ancak liste yenilenemedi.', 'error');
+    } catch {
+      addToast('Sıralama güncellenemedi.', 'error');
+    } finally {
+      setGalleryBusy(false);
     }
-    await reloadImages(id);
   };
 
   const buildPayload = () => {
     const specifications = Object.fromEntries(
       specs.filter((s) => s.key.trim()).map((s) => [s.key.trim(), s.value.trim()]),
     );
+    const taxParsed = Number(form.taxRate);
     return {
       name: form.name,
       slug: normalizeSlug(form.slug || form.name),
@@ -256,8 +282,8 @@ export default function AdminProductEditPage() {
       shortDescription: form.shortDescription,
       description: form.description,
       price: Number(form.price),
-      oldPrice: form.oldPrice ? Number(form.oldPrice) : null,
-      taxRate: Number(form.taxRate) || 20,
+      oldPrice: form.oldPrice === '' ? null : Number(form.oldPrice),
+      taxRate: taxParsed,
       stock: Number(form.stock),
       isActive: form.isActive,
       specifications,
@@ -266,7 +292,7 @@ export default function AdminProductEditPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (saving) return;
+    if (busy) return;
     const payload = buildPayload();
     const validation = validateAdminProductForm(payload);
     if (validation) {
@@ -275,65 +301,64 @@ export default function AdminProductEditPage() {
     }
 
     setSaving(true);
-    if (isNew) {
-      const created = await createProduct(payload);
-      if (!created.success) {
-        setSaving(false);
-        addToast(created.error ?? 'Ürün oluşturulamadı.', 'error');
-        return;
-      }
-      if (!created.data?.id) {
-        setSaving(false);
-        addToast('Ürün oluşturulamadı.', 'error');
+    try {
+      if (isNew) {
+        const created = await createProduct(payload);
+        if (!created.success || !created.data?.id) {
+          addToast(!created.success ? created.error : 'Ürün oluşturulamadı.', 'error');
+          return;
+        }
+
+        const productId = created.data.id;
+        let imageFailures = 0;
+        for (const file of pendingFiles) {
+          const uploaded = await uploadProductImage(file, productId);
+          if (!uploaded.success || !uploaded.data) {
+            imageFailures += 1;
+            continue;
+          }
+          const saved = await addProductImageRecord(productId, uploaded.data.url);
+          if (!saved.success) {
+            await bestEffortDeleteUploadedObject(uploaded.data.path);
+            imageFailures += 1;
+          }
+        }
+
+        setDirty(false);
+        if (imageFailures > 0) {
+          addToast(
+            `Ürün oluşturuldu ancak ${imageFailures} görsel yüklenemedi. Ürünü düzenleyerek görselleri tekrar ekleyebilirsiniz.`,
+            'error',
+          );
+        } else {
+          addToast(pendingFiles.length ? 'Ürün ve görseller kaydedildi.' : 'Ürün oluşturuldu.', 'success');
+        }
+        navigate(`/admin/urunler/${productId}`);
         return;
       }
 
-      const productId = created.data.id;
-      let imageFailures = 0;
-      for (const file of pendingFiles) {
-        const uploaded = await uploadProductImage(file, productId);
-        if (!uploaded.success || !uploaded.data) {
-          imageFailures += 1;
-          continue;
-        }
-        const saved = await addProductImageRecord(productId, uploaded.data.url);
-        if (!saved.success) {
-          await bestEffortDeleteUploadedObject(uploaded.data.path);
-          imageFailures += 1;
-        }
+      const updated = await updateProduct(id!, payload);
+      if (!updated.success) {
+        addToast(updated.error ?? 'Kayıt başarısız.', 'error');
+        return;
       }
-
-      setSaving(false);
       setDirty(false);
-      if (imageFailures > 0) {
-        addToast(
-          `Ürün oluşturuldu ancak ${imageFailures} görsel yüklenemedi. Ürünü düzenleyerek görselleri tekrar ekleyebilirsiniz.`,
-          'error',
-        );
-      } else {
-        addToast(pendingFiles.length ? 'Ürün ve görseller kaydedildi.' : 'Ürün oluşturuldu.', 'success');
+      if (updated.data) {
+        setImages(updated.data.imageRecords);
+        setForm((f) => ({
+          ...f,
+          slug: updated.data!.slug,
+          isActive: updated.data!.isActive,
+          sku: updated.data!.sku,
+          taxRate: String(updated.data!.taxRate ?? f.taxRate),
+        }));
       }
-      navigate(`/admin/urunler/${productId}`);
-      return;
+      addToast('Ürün güncellendi.', 'success');
+    } catch {
+      addToast('Kayıt sırasında beklenmeyen bir hata oluştu.', 'error');
+    } finally {
+      setSaving(false);
     }
-
-    const updated = await updateProduct(id!, payload);
-    setSaving(false);
-    if (!updated.success) {
-      addToast(updated.error ?? 'Kayıt başarısız.', 'error');
-      return;
-    }
-    setDirty(false);
-    if (updated.data) {
-      setImages(updated.data.imageRecords);
-      setForm((f) => ({
-        ...f,
-        slug: updated.data!.slug,
-        isActive: updated.data!.isActive,
-        sku: updated.data!.sku,
-      }));
-    }
-    addToast('Ürün güncellendi.', 'success');
   };
 
   const sortedImages = useMemo(
@@ -524,19 +549,19 @@ export default function AdminProductEditPage() {
                     )}
                   </div>
                   <div className="flex flex-col gap-1">
-                    <button type="button" className="p-1 text-aq-muted hover:text-aq-blue" onClick={() => void moveImage(index, -1)} aria-label="Yukarı">
+                    <button type="button" disabled={busy} className="p-1 text-aq-muted hover:text-aq-blue disabled:opacity-40" onClick={() => void moveImage(index, -1)} aria-label="Yukarı">
                       <ArrowUp className="w-3.5 h-3.5" />
                     </button>
-                    <button type="button" className="p-1 text-aq-muted hover:text-aq-blue" onClick={() => void moveImage(index, 1)} aria-label="Aşağı">
+                    <button type="button" disabled={busy} className="p-1 text-aq-muted hover:text-aq-blue disabled:opacity-40" onClick={() => void moveImage(index, 1)} aria-label="Aşağı">
                       <ArrowDown className="w-3.5 h-3.5" />
                     </button>
                   </div>
                   {img.sort_order !== 0 && (
-                    <button type="button" className="p-1 text-aq-muted hover:text-aq-blue" onClick={() => void makePrimary(img.id)} aria-label="Ana görsel yap">
+                    <button type="button" disabled={busy} className="p-1 text-aq-muted hover:text-aq-blue disabled:opacity-40" onClick={() => void makePrimary(img.id)} aria-label="Ana görsel yap">
                       <Star className="w-3.5 h-3.5" />
                     </button>
                   )}
-                  <button type="button" className="p-1 text-aq-muted hover:text-red-500" onClick={() => void removeImage(img)} aria-label="Sil">
+                  <button type="button" disabled={busy} className="p-1 text-aq-muted hover:text-red-500 disabled:opacity-40" onClick={() => void removeImage(img)} aria-label="Sil">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -582,7 +607,7 @@ export default function AdminProductEditPage() {
             </label>
           </AdminCard>
 
-          <AdminButton type="submit" disabled={saving || uploadingImage} className="w-full">
+          <AdminButton type="submit" disabled={busy} className="w-full">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Kaydet
           </AdminButton>

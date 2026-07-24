@@ -1076,6 +1076,14 @@ export interface Database {
         Args: { p_image_id: string };
         Returns: Record<string, unknown>;
       };
+      admin_adjust_product_stock: {
+        Args: { p_product_id: string; p_delta: number };
+        Returns: Record<string, unknown>;
+      };
+      admin_save_shipping_bundle: {
+        Args: { p_shipping: Record<string, unknown>; p_free_shipping_threshold: number };
+        Returns: Record<string, unknown>;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

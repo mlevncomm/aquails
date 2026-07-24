@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Eye, BookOpen } from 'lucide-react';
+import { Plus, Trash2, BookOpen, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router';
 import { useToastStore } from '@/components/Toast';
 import { getBlogPosts, toggleBlogStatus, deleteBlogPost, createBlogPost, type BlogPostListItem } from '@/services/blogService';
 import {
@@ -31,10 +32,13 @@ export default function AdminBlogPage() {
   useEffect(() => { void load(); }, [load]);
 
   const remove = async (id: string) => {
+    if (!window.confirm('Bu yazıyı silmek istediğinize emin misiniz?')) return;
     const result = await deleteBlogPost(id);
     if (result.success) {
       addToast('Yazı silindi.', 'success');
       void load();
+    } else {
+      addToast(result.error ?? 'Silinemedi.', 'error');
     }
   };
 
@@ -43,6 +47,8 @@ export default function AdminBlogPage() {
     if (result.success) {
       addToast('Durum güncellendi.', 'info');
       void load();
+    } else {
+      addToast(result.error ?? 'Durum güncellenemedi.', 'error');
     }
   };
 
@@ -131,12 +137,17 @@ export default function AdminBlogPage() {
                   <td className="px-4 py-3 text-sm text-aq-text">{p.views.toLocaleString('tr-TR')}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      <button type="button" className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue">
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue">
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
+                      {p.status === 'published' && (
+                        <Link
+                          to={`/blog/${p.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue"
+                          title="Yayında görüntüle"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </Link>
+                      )}
                       <button
                         type="button"
                         onClick={() => void remove(p.id)}

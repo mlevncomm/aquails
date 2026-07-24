@@ -39,6 +39,9 @@ const checks = [
   ['admin catalog RPC update', /admin_update_product/, catalogMigration],
   ['admin catalog RPC images', /admin_add_product_image[\s\S]*admin_set_product_primary_image/, catalogMigration],
   ['admin catalog unique sort order', /product_images_product_id_sort_order_uidx/, catalogMigration],
+  ['admin catalog no destructive dedupe delete', (src) => !/DELETE FROM public\.product_images pi[\s\S]*rn > 1/.test(src), catalogMigration],
+  ['admin catalog deferrable unique', /DEFERRABLE INITIALLY DEFERRED/, catalogMigration],
+  ['admin adjust stock rpc', /admin_adjust_product_stock/, catalogMigration],
 ];
 
 const forbiddenInCronSql = [

@@ -347,12 +347,16 @@ export function normalizeSlug(raw: string): string {
 
 export function validateAdminProductForm(input: AdminProductForm): string | null {
   if (!input.name.trim()) return 'Ürün adı zorunludur.';
-  if (!input.slug.trim()) return 'Ürün adresi (slug) zorunludur.';
+  const slug = normalizeSlug(input.slug || input.name);
+  if (!slug) return 'Ürün adresi (slug) zorunludur.';
   if (!input.categoryId) return 'Kategori seçilmelidir.';
   if (!Number.isFinite(input.price) || input.price < 0) return 'Geçerli bir fiyat girin.';
   if (!Number.isFinite(input.stock) || input.stock < 0) return 'Geçerli bir stok değeri girin.';
-  if (input.taxRate != null && (!Number.isFinite(input.taxRate) || input.taxRate < 0)) {
-    return 'Geçerli bir KDV oranı girin.';
+  if (input.oldPrice != null && (!Number.isFinite(input.oldPrice) || input.oldPrice < 0)) {
+    return 'Geçerli bir eski fiyat girin.';
+  }
+  if (input.taxRate != null && (!Number.isFinite(input.taxRate) || input.taxRate < 0 || input.taxRate > 100)) {
+    return 'KDV oranı 0–100 arasında olmalıdır.';
   }
   return null;
 }
@@ -381,7 +385,7 @@ export async function updateProduct(
     p_stock: input.stock,
     p_is_active: input.isActive,
     p_specifications: input.specifications,
-    p_tax_rate: input.taxRate ?? 20,
+    p_tax_rate: input.taxRate == null ? 20 : input.taxRate,
   });
 
   if (error) return fail(mapDbError(error.message, 'Ürün güncellenemedi.'));
@@ -405,27 +409,6 @@ export async function setProductPrimaryImage(
   });
   if (error) return fail(mapDbError(error.message, 'Ana görsel ayarlanamadı.'));
   return ok();
-}
-
-/** @deprecated Prefer addProductImageRecord + gallery APIs */
-export async function setProductPrimaryImageByUrl(
-  productId: string,
-  url: string,
-): Promise<MutationResult> {
-  const supabase = getSupabaseOrNull();
-  if (!supabase) return fail('Servis yapılandırılmamış.');
-
-  const { data, error } = await supabase.rpc('admin_add_product_image', {
-    p_product_id: productId,
-    p_url: url,
-    p_alt_text: null,
-    p_sort_order: 0,
-  });
-  if (error) return fail(mapDbError(error.message, 'Görsel kaydedilemedi.'));
-  if (!data) return fail('Görsel kaydı oluşturulamadı.');
-
-  const row = data as DbProductImage;
-  return setProductPrimaryImage(productId, row.id);
 }
 
 export async function addProductImageRecord(
@@ -504,7 +487,7 @@ export async function createProduct(
       specifications: input.specifications,
       rating: 0,
       review_count: 0,
-      tax_rate: input.taxRate ?? 20,
+      tax_rate: input.taxRate == null ? 20 : input.taxRate,
     })
     .select('id')
     .single();
@@ -513,18 +496,22 @@ export async function createProduct(
   return ok({ id: data.id });
 }
 
-export async function getCategoryOptions(): Promise<{ id: string; name: string; slug: string }[]> {
+export async function getCategoryOptions(): Promise<{ id: string; name: string; slug: string; isActive: boolean }[]> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return [];
 
   const { data, error } = await supabase
     .from('categories')
-    .select('id, name, slug')
-    .eq('is_active', true)
+    .select('id, name, slug, is_active')
     .order('sort_order');
 
   if (error) return [];
-  return data ?? [];
+  return (data ?? []).map((c) => ({
+    id: c.id,
+    name: c.is_active ? c.name : `${c.name} (pasif)`,
+    slug: c.slug,
+    isActive: c.is_active,
+  }));
 }
 
 export async function getCategories(): Promise<Category[]> {

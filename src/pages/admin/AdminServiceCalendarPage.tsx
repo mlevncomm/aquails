@@ -46,7 +46,10 @@ export default function AdminServiceCalendarPage() {
 
   return (
     <AdminPageShell>
-      <AdminPageHeader title="Servis Takvimi" description="Planlanmış servis randevuları" />
+      <AdminPageHeader title="Servis Takvimi" description="Salt okunur görünüm — planlanmış servis randevuları" />
+      <AdminCard className="mb-4 border border-amber-200 bg-amber-50">
+        <p className="text-sm text-amber-800">Bu ekran salt okunurdur; atama ve durum güncellemesi Servis Talepleri sayfasından yapılır.</p>
+      </AdminCard>
 
       <div className="grid grid-cols-7 gap-2 mb-6">
         {weekDays.map((d, i) => {

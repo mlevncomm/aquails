@@ -18,7 +18,10 @@
     "test:kdv": "node scripts/test-kdv.mjs",
     "test:security": "node scripts/test-security-hardening.mjs",
     "test:admin": "node scripts/test-admin-stability.mjs",
-    "test:product": "node scripts/test-product-helpers.mjs"
+    "test:product": "node scripts/test-product-helpers.mjs",
+    "test:unit": "vitest run",
+    "test:sql": "node scripts/test-catalog-sql.mjs",
+    "test:smoke": "node scripts/test-spa-smoke.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -92,7 +95,8 @@
     "tw-animate-css": "^1.4.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vitest": "^3.2.4"
   },
   "overrides": {
     "lodash": "^4.18.1"

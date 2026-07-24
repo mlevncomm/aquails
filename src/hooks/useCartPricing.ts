@@ -3,7 +3,7 @@ import type { CartItem } from '@/types';
 import { getShippingConfig, getTaxConfig, type TaxConfig } from '@/services/shippingService';
 import { calculateCartTax, cartItemsToTaxLines } from '@/services/taxService';
 import { getProductGrossPrice } from '@/lib/pricing';
-import { getSiteSettings } from '@/services/settingsService';
+import { getSiteConfig } from '@/services/settingsService';
 
 const DEFAULT_TAX: TaxConfig = { rate: 20, displayInCheckout: true, priceIncludesVat: false };
 
@@ -32,7 +32,7 @@ export function useCartPricing(
         const standard = cfg.methods.find((m) => m.id === 'standard') ?? cfg.methods[0];
         if (standard) setShippingCost(standard.price);
       }),
-      getSiteSettings().then((s) => setFreeShippingThreshold(s.freeShippingThreshold)),
+      getSiteConfig().then((s) => setFreeShippingThreshold(s.freeShippingLimit)),
     ]).finally(() => setLoaded(true));
   }, []);
 
