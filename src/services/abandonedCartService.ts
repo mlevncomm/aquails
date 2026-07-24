@@ -116,12 +116,14 @@ export async function markConverted(id: string): Promise<{ success: boolean; err
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('abandoned_carts')
     .update({ status: 'converted' })
-    .eq('id', id);
+    .eq('id', id)
+    .select('id');
 
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Sepet güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }
 
@@ -129,8 +131,9 @@ export async function deleteAbandonedCart(id: string): Promise<{ success: boolea
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase.from('abandoned_carts').delete().eq('id', id);
+  const { data, error } = await supabase.from('abandoned_carts').delete().eq('id', id).select('id');
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Sepet silinemedi veya yetkiniz yok.' };
   return { success: true };
 }
 

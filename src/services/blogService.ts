@@ -5,6 +5,7 @@ import type { DbBlogPost } from '@/types/database';
 export interface BlogPostListItem {
   id: string;
   title: string;
+  slug: string;
   category: string;
   status: 'draft' | 'published';
   date: string;
@@ -44,6 +45,7 @@ function mapPost(row: DbBlogPost): BlogPostListItem {
   return {
     id: row.id,
     title: row.title,
+    slug: row.slug,
     category: row.category,
     status: row.status,
     date: formatDateTR(row.created_at),
@@ -148,8 +150,9 @@ export async function toggleBlogStatus(
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase.from('blog_posts').update({ status }).eq('id', id);
+  const { data, error } = await supabase.from('blog_posts').update({ status }).eq('id', id).select('id');
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Yazı güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }
 
@@ -157,7 +160,8 @@ export async function deleteBlogPost(id: string): Promise<{ success: boolean; er
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase.from('blog_posts').delete().eq('id', id);
+  const { data, error } = await supabase.from('blog_posts').delete().eq('id', id).select('id');
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Yazı silinemedi veya yetkiniz yok.' };
   return { success: true };
 }

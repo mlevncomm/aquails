@@ -63,7 +63,8 @@ export async function deleteStockNotification(id: string): Promise<{ success: bo
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase.from('stock_notifications').delete().eq('id', id);
+  const { data, error } = await supabase.from('stock_notifications').delete().eq('id', id).select('id');
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Bildirim silinemedi veya yetkiniz yok.' };
   return { success: true };
 }

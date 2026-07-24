@@ -55,6 +55,23 @@ export async function saveShippingConfig(config: ShippingConfig): Promise<{ succ
   return setSetting('shipping_methods', config as unknown as Record<string, unknown>);
 }
 
+/** Atomic shipping methods + free-shipping threshold (admin-gated RPC). */
+export async function saveShippingBundle(
+  config: ShippingConfig,
+  freeShippingLimit: number,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+  const { data, error } = await supabase.rpc('admin_save_shipping_bundle', {
+    p_shipping: config as unknown as Record<string, unknown>,
+    p_free_shipping_threshold: freeShippingLimit,
+  });
+  if (error) return { success: false, error: error.message };
+  const result = data as { success?: boolean } | null;
+  if (!result?.success) return { success: false, error: 'Kargo ayarları kaydedilemedi.' };
+  return { success: true };
+}
+
 export async function getTaxConfig(): Promise<TaxConfig> {
   const raw = await getSetting<Partial<TaxConfig>>('tax', DEFAULT_TAX);
   const rate = Number(raw.rate);

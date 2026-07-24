@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 const migration = readFileSync('supabase/migrations/20260718000100_production_hardening.sql', 'utf8');
 const cronMigration = readFileSync('supabase/migrations/20260718000200_email_outbox_pg_cron.sql', 'utf8');
 const reliabilityMigration = readFileSync('supabase/migrations/20260718000300_email_outbox_reliability.sql', 'utf8');
+const catalogMigration = readFileSync('supabase/migrations/20260724000100_admin_catalog_reliability.sql', 'utf8');
 const emailWorker = readFileSync('api/process-email-outbox.ts', 'utf8');
 const vercelConfig = readFileSync('vercel.json', 'utf8');
 
@@ -35,6 +36,12 @@ const checks = [
   ['sent clears claimed_at', /status:\s*'sent'[\s\S]*claimed_at:\s*null/, emailWorker],
   ['failed clears claimed_at', /status:\s*'failed'[\s\S]*claimed_at:\s*null/, emailWorker],
   ['DB update errors not swallowed', /updateFailures > 0/, emailWorker],
+  ['admin catalog RPC update', /admin_update_product/, catalogMigration],
+  ['admin catalog RPC images', /admin_add_product_image[\s\S]*admin_set_product_primary_image/, catalogMigration],
+  ['admin catalog unique sort order', /product_images_product_id_sort_order_uidx/, catalogMigration],
+  ['admin catalog no destructive dedupe delete', (src) => !/DELETE FROM public\.product_images pi[\s\S]*rn > 1/.test(src), catalogMigration],
+  ['admin catalog deferrable unique', /DEFERRABLE INITIALLY DEFERRED/, catalogMigration],
+  ['admin adjust stock rpc', /admin_adjust_product_stock/, catalogMigration],
 ];
 
 const forbiddenInCronSql = [

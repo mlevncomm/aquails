@@ -3,7 +3,7 @@ import { CreditCard, Save, CheckCircle, Shield, AlertTriangle } from 'lucide-rea
 import {
   getPaytrSettings,
   savePaytrSettings,
-  getBankAccounts,
+  getAdminBankAccounts,
   saveBankAccounts,
   type PaytrSettings,
   type BankAccount,
@@ -34,12 +34,14 @@ export default function AdminPaymentSettingsPage() {
   ]);
 
   useEffect(() => {
-    void Promise.all([getPaytrSettings(), getBankAccounts()]).then(([p, b]) => {
-      setPaytr(p);
-      if (b.length) setBanks(b);
+    void Promise.all([getPaytrSettings(), getAdminBankAccounts()]).then(([p, b]) => {
+      if (p.ok) setPaytr(p.data);
+      else addToast(p.error, 'error');
+      if (b.ok) setBanks(b.data.length ? b.data : [{ bankName: '', accountName: '', iban: '' }]);
+      else addToast(b.error, 'error');
       setLoading(false);
     });
-  }, []);
+  }, [addToast]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +53,12 @@ export default function AdminPaymentSettingsPage() {
     setSaving(false);
 
     if (!paytrRes.success || !bankRes.success) {
-      addToast(paytrRes.error ?? bankRes.error ?? 'Kayıt başarısız.', 'error');
+      addToast(
+        (!paytrRes.success ? paytrRes.error : undefined)
+          ?? (!bankRes.success ? bankRes.error : undefined)
+          ?? 'Kayıt başarısız.',
+        'error',
+      );
       return;
     }
 

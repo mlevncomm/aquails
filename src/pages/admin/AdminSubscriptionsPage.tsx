@@ -42,6 +42,8 @@ export default function AdminSubscriptionsPage() {
     if (res.success) {
       addToast('Abonelik durumu güncellendi.', 'success');
       load();
+    } else {
+      addToast(res.error ?? 'Durum güncellenemedi.', 'error');
     }
   };
 

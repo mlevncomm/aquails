@@ -1,8 +1,9 @@
-import { Routes, Route, Navigate } from 'react-router';
+import { Routes, Route } from 'react-router';
 import { lazy, Suspense } from 'react';
 import { ScrollToTop } from './components/ScrollToTop';
 import { ToastContainer } from './components/Toast';
 import { RouteGuard } from './components/RouteGuard';
+import { AppErrorBoundary } from './components/AppErrorBoundary';
 
 import { PublicLayout } from './layouts/PublicLayout';
 import { AuthLayout } from './layouts/AuthLayout';
@@ -90,9 +91,11 @@ const FilterCalculatorPage = lazy(() => import('./pages/FilterCalculatorPage'));
 const WaterQualityTestPage = lazy(() => import('./pages/WaterQualityTestPage'));
 const ServiceNetworkPage = lazy(() => import('./pages/ServiceNetworkPage'));
 const FilterGuidePage = lazy(() => import('./pages/FilterGuidePage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 export default function App() {
   return (
+    <AppErrorBoundary>
     <RouteGuard>
       <ScrollToTop />
       <ToastContainer />
@@ -191,9 +194,10 @@ export default function App() {
         <Route path="/all-links" element={<AllLinksPage />} />
         <Route path="/links" element={<AllLinksPage />} />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       </Suspense>
     </RouteGuard>
+    </AppErrorBoundary>
   );
 }

@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
 import { cn } from '@/lib/utils';
-import { getNavLinks, saveNavLinks, type NavLinkItem } from '@/services/settingsService';
+import { getAdminNavLinks, saveNavLinks, type NavLinkItem } from '@/services/settingsService';
 import {
   AdminPageShell,
   AdminPageHeader,
@@ -55,32 +55,45 @@ export default function AdminLinksPage() {
   });
 
   useEffect(() => {
-    void getNavLinks().then((data) => {
-      setLinks(data);
+    void getAdminNavLinks().then((result) => {
+      if (!result.ok) {
+        addToast(result.error, 'error');
+        setLoading(false);
+        return;
+      }
+      setLinks(result.data);
       setLoading(false);
     });
-  }, []);
+  }, [addToast]);
 
-  const persistLinks = async (next: LinkItem[]) => {
-    setLinks(next);
+  const persistLinks = async (next: LinkItem[], successMessage: string) => {
     const res = await saveNavLinks(next);
-    if (!res.success) addToast(res.error ?? 'Kaydedilemedi.', 'error');
+    if (!res.success) {
+      addToast(res.error ?? 'Kaydedilemedi.', 'error');
+      return false;
+    }
+    setLinks(next);
+    addToast(successMessage, 'success');
+    return true;
   };
 
   const handleToggleActive = (id: string) => {
-    void persistLinks(links.map((l) => (l.id === id ? { ...l, active: !l.active } : l)));
-    addToast('Durum güncellendi', 'success');
+    void persistLinks(
+      links.map((l) => (l.id === id ? { ...l, active: !l.active } : l)),
+      'Durum güncellendi',
+    );
   };
 
   const handleToggleFeatured = (id: string) => {
-    void persistLinks(links.map((l) => (l.id === id ? { ...l, featured: !l.featured } : l)));
-    addToast('Öne çıkan durumu güncellendi', 'success');
+    void persistLinks(
+      links.map((l) => (l.id === id ? { ...l, featured: !l.featured } : l)),
+      'Öne çıkan durumu güncellendi',
+    );
   };
 
   const handleDelete = (id: string) => {
     if (confirm('Bu bağlantıyı silmek istediğinize emin misiniz?')) {
-      void persistLinks(links.filter((l) => l.id !== id));
-      addToast('Bağlantı silindi', 'success');
+      void persistLinks(links.filter((l) => l.id !== id), 'Bağlantı silindi');
     }
   };
 
@@ -90,18 +103,21 @@ export default function AdminLinksPage() {
     setShowAdd(false);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editForm?.title || !editForm?.url) {
       addToast('Başlık ve URL zorunludur.', 'error');
       return;
     }
-    void persistLinks(links.map((l) => (l.id === editForm.id ? editForm : l)));
+    const ok = await persistLinks(
+      links.map((l) => (l.id === editForm.id ? editForm : l)),
+      'Bağlantı güncellendi',
+    );
+    if (!ok) return;
     setIsEditing(false);
     setEditForm(null);
-    addToast('Bağlantı güncellendi', 'success');
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!newForm.title || !newForm.url) {
       addToast('Başlık ve URL zorunludur.', 'error');
       return;
@@ -115,10 +131,10 @@ export default function AdminLinksPage() {
       featured: false,
       order: links.length + 1,
     };
-    void persistLinks([...links, newLink]);
+    const ok = await persistLinks([...links, newLink], 'Yeni bağlantı eklendi');
+    if (!ok) return;
     setShowAdd(false);
     setNewForm({ title: '', url: '', icon: 'ExternalLink', active: true, featured: false });
-    addToast('Yeni bağlantı eklendi', 'success');
   };
 
   const getIcon = (iconName: string) => {

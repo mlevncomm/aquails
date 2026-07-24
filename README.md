@@ -65,6 +65,38 @@ Uygulama `http://localhost:3000` adresinde çalışır.
 
 > **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` ve PayTR secret'ları **asla** frontend'e veya `VITE_*` env'e konmamalıdır.
 
+### Ürün görselleri (Storage)
+
+Admin ürün galerisi Supabase Storage bucket `product-images` kullanır.
+
+`20260717000100_audit_completion_rpcs` migration’ı bucket’ı ve admin yazma / public okuma storage politikalarını oluşturur.
+Ayrı manuel bucket oluşturmaya gerek yoktur.
+
+**Migration sonrası doğrulama:**
+
+```sql
+select id, public from storage.buckets where id = 'product-images';
+select policyname, cmd from pg_policies
+where schemaname = 'storage' and tablename = 'objects'
+  and (qual::text ilike '%product-images%' or with_check::text ilike '%product-images%');
+```
+
+### Production release sırası
+
+1. Backup / PITR durumunu doğrulayın.
+2. Vercel server env + Supabase Vault secret’larını tamamlayın (`SITE_URL`, `CRON_SECRET`, PayTR, Resend, service role, …).
+3. Migration’ları sırayla uygulayın (pending olanlar dahil):
+   - `20260717000100_audit_completion_rpcs` (bucket + policies dahil)
+   - `20260718000100_production_hardening`
+   - `20260718000200_email_outbox_pg_cron` (+ Vault secret’ları)
+   - `20260718000300_email_outbox_reliability`
+   - `20260724000100_admin_catalog_reliability`
+4. Signed-in admin smoke (ürün listesi, güncelleme, görsel galeri, ayarlar).
+5. PR’ı ready yapıp `main`’e merge edin.
+6. Production deploy — **`main` merge otomatik production deploy tetikleyebilir** (Vercel production branch). Deploy’u bilinçli yapın.
+
+> Bu repository’deki agent/PR işleri production migration veya production deploy uygulamaz; yalnız kod + preview doğrular.
+
 ### E-posta outbox zamanlama (Supabase pg_cron)
 
 Vercel Hobby planı saatlik Cron Job'lara izin vermez; `vercel.json` içinde Cron tanımı yoktur.

@@ -65,7 +65,17 @@ export default function AdminCategoriesPage() {
     setShowForm(true);
   };
 
-  const activeCategories = categories.filter((c) => c.isActive);
+  const activeCategories = categories;
+
+  const toggleActive = async (cat: AdminCategory) => {
+    try {
+      await updateCategory(cat.id, { isActive: !cat.isActive });
+      addToast(cat.isActive ? 'Kategori pasife alındı.' : 'Kategori aktifleştirildi.', 'success');
+      void load();
+    } catch {
+      addToast('Durum güncellenemedi.', 'error');
+    }
+  };
 
   return (
     <AdminPageShell>
@@ -172,8 +182,14 @@ export default function AdminCategoriesPage() {
                     </td>
                     <td className="px-4 py-3 text-sm text-aq-muted">{cat.slug}</td>
                     <td className="px-4 py-3 text-sm text-aq-text">{cat.productCount ?? 0}</td>
-                    <td className="px-4 py-3 text-sm text-emerald-600">
-                      {cat.isActive ? 'Aktif' : 'Pasif'}
+                    <td className="px-4 py-3 text-sm">
+                      <button
+                        type="button"
+                        onClick={() => void toggleActive(cat)}
+                        className={cat.isActive ? 'text-emerald-600' : 'text-aq-muted'}
+                      >
+                        {cat.isActive ? 'Aktif' : 'Pasif'}
+                      </button>
                     </td>
                     <td className="px-4 py-3">
                       <button

@@ -1,21 +1,16 @@
-import { Award, Gift, TrendingUp, Plus, Minus } from 'lucide-react';
+import { Award, Gift, TrendingUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useToastStore } from '@/components/Toast';
 import { getLoyaltyData, EARN_RULES, type LoyaltyData } from '@/services/loyaltyService';
 import {
   AdminPageShell,
   AdminPageHeader,
   AdminCard,
-  AdminInput,
-  AdminButton,
   AdminTableWrap,
   AdminStatCard,
 } from '@/components/admin/admin-ui';
 
 export default function AdminLoyaltyPage() {
-  const addToast = useToastStore((s) => s.add);
   const [data, setData] = useState<LoyaltyData>({ totalPoints: 0, availablePoints: 0, totalRedeemed: 0 });
-  const [amount, setAmount] = useState(100);
 
   useEffect(() => {
     void getLoyaltyData().then(setData);
@@ -25,38 +20,20 @@ export default function AdminLoyaltyPage() {
     <AdminPageShell>
       <AdminPageHeader
         title="Sadakat Yönetimi"
-        description="Müşteri puanlarını görüntüleyin ve kuralları yönetin."
+        description="Salt okunur özet — müşteri bazlı puan işlemleri bu ekrandan yapılmaz."
       />
+
+      <AdminCard className="mb-6 border border-amber-200 bg-amber-50">
+        <p className="text-sm text-amber-800">
+          Bu sayfa <strong>salt okunur</strong>dur. Puan kurallarını görüntüler; manuel ekleme/çıkarma burada yoktur.
+        </p>
+      </AdminCard>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         <AdminStatCard label="Toplam Puan" value={data.totalPoints} icon={<Award className="w-5 h-5" />} />
         <AdminStatCard label="Kullanılabilir" value={data.availablePoints} icon={<Gift className="w-5 h-5" />} />
         <AdminStatCard label="Kullanılan" value={data.totalRedeemed} icon={<TrendingUp className="w-5 h-5" />} />
       </div>
-
-      <AdminCard className="mb-6">
-        <p className="text-sm font-semibold text-aq-text mb-3">Manuel Puan İşlemi</p>
-        <p className="text-sm text-aq-muted mb-3">
-          Müşteri bazlı puan işlemleri için müşteri profilinden yönetim yapılabilir.
-        </p>
-        <div className="flex gap-3 opacity-50 pointer-events-none">
-          <AdminInput
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(Number(e.target.value))}
-            className="w-24 bg-aq-ice"
-          />
-          <AdminButton className="!bg-emerald-500 hover:!bg-emerald-600">
-            <Plus className="w-4 h-4" /> Ekle
-          </AdminButton>
-          <AdminButton
-            variant="danger"
-            onClick={() => addToast('Müşteri seçimi gerekli.', 'info')}
-          >
-            <Minus className="w-4 h-4" /> Çıkar
-          </AdminButton>
-        </div>
-      </AdminCard>
 
       <AdminTableWrap>
         <div className="px-4 pt-4 pb-2">

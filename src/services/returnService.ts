@@ -90,7 +90,12 @@ export async function updateReturnStatus(
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
-  const { error } = await supabase.from('return_requests').update({ status, admin_note: adminNote ?? null }).eq('id', id);
+  const { data, error } = await supabase
+    .from('return_requests')
+    .update({ status, admin_note: adminNote ?? null })
+    .eq('id', id)
+    .select('id');
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'İade talebi güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }

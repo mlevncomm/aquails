@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Truck, Save, Loader2, Plus, Trash2 } from 'lucide-react';
-import { getShippingConfig, saveShippingConfig, type ShippingMethod } from '@/services/shippingService';
-import { getSiteSettings, saveSiteSettings } from '@/services/settingsService';
+import { getShippingConfig, saveShippingBundle, type ShippingMethod } from '@/services/shippingService';
+import { getAdminSiteSettings } from '@/services/settingsService';
 import { useToastStore } from '@/components/Toast';
 import {
   AdminPageShell,
@@ -16,16 +16,22 @@ import {
 export default function AdminShippingPage() {
   const addToast = useToastStore((s) => s.add);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [methods, setMethods] = useState<ShippingMethod[]>([]);
   const [codFee, setCodFee] = useState(150);
   const [freeShipping, setFreeShipping] = useState(500);
 
   useEffect(() => {
-    void Promise.all([getShippingConfig(), getSiteSettings()]).then(([ship, site]) => {
+    void Promise.all([getShippingConfig(), getAdminSiteSettings()]).then(([ship, site]) => {
+      if (!site.ok) {
+        setLoadError(site.error);
+        setLoading(false);
+        return;
+      }
       setMethods(ship.methods);
       setCodFee(ship.codFee);
-      setFreeShipping(site.freeShippingThreshold);
+      setFreeShipping(site.data.freeShippingLimit);
       setLoading(false);
     });
   }, []);
@@ -44,23 +50,30 @@ export default function AdminShippingPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
     setSaving(true);
-    const [shipRes] = await Promise.all([
-      saveShippingConfig({ methods, codFee }),
-      saveSiteSettings({
-        ...(await getSiteSettings()),
-        freeShippingThreshold: freeShipping,
-      }),
-    ]);
+    const result = await saveShippingBundle({ methods, codFee }, freeShipping);
     setSaving(false);
-    if (!shipRes.success) addToast(shipRes.error ?? 'Kayıt başarısız.', 'error');
-    else addToast('Kargo ayarları kaydedildi.', 'success');
+    if (!result.success) {
+      addToast(result.error ?? 'Kayıt başarısız.', 'error');
+      return;
+    }
+    addToast('Kargo ayarları kaydedildi.', 'success');
   };
 
   if (loading) {
     return (
       <AdminPageShell>
         <AdminLoading variant="spinner" label="Kargo ayarları yükleniyor..." />
+      </AdminPageShell>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <AdminPageShell>
+        <AdminPageHeader title="Kargo Modülü" description={loadError} />
+        <AdminButton type="button" onClick={() => window.location.reload()}>Tekrar Dene</AdminButton>
       </AdminPageShell>
     );
   }

@@ -27,8 +27,11 @@ export default function AdminFilterTrackingPage() {
     <AdminPageShell>
       <AdminPageHeader
         title="Filtre Değişim Takipleri"
-        description="Filtre değişim servis talepleri"
+        description="Salt okunur liste — filtre değişim servis talepleri"
       />
+      <AdminCard className="mb-4 border border-amber-200 bg-amber-50">
+        <p className="text-sm text-amber-800">Bu ekran salt okunurdur; durum güncellemesi Servis Talepleri sayfasından yapılır.</p>
+      </AdminCard>
 
       {loading ? (
         <AdminLoading />

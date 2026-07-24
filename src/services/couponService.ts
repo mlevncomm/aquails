@@ -189,8 +189,9 @@ export async function toggleCouponActive(
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase.from('coupons').update({ is_active: active }).eq('id', id);
+  const { data, error } = await supabase.from('coupons').update({ is_active: active }).eq('id', id).select('id');
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Kupon güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }
 
@@ -198,7 +199,8 @@ export async function deleteCoupon(id: string): Promise<{ success: boolean; erro
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase.from('coupons').delete().eq('id', id);
+  const { data, error } = await supabase.from('coupons').delete().eq('id', id).select('id');
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Kupon silinemedi veya yetkiniz yok.' };
   return { success: true };
 }

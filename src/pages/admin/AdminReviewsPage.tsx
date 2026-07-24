@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Star, Eye, Trash2, MessageSquare } from 'lucide-react';
+import { Star, Trash2, MessageSquare } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
 import { getReviews, toggleReviewPublished, deleteReview, type AdminReview } from '@/services/reviewService';
 import {
@@ -32,14 +32,19 @@ export default function AdminReviewsPage() {
     if (result.success) {
       addToast('Durum güncellendi.', 'info');
       void load();
+    } else {
+      addToast(result.error ?? 'Durum güncellenemedi.', 'error');
     }
   };
 
   const remove = async (id: string) => {
+    if (!window.confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
     const result = await deleteReview(id);
     if (result.success) {
       addToast('Yorum silindi.', 'success');
       void load();
+    } else {
+      addToast(result.error ?? 'Silinemedi.', 'error');
     }
   };
 
@@ -90,9 +95,6 @@ export default function AdminReviewsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      <button type="button" className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue">
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
                       <button
                         type="button"
                         onClick={() => void remove(r.id)}

@@ -85,12 +85,14 @@ export async function toggleReviewPublished(
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('reviews')
     .update({ is_published: published })
-    .eq('id', id);
+    .eq('id', id)
+    .select('id');
 
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Yorum güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }
 
@@ -98,8 +100,9 @@ export async function deleteReview(id: string): Promise<{ success: boolean; erro
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase.from('reviews').delete().eq('id', id);
+  const { data, error } = await supabase.from('reviews').delete().eq('id', id).select('id');
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Yorum silinemedi veya yetkiniz yok.' };
   return { success: true };
 }
 

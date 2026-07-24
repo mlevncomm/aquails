@@ -408,8 +408,13 @@ export async function updateOrderStatus(
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase.from('orders').update({ status }).eq('id', id);
+  const { data, error } = await supabase
+    .from('orders')
+    .update({ status })
+    .eq('id', id)
+    .select('id');
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Sipariş güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }
 
@@ -432,16 +437,18 @@ export async function updateOrderShipping(
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('orders')
     .update({
       cargo_company: cargoCompany,
       tracking_number: trackingNumber,
       status: 'shipped',
     })
-    .eq('id', id);
+    .eq('id', id)
+    .select('id');
 
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Kargo bilgisi güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }
 

@@ -20,7 +20,7 @@ export async function getStockItems(): Promise<StockItem[]> {
     .select('id, name, sku, stock')
     .order('stock');
 
-  if (error || !data) return [];
+  if (error) throw error;
   return (data as Pick<DbProduct, 'id' | 'name' | 'sku' | 'stock'>[]).map((p) => ({
     id: p.id,
     name: p.name,
@@ -32,29 +32,35 @@ export async function getStockItems(): Promise<StockItem[]> {
 
 export async function updateStock(
   id: string,
-  stock: number
+  stock: number,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('products')
     .update({ stock: Math.max(0, stock) })
-    .eq('id', id);
+    .eq('id', id)
+    .select('id');
 
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Stok güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }
 
 export async function adjustStock(
   id: string,
-  delta: number
-): Promise<{ success: boolean; error?: string }> {
+  delta: number,
+): Promise<{ success: boolean; error?: string; stock?: number }> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { data } = await supabase.from('products').select('stock').eq('id', id).maybeSingle();
-  if (!data) return { success: false, error: 'Ürün bulunamadı.' };
-
-  return updateStock(id, data.stock + delta);
+  const { data, error } = await supabase.rpc('admin_adjust_product_stock', {
+    p_product_id: id,
+    p_delta: delta,
+  });
+  if (error) return { success: false, error: error.message };
+  if (!data) return { success: false, error: 'Stok güncellenemedi.' };
+  const row = data as { stock?: number };
+  return { success: true, stock: row.stock };
 }

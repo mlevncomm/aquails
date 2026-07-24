@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Wrench, Clock, MapPin, ChevronDown } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { getServiceRequests, updateServiceRequest, type AdminServiceRequest } from '@/services/serviceRequestService';
+import { useToastStore } from '@/components/Toast';
 import {
   AdminPageShell,
   AdminPageHeader,
@@ -18,6 +19,7 @@ const statuses = ['pending', 'scheduled', 'in_progress', 'completed', 'cancelled
 export default function AdminServiceRequestsPage() {
   const [list, setList] = useState<AdminServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const addToast = useToastStore((s) => s.add);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -31,12 +33,20 @@ export default function AdminServiceRequestsPage() {
 
   const assignTech = async (id: string, tech: string) => {
     if (!tech || tech === 'Ata') return;
-    await updateServiceRequest(id, { assigned_to: tech, status: 'scheduled' });
+    const result = await updateServiceRequest(id, { assigned_to: tech, status: 'scheduled' });
+    if (!result.success) {
+      addToast(result.error ?? 'Atama başarısız.', 'error');
+      return;
+    }
     void load();
   };
 
   const updateStatus = async (id: string, status: typeof statuses[number]) => {
-    await updateServiceRequest(id, { status });
+    const result = await updateServiceRequest(id, { status });
+    if (!result.success) {
+      addToast(result.error ?? 'Durum güncellenemedi.', 'error');
+      return;
+    }
     void load();
   };
 

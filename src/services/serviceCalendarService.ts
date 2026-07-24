@@ -93,11 +93,15 @@ export async function getWeekSlots(): Promise<ServiceSlot[]> {
   return slots;
 }
 
-export async function completeSlot(slotId: string): Promise<void> {
+export async function completeSlot(slotId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseOrNull();
-  if (!supabase) return;
-  await supabase
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+  const { data, error } = await supabase
     .from('service_slots')
     .update({ is_available: false, booked: 999 })
-    .eq('id', slotId);
+    .eq('id', slotId)
+    .select('id');
+  if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Slot güncellenemedi veya yetkiniz yok.' };
+  return { success: true };
 }

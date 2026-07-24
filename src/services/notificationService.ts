@@ -44,14 +44,26 @@ export async function getUnreadCount(userId: string): Promise<number> {
   return count ?? 0;
 }
 
-export async function markNotificationRead(id: string): Promise<void> {
+export async function markNotificationRead(id: string): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseOrNull();
-  if (!supabase) return;
-  await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+  const { data, error } = await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('id', id)
+    .select('id');
+  if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Bildirim güncellenemedi.' };
+  return { success: true };
 }
 
-export async function markAllNotificationsRead(userId: string): Promise<void> {
+export async function markAllNotificationsRead(userId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseOrNull();
-  if (!supabase) return;
-  await supabase.from('notifications').update({ is_read: true }).eq('user_id', userId);
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+  const { error } = await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('user_id', userId);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
 }
