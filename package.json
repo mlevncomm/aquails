@@ -16,7 +16,9 @@
     "test:e2e": "node scripts/e2e-checkout-test.mjs",
     "test:full": "node scripts/e2e-full-system-test.mjs",
     "test:kdv": "node scripts/test-kdv.mjs",
-    "test:security": "node scripts/test-security-hardening.mjs"
+    "test:security": "node scripts/test-security-hardening.mjs",
+    "test:admin": "node scripts/test-admin-stability.mjs",
+    "test:product": "node scripts/test-product-helpers.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
