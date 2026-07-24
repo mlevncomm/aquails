@@ -69,14 +69,20 @@ export async function updateCategory(
   if (input.icon !== undefined) row.icon = input.icon;
   if (input.sortOrder !== undefined) row.sort_order = input.sortOrder;
   if (input.isActive !== undefined) row.is_active = input.isActive;
-  const { error } = await supabase.from('categories').update(row as { name?: string; icon?: string; sort_order?: number; is_active?: boolean }).eq('id', id);
+  const { data, error } = await supabase
+    .from('categories')
+    .update(row as { name?: string; icon?: string; sort_order?: number; is_active?: boolean })
+    .eq('id', id)
+    .select('id');
   if (error) throw error;
+  if (!data?.length) throw new Error('Kategori güncellenemedi veya yetkiniz yok.');
 }
 
 export async function deleteCategory(id: string): Promise<void> {
   const supabase = getSupabaseOrNull();
   if (!supabase) throw new Error('Supabase yapılandırılmamış.');
 
-  const { error } = await supabase.from('categories').delete().eq('id', id);
+  const { data, error } = await supabase.from('categories').delete().eq('id', id).select('id');
   if (error) throw error;
+  if (!data?.length) throw new Error('Kategori silinemedi veya yetkiniz yok.');
 }

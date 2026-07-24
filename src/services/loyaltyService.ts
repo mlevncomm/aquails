@@ -65,12 +65,14 @@ export async function earnPoints(
 
   if (!data) return { success: false, error: 'Kullanıcı bulunamadı.' };
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('profiles')
     .update({ loyalty_points: data.loyalty_points + amount })
-    .eq('id', userId);
+    .eq('id', userId)
+    .select('id');
 
   if (error) return { success: false, error: error.message };
+  if (!updated?.length) return { success: false, error: 'Puan güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }
 

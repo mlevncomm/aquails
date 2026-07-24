@@ -37,12 +37,14 @@ export async function updateStock(
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('products')
     .update({ stock: Math.max(0, stock) })
-    .eq('id', id);
+    .eq('id', id)
+    .select('id');
 
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Stok güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }
 

@@ -105,8 +105,9 @@ export async function updateServiceRequest(
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase.from('service_requests').update(updates).eq('id', id);
+  const { data, error } = await supabase.from('service_requests').update(updates).eq('id', id).select('id');
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Servis talebi güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }
 

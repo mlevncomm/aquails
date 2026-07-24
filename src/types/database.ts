@@ -1037,6 +1037,45 @@ export interface Database {
         Args: { p_items: unknown };
         Returns: undefined;
       };
+      admin_update_product: {
+        Args: {
+          p_id: string;
+          p_name: string;
+          p_slug: string;
+          p_category_id: string;
+          p_sku: string;
+          p_short_description: string;
+          p_description: string;
+          p_price: number;
+          p_old_price: number | null;
+          p_stock: number;
+          p_is_active: boolean;
+          p_specifications: Record<string, unknown>;
+          p_tax_rate: number;
+        };
+        Returns: Record<string, unknown>;
+      };
+      admin_add_product_image: {
+        Args: {
+          p_product_id: string;
+          p_url: string;
+          p_alt_text?: string | null;
+          p_sort_order?: number | null;
+        };
+        Returns: Record<string, unknown>;
+      };
+      admin_set_product_primary_image: {
+        Args: { p_product_id: string; p_image_id: string };
+        Returns: Record<string, unknown>;
+      };
+      admin_reorder_product_images: {
+        Args: { p_product_id: string; p_ordered_ids: string[] };
+        Returns: Record<string, unknown>[];
+      };
+      admin_delete_product_image_record: {
+        Args: { p_image_id: string };
+        Returns: Record<string, unknown>;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

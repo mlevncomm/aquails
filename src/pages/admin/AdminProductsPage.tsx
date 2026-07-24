@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { Search, Plus, Pencil, Package } from 'lucide-react';
+import { Search, Plus, Pencil, Package, RefreshCw } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import { useCatalog } from '@/hooks/useCatalog';
+import { useAdminCatalog } from '@/hooks/useAdminCatalog';
 import {
   AdminPageShell,
   AdminPageHeader,
@@ -19,7 +19,7 @@ import {
 } from '@/components/admin/admin-ui';
 
 export default function AdminProductsPage() {
-  const { products, categories, loading } = useCatalog();
+  const { products, categories, loading, error, errorCode, isEmpty, reload } = useAdminCatalog();
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
 
@@ -29,7 +29,7 @@ export default function AdminProductsPage() {
     return matchSearch && matchCat;
   });
 
-  const cats = ['all', ...Array.from(new Set(products.map((p) => p.category)))];
+  const cats = ['all', ...Array.from(new Set(products.map((p) => p.category).filter(Boolean)))];
 
   return (
     <AdminPageShell>
@@ -37,11 +37,16 @@ export default function AdminProductsPage() {
         title="Ürün Yönetimi"
         description="Katalog ürünlerini arayın, filtreleyin ve düzenleyin."
         action={
-          <Link to="/admin/urunler/ekle">
-            <AdminButton>
-              <Plus className="w-4 h-4" /> Yeni Ürün
+          <div className="flex items-center gap-2">
+            <AdminButton variant="secondary" onClick={() => void reload()} disabled={loading}>
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Yenile
             </AdminButton>
-          </Link>
+            <Link to="/admin/urunler/ekle">
+              <AdminButton>
+                <Plus className="w-4 h-4" /> Yeni Ürün
+              </AdminButton>
+            </Link>
+          </div>
         }
       />
 
@@ -73,12 +78,25 @@ export default function AdminProductsPage() {
 
       {loading ? (
         <AdminLoading label="Ürünler yükleniyor..." />
-      ) : filtered.length === 0 ? (
+      ) : error ? (
         <AdminCard padding={false}>
           <AdminEmpty
             icon={Package}
-            title="Ürün bulunamadı"
-            message="Arama veya kategori filtresine uygun ürün yok."
+            title={errorCode === 'network' ? 'Bağlantı hatası' : 'Ürünler yüklenemedi'}
+            message={error}
+            action={
+              <AdminButton onClick={() => void reload()}>
+                <RefreshCw className="w-4 h-4" /> Tekrar Dene
+              </AdminButton>
+            }
+          />
+        </AdminCard>
+      ) : isEmpty ? (
+        <AdminCard padding={false}>
+          <AdminEmpty
+            icon={Package}
+            title="Henüz ürün yok"
+            message="Veritabanında ürün kaydı bulunamadı. İlk ürünü ekleyerek başlayın."
             action={
               <Link to="/admin/urunler/ekle">
                 <AdminButton>
@@ -86,6 +104,14 @@ export default function AdminProductsPage() {
                 </AdminButton>
               </Link>
             }
+          />
+        </AdminCard>
+      ) : filtered.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty
+            icon={Package}
+            title="Ürün bulunamadı"
+            message="Arama veya kategori filtresine uygun ürün yok."
           />
         </AdminCard>
       ) : (
@@ -109,7 +135,7 @@ export default function AdminProductsPage() {
                     <p className="text-[11px] text-aq-muted mt-0.5">{p.category}</p>
                     <div className="flex items-center justify-between mt-2 gap-2">
                       <p className="text-sm font-bold text-aq-text">{p.price.toLocaleString('tr-TR')}₺</p>
-                      <StatusBadge status={p.stock <= 5 ? 'low' : 'active'} />
+                      <StatusBadge status={p.isActive ? (p.stock <= 5 ? 'low' : 'active') : 'inactive'} />
                     </div>
                   </div>
                 </div>
@@ -167,7 +193,7 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="px-4 py-3 text-sm text-aq-text">{p.stock}</td>
                       <td className="px-4 py-3">
-                        <StatusBadge status={p.stock <= 5 ? 'low' : 'active'} />
+                        <StatusBadge status={p.isActive ? (p.stock <= 5 ? 'low' : 'active') : 'inactive'} />
                       </td>
                       <td className="px-4 py-3">
                         <Link

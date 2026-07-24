@@ -56,20 +56,37 @@ export async function addFilterDevice(
   return { success: true };
 }
 
-export async function toggleFilterReminder(id: string, enabled: boolean): Promise<void> {
+export async function toggleFilterReminder(id: string, enabled: boolean): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseOrNull();
-  if (!supabase) return;
-  await supabase.from('filter_tracking').update({ reminder_enabled: enabled }).eq('id', id);
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+  const { data, error } = await supabase
+    .from('filter_tracking')
+    .update({ reminder_enabled: enabled })
+    .eq('id', id)
+    .select('id');
+  if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Kayıt güncellenemedi.' };
+  return { success: true };
 }
 
-export async function markFilterChanged(id: string): Promise<void> {
+export async function markFilterChanged(id: string): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseOrNull();
-  if (!supabase) return;
-  await supabase.from('filter_tracking').update({ last_changed_at: new Date().toISOString().slice(0, 10) }).eq('id', id);
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+  const { data, error } = await supabase
+    .from('filter_tracking')
+    .update({ last_changed_at: new Date().toISOString().slice(0, 10) })
+    .eq('id', id)
+    .select('id');
+  if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Kayıt güncellenemedi.' };
+  return { success: true };
 }
 
-export async function deleteFilterDevice(id: string): Promise<void> {
+export async function deleteFilterDevice(id: string): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseOrNull();
-  if (!supabase) return;
-  await supabase.from('filter_tracking').delete().eq('id', id);
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+  const { data, error } = await supabase.from('filter_tracking').delete().eq('id', id).select('id');
+  if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Kayıt silinemedi.' };
+  return { success: true };
 }

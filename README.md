@@ -65,6 +65,27 @@ Uygulama `http://localhost:3000` adresinde çalışır.
 
 > **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` ve PayTR secret'ları **asla** frontend'e veya `VITE_*` env'e konmamalıdır.
 
+### Ürün görselleri (Storage)
+
+Admin ürün galerisi Supabase Storage bucket `product-images` kullanır.
+
+**Production öncesi manuel adımlar (bu PR migration uygulamaz):**
+
+1. Supabase Dashboard → Storage → New bucket:
+   - Name: `product-images`
+   - Public: **yes**
+2. Bucket policies (admin yazma / public okuma) veya Dashboard policy wizard ile:
+   - `authenticated` + `public.is_admin()` → INSERT/UPDATE/DELETE
+   - `anon`/`authenticated` → SELECT (public read)
+3. Migration'ları sırayla uygulayın (henüz remote'da pending olanlar dahil):
+   - `20260717000100_audit_completion_rpcs`
+   - `20260718000100_production_hardening`
+   - `20260718000200_email_outbox_pg_cron` (+ Vault secret'ları)
+   - `20260718000300_email_outbox_reliability`
+   - `20260724000100_admin_catalog_reliability`
+
+Bucket yoksa görsel upload başarısız olur; ürün metin alanları yine de kaydedilebilir.
+
 ### E-posta outbox zamanlama (Supabase pg_cron)
 
 Vercel Hobby planı saatlik Cron Job'lara izin vermez; `vercel.json` içinde Cron tanımı yoktur.

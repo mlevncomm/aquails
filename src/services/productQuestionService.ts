@@ -71,16 +71,18 @@ export async function answerQuestion(
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('product_questions')
     .update({
       answer,
       is_published: true,
       answered_at: new Date().toISOString(),
     })
-    .eq('id', id);
+    .eq('id', id)
+    .select('id');
 
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Soru yanıtlanamadı veya yetkiniz yok.' };
   return { success: true };
 }
 
@@ -117,8 +119,9 @@ export async function deleteQuestion(id: string): Promise<{ success: boolean; er
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { error } = await supabase.from('product_questions').delete().eq('id', id);
+  const { data, error } = await supabase.from('product_questions').delete().eq('id', id).select('id');
   if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Soru silinemedi veya yetkiniz yok.' };
   return { success: true };
 }
 

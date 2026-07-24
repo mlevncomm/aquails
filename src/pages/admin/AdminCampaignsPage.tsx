@@ -53,16 +53,20 @@ export default function AdminCampaignsPage() {
   };
 
   const remove = async (id: string) => {
+    if (!window.confirm('Bu kampanyayı silmek istediğinize emin misiniz?')) return;
     const result = await deleteCoupon(id);
     if (result.success) {
       addToast('Silindi.', 'success');
       void load();
+    } else {
+      addToast(result.error ?? 'Silinemedi.', 'error');
     }
   };
 
   const toggle = async (id: string, active: boolean) => {
     const result = await toggleCouponActive(id, !active);
     if (result.success) void load();
+    else addToast(result.error ?? 'Güncellenemedi.', 'error');
   };
 
   return (
