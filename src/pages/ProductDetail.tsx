@@ -188,11 +188,9 @@ export default function ProductDetail() {
   };
 
   const productImages = product.images && product.images.length > 0
-    ? product.images
+    ? [...new Set(product.images.filter(Boolean))]
     : ['/images/products/placeholder.jpg'];
-  const thumbnails = productImages.length > 1
-    ? productImages.slice(0, 4)
-    : [productImages[0], productImages[0], productImages[0], productImages[0]];
+  const thumbnails = productImages;
 
   return (
     <>
@@ -232,25 +230,28 @@ export default function ProductDetail() {
                 onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
               />
             </div>
-            <div className="flex gap-3 mt-3">
-              {thumbnails.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveImage(i)}
-                  className={cn(
-                    'w-[72px] h-[72px] rounded-xl border-2 flex items-center justify-center bg-aq-ice transition-all overflow-hidden',
-                    activeImage === i ? 'border-aq-deep' : 'border-transparent hover:border-aq-border/60'
-                  )}
-                >
-                  <img
-                    src={img}
-                    alt={`${product.name} - ${i + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
-                  />
-                </button>
-              ))}
-            </div>
+            {thumbnails.length > 1 && (
+              <div className="flex gap-3 mt-3">
+                {thumbnails.map((img, i) => (
+                  <button
+                    key={`${img}-${i}`}
+                    type="button"
+                    onClick={() => setActiveImage(i)}
+                    className={cn(
+                      'w-[72px] h-[72px] rounded-xl border-2 flex items-center justify-center bg-aq-ice transition-all overflow-hidden',
+                      activeImage === i ? 'border-aq-deep' : 'border-transparent hover:border-aq-border/60'
+                    )}
+                  >
+                    <img
+                      src={img}
+                      alt={`${product.name} - ${i + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </ScrollReveal>
 
           {/* Right - Info */}
