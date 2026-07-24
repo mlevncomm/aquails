@@ -23,9 +23,9 @@ jobs:
       - run: npm run test:kdv
       - run: npm run test:security
       - run: npm run test:product
-      - run: npm run test:admin
       - run: npm run test:unit
       - run: npm run test:sql
       - run: npm run build
+      - run: npm run test:admin
       - run: npm run test:smoke
       - run: npm audit --omit=dev --audit-level=high
