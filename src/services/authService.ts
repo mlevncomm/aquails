@@ -200,36 +200,46 @@ export async function updatePassword(
   return { success: true };
 }
 
-/** Initialize auth: Supabase session listener */
+/** Initialize auth: Supabase session listener. Always completes hydration. */
 export async function initAuth(): Promise<void> {
   const supabase = getSupabaseOrNull();
 
-  if (supabase) {
-    const user = await getCurrentUser();
-    if (user) useAuthStore.getState().setUser(user);
+  try {
+    if (!supabase) return;
 
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        useAuthStore.getState().setHydrated();
-        return;
-      }
-      if (session?.user) {
-        const profile = await getProfile(session.user.id);
-        useAuthStore.getState().setUser(profile ?? {
-          id: session.user.id,
-          email: session.user.email ?? '',
-          name: session.user.user_metadata?.name ?? '',
-          phone: session.user.user_metadata?.phone ?? '',
-          role: 'customer',
-        });
-      } else {
-        useAuthStore.getState().clearUser();
-      }
-      useAuthStore.getState().setHydrated();
+    try {
+      const user = await getCurrentUser();
+      if (user) useAuthStore.getState().setUser(user);
+    } catch {
+      // Transient Supabase errors must not leave public pages blocked.
+    }
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      void (async () => {
+        try {
+          if (_event === 'PASSWORD_RECOVERY') return;
+          if (session?.user) {
+            const profile = await getProfile(session.user.id);
+            useAuthStore.getState().setUser(profile ?? {
+              id: session.user.id,
+              email: session.user.email ?? '',
+              name: session.user.user_metadata?.name ?? '',
+              phone: session.user.user_metadata?.phone ?? '',
+              role: 'customer',
+            });
+          } else {
+            useAuthStore.getState().clearUser();
+          }
+        } catch {
+          // Ignore profile fetch races; keep existing session state.
+        } finally {
+          useAuthStore.getState().setHydrated();
+        }
+      })();
     });
+  } finally {
+    useAuthStore.getState().setHydrated();
   }
-
-  useAuthStore.getState().setHydrated();
 }
 
 export const login = signIn;
