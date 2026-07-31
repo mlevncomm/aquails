@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { User, Mail, Phone, Lock, Eye, EyeOff, ArrowUpRight } from 'lucide-react';
+import { User, Mail, Phone, Lock, Eye, EyeOff, ArrowUpRight, Check } from 'lucide-react';
 import { register } from '@/services/authService';
 import { trackReferralSignup } from '@/services/referralService';
 import { useToastStore } from '@/components/Toast';
@@ -148,19 +148,62 @@ export default function RegisterPage() {
               {errors.confirm && <p className="mt-1 text-[11px] text-red-500">{errors.confirm}</p>}
             </div>
 
-            <label className="flex cursor-pointer items-start gap-2 pt-1 text-xs text-aq-muted">
-              <input
-                type="checkbox"
-                checked={agree}
-                onChange={(e) => {
-                  setAgree(e.target.checked);
-                  setErrors({ ...errors, agree: '' });
-                }}
-                className="mt-0.5 h-4 w-4 rounded accent-aq-deep"
-              />
-              <span>KVKK ve üyelik sözleşmesini okudum, kabul ediyorum.</span>
-            </label>
-            {errors.agree && <p className="-mt-2 text-[11px] text-red-500">{errors.agree}</p>}
+            <div
+              className={cn(
+                'rounded-2xl border p-3.5 transition-all',
+                agree
+                  ? 'border-aq-blue/35 bg-gradient-to-br from-aq-sky/50 to-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]'
+                  : 'border-aq-border/70 bg-white/55',
+                errors.agree && 'border-red-300 bg-red-50/40',
+              )}
+            >
+              <label className="flex cursor-pointer items-start gap-3">
+                <span className="relative mt-0.5 inline-flex shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={agree}
+                    onChange={(e) => {
+                      setAgree(e.target.checked);
+                      setErrors({ ...errors, agree: '' });
+                    }}
+                    className="peer sr-only"
+                  />
+                  <span
+                    className={cn(
+                      'flex h-5 w-5 items-center justify-center rounded-md border transition-all',
+                      'border-aq-border/80 bg-white shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-aq-aqua/40',
+                      agree && 'border-aq-blue bg-gradient-to-br from-aq-blue to-[#0d6fba] text-white shadow-[0_6px_14px_-6px_rgba(18,134,216,0.8)]',
+                    )}
+                    aria-hidden
+                  >
+                    {agree ? <Check className="h-3 w-3 stroke-[3]" /> : null}
+                  </span>
+                </span>
+                <span className="text-xs leading-relaxed text-aq-muted">
+                  <Link
+                    to="/kvkk"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-semibold text-aq-blue underline-offset-2 transition-colors hover:text-aq-deep hover:underline"
+                  >
+                    KVKK
+                  </Link>
+                  {' '}aydınlatma metnini ve{' '}
+                  <Link
+                    to="/uyelik-sozlesmesi"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-semibold text-aq-blue underline-offset-2 transition-colors hover:text-aq-deep hover:underline"
+                  >
+                    üyelik sözleşmesini
+                  </Link>
+                  {' '}okudum, kabul ediyorum.
+                </span>
+              </label>
+            </div>
+            {errors.agree && <p className="-mt-1 text-[11px] text-red-500">{errors.agree}</p>}
 
             <button
               type="submit"

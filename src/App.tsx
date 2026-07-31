@@ -29,6 +29,7 @@ const ContactPage = lazy(() => import('./pages/ContactPage'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const KVKKPage = lazy(() => import('./pages/KVKKPage'));
+const MembershipTermsPage = lazy(() => import('./pages/MembershipTermsPage'));
 const DistanceSalesPage = lazy(() => import('./pages/DistanceSalesPage'));
 const ReturnPolicyPage = lazy(() => import('./pages/ReturnPolicyPage'));
 const ShippingPage = lazy(() => import('./pages/ShippingPage'));
@@ -123,6 +124,7 @@ export default function App() {
           <Route path="/sss" element={<FAQPage />} />
           <Route path="/gizlilik" element={<PrivacyPage />} />
           <Route path="/kvkk" element={<KVKKPage />} />
+          <Route path="/uyelik-sozlesmesi" element={<MembershipTermsPage />} />
           <Route path="/mesafeli-satis" element={<DistanceSalesPage />} />
           <Route path="/iade" element={<ReturnPolicyPage />} />
           <Route path="/kargo-kurulum" element={<ShippingPage />} />
