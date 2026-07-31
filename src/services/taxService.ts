@@ -18,6 +18,8 @@ export interface TaxConfigLike {
   rate: number;
   priceIncludesVat: boolean;
   displayInCheckout: boolean;
+  /** false ise KDV hiç uygulanmaz (oran 0 sayılır) */
+  enabled?: boolean;
 }
 
 export interface TaxCalculationInput {
@@ -59,6 +61,7 @@ function round2(n: number): number {
 }
 
 function lineRate(line: CartLineForTax, defaultRate: number): number {
+  if (!(defaultRate > 0)) return 0;
   const r = line.taxRate ?? defaultRate;
   return r > 0 ? r : defaultRate;
 }
@@ -90,7 +93,12 @@ function feeWithTax(amount: number, rate: number) {
  */
 export function calculateCartTax(input: TaxCalculationInput): TaxCalculationResult {
   const { lines, shipping, codFee = 0, discount = 0, config } = input;
-  const defaultRate = config.rate > 0 ? config.rate : 20;
+  const defaultRate =
+    config.enabled === false
+      ? 0
+      : Number.isFinite(config.rate) && config.rate >= 0
+        ? config.rate
+        : 20;
   const incl = config.priceIncludesVat;
 
   let linesNet = 0;

@@ -18,6 +18,7 @@ import {
   updateProduct,
   validateAdminProductForm,
 } from '@/services/productService';
+import { getTaxConfig } from '@/services/shippingService';
 import {
   bestEffortDeleteUploadedObject,
   uploadProductImage,
@@ -48,6 +49,7 @@ export default function AdminProductEditPage() {
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [notFound, setNotFound] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [siteTaxEnabled, setSiteTaxEnabled] = useState(true);
   const [specs, setSpecs] = useState([{ key: '', value: '' }]);
   const [dirty, setDirty] = useState(false);
   const [form, setForm] = useState({
@@ -76,6 +78,10 @@ export default function AdminProductEditPage() {
       if (isNew && cats[0]) setForm((f) => ({ ...f, categoryId: cats[0].id }));
     });
   }, [isNew]);
+
+  useEffect(() => {
+    void getTaxConfig().then((cfg) => setSiteTaxEnabled(cfg.enabled));
+  }, []);
 
   useEffect(() => {
     if (isNew) return;
@@ -517,10 +523,21 @@ export default function AdminProductEditPage() {
             </div>
             {form.price && (
               <p className="text-xs text-aq-blue mt-3 bg-aq-sky px-3 py-2 rounded-lg">
-                Müşteri fiyatı (KDV dahil):{' '}
-                <strong>
-                  {(Number(form.price) * (1 + (Number(form.taxRate) || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
-                </strong>
+                {siteTaxEnabled ? (
+                  <>
+                    Müşteri fiyatı (KDV dahil):{' '}
+                    <strong>
+                      {(Number(form.price) * (1 + (Number(form.taxRate) || 20) / 100)).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
+                    </strong>
+                  </>
+                ) : (
+                  <>
+                    KDV site genelinde pasif — müşteri fiyatı:{' '}
+                    <strong>
+                      {Number(form.price).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
+                    </strong>
+                  </>
+                )}
               </p>
             )}
             <label className="flex items-center gap-2 text-sm text-aq-muted mt-4">

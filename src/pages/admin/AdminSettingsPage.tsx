@@ -48,13 +48,47 @@ function TaxSection() {
       <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
         <Receipt className="w-4 h-4 text-aq-blue" />KDV / Vergi
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 max-w-2xl p-3 rounded-xl bg-aq-ice border border-aq-border/50">
+        <div>
+          <p className="text-sm font-medium text-aq-text">KDV uygula</p>
+          <p className="text-xs text-aq-muted mt-0.5">
+            {tax.enabled
+              ? 'Vitrin, sepet ve ödeme tutarlarına KDV eklenir.'
+              : 'KDV pasif — müşteri net fiyatı görür ve öder.'}
+          </p>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-aq-muted cursor-pointer shrink-0">
+          <input
+            type="checkbox"
+            checked={tax.enabled}
+            onChange={(e) => setTax({ ...tax, enabled: e.target.checked })}
+            className="w-4 h-4 accent-aq-deep"
+          />
+          {tax.enabled ? 'Aktif' : 'Pasif'}
+        </label>
+      </div>
+
+      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl ${!tax.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <div>
           <AdminLabel>Varsayılan KDV Oranı (%)</AdminLabel>
-          <AdminInput type="number" value={tax.rate} onChange={(e) => setTax({ ...tax, rate: Number(e.target.value) })} />
+          <AdminInput
+            type="number"
+            min={0}
+            max={100}
+            value={tax.rate}
+            onChange={(e) => setTax({ ...tax, rate: Number(e.target.value) })}
+            disabled={!tax.enabled}
+          />
         </div>
-        <label className="flex items-center gap-2 text-sm text-aq-muted mt-6">
-          <input type="checkbox" checked={tax.displayInCheckout} onChange={(e) => setTax({ ...tax, displayInCheckout: e.target.checked })} />
+        <label className="flex items-center gap-2 text-sm text-aq-muted mt-6 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={tax.displayInCheckout}
+            onChange={(e) => setTax({ ...tax, displayInCheckout: e.target.checked })}
+            disabled={!tax.enabled}
+            className="w-4 h-4 accent-aq-deep"
+          />
           Checkout&apos;ta KDV göster
         </label>
       </div>
@@ -66,6 +100,10 @@ function TaxSection() {
         <p>
           Her ürünün kendi KDV oranı olabilir (ürün düzenleme ekranı). Oran girilmezse yukarıdaki varsayılan kullanılır.
           Kargo ve kapıda ödeme ücretleri KDV hariç girilir; checkout toplamına KDV eklenir.
+        </p>
+        <p>
+          <strong>KDV pasif</strong> edildiğinde ürün, kargo ve kapıda ödeme tutarlarına vergi eklenmez;
+          kayıtlı oran korunur, tekrar aktif edilince aynı oranla devam eder.
         </p>
       </div>
       <AdminButton type="button" className="mt-4" disabled={saving} onClick={() => void save()}>

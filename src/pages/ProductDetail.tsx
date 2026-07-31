@@ -22,6 +22,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
 import { ProductPrice } from '@/components/ProductPrice';
+import { ProductImageGallery } from '@/components/ProductImageGallery';
 import { getProductGrossPrice } from '@/lib/pricing';
 import { cn } from '@/lib/utils';
 
@@ -49,7 +50,6 @@ export default function ProductDetail() {
   const addToast = useToastStore(s => s.add);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
-  const [activeImage, setActiveImage] = useState(0);
   const [descExpanded, setDescExpanded] = useState(false);
 
   const [questionName, setQuestionName] = useState('');
@@ -190,7 +190,6 @@ export default function ProductDetail() {
   const productImages = product.images && product.images.length > 0
     ? [...new Set(product.images.filter(Boolean))]
     : ['/images/products/placeholder.jpg'];
-  const thumbnails = productImages;
 
   return (
     <>
@@ -222,36 +221,7 @@ export default function ProductDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left - Gallery */}
           <ScrollReveal x={-20}>
-            <div className="bg-aq-ice border border-aq-border/60 rounded-2xl aspect-square flex items-center justify-center overflow-hidden">
-              <img
-                src={productImages[activeImage] || productImages[0]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-                onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
-              />
-            </div>
-            {thumbnails.length > 1 && (
-              <div className="flex gap-3 mt-3">
-                {thumbnails.map((img, i) => (
-                  <button
-                    key={`${img}-${i}`}
-                    type="button"
-                    onClick={() => setActiveImage(i)}
-                    className={cn(
-                      'w-[72px] h-[72px] rounded-xl border-2 flex items-center justify-center bg-aq-ice transition-all overflow-hidden',
-                      activeImage === i ? 'border-aq-deep' : 'border-transparent hover:border-aq-border/60'
-                    )}
-                  >
-                    <img
-                      src={img}
-                      alt={`${product.name} - ${i + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
+            <ProductImageGallery images={productImages} alt={product.name} />
           </ScrollReveal>
 
           {/* Right - Info */}

@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { CartItem } from '@/types';
-import { getShippingConfig, getTaxConfig, type TaxConfig } from '@/services/shippingService';
+import { getShippingConfig, getTaxConfig, getEffectiveTaxRate, type TaxConfig } from '@/services/shippingService';
 import { calculateCartTax, cartItemsToTaxLines } from '@/services/taxService';
 import { getProductGrossPrice } from '@/lib/pricing';
 import { getSiteConfig } from '@/services/settingsService';
 
-const DEFAULT_TAX: TaxConfig = { rate: 20, displayInCheckout: true, priceIncludesVat: false };
+const DEFAULT_TAX: TaxConfig = { enabled: true, rate: 20, displayInCheckout: true, priceIncludesVat: false };
 
 export function useCartPricing(
   items: CartItem[],
@@ -16,13 +16,24 @@ export function useCartPricing(
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(1500);
   const [loaded, setLoaded] = useState(false);
 
+  const effectiveRate = getEffectiveTaxRate(taxConfig);
+
+  const pricingTaxConfig = useMemo(
+    () => ({
+      ...taxConfig,
+      rate: effectiveRate,
+      enabled: taxConfig.enabled,
+    }),
+    [taxConfig, effectiveRate],
+  );
+
   const subtotal = useMemo(
     () =>
       items.reduce(
-        (sum, i) => sum + getProductGrossPrice(i.product, taxConfig.rate) * i.quantity,
+        (sum, i) => sum + getProductGrossPrice(i.product, effectiveRate) * i.quantity,
         0,
       ),
-    [items, taxConfig.rate],
+    [items, effectiveRate],
   );
 
   useEffect(() => {
@@ -48,9 +59,9 @@ export function useCartPricing(
         shipping,
         codFee,
         discount,
-        config: { ...taxConfig, priceIncludesVat: false },
+        config: { ...pricingTaxConfig, priceIncludesVat: false },
       }),
-    [items, shipping, codFee, discount, taxConfig],
+    [items, shipping, codFee, discount, pricingTaxConfig],
   );
 
   const freeShippingProgress = Math.min(
@@ -60,7 +71,8 @@ export function useCartPricing(
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal);
 
   return {
-    taxConfig,
+    /** Fiyatlandırma için efektif config (KDV kapalıysa rate=0) */
+    taxConfig: pricingTaxConfig,
     shipping,
     shippingCost,
     codFee,

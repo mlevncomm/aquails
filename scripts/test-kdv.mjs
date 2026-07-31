@@ -26,7 +26,12 @@ function feeWithTax(amount, rate) {
 }
 
 function calculateCartTax({ lines, shipping, codFee = 0, discount = 0, config }) {
-  const defaultRate = config.rate > 0 ? config.rate : 20;
+  const defaultRate =
+    config.enabled === false
+      ? 0
+      : Number.isFinite(config.rate) && config.rate >= 0
+        ? config.rate
+        : 20;
   const incl = config.priceIncludesVat;
 
   let linesNet = 0;
@@ -34,10 +39,11 @@ function calculateCartTax({ lines, shipping, codFee = 0, discount = 0, config })
   let linesGross = 0;
 
   for (const line of lines) {
-    const rate = line.taxRate ?? defaultRate;
+    const rate = !(defaultRate > 0) ? 0 : (line.taxRate ?? defaultRate);
+    const lineRate = rate > 0 ? rate : defaultRate;
     const part = incl
-      ? lineFromInclusive(line.unitPrice, line.quantity, rate)
-      : lineFromExclusive(line.unitPrice, line.quantity, rate);
+      ? lineFromInclusive(line.unitPrice, line.quantity, lineRate)
+      : lineFromExclusive(line.unitPrice, line.quantity, lineRate);
     linesNet += part.net;
     linesTax += part.tax;
     linesGross += part.gross;
@@ -136,6 +142,16 @@ const withDiscount = calculateCartTax({
   config: { rate: 20, priceIncludesVat: true },
 });
 assert(Math.abs(withDiscount.totalGross - 2857.8) < 0.01, `İndirimli KDV dahil: 2857.80₺ (got ${withDiscount.totalGross})`);
+
+// KDV pasif — ürün taxRate olsa bile vergi uygulanmaz
+const taxDisabled = calculateCartTax({
+  lines: [{ unitPrice: 100, quantity: 1, taxRate: 20 }],
+  shipping: 49,
+  codFee: 150,
+  config: { rate: 20, priceIncludesVat: false, enabled: false },
+});
+assert(taxDisabled.totalGross === 299, `KDV pasif: 299₺ (got ${taxDisabled.totalGross})`);
+assert(taxDisabled.totalTax === 0, `KDV pasif: vergi 0 (got ${taxDisabled.totalTax})`);
 
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);
