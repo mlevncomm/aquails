@@ -65,42 +65,56 @@ export default function Cart() {
       />
     <PageLayout>
       {/* Hero */}
-      <div className="relative bg-white py-12 md:py-14 overflow-hidden border-b border-aq-border/50">
+      <div className="relative overflow-hidden border-b border-aq-border/40 bg-[#F7FBFE] py-12 md:py-14">
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_0%_0%,rgba(32,211,242,0.14),transparent_55%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_60%_at_100%_0%,rgba(18,134,216,0.1),transparent_50%)]" />
+        </div>
         <div className="page-container relative">
-          <h1 className="text-2xl md:text-3xl font-bold text-aq-text">Alışveriş Sepetim</h1>
-          <p className="text-sm text-aq-muted mt-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-aq-blue/70">Alışveriş</p>
+          <h1 className="mt-2 font-[Poppins,ui-sans-serif,sans-serif] text-2xl font-semibold tracking-tight text-aq-deep md:text-3xl">
+            Sepetim
+          </h1>
+          <p className="mt-2 text-sm text-aq-muted">
             {items.length === 0 ? 'Sepetiniz boş' : `Sepetinizde ${items.length} ürün bulunuyor`}
           </p>
         </div>
       </div>
 
-      <div className="page-container py-8 sm:py-10 overflow-x-hidden">
+      <div className="page-container overflow-x-hidden py-8 sm:py-10">
         {items.length === 0 ? (
           /* Empty State */
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center py-20 max-w-md mx-auto"
+            className="relative mx-auto max-w-lg overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/75 px-6 py-16 text-center shadow-[0_30px_80px_-40px_rgba(6,38,61,0.35)] backdrop-blur-xl sm:px-10"
           >
-            <div className="w-24 h-24 bg-aq-ice rounded-2xl flex items-center justify-center mx-auto mb-6 border border-aq-border/60">
-              <ShoppingCart className="w-12 h-12 text-aq-blue/30" />
+            <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-aq-aqua/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-20 -left-10 h-36 w-36 rounded-full bg-aq-blue/10 blur-3xl" />
+            <div className="relative mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/80 bg-white/90 shadow-[0_20px_50px_-28px_rgba(6,38,61,0.4)]">
+              <ShoppingCart className="h-11 w-11 text-aq-blue/50" strokeWidth={1.5} />
+              <span className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-aq-aqua to-aq-blue text-white shadow-md">
+                <Sparkles className="h-3.5 w-3.5" />
+              </span>
             </div>
-            <h2 className="text-xl font-semibold text-aq-text mb-2">Sepetiniz Henüz Boş</h2>
-            <p className="text-sm text-aq-muted leading-relaxed mb-6">
+            <h2 className="relative font-[Poppins,ui-sans-serif,sans-serif] text-xl font-semibold tracking-tight text-aq-deep">
+              Sepetiniz Henüz Boş
+            </h2>
+            <p className="relative mx-auto mt-2 mb-7 max-w-sm text-sm leading-relaxed text-aq-muted">
               Su arıtma cihazları, filtre setleri ve aksesuarlarımızı keşfedin. Size en uygun ürünleri sepetinize ekleyin.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="relative flex flex-col justify-center gap-3 sm:flex-row">
               <Link
                 to="/urunler"
-                className="inline-flex items-center justify-center gap-2 bg-aq-blue text-white px-8 py-3.5 rounded-xl font-semibold text-sm hover:bg-aq-deep hover:text-white transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-aq-blue to-[#0d6fba] px-8 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(18,134,216,0.75)] transition-all hover:-translate-y-0.5"
               >
-                <Package className="w-4 h-4" /> Ürünleri Keşfet
+                <Package className="h-4 w-4" /> Ürünleri Keşfet
               </Link>
               <Link
                 to="/urun-secim-sihirbazi"
-                className="inline-flex items-center justify-center gap-2 border-2 border-aq-border/60 text-aq-muted px-8 py-3.5 rounded-xl font-semibold text-sm hover:border-aq-blue hover:text-aq-blue transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-aq-border/70 bg-white/80 px-8 py-3.5 text-sm font-semibold text-aq-muted transition-all hover:border-aq-blue/35 hover:text-aq-blue"
               >
-                <Sparkles className="w-4 h-4" /> Sihirbaz Kullan
+                <Sparkles className="h-4 w-4" /> Sihirbaz Kullan
               </Link>
             </div>
           </motion.div>
