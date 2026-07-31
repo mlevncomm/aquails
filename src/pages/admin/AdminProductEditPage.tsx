@@ -9,6 +9,7 @@ import type { DbProductImage } from '@/types/database';
 import {
   addProductImageRecord,
   createProduct,
+  deleteProduct,
   deleteProductImageRecord,
   getAdminProductById,
   getCategoryOptions,
@@ -24,6 +25,7 @@ import {
   uploadProductImage,
   validateProductImageFile,
 } from '@/services/storageService';
+import { ConfirmModal } from '@/components/ConfirmModal';
 import {
   AdminBreadcrumb, AdminButton, AdminCard, AdminEmpty, AdminInput, AdminLabel,
   AdminLoading, AdminPageHeader, AdminPageShell, AdminSelect, AdminTextarea,
@@ -50,6 +52,8 @@ export default function AdminProductEditPage() {
   const [notFound, setNotFound] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [siteTaxEnabled, setSiteTaxEnabled] = useState(true);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deletingProduct, setDeletingProduct] = useState(false);
   const [specs, setSpecs] = useState([{ key: '', value: '' }]);
   const [dirty, setDirty] = useState(false);
   const [form, setForm] = useState({
@@ -275,6 +279,22 @@ export default function AdminProductEditPage() {
     }
   };
 
+  const handleDeleteProduct = async () => {
+    if (!id || deletingProduct) return;
+    setDeletingProduct(true);
+    const result = await deleteProduct(id);
+    if (!result.success) {
+      setDeletingProduct(false);
+      addToast(result.error ?? 'Ürün silinemedi.', 'error');
+      return;
+    }
+    for (const url of result.data?.imageUrls ?? []) {
+      void bestEffortDeleteUploadedObject(url);
+    }
+    addToast('Ürün silindi.', 'success');
+    navigate('/admin/urunler');
+  };
+
   const buildPayload = () => {
     const specifications = Object.fromEntries(
       specs.filter((s) => s.key.trim()).map((s) => [s.key.trim(), s.value.trim()]),
@@ -412,11 +432,23 @@ export default function AdminProductEditPage() {
         title={isNew ? 'Yeni Ürün Ekle' : 'Ürün Düzenle'}
         description={isNew ? 'Kataloğa yeni ürün ekleyin.' : 'Ürün bilgilerini güncelleyin.'}
         action={
-          <Link to="/admin/urunler">
-            <AdminButton variant="ghost" className="!px-3">
-              <ArrowLeft className="w-4 h-4" /> Geri
-            </AdminButton>
-          </Link>
+          <div className="flex items-center gap-2">
+            {!isNew && (
+              <AdminButton
+                type="button"
+                variant="secondary"
+                className="!text-red-500 hover:!bg-red-50"
+                onClick={() => setConfirmDeleteOpen(true)}
+              >
+                <Trash2 className="w-4 h-4" /> Sil
+              </AdminButton>
+            )}
+            <Link to="/admin/urunler">
+              <AdminButton variant="ghost" className="!px-3">
+                <ArrowLeft className="w-4 h-4" /> Geri
+              </AdminButton>
+            </Link>
+          </div>
         }
       />
 
@@ -630,6 +662,21 @@ export default function AdminProductEditPage() {
           </AdminButton>
         </div>
       </form>
+
+      <ConfirmModal
+        open={confirmDeleteOpen}
+        onCancel={() => {
+          if (!deletingProduct) setConfirmDeleteOpen(false);
+        }}
+        onConfirm={() => {
+          if (!deletingProduct) void handleDeleteProduct();
+        }}
+        title="Ürünü sil"
+        description={`“${form.name || 'Bu ürün'}” kalıcı olarak silinecek. Bu işlem geri alınamaz.`}
+        confirmLabel={deletingProduct ? 'Siliniyor...' : 'Sil'}
+        cancelLabel="Vazgeç"
+        variant="danger"
+      />
     </AdminPageShell>
   );
 }

@@ -461,6 +461,35 @@ export async function deleteProductImageRecord(
   return ok({ url: result.url, product_id: result.product_id });
 }
 
+/** Admin: ürünü kalıcı siler (sepet satırlarını temizler; sipariş satırları ürün id'sini null yapar). */
+export async function deleteProduct(
+  productId: string,
+): Promise<MutationResult<{ id: string; name?: string; imageUrls: string[] }>> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return fail('Servis yapılandırılmamış.');
+  const { data, error } = await supabase.rpc('admin_delete_product', {
+    p_product_id: productId,
+  });
+  if (error) return fail(mapDbError(error.message, 'Ürün silinemedi.'));
+  const result = data as {
+    success?: boolean;
+    error?: string;
+    id?: string;
+    name?: string;
+    image_urls?: string[] | null;
+  } | null;
+  if (!result?.success) {
+    if (result?.error === 'not_found') return fail('Ürün bulunamadı.');
+    return fail('Ürün silinemedi.');
+  }
+  return ok({
+    id: result.id ?? productId,
+    name: result.name,
+    imageUrls: Array.isArray(result.image_urls) ? result.image_urls : [],
+  });
+}
+
+
 export async function createProduct(
   input: AdminProductForm,
 ): Promise<MutationResult<{ id: string }>> {
