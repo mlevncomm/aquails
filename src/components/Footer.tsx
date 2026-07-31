@@ -77,7 +77,7 @@ export function Footer() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
             <div>
               <div className="mb-4 inline-flex items-center">
-                <BrandLogo variant="logo" bare className="h-10 w-auto max-w-[200px]" />
+                <BrandLogo variant="logo" bare inverted className="text-[1.08rem] gap-[0.34em]" />
               </div>
               <p className="text-sm text-white/45 leading-relaxed">
                 2008&apos;den beri su arıtma teknolojilerinde güvenilir çözüm ortağınız.
