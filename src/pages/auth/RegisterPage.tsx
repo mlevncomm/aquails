@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { Droplets, User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Phone, Lock, Eye, EyeOff, ArrowUpRight } from 'lucide-react';
 import { register } from '@/services/authService';
 import { trackReferralSignup } from '@/services/referralService';
 import { useToastStore } from '@/components/Toast';
 import { useAuthStore } from '@/stores/authStore';
+import { AuthBrand } from '@/layouts/AuthLayout';
+import { cn } from '@/lib/utils';
+
+const fieldBase =
+  'w-full rounded-2xl border bg-white/80 pl-11 pr-4 py-3 text-sm text-aq-text placeholder:text-aq-muted/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] transition-all focus:outline-none focus:border-aq-blue/50 focus:ring-4 focus:ring-aq-aqua/15';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -59,71 +64,121 @@ export default function RegisterPage() {
     setLoading(false);
   };
 
-  // Duz fonksiyon olarak render edilir (bilesen degil); aksi halde her renderda
-  // yeni bilesen tipi olusur, input DOM'dan sokulur ve odak kaybolur.
   const renderInput = ({ label, icon: Icon, type = 'text', field, placeholder }: { label: string; icon: React.ElementType; type?: string; field: string; placeholder: string }) => (
     <div>
-      <label className="text-xs font-medium text-aq-muted mb-1.5 block">{label}</label>
+      <label className="mb-1.5 block text-xs font-medium text-aq-muted">{label}</label>
       <div className="relative">
-        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-aq-muted" />
-        <input type={type} value={(form as Record<string, string>)[field]} onChange={(e) => { setForm({ ...form, [field]: e.target.value }); setErrors({ ...errors, [field]: '' }); }} placeholder={placeholder} className={`w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/10 bg-aq-ice ${errors[field] ? 'border-red-300' : 'border-aq-border/60'}`} />
+        <Icon className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-aq-muted" />
+        <input
+          type={type}
+          value={(form as Record<string, string>)[field]}
+          onChange={(e) => {
+            setForm({ ...form, [field]: e.target.value });
+            setErrors({ ...errors, [field]: '' });
+          }}
+          placeholder={placeholder}
+          className={cn(fieldBase, errors[field] ? 'border-red-300' : 'border-aq-border/70')}
+        />
       </div>
-      {errors[field] && <p className="text-[11px] text-red-500 mt-1">{errors[field]}</p>}
+      {errors[field] && <p className="mt-1 text-[11px] text-red-500">{errors[field]}</p>}
     </div>
   );
 
   return (
-    <div className="w-full max-w-[400px]">
-      <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-        <Droplets className="w-8 h-8 text-aq-blue" />
-        <span className="text-2xl font-bold text-aq-text">aquails</span>
-      </Link>
+    <div className="w-full">
+      <AuthBrand />
 
-      <div className="bg-white border border-aq-border/60 rounded-2xl p-8">
-        <h1 className="text-xl font-semibold text-aq-text mb-1">Kayıt Ol</h1>
-        <p className="text-sm text-aq-muted mb-8">
-          Yeni bir hesap oluşturun.
-          {refCode ? <span className="block mt-1 text-aq-blue">Davet kodu: {refCode}</span> : null}
-        </p>
+      <div className="relative overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/75 p-7 sm:p-8 shadow-[0_30px_80px_-40px_rgba(6,38,61,0.45)] backdrop-blur-xl">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-aq-aqua/15 blur-3xl" />
+        <div className="relative">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-aq-blue/70">Hesap</p>
+          <h1 className="mt-2 font-[Poppins,ui-sans-serif,sans-serif] text-2xl font-semibold tracking-tight text-aq-deep">
+            Kayıt Ol
+          </h1>
+          <p className="mt-2 text-sm text-aq-muted leading-relaxed">
+            Yeni bir Aquails hesabı oluşturun.
+            {refCode ? <span className="mt-1 block text-aq-blue">Davet kodu: {refCode}</span> : null}
+          </p>
 
-        <form onSubmit={handleSubmit} className="space-y-3.5">
-          {renderInput({ label: 'Ad Soyad', icon: User, field: 'name', placeholder: 'Adınız Soyadınız' })}
-          {renderInput({ label: 'E-posta', icon: Mail, type: 'email', field: 'email', placeholder: 'ornek@email.com' })}
-          {renderInput({ label: 'Telefon', icon: Phone, type: 'tel', field: 'phone', placeholder: '05XX XXX XX XX' })}
+          <form onSubmit={handleSubmit} className="mt-6 space-y-3.5">
+            {renderInput({ label: 'Ad Soyad', icon: User, field: 'name', placeholder: 'Adınız Soyadınız' })}
+            {renderInput({ label: 'E-posta', icon: Mail, type: 'email', field: 'email', placeholder: 'ornek@email.com' })}
+            {renderInput({ label: 'Telefon', icon: Phone, type: 'tel', field: 'phone', placeholder: '05XX XXX XX XX' })}
 
-          <div>
-            <label className="text-xs font-medium text-aq-muted mb-1.5 block">Şifre</label>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-aq-muted" />
-              <input type={showPass ? 'text' : 'password'} value={form.password} onChange={(e) => { setForm({ ...form, password: e.target.value }); setErrors({ ...errors, password: '' }); }} placeholder="En az 6 karakter" className={`w-full pl-10 pr-10 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/10 bg-aq-ice ${errors.password ? 'border-red-300' : 'border-aq-border/60'}`} />
-              <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-aq-muted">{showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-aq-muted">Şifre</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-aq-muted" />
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={(e) => {
+                    setForm({ ...form, password: e.target.value });
+                    setErrors({ ...errors, password: '' });
+                  }}
+                  placeholder="En az 6 karakter"
+                  className={cn(fieldBase, 'pr-11', errors.password ? 'border-red-300' : 'border-aq-border/70')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-aq-muted"
+                >
+                  {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.password && <p className="mt-1 text-[11px] text-red-500">{errors.password}</p>}
             </div>
-            {errors.password && <p className="text-[11px] text-red-500 mt-1">{errors.password}</p>}
-          </div>
 
-          <div>
-            <label className="text-xs font-medium text-aq-muted mb-1.5 block">Şifre Tekrar</label>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-aq-muted" />
-              <input type={showPass ? 'text' : 'password'} value={form.confirm} onChange={(e) => { setForm({ ...form, confirm: e.target.value }); setErrors({ ...errors, confirm: '' }); }} placeholder="Şifrenizi tekrar girin" className={`w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/10 bg-aq-ice ${errors.confirm ? 'border-red-300' : 'border-aq-border/60'}`} />
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-aq-muted">Şifre Tekrar</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-aq-muted" />
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  value={form.confirm}
+                  onChange={(e) => {
+                    setForm({ ...form, confirm: e.target.value });
+                    setErrors({ ...errors, confirm: '' });
+                  }}
+                  placeholder="Şifrenizi tekrar girin"
+                  className={cn(fieldBase, errors.confirm ? 'border-red-300' : 'border-aq-border/70')}
+                />
+              </div>
+              {errors.confirm && <p className="mt-1 text-[11px] text-red-500">{errors.confirm}</p>}
             </div>
-            {errors.confirm && <p className="text-[11px] text-red-500 mt-1">{errors.confirm}</p>}
-          </div>
 
-          <label className="flex items-start gap-2 text-xs text-aq-muted cursor-pointer pt-1">
-            <input type="checkbox" checked={agree} onChange={(e) => { setAgree(e.target.checked); setErrors({ ...errors, agree: '' }); }} className="w-4 h-4 mt-0.5 accent-aq-deep rounded" />
-            <span>KVKK ve üyelik sözleşmesini okudum, kabul ediyorum.</span>
-          </label>
-          {errors.agree && <p className="text-[11px] text-red-500 -mt-2">{errors.agree}</p>}
+            <label className="flex cursor-pointer items-start gap-2 pt-1 text-xs text-aq-muted">
+              <input
+                type="checkbox"
+                checked={agree}
+                onChange={(e) => {
+                  setAgree(e.target.checked);
+                  setErrors({ ...errors, agree: '' });
+                }}
+                className="mt-0.5 h-4 w-4 rounded accent-aq-deep"
+              />
+              <span>KVKK ve üyelik sözleşmesini okudum, kabul ediyorum.</span>
+            </label>
+            {errors.agree && <p className="-mt-2 text-[11px] text-red-500">{errors.agree}</p>}
 
-          <button type="submit" disabled={loading} className="w-full bg-aq-blue text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all disabled:opacity-60">
-            {loading ? 'Kaydediliyor...' : 'Kayıt Ol'}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="group mt-1 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-aq-blue to-[#0d6fba] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(18,134,216,0.75)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading ? 'Kaydediliyor...' : 'Kayıt Ol'}
+              {!loading && <ArrowUpRight className="h-4 w-4" />}
+            </button>
+          </form>
 
-        <p className="text-center text-xs text-aq-muted mt-5">
-          Zaten hesabınız var mı? <Link to="/giris" className="text-aq-blue font-semibold hover:underline">Giriş Yap</Link>
-        </p>
+          <p className="mt-6 text-center text-xs text-aq-muted">
+            Zaten hesabınız var mı?{' '}
+            <Link to="/giris" className="font-semibold text-aq-blue hover:text-aq-deep">
+              Giriş Yap
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
