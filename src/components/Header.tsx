@@ -6,7 +6,7 @@ import {
   Heart, ChevronRight, LogOut, Search, GitCompare,
   ChevronDown, Package, Droplet, Zap, Monitor, Coffee,
   Building2, Filter, CircleDot, Settings, Wrench,
-  Plug, Sparkles, ChefHat, Activity, Home
+  Plug, Sparkles, ChefHat, Activity, Home, ArrowUpRight, Wand2,
 } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -119,6 +119,24 @@ export function Header() {
   const compareCount = useCompareStore(s => s.ids.length);
   const cartCount = getTotalItems();
   const searchRef = useRef<HTMLDivElement>(null);
+  const megaCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const openMega = () => {
+    if (megaCloseTimer.current) {
+      clearTimeout(megaCloseTimer.current);
+      megaCloseTimer.current = null;
+    }
+    setIsMegaOpen(true);
+  };
+
+  const closeMega = () => {
+    if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current);
+    megaCloseTimer.current = setTimeout(() => setIsMegaOpen(false), 140);
+  };
+
+  useEffect(() => () => {
+    if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -263,14 +281,14 @@ export function Header() {
                 <div
                   key={link.label}
                   className="relative"
-                  onMouseEnter={() => link.hasMega && setIsMegaOpen(true)}
-                  onMouseLeave={() => link.hasMega && setIsMegaOpen(false)}
+                  onMouseEnter={() => link.hasMega && openMega()}
+                  onMouseLeave={() => link.hasMega && closeMega()}
                 >
                   <Link
                     to={link.href}
                     className={cn(
                       'px-3 py-1.5 text-[13px] font-medium rounded-full transition-colors flex items-center gap-1',
-                      location.pathname === link.href
+                      location.pathname === link.href || (link.hasMega && isMegaOpen)
                         ? 'text-aq-deep bg-aq-sky'
                         : 'text-aq-muted hover:text-aq-text hover:bg-aq-ice/80',
                     )}
@@ -278,7 +296,7 @@ export function Header() {
                     {link.label}
                     {link.hasMega && (
                       <ChevronDown
-                        className={cn('w-3 h-3 transition-transform', isMegaOpen ? 'rotate-180' : '')}
+                        className={cn('w-3 h-3 transition-transform duration-300', isMegaOpen ? 'rotate-180' : '')}
                       />
                     )}
                   </Link>
@@ -382,40 +400,108 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mega Menu - Desktop (anchored to sticky header bottom) */}
+        {/* Mega Menu - Desktop */}
         <AnimatePresence>
           {isMegaOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -5 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              onMouseEnter={() => setIsMegaOpen(true)}
-              onMouseLeave={() => setIsMegaOpen(false)}
-              className="hidden lg:block absolute left-0 right-0 top-full z-40 bg-white border-b border-aq-border/60 shadow-sm"
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+              onMouseEnter={openMega}
+              onMouseLeave={closeMega}
+              className="hidden lg:block absolute left-0 right-0 top-full z-40"
             >
-              <div className="page-container py-6">
-                <div className="grid grid-cols-7 gap-3">
-                  {categories.map(cat => {
-                    const Icon = getCategoryIcon(cat.icon);
-                    return (
-                      <Link
-                        key={cat.id}
-                        to={`/urunler?kategori=${cat.id}`}
-                        onClick={() => setIsMegaOpen(false)}
-                        className="group p-4 rounded-xl hover:bg-aq-ice transition-all"
-                      >
-                        <div className="w-10 h-10 bg-aq-sky rounded-xl flex items-center justify-center mb-3 group-hover:bg-aq-blue transition-colors">
-                          <Icon className="w-5 h-5 text-aq-blue group-hover:text-white transition-colors" />
+              <div className="border-b border-aq-border/50 bg-white/95 backdrop-blur-xl shadow-[0_20px_50px_-28px_rgba(6,38,61,0.35)]">
+                <div className="h-px bg-gradient-to-r from-transparent via-aq-aqua/50 to-transparent" />
+                <div className="page-container py-7">
+                  <div className="grid grid-cols-12 gap-6">
+                    {/* Featured rail */}
+                    <div className="col-span-3 relative overflow-hidden rounded-2xl bg-[#061b2c] px-5 py-6 text-white">
+                      <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-aq-aqua/20 blur-2xl" />
+                      <div className="pointer-events-none absolute -bottom-10 left-0 h-28 w-28 rounded-full bg-aq-blue/25 blur-2xl" />
+                      <p className="relative text-[10px] font-semibold uppercase tracking-[0.2em] text-aq-aqua/80">
+                        Katalog
+                      </p>
+                      <h3 className="relative mt-3 text-lg font-semibold leading-snug tracking-tight">
+                        İhtiyacına uygun sistemi bul
+                      </h3>
+                      <p className="relative mt-2 text-[12px] leading-relaxed text-white/50">
+                        Kategorilerden seç veya sihirbazla 1 dakikada öneri al.
+                      </p>
+                      <div className="relative mt-5 flex flex-col gap-2">
+                        <Link
+                          to="/urunler"
+                          onClick={() => setIsMegaOpen(false)}
+                          className="inline-flex items-center justify-between rounded-xl bg-white px-3.5 py-2.5 text-[13px] font-semibold text-aq-deep transition-colors hover:bg-aq-sky"
+                        >
+                          Tüm ürünler
+                          <ArrowUpRight className="h-3.5 w-3.5" />
+                        </Link>
+                        <Link
+                          to="/urun-secim-sihirbazi"
+                          onClick={() => setIsMegaOpen(false)}
+                          className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-3.5 py-2.5 text-[13px] font-medium text-white/85 transition-colors hover:border-aq-aqua/40 hover:text-aq-aqua"
+                        >
+                          <Wand2 className="h-3.5 w-3.5" />
+                          Ürün sihirbazı
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Categories */}
+                    <div className="col-span-9">
+                      <div className="mb-4 flex items-end justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-aq-muted/70">
+                            Kategoriler
+                          </p>
+                          <p className="mt-1 text-sm text-aq-muted">
+                            {categories.length} kategori · hızlı filtre
+                          </p>
                         </div>
-                        <h4 className="text-sm font-semibold text-aq-text mb-1">{cat.name}</h4>
-                        <p className="text-xs text-aq-muted">{cat.productCount} ürün</p>
-                      </Link>
-                    );
-                  })}
-                </div>
-                <div className="mt-4 pt-4 border-t border-aq-border/60 flex items-center justify-between">
-                  <p className="text-xs text-aq-muted">Tüm ürünleri keşfedin: <Link to="/urunler" onClick={() => setIsMegaOpen(false)} className="text-aq-blue font-medium hover:underline">Tüm Ürünler</Link></p>
-                  <Link to="/kampanyalar" onClick={() => setIsMegaOpen(false)} className="text-xs font-medium text-aq-blue hover:underline">Tüm Kampanyalar →</Link>
+                        <Link
+                          to="/kampanyalar"
+                          onClick={() => setIsMegaOpen(false)}
+                          className="text-[12px] font-medium text-aq-blue hover:text-aq-deep transition-colors"
+                        >
+                          Kampanyalar →
+                        </Link>
+                      </div>
+
+                      <div className="grid grid-cols-3 xl:grid-cols-4 gap-2">
+                        {categories.map((cat, i) => {
+                          const Icon = getCategoryIcon(cat.icon);
+                          return (
+                            <motion.div
+                              key={cat.id}
+                              initial={{ opacity: 0, y: 6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: Math.min(i * 0.03, 0.2) }}
+                            >
+                              <Link
+                                to={`/urunler?kategori=${cat.id}`}
+                                onClick={() => setIsMegaOpen(false)}
+                                className="group flex items-start gap-3 rounded-2xl border border-transparent px-3 py-3 transition-all duration-250 hover:border-aq-border/70 hover:bg-aq-ice/80 hover:shadow-[0_8px_24px_-16px_rgba(18,134,216,0.35)]"
+                              >
+                                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-aq-sky text-aq-blue transition-all duration-300 group-hover:bg-aq-blue group-hover:text-white group-hover:scale-105">
+                                  <Icon className="h-4.5 w-4.5 h-[18px] w-[18px]" />
+                                </span>
+                                <span className="min-w-0 pt-0.5">
+                                  <span className="block text-[13px] font-semibold text-aq-text leading-snug group-hover:text-aq-deep">
+                                    {cat.name}
+                                  </span>
+                                  <span className="mt-0.5 block text-[11px] text-aq-muted">
+                                    {cat.productCount} ürün
+                                  </span>
+                                </span>
+                              </Link>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -587,7 +673,7 @@ export function Header() {
                           transition={{ duration: 0.22 }}
                           className="overflow-hidden"
                         >
-                          <div className="pt-1 pb-1 space-y-0.5">
+                          <div className="pt-2 pb-1 space-y-1 px-1">
                             {categories.map(cat => {
                               const Icon = getCategoryIcon(cat.icon);
                               return (
@@ -595,16 +681,29 @@ export function Header() {
                                   key={cat.id}
                                   to={`/urunler?kategori=${cat.id}`}
                                   onClick={() => setIsMobileMenuOpen(false)}
-                                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-aq-muted hover:bg-aq-ice hover:text-aq-blue rounded-xl transition-colors"
+                                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-aq-muted hover:bg-aq-ice hover:text-aq-blue rounded-2xl transition-colors"
                                 >
-                                  <span className="w-8 h-8 rounded-xl bg-aq-sky flex items-center justify-center flex-shrink-0">
+                                  <span className="w-9 h-9 rounded-xl bg-aq-sky flex items-center justify-center flex-shrink-0">
                                     <Icon className="w-4 h-4 text-aq-blue" />
                                   </span>
-                                  <span className="flex-1 truncate">{cat.name}</span>
-                                  <span className="text-[11px] text-aq-muted">{cat.productCount}</span>
+                                  <span className="flex-1 min-w-0">
+                                    <span className="block truncate font-medium text-aq-text">{cat.name}</span>
+                                    <span className="text-[11px] text-aq-muted">{cat.productCount} ürün</span>
+                                  </span>
+                                  <ChevronRight className="w-3.5 h-3.5 opacity-30" />
                                 </Link>
                               );
                             })}
+                            <Link
+                              to="/urun-secim-sihirbazi"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="flex items-center gap-3 px-3 py-2.5 text-sm text-aq-blue font-medium rounded-2xl hover:bg-aq-sky/60 transition-colors"
+                            >
+                              <span className="w-9 h-9 rounded-xl bg-aq-blue/10 flex items-center justify-center flex-shrink-0">
+                                <Wand2 className="w-4 h-4 text-aq-blue" />
+                              </span>
+                              Ürün seçim sihirbazı
+                            </Link>
                           </div>
                         </motion.div>
                       )}
