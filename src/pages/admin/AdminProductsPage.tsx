@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { Search, Plus, Pencil, Package, RefreshCw } from 'lucide-react';
+import { Search, Plus, Pencil, Package, RefreshCw, Trash2, Loader2 } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
+import { ConfirmModal } from '@/components/ConfirmModal';
+import { useToastStore } from '@/components/Toast';
 import { useAdminCatalog } from '@/hooks/useAdminCatalog';
+import { deleteProduct } from '@/services/productService';
+import { bestEffortDeleteUploadedObject } from '@/services/storageService';
 import {
   AdminPageShell,
   AdminPageHeader,
@@ -20,8 +24,11 @@ import {
 
 export default function AdminProductsPage() {
   const { products, categories, loading, error, errorCode, isEmpty, reload } = useAdminCatalog();
+  const addToast = useToastStore((s) => s.add);
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filtered = products.filter((p) => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
@@ -31,11 +38,29 @@ export default function AdminProductsPage() {
 
   const cats = ['all', ...Array.from(new Set(products.map((p) => p.category).filter(Boolean)))];
 
+  const confirmDelete = async () => {
+    if (!pendingDelete || deleting) return;
+    setDeleting(true);
+    const result = await deleteProduct(pendingDelete.id);
+    if (!result.success) {
+      setDeleting(false);
+      addToast(result.error ?? 'Ürün silinemedi.', 'error');
+      return;
+    }
+    for (const url of result.data?.imageUrls ?? []) {
+      void bestEffortDeleteUploadedObject(url);
+    }
+    setDeleting(false);
+    setPendingDelete(null);
+    addToast(`“${pendingDelete.name}” silindi.`, 'success');
+    void reload();
+  };
+
   return (
     <AdminPageShell>
       <AdminPageHeader
         title="Ürün Yönetimi"
-        description="Katalog ürünlerini arayın, filtreleyin ve düzenleyin."
+        description="Katalog ürünlerini arayın, filtreleyin, düzenleyin veya silin."
         action={
           <div className="flex items-center gap-2">
             <AdminButton variant="secondary" onClick={() => void reload()} disabled={loading}>
@@ -139,13 +164,23 @@ export default function AdminProductsPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-aq-border/50">
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-aq-border/50 gap-2">
                   <p className="text-xs text-aq-muted">Stok: {p.stock}</p>
-                  <Link to={`/admin/urunler/${p.id}`}>
-                    <AdminButton variant="secondary" className="!px-3 !py-2">
-                      <Pencil className="w-3.5 h-3.5" /> Düzenle
+                  <div className="flex items-center gap-2">
+                    <Link to={`/admin/urunler/${p.id}`}>
+                      <AdminButton variant="secondary" className="!px-3 !py-2">
+                        <Pencil className="w-3.5 h-3.5" /> Düzenle
+                      </AdminButton>
+                    </Link>
+                    <AdminButton
+                      variant="secondary"
+                      className="!px-3 !py-2 !text-red-500 hover:!bg-red-50"
+                      onClick={() => setPendingDelete({ id: p.id, name: p.name })}
+                      aria-label="Ürünü sil"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Sil
                     </AdminButton>
-                  </Link>
+                  </div>
                 </div>
               </AdminCard>
             ))}
@@ -196,13 +231,25 @@ export default function AdminProductsPage() {
                         <StatusBadge status={p.isActive ? (p.stock <= 5 ? 'low' : 'active') : 'inactive'} />
                       </td>
                       <td className="px-4 py-3">
-                        <Link
-                          to={`/admin/urunler/${p.id}`}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue"
-                          aria-label="Ürünü düzenle"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </Link>
+                        <div className="flex items-center gap-1">
+                          <Link
+                            to={`/admin/urunler/${p.id}`}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue"
+                            aria-label="Ürünü düzenle"
+                            title="Düzenle"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => setPendingDelete({ id: p.id, name: p.name })}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500"
+                            aria-label="Ürünü sil"
+                            title="Sil"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -216,6 +263,32 @@ export default function AdminProductsPage() {
             </AdminTableWrap>
           </AdminDesktopOnly>
         </>
+      )}
+
+      <ConfirmModal
+        open={!!pendingDelete}
+        title="Ürünü sil"
+        description={
+          pendingDelete
+            ? `“${pendingDelete.name}” kalıcı olarak silinecek. Sipariş geçmişindeki satırlar korunur; sepetlerden kaldırılır.`
+            : ''
+        }
+        confirmLabel={deleting ? 'Siliniyor…' : 'Evet, sil'}
+        cancelLabel="Vazgeç"
+        variant="danger"
+        onConfirm={() => {
+          if (!deleting) void confirmDelete();
+        }}
+        onCancel={() => {
+          if (!deleting) setPendingDelete(null);
+        }}
+      />
+
+      {deleting && (
+        <div className="fixed bottom-4 right-4 z-[80] flex items-center gap-2 rounded-xl bg-white border border-aq-border/60 shadow-sm px-3 py-2 text-xs text-aq-muted">
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-aq-blue" />
+          Ürün siliniyor…
+        </div>
       )}
     </AdminPageShell>
   );
