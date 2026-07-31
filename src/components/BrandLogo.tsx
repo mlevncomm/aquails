@@ -19,11 +19,11 @@ const WORD: { char: string; q?: boolean }[] = [
   { char: 'S' },
 ];
 
-const FONT = 'font-[Urbanist,ui-sans-serif,system-ui,sans-serif]';
+const FONT = 'font-[Poppins,ui-sans-serif,system-ui,sans-serif]';
 
 /**
  * Metin logotype: AQUAILS
- * Urbanist (az kalın), geniş aralık, açık A (Λ), mavi degrade Q
+ * Poppins (az kalın), geniş aralık, açık A (Λ), mavi degrade Q
  */
 export function BrandLogo({
   variant = 'logo',
