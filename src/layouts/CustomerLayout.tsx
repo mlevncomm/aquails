@@ -5,7 +5,7 @@ import {
   Wrench, Lock, LogOut, Bell, ExternalLink, Menu, X,
   RefreshCw, RotateCcw, GitCompare, Tag, Award, Users,
 } from 'lucide-react';
-import { BrandLogo } from '@/components/BrandLogo';
+import { BrandLogoMark } from '@/components/BrandLogo';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import { logout as logoutService } from '@/services/authService';
@@ -169,7 +169,7 @@ export function CustomerLayout() {
 
         <div className="p-5 pb-4 border-b border-aq-border/60">
           <Link to="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-            <BrandLogo variant="logo" className="h-7" />
+            <BrandLogoMark imgClassName="h-11 w-auto max-w-[140px]" className="!px-2 !py-1" />
           </Link>
         </div>
 
