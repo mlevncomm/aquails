@@ -16,7 +16,7 @@ import { logout } from '@/services/authService';
 import { getSiteConfig } from '@/services/settingsService';
 import { categories as staticCategories } from '@/data';
 import { useCatalog } from '@/hooks/useCatalog';
-import { BrandLogo } from '@/components/BrandLogo';
+import { BrandLogoMark } from '@/components/BrandLogo';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -206,7 +206,7 @@ export function Header() {
       >
         <div className="page-container min-w-0 !py-0">
           {/* ——— Mobile header ——— */}
-          <div className="lg:hidden grid grid-cols-[auto_1fr_auto] items-center gap-2 h-[56px]">
+          <div className="lg:hidden grid grid-cols-[auto_1fr_auto] items-center gap-2 h-[64px]">
             <HeaderIconButton
               label={isMobileMenuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -223,7 +223,7 @@ export function Header() {
               className="flex justify-center min-w-0 px-1"
               aria-label="Aquails Ana Sayfa"
             >
-              <BrandLogo variant="logo" bare className="h-[26px] w-auto max-w-[140px]" />
+              <BrandLogoMark imgClassName="h-[44px] w-auto max-w-[120px]" className="!px-2 !py-1" />
             </Link>
 
             <div className="flex items-center gap-1.5">
@@ -253,9 +253,9 @@ export function Header() {
           </div>
 
           {/* ——— Desktop header ——— */}
-          <div className="hidden lg:flex items-center justify-between gap-3 h-16">
-            <Link to="/" className="flex items-center flex-shrink-0 min-w-0">
-              <BrandLogo variant="logo" bare className="h-8" />
+          <div className="hidden lg:flex items-center justify-between gap-3 h-[72px]">
+            <Link to="/" className="flex items-center flex-shrink-0 min-w-0" aria-label="Aquails Ana Sayfa">
+              <BrandLogoMark imgClassName="h-[52px] w-auto" className="!px-3 !py-1.5" />
             </Link>
 
             <nav className="flex items-center gap-0.5">
@@ -439,7 +439,7 @@ export function Header() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               onSubmit={handleSearch}
-              className="fixed top-[calc(36px+56px+10px)] left-3 right-3 z-[61] lg:hidden"
+              className="fixed top-[calc(36px+64px+10px)] left-3 right-3 z-[61] lg:hidden"
             >
               <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-sm ring-1 ring-aq-border p-2">
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-aq-muted" />
@@ -483,7 +483,7 @@ export function Header() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="min-w-0 flex-1"
                   >
-                    <BrandLogo variant="logo" bare className="h-9 w-auto max-w-[180px] bg-transparent" />
+                    <BrandLogoMark imgClassName="h-12 w-auto max-w-[140px]" className="!px-2.5 !py-1" />
                   </Link>
                   <button
                     type="button"

@@ -76,8 +76,8 @@ export function Footer() {
         <div className="page-container min-w-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
             <div>
-              <div className="mb-4 inline-flex items-center bg-white rounded-xl px-3 py-2">
-                <BrandLogo variant="logo" bare className="h-7 w-auto" />
+              <div className="mb-4 inline-flex items-center">
+                <BrandLogo variant="logo" bare className="h-14 w-auto max-w-[180px]" />
               </div>
               <p className="text-sm text-white/45 leading-relaxed">
                 2008&apos;den beri su arıtma teknolojilerinde güvenilir çözüm ortağınız.

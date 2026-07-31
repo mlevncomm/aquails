@@ -224,10 +224,11 @@ export function AdminLayout() {
 
         <div className="px-4 py-5 border-b border-aq-navy">
           <Link to="/admin" className="flex items-center gap-3 px-1" onClick={() => setMobileOpen(false)}>
-            <BrandLogo variant="icon" className="w-9 h-9 rounded-xl flex-shrink-0" />
-            {!collapsed && (
+            {collapsed ? (
+              <BrandLogo variant="icon" className="w-10 h-10 flex-shrink-0" />
+            ) : (
               <div className="min-w-0">
-                <BrandLogo variant="logo" className="h-5 brightness-0 invert" />
+                <BrandLogo variant="logo" bare className="h-11 w-auto max-w-[160px]" />
                 <p className="text-[11px] text-white/50 mt-0.5">Yönetim Paneli</p>
               </div>
             )}
