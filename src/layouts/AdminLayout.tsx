@@ -228,7 +228,7 @@ export function AdminLayout() {
               <BrandLogo variant="icon" className="w-10 h-10 flex-shrink-0" />
             ) : (
               <div className="min-w-0">
-                <BrandLogo variant="logo" bare className="h-11 w-auto max-w-[160px]" />
+                <BrandLogo variant="logo" bare className="h-9 w-auto max-w-[170px]" />
                 <p className="text-[11px] text-white/50 mt-0.5">Yönetim Paneli</p>
               </div>
             )}
