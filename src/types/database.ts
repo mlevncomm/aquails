@@ -1076,6 +1076,10 @@ export interface Database {
         Args: { p_image_id: string };
         Returns: Record<string, unknown>;
       };
+      admin_delete_product: {
+        Args: { p_product_id: string };
+        Returns: Record<string, unknown>;
+      };
       admin_adjust_product_stock: {
         Args: { p_product_id: string; p_delta: number };
         Returns: Record<string, unknown>;
