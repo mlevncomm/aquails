@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Product } from '@/types';
-import { getTaxConfig } from '@/services/shippingService';
+import { getTaxConfig, getEffectiveTaxRate } from '@/services/shippingService';
 import {
   getProductGrossPrice,
   getProductGrossOldPrice,
@@ -11,9 +11,13 @@ import {
 
 export function useProductDisplayPrice(product: Pick<Product, 'price' | 'taxRate' | 'oldPrice'>) {
   const [defaultTaxRate, setDefaultTaxRate] = useState(20);
+  const [taxEnabled, setTaxEnabled] = useState(true);
 
   useEffect(() => {
-    void getTaxConfig().then((cfg) => setDefaultTaxRate(cfg.rate));
+    void getTaxConfig().then((cfg) => {
+      setTaxEnabled(cfg.enabled);
+      setDefaultTaxRate(getEffectiveTaxRate(cfg));
+    });
   }, []);
 
   const taxRate = getProductTaxRate(product, defaultTaxRate);
@@ -23,6 +27,7 @@ export function useProductDisplayPrice(product: Pick<Product, 'price' | 'taxRate
   return {
     netPrice: product.price,
     taxRate,
+    taxEnabled: taxEnabled && taxRate > 0,
     grossPrice,
     grossOldPrice,
     formattedGross: formatTryShort(grossPrice),
@@ -34,7 +39,7 @@ export function useProductDisplayPrice(product: Pick<Product, 'price' | 'taxRate
 export function useDefaultTaxRate(): number {
   const [rate, setRate] = useState(20);
   useEffect(() => {
-    void getTaxConfig().then((cfg) => setRate(cfg.rate));
+    void getTaxConfig().then((cfg) => setRate(getEffectiveTaxRate(cfg)));
   }, []);
   return rate;
 }

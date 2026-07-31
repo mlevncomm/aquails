@@ -15,6 +15,8 @@ export interface ShippingConfig {
 }
 
 export interface TaxConfig {
+  /** Site genelinde KDV uygulansın mı */
+  enabled: boolean;
   rate: number;
   displayInCheckout: boolean;
   priceIncludesVat: boolean;
@@ -29,7 +31,7 @@ const DEFAULT_SHIPPING: ShippingConfig = {
   codFee: 150,
 };
 
-const DEFAULT_TAX: TaxConfig = { rate: 20, displayInCheckout: true, priceIncludesVat: false };
+const DEFAULT_TAX: TaxConfig = { enabled: true, rate: 20, displayInCheckout: true, priceIncludesVat: false };
 
 async function getSetting<T>(key: string, fallback: T): Promise<T> {
   const supabase = getSupabaseOrNull();
@@ -73,13 +75,19 @@ export async function saveShippingBundle(
 }
 
 export async function getTaxConfig(): Promise<TaxConfig> {
-  const raw = await getSetting<Partial<TaxConfig>>('tax', DEFAULT_TAX);
+  const raw = await getSetting<Partial<TaxConfig> & { enabled?: boolean | string }>('tax', DEFAULT_TAX);
   const rate = Number(raw.rate);
   return {
+    enabled: raw.enabled !== false && raw.enabled !== ('false' as unknown as boolean),
     rate: Number.isFinite(rate) && rate > 0 ? rate : DEFAULT_TAX.rate,
     displayInCheckout: raw.displayInCheckout !== false && raw.displayInCheckout !== ('false' as unknown as boolean),
     priceIncludesVat: raw.priceIncludesVat === true,
   };
+}
+
+/** KDV kapalıysa 0; açıkken site varsayılan oranı. */
+export function getEffectiveTaxRate(config: Pick<TaxConfig, 'enabled' | 'rate'>): number {
+  return config.enabled ? config.rate : 0;
 }
 
 export async function saveTaxConfig(config: TaxConfig): Promise<{ success: boolean; error?: string }> {

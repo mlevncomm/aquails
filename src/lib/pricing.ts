@@ -6,8 +6,9 @@ export function roundPrice(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-/** Ürün satırı KDV oranı (%). Ürün bazlı yoksa site varsayılanı. */
+/** Ürün satırı KDV oranı (%). Ürün bazlı yoksa site varsayılanı. defaultRate 0 = KDV kapalı. */
 export function getProductTaxRate(product: Pick<Product, 'taxRate'>, defaultRate = DEFAULT_TAX_RATE): number {
+  if (!(defaultRate > 0)) return 0;
   const rate = product.taxRate ?? defaultRate;
   return rate > 0 ? rate : defaultRate;
 }

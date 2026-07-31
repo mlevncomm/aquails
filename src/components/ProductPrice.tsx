@@ -16,9 +16,9 @@ const sizeClasses = {
   lg: { price: 'text-2xl sm:text-3xl font-bold', old: 'text-lg' },
 };
 
-/** Müşteriye KDV dahil fiyat gösterir (100₺ net + %20 → 120₺) */
+/** Müşteriye KDV dahil fiyat gösterir (100₺ net + %20 → 120₺). KDV kapalıysa net fiyat. */
 export function ProductPrice({ product, size = 'md', showTaxHint = false, className }: ProductPriceProps) {
-  const { grossOldPrice, taxRate, formattedGross, formattedOldGross } = useProductDisplayPrice(product);
+  const { grossOldPrice, taxRate, taxEnabled, formattedGross, formattedOldGross } = useProductDisplayPrice(product);
   const sizes = sizeClasses[size];
 
   return (
@@ -29,7 +29,7 @@ export function ProductPrice({ product, size = 'md', showTaxHint = false, classN
           <span className={cn(sizes.old, 'text-aq-muted line-through')}>{formattedOldGross}</span>
         )}
       </div>
-      {showTaxHint && (
+      {showTaxHint && taxEnabled && (
         <p className="text-[11px] text-aq-muted mt-1">KDV dahil (%{taxRate})</p>
       )}
     </div>
