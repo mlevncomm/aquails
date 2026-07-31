@@ -234,6 +234,14 @@ export function Header() {
                 <Search className="w-[17px] h-[17px]" strokeWidth={2.1} />
               </HeaderIconButton>
               <HeaderIconButton
+                href="/karsilastir"
+                label="Karşılaştır"
+                badge={compareCount}
+                badgeTone="dark"
+              >
+                <GitCompare className="w-[17px] h-[17px]" strokeWidth={2.1} />
+              </HeaderIconButton>
+              <HeaderIconButton
                 label="Sepet"
                 onClick={toggleDrawer}
                 badge={cartCount}
@@ -527,7 +535,9 @@ export function Header() {
                       className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-aq-ice ring-1 ring-aq-border/80 hover:ring-aq-deep/20 transition-all"
                     >
                       <GitCompare className="w-[18px] h-[18px] text-aq-blue" strokeWidth={2.1} />
-                      <span className="text-[10px] font-semibold text-aq-muted">Karşılaştır</span>
+                      <span className="text-[10px] font-semibold text-aq-muted">
+                        Karşılaştır{compareCount > 0 ? ` (${compareCount})` : ''}
+                      </span>
                     </Link>
                     <button
                       type="button"

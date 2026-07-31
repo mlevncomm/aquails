@@ -1,10 +1,11 @@
 import { Link } from 'react-router';
-import { ShoppingCart, Heart, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Heart, ArrowRight, GitCompare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Product } from '@/types';
 import { RatingStars } from './RatingStars';
 import { useCartStore } from '@/stores/cartStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
+import { compareToastMessage, useCompareStore } from '@/stores/compareStore';
 import { useToastStore } from '@/components/Toast';
 import { ProductPrice } from '@/components/ProductPrice';
 import { cn } from '@/lib/utils';
@@ -17,6 +18,8 @@ interface ProductCardProps {
 export function ProductCard({ product, compact = false }: ProductCardProps) {
   const { addItem, openDrawer } = useCartStore();
   const { toggle, isFav } = useFavoritesStore();
+  const toggleCompare = useCompareStore((s) => s.toggle);
+  const isComparing = useCompareStore((s) => s.ids.includes(product.id));
   const addToast = useToastStore((s) => s.add);
   const isFavorited = isFav(product.id);
 
@@ -33,6 +36,13 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
     e.stopPropagation();
     toggle(product.id);
     addToast(isFavorited ? 'Favorilerden çıkarıldı.' : 'Favorilere eklendi.', 'info');
+  };
+
+  const handleCompare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const result = toggleCompare(product.id);
+    addToast(compareToastMessage(result), result === 'removed' ? 'info' : 'success');
   };
 
   const primaryImage = product.images?.[0] || '/images/products/placeholder.jpg';
@@ -110,19 +120,34 @@ export function ProductCard({ product, compact = false }: ProductCardProps) {
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={handleFavorite}
-            aria-label={isFavorited ? 'Favorilerden çıkar' : 'Favorilere ekle'}
-            className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-white shadow-sm ring-1 ring-aq-border/80"
-          >
-            <Heart
+          <div className="absolute top-3 right-3 flex flex-col gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+            <button
+              type="button"
+              onClick={handleFavorite}
+              aria-label={isFavorited ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+              className="w-9 h-9 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white shadow-sm ring-1 ring-aq-border/80"
+            >
+              <Heart
+                className={cn(
+                  'w-4 h-4 transition-colors',
+                  isFavorited ? 'text-[#E85454] fill-[#E85454]' : 'text-aq-muted',
+                )}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={handleCompare}
+              aria-label={isComparing ? 'Karşılaştırmadan çıkar' : 'Karşılaştırmaya ekle'}
               className={cn(
-                'w-4 h-4 transition-colors',
-                isFavorited ? 'text-[#E85454] fill-[#E85454]' : 'text-aq-muted',
+                'w-9 h-9 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-sm ring-1 transition-colors',
+                isComparing
+                  ? 'bg-aq-sky text-aq-blue ring-aq-blue/30'
+                  : 'bg-white/90 text-aq-muted hover:bg-white ring-aq-border/80',
               )}
-            />
-          </button>
+            >
+              <GitCompare className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <div className="p-4 sm:p-5 flex flex-col flex-1">

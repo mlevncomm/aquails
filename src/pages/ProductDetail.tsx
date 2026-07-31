@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart, ShoppingCart, Zap, Check, ChevronRight,
   Shield, Truck, Wrench, ThumbsUp,
-  MessageCircle, Bell, Mail, Phone, Send, AlertCircle, HelpCircle, Loader2
+  MessageCircle, Bell, Mail, Phone, Send, AlertCircle, HelpCircle, Loader2, GitCompare
 } from 'lucide-react';
 import { openWhatsApp, getProductInquiryMessage } from '@/services/whatsappService';
 import { subscribeStockAlert, getStockNotifications } from '@/services/stockNotificationService';
@@ -21,6 +21,7 @@ import { askQuestion, getPublicQuestionsForProduct } from '@/services/productQue
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useFavoritesStore } from '@/stores/favoritesStore';
+import { compareToastMessage, useCompareStore } from '@/stores/compareStore';
 import { ProductPrice } from '@/components/ProductPrice';
 import { ProductImageGallery } from '@/components/ProductImageGallery';
 import { getProductGrossPrice } from '@/lib/pricing';
@@ -47,6 +48,8 @@ export default function ProductDetail() {
   const { addItem, openDrawer } = useCartStore();
   const user = useAuthStore((s) => s.user);
   const { toggle: toggleFavorite, isFav } = useFavoritesStore();
+  const toggleCompare = useCompareStore((s) => s.toggle);
+  const compareIds = useCompareStore((s) => s.ids);
   const addToast = useToastStore(s => s.add);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
@@ -133,6 +136,7 @@ export default function ProductDetail() {
   };
 
   const isFavorited = isFav(product.id);
+  const isComparing = compareIds.includes(product.id);
 
   const isLowStock = product.stock <= 5;
   const isOutOfStock = product.stock === 0;
@@ -322,6 +326,22 @@ export default function ProductDetail() {
               >
                 <MessageCircle className="w-4 h-4" />
                 WhatsApp
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const result = toggleCompare(product.id);
+                  addToast(compareToastMessage(result), result === 'removed' ? 'info' : 'success');
+                }}
+                aria-label={isComparing ? 'Karşılaştırmadan çıkar' : 'Karşılaştırmaya ekle'}
+                className={cn(
+                  'w-full sm:w-14 h-12 sm:h-14 flex items-center justify-center border rounded-xl transition-all',
+                  isComparing
+                    ? 'border-aq-blue bg-aq-sky text-aq-blue'
+                    : 'border-aq-border/60 text-aq-muted hover:border-aq-deep'
+                )}
+              >
+                <GitCompare className="w-5 h-5" />
               </button>
               <button
                 onClick={() => toggleFavorite(product.id)}
