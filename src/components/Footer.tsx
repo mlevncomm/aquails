@@ -253,6 +253,9 @@ export function Footer() {
             <Link to="/kvkk" className="transition-colors hover:text-white/70">
               KVKK
             </Link>
+            <Link to="/uyelik-sozlesmesi" className="transition-colors hover:text-white/70">
+              Üyelik Sözleşmesi
+            </Link>
           </nav>
         </div>
       </div>
