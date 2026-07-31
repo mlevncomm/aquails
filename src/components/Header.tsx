@@ -223,7 +223,7 @@ export function Header() {
               className="flex justify-center min-w-0 px-1"
               aria-label="Aquails Ana Sayfa"
             >
-              <BrandLogo variant="logo" bare className="h-9 w-auto max-w-[168px]" />
+              <BrandLogo variant="logo" bare className="text-[0.92rem] gap-[0.30em]" />
             </Link>
 
             <div className="flex items-center gap-1.5">
@@ -255,7 +255,7 @@ export function Header() {
           {/* ——— Desktop header ——— */}
           <div className="hidden lg:flex items-center justify-between gap-3 h-16">
             <Link to="/" className="flex items-center flex-shrink-0 min-w-0" aria-label="Aquails Ana Sayfa">
-              <BrandLogo variant="logo" bare className="h-11 w-auto max-w-[220px]" />
+              <BrandLogo variant="logo" bare className="text-[1.12rem] gap-[0.36em]" />
             </Link>
 
             <nav className="flex items-center gap-0.5">
@@ -483,7 +483,7 @@ export function Header() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="min-w-0 flex-1"
                   >
-                    <BrandLogo variant="logo" bare className="h-10 w-auto max-w-[200px]" />
+                    <BrandLogo variant="logo" bare className="text-[1.02rem] gap-[0.34em]" />
                   </Link>
                   <button
                     type="button"

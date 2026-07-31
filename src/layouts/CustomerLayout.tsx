@@ -169,7 +169,7 @@ export function CustomerLayout() {
 
         <div className="p-5 pb-4 border-b border-aq-border/60">
           <Link to="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-            <BrandLogo variant="logo" bare className="h-9 w-auto max-w-[180px]" />
+            <BrandLogo variant="logo" bare className="text-[0.92rem] gap-[0.30em]" />
           </Link>
         </div>
 

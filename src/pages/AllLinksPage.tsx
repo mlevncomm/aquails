@@ -176,7 +176,7 @@ export default function AllLinksPage() {
             <div className="relative w-[88px] h-[88px] mx-auto mb-4">
               <div className="absolute inset-0 rounded-[28px] bg-gradient-to-br from-aq-navy via-aq-deep to-aq-aqua p-[3px] shadow-sm shadow-aq-deep/20">
                 <div className="w-full h-full bg-white rounded-[25px] flex items-center justify-center overflow-hidden">
-                  <BrandLogo variant="icon" className="w-14 h-14" />
+                  <BrandLogo variant="icon" className="text-4xl" />
                 </div>
               </div>
             </div>
