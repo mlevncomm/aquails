@@ -7,6 +7,7 @@ import {
   ChevronDown, Package, Droplet, Zap, Monitor, Coffee,
   Building2, Filter, CircleDot, Settings, Wrench,
   Plug, Sparkles, ChefHat, Activity, Home, ArrowUpRight, Wand2,
+  Phone, Truck,
 } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -76,11 +77,11 @@ function HeaderIconButton({
   );
 
   const baseClass = cn(
-    'relative flex items-center justify-center rounded-full transition-all duration-200',
-    'text-aq-muted hover:text-aq-blue',
-    'bg-white border border-aq-border/60',
-    'hover:border-aq-blue/30 hover:bg-aq-sky/40',
-    'w-9 h-9 lg:w-[34px] lg:h-[34px]',
+    'relative flex items-center justify-center rounded-full transition-all duration-300',
+    'text-aq-muted hover:text-aq-deep',
+    'bg-aq-ice/50 border border-aq-border/50',
+    'hover:border-aq-blue/25 hover:bg-aq-sky/70 hover:shadow-[0_4px_14px_-6px_rgba(18,134,216,0.35)]',
+    'w-9 h-9 lg:w-9 lg:h-9',
     className,
   );
 
@@ -188,43 +189,55 @@ export function Header() {
 
   return (
     <>
-      {/* Top Bar — minimal */}
-      <div className="bg-white border-b border-aq-border/60 overflow-x-hidden">
-        <div className="page-container h-9 flex items-center justify-between text-[11px] tracking-wide min-w-0 gap-4 !py-0">
-          <p className="text-aq-muted/90 truncate min-w-0">
-            <span className="font-medium text-aq-text/80">Ücretsiz kargo</span>
-            <span className="mx-1.5 text-aq-border">·</span>
-            <span>{freeShippingLimit.toLocaleString('tr-TR')}₺ ve üzeri</span>
+      {/* Top utility bar */}
+      <div className="relative overflow-hidden bg-[#061b2c] text-white">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_0%_50%,rgba(32,211,242,0.16),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_100%_at_100%_50%,rgba(18,134,216,0.18),transparent_50%)]" />
+        <div className="relative page-container flex h-10 items-center justify-between gap-4 text-[11px] !py-0 min-w-0">
+          <p className="flex min-w-0 items-center gap-2 truncate text-white/70">
+            <span className="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-aq-aqua/15 text-aq-aqua">
+              <Truck className="h-3 w-3" strokeWidth={2.25} />
+            </span>
+            <span className="truncate">
+              <span className="font-semibold text-white">Ücretsiz kargo</span>
+              <span className="mx-1.5 text-white/25">·</span>
+              <span>{freeShippingLimit.toLocaleString('tr-TR')}₺ ve üzeri siparişlerde</span>
+            </span>
           </p>
-          <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
+          <div className="hidden sm:flex items-center gap-1 flex-shrink-0">
             <Link
               to="/siparis-takip"
-              className="text-aq-muted hover:text-aq-deep transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-white/65 transition-colors hover:bg-white/10 hover:text-white"
             >
+              <Package className="h-3 w-3" strokeWidth={2.25} />
               Sipariş Takip
             </Link>
+            <span className="mx-1 h-3 w-px bg-white/15" />
             <a
               href={`tel:${phone.replace(/\s/g, '')}`}
-              className="text-aq-muted hover:text-aq-deep transition-colors tabular-nums"
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium tabular-nums text-aq-aqua transition-colors hover:bg-aq-aqua/10"
             >
+              <Phone className="h-3 w-3" strokeWidth={2.25} />
               {phone}
             </a>
           </div>
         </div>
       </div>
 
-      {/* Main Header — eski düzen, sadeleştirilmiş UI */}
+      {/* Main Header */}
       <header
         className={cn(
           'sticky top-0 z-50 relative overflow-x-visible transition-all duration-300',
-          'border-b border-aq-border/70',
-          'bg-white/92 backdrop-blur-xl supports-[backdrop-filter]:bg-white/85',
-          isScrolled ? 'shadow-[0_4px_20px_rgba(7,24,39,0.04)]' : 'shadow-none',
+          'border-b border-aq-border/60',
+          'bg-white/90 backdrop-blur-xl supports-[backdrop-filter]:bg-white/80',
+          isScrolled
+            ? 'shadow-[0_8px_30px_-12px_rgba(6,38,61,0.12)]'
+            : 'shadow-none',
         )}
       >
         <div className="page-container min-w-0 !py-0">
           {/* ——— Mobile header ——— */}
-          <div className="lg:hidden grid grid-cols-[auto_1fr_auto] items-center gap-2 h-[56px]">
+          <div className="lg:hidden grid grid-cols-[auto_1fr_auto] items-center gap-2 h-[58px]">
             <HeaderIconButton
               label={isMobileMenuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -241,14 +254,11 @@ export function Header() {
               className="flex justify-center min-w-0 px-1"
               aria-label="Aquails Ana Sayfa"
             >
-              <BrandLogo variant="logo" bare className="text-[0.92rem] gap-[0.30em]" />
+              <BrandLogo variant="logo" bare className="text-[0.95rem] gap-[0.30em]" />
             </Link>
 
             <div className="flex items-center gap-1.5">
-              <HeaderIconButton
-                label="Ara"
-                onClick={() => setIsSearchOpen(true)}
-              >
+              <HeaderIconButton label="Ara" onClick={() => setIsSearchOpen(true)}>
                 <Search className="w-[17px] h-[17px]" strokeWidth={2.1} />
               </HeaderIconButton>
               <HeaderIconButton
@@ -271,12 +281,12 @@ export function Header() {
           </div>
 
           {/* ——— Desktop header ——— */}
-          <div className="hidden lg:flex items-center justify-between gap-3 h-16">
+          <div className="hidden lg:flex items-center justify-between gap-4 h-[68px]">
             <Link to="/" className="flex items-center flex-shrink-0 min-w-0" aria-label="Aquails Ana Sayfa">
-              <BrandLogo variant="logo" bare className="text-[1.12rem] gap-[0.36em]" />
+              <BrandLogo variant="logo" bare className="text-[1.15rem] gap-[0.34em]" />
             </Link>
 
-            <nav className="flex items-center gap-0.5">
+            <nav className="flex items-center gap-0.5 rounded-full bg-aq-ice/60 p-1 ring-1 ring-aq-border/40">
               {navLinks.map(link => (
                 <div
                   key={link.label}
@@ -287,16 +297,19 @@ export function Header() {
                   <Link
                     to={link.href}
                     className={cn(
-                      'px-3 py-1.5 text-[13px] font-medium rounded-full transition-colors flex items-center gap-1',
+                      'px-3.5 py-1.5 text-[13px] font-medium rounded-full transition-all duration-250 flex items-center gap-1',
                       location.pathname === link.href || (link.hasMega && isMegaOpen)
-                        ? 'text-aq-deep bg-aq-sky'
-                        : 'text-aq-muted hover:text-aq-text hover:bg-aq-ice/80',
+                        ? 'bg-white text-aq-deep shadow-[0_2px_10px_-4px_rgba(6,38,61,0.2)] ring-1 ring-aq-border/50'
+                        : 'text-aq-muted hover:text-aq-deep hover:bg-white/70',
                     )}
                   >
                     {link.label}
                     {link.hasMega && (
                       <ChevronDown
-                        className={cn('w-3 h-3 transition-transform duration-300', isMegaOpen ? 'rotate-180' : '')}
+                        className={cn(
+                          'w-3 h-3 transition-transform duration-300',
+                          isMegaOpen ? 'rotate-180 text-aq-blue' : '',
+                        )}
                       />
                     )}
                   </Link>
@@ -304,7 +317,7 @@ export function Header() {
               ))}
             </nav>
 
-            <div className="flex items-center gap-1.5 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <div ref={searchRef} className="relative">
                 <HeaderIconButton label="Ara" onClick={() => setIsSearchOpen(!isSearchOpen)}>
                   <Search className="w-[16px] h-[16px]" strokeWidth={2.1} />
@@ -316,7 +329,7 @@ export function Header() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
                       onSubmit={handleSearch}
-                      className="absolute right-0 top-full mt-2 w-72 bg-white/95 backdrop-blur-xl border border-aq-border/60 rounded-2xl shadow-sm p-2 z-50"
+                      className="absolute right-0 top-full mt-2 w-72 bg-white/95 backdrop-blur-xl border border-aq-border/60 rounded-2xl shadow-[0_16px_40px_-20px_rgba(6,38,61,0.35)] p-2 z-50"
                     >
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-aq-muted" />
@@ -349,9 +362,9 @@ export function Header() {
                 <div className="relative ml-1">
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-aq-ice transition-colors"
+                    className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full hover:bg-aq-ice transition-colors ring-1 ring-transparent hover:ring-aq-border/60"
                   >
-                    <div className="w-8 h-8 bg-aq-blue rounded-full flex items-center justify-center text-white text-xs font-semibold">
+                    <div className="w-8 h-8 bg-gradient-to-br from-aq-blue to-aq-deep rounded-full flex items-center justify-center text-white text-xs font-semibold shadow-[0_4px_12px_-4px_rgba(18,134,216,0.55)]">
                       {user.name[0]}
                     </div>
                     <span className="hidden md:block text-[12px] font-medium text-aq-text max-w-[80px] truncate">
@@ -381,18 +394,19 @@ export function Header() {
                   </AnimatePresence>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 ml-1.5">
+                <div className="flex items-center gap-2 ml-1.5 pl-2 border-l border-aq-border/50">
                   <Link
                     to="/giris"
-                    className="text-[12px] font-medium text-aq-muted hover:text-aq-text px-2.5 py-1.5 rounded-full hover:bg-aq-ice transition-all"
+                    className="text-[12px] font-medium text-aq-muted hover:text-aq-deep px-2.5 py-1.5 rounded-full hover:bg-aq-ice transition-all"
                   >
                     Giriş Yap
                   </Link>
                   <Link
                     to="/iletisim"
-                    className="text-[12px] font-semibold text-white bg-aq-blue px-3.5 py-1.5 rounded-full hover:bg-aq-deep transition-all"
+                    className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-white bg-gradient-to-r from-aq-blue to-[#0d6fba] px-4 py-2 rounded-full shadow-[0_8px_20px_-10px_rgba(18,134,216,0.7)] hover:shadow-[0_10px_24px_-8px_rgba(18,134,216,0.85)] hover:-translate-y-0.5 transition-all"
                   >
                     İletişime Geç
+                    <ArrowUpRight className="w-3.5 h-3.5 opacity-90" />
                   </Link>
                 </div>
               )}
@@ -525,7 +539,7 @@ export function Header() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               onSubmit={handleSearch}
-              className="fixed top-[calc(36px+56px+10px)] left-3 right-3 z-[61] lg:hidden"
+              className="fixed top-[calc(40px+58px+10px)] left-3 right-3 z-[61] lg:hidden"
             >
               <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-sm ring-1 ring-aq-border p-2">
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-aq-muted" />
