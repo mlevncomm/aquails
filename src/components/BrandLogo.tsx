@@ -19,9 +19,11 @@ const WORD: { char: string; q?: boolean }[] = [
   { char: 'S' },
 ];
 
+const FONT = 'font-[Urbanist,ui-sans-serif,system-ui,sans-serif]';
+
 /**
  * Metin logotype: AQUAILS
- * Michroma, geniş harf aralığı, açık A (Λ), mavi degrade Q
+ * Urbanist (az kalın), geniş aralık, açık A (Λ), mavi degrade Q
  */
 export function BrandLogo({
   variant = 'logo',
@@ -30,19 +32,20 @@ export function BrandLogo({
   bare = false,
 }: BrandLogoProps) {
   const metal = inverted
-    ? 'bg-[linear-gradient(180deg,#F4F7FA_0%,#C8D0DA_45%,#8B97A6_100%)]'
-    : 'bg-[linear-gradient(180deg,#2F3E50_0%,#152232_50%,#0A1420_100%)]';
+    ? 'bg-[linear-gradient(180deg,#F7FAFC_0%,#D0D8E2_42%,#9AA6B4_100%)]'
+    : 'bg-[linear-gradient(180deg,#3A4B5E_0%,#1C2B3C_48%,#0C1622_100%)]';
 
   const metalClass = cn('bg-clip-text text-transparent', metal);
   const qClass =
-    'bg-clip-text text-transparent bg-[linear-gradient(165deg,#6AD0FF_0%,#1B9BEA_40%,#0A6CB8_100%)]';
+    'bg-clip-text text-transparent bg-[linear-gradient(165deg,#7AD6FF_0%,#2AA6F0_36%,#0C74C4_100%)]';
 
   if (variant === 'icon') {
     return (
       <span
         className={cn(
           'inline-flex items-center justify-center bg-transparent select-none',
-          'font-[Michroma,ui-sans-serif,system-ui,sans-serif] leading-none',
+          FONT,
+          'font-semibold leading-none',
           bare && 'bg-transparent',
           className,
         )}
@@ -58,8 +61,9 @@ export function BrandLogo({
     <span
       className={cn(
         'inline-flex items-center bg-transparent select-none',
-        'font-[Michroma,ui-sans-serif,system-ui,sans-serif] uppercase leading-none',
-        'text-[1.05rem] gap-[0.34em]',
+        FONT,
+        'font-semibold uppercase leading-none',
+        'text-[1.15rem] gap-[0.32em]',
         bare && 'bg-transparent',
         className,
       )}
