@@ -1,7 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router';
+import { useCallback } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 
 export function CartDrawer() {
   const { items, isDrawerOpen, closeDrawer, updateQuantity, removeItem, getSubtotal } = useCartStore();
@@ -9,22 +12,28 @@ export function CartDrawer() {
   const shipping = subtotal >= 1500 ? 0 : 49;
   const total = subtotal + shipping;
 
+  const onClose = useCallback(() => closeDrawer(), [closeDrawer]);
+  useBodyScrollLock(isDrawerOpen);
+  useEscapeKey(isDrawerOpen, onClose);
+
   return (
     <AnimatePresence>
       {isDrawerOpen && (
         <>
-          {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 bg-aqua-secondary/40 z-50"
-            onClick={closeDrawer}
+            onClick={onClose}
+            aria-hidden="true"
           />
 
-          {/* Drawer */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Sepet"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}

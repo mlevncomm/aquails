@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link, useLocation, Outlet } from 'react-router';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Wrench, Filter,
@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNotificationStore } from '@/stores/notificationStore';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 
 interface MenuItem {
   label: string;
@@ -76,10 +78,9 @@ export function AdminLayout() {
 
   const sidebarWidth = collapsed ? 'w-[72px]' : 'w-[260px]';
 
-  // Mobil menü açıkken sayfa scroll'unu engelle
-  if (typeof document !== 'undefined') {
-    document.body.style.overflow = mobileOpen ? 'hidden' : '';
-  }
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
+  useBodyScrollLock(mobileOpen);
+  useEscapeKey(mobileOpen, closeMobile);
 
   return (
     <div className="min-h-[100dvh] flex bg-[#F0F6FF] relative">
@@ -91,7 +92,7 @@ export function AdminLayout() {
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobile}
         />
       )}
 
@@ -105,7 +106,7 @@ export function AdminLayout() {
       >
         {/* Mobile Close Button - Sidebar içinde üst köşede */}
         <button
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobile}
           className="lg:hidden absolute top-3 right-3 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center text-white/80 transition-colors z-10"
         >
           <X className="w-5 h-5" />

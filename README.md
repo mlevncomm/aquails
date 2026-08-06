@@ -17,22 +17,40 @@ npm install
 cp .env.example .env
 ```
 
-### Frontend env (Vercel + local `.env`)
+### Frontend env (Vite — Vercel + local `.env`)
+
+Bu proje **Vite** kullanır. Next.js `NEXT_PUBLIC_*` değişkenleri **kullanılmaz**.
+
+| Next.js (kullanma) | Vite (kullan) |
+|--------------------|---------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | `VITE_SUPABASE_URL` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `VITE_SUPABASE_ANON_KEY` |
 
 Yalnızca şu public değişkenler frontend bundle'a girer:
 
 | Variable | Açıklama |
 |----------|----------|
 | `VITE_SUPABASE_URL` | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon/public key |
-| `VITE_APP_URL` | Production site URL (auth redirect, referral link) |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon / publishable key |
+| `VITE_APP_URL` | Site URL (auth redirect, referral link) |
 | `VITE_DATA_PROVIDER` | `supabase` (default) veya `express` |
 
+**Local (`.env`):**
+
 ```env
-VITE_APP_URL=http://localhost:3000
+VITE_SUPABASE_URL=https://tsbiicekqgxjokhyxria.supabase.co
+VITE_SUPABASE_ANON_KEY=<Supabase publishable key>
 VITE_DATA_PROVIDER=supabase
-VITE_SUPABASE_URL=http://127.0.0.1:54321
-VITE_SUPABASE_ANON_KEY=<local-anon-key>
+VITE_APP_URL=http://localhost:3000
+```
+
+**Production (Vercel → Environment Variables):**
+
+```env
+VITE_SUPABASE_URL=https://tsbiicekqgxjokhyxria.supabase.co
+VITE_SUPABASE_ANON_KEY=<Supabase publishable key>
+VITE_DATA_PROVIDER=supabase
+VITE_APP_URL=<production domain>
 ```
 
 > **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` **asla** Vercel'e, frontend `.env` dosyasına veya client bundle'a eklenmemelidir. Yalnızca Supabase Edge Function secrets üzerinden kullanılır.
@@ -118,16 +136,18 @@ Frontend (Vercel SPA)
 1. Repo'yu Vercel'e bağlayın
 2. **Build command:** `npm run build` ( `vercel.json` içinde tanımlı)
 3. **Output directory:** `dist`
-4. **Environment variables** (yalnızca bunlar):
+4. **Environment variables** (Vite `VITE_*` prefix — `NEXT_PUBLIC_*` değil):
 
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-   - `VITE_APP_URL` (ör. `https://aquails.vercel.app`)
-   - `VITE_DATA_PROVIDER=supabase`
+   | Name | Example value |
+   |------|---------------|
+   | `VITE_SUPABASE_URL` | `https://tsbiicekqgxjokhyxria.supabase.co` |
+   | `VITE_SUPABASE_ANON_KEY` | Supabase publishable / anon key |
+   | `VITE_APP_URL` | `https://your-domain.vercel.app` |
+   | `VITE_DATA_PROVIDER` | `supabase` |
 
 5. **SPA fallback:** `vercel.json` → `"rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]`
 
-> **Vercel'e eklenmemesi gerekenler:** `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_URL` (service), database password, Iyzico/PayTR secret'ları. Bunlar Supabase secrets'ta kalır.
+> **Vercel'e eklenmemesi gerekenler:** `NEXT_PUBLIC_*`, `SUPABASE_SERVICE_ROLE_KEY`, database password, Iyzico/PayTR secret'ları.
 
 ## Supabase Production Deploy
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router';
 import {
   LayoutDashboard, ShoppingBag, MapPin, User, Heart, Filter,
@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import { logout as logoutService } from '@/services/authService';
 import { useNotificationStore } from '@/stores/notificationStore';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 
 const menuItems = [
   { label: 'Gösterge Paneli', href: '/hesabim', icon: LayoutDashboard },
@@ -42,9 +44,9 @@ export function CustomerLayout() {
   };
 
   // Mobil menü açıkken sayfa scroll'unu engelle
-  if (typeof document !== 'undefined') {
-    document.body.style.overflow = mobileOpen ? 'hidden' : '';
-  }
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
+  useBodyScrollLock(mobileOpen);
+  useEscapeKey(mobileOpen, closeMobile);
 
   const currentPageTitle = menuItems.find((m) => m.href === location.pathname)?.label || 'Gösterge Paneli';
 
@@ -54,7 +56,7 @@ export function CustomerLayout() {
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40 lg:hidden backdrop-blur-sm"
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobile}
         />
       )}
 

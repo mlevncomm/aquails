@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,6 +15,8 @@ import { useCompareStore } from '@/stores/compareStore';
 import { logout } from '@/services/authService';
 import { categories } from '@/data';
 import { cn } from '@/lib/utils';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 
 const iconMap: Record<string, React.ElementType> = {
   Droplet, Zap, Monitor, Coffee, Building2, Filter, CircleDot,
@@ -48,9 +50,20 @@ export function Header() {
   const cartCount = getTotalItems();
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to top on route change
+  const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), []);
+  useBodyScrollLock(isMobileMenuOpen);
+  useEscapeKey(isMobileMenuOpen, closeMobileMenu);
+
+  const isNavActive = (href: string) => {
+    if (href === '/') return location.pathname === '/';
+    if (href === '/urunler') {
+      return location.pathname === '/urunler' || location.pathname.startsWith('/urun/');
+    }
+    return location.pathname === href || location.pathname.startsWith(`${href}/`);
+  };
+
+  // Close menus on route change (scroll is handled site-wide by ScrollToTop)
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
     setIsMobileMenuOpen(false);
     setIsMegaOpen(false);
     setMobileCatsOpen(false);
@@ -124,7 +137,14 @@ export function Header() {
           <nav className="hidden lg:flex items-center gap-0.5">
             {navLinks.map(link => (
               <div key={link.label} className="relative" onMouseEnter={() => link.hasMega && setIsMegaOpen(true)} onMouseLeave={() => link.hasMega && setIsMegaOpen(false)}>
-                <Link to={link.href} className={cn('relative px-3 py-2 text-[13px] font-medium rounded-lg transition-colors flex items-center gap-1', location.pathname === link.href ? 'text-[#1A73E8] bg-[#F0F6FF]' : 'text-[#5A6B7B] hover:text-[#0D2137] hover:bg-[#F8FBFF]')}>
+                <Link
+                  to={link.href}
+                  aria-current={isNavActive(link.href) ? 'page' : undefined}
+                  className={cn(
+                    'relative px-3 py-2 text-[13px] font-medium rounded-lg transition-colors flex items-center gap-1',
+                    isNavActive(link.href) ? 'text-[#1A73E8] bg-[#F0F6FF]' : 'text-[#5A6B7B] hover:text-[#0D2137] hover:bg-[#F8FBFF]',
+                  )}
+                >
                   {link.label}
                   {link.hasMega && <ChevronDown className={cn('w-3 h-3 transition-transform', isMegaOpen ? 'rotate-180' : '')} />}
                 </Link>
@@ -240,7 +260,7 @@ export function Header() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={closeMobileMenu} aria-hidden="true" />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.3 }} className="fixed top-0 left-0 bottom-0 w-[300px] bg-white z-50 lg:hidden shadow-xl overflow-y-auto">
               <div className="p-5">
                 <div className="flex items-center justify-between mb-6">
@@ -269,7 +289,15 @@ export function Header() {
                 <nav className="flex flex-col gap-0.5">
                   {navLinks.map((link, i) => (
                     <motion.div key={link.label} initial={{ opacity: 0, x: -15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
-                      <Link to={link.href} onClick={() => setIsMobileMenuOpen(false)} className={cn('flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-colors', location.pathname === link.href ? 'bg-[#F0F6FF] text-[#1A73E8]' : 'text-[#5A6B7B] hover:bg-[#F8FBFF]')}>
+                      <Link
+                        to={link.href}
+                        onClick={closeMobileMenu}
+                        aria-current={isNavActive(link.href) ? 'page' : undefined}
+                        className={cn(
+                          'flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-colors',
+                          isNavActive(link.href) ? 'bg-[#F0F6FF] text-[#1A73E8]' : 'text-[#5A6B7B] hover:bg-[#F8FBFF]',
+                        )}
+                      >
                         {link.label}
                         <ChevronRight className="w-4 h-4 opacity-40" />
                       </Link>

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
 import { SEO } from '@/components/SEO';
+import { scrollToPageTop } from '@/lib/scroll';
 
 
 const linkGroups = [
@@ -80,7 +81,7 @@ export default function AllLinksPage() {
 
   useEffect(() => {
     document.title = 'Aquails | Tum Baglantilar';
-    window.scrollTo(0, 0);
+    scrollToPageTop();
   }, []);
 
   const handleCopyCoupon = () => {

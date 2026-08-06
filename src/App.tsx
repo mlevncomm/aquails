@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router';
+import { Routes, Route } from 'react-router';
 import { ScrollToTop } from './components/ScrollToTop';
 import { ToastContainer } from './components/Toast';
 import { RouteGuard } from './components/RouteGuard';
@@ -30,6 +30,7 @@ import KVKKPage from './pages/KVKKPage';
 import DistanceSalesPage from './pages/DistanceSalesPage';
 import ReturnPolicyPage from './pages/ReturnPolicyPage';
 import ShippingPage from './pages/ShippingPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
@@ -175,7 +176,7 @@ export default function App() {
         <Route path="/all-links" element={<AllLinksPage />} />
         <Route path="/links" element={<AllLinksPage />} />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </RouteGuard>
   );

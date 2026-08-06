@@ -1,14 +1,19 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { Search, SlidersHorizontal, LayoutGrid, List, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageLayout } from '@/layouts/PageLayout';
 import { StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
 import { ProductCard } from '@/components/ProductCard';
+import { useScrollToTopOnChange } from '@/components/ScrollToTop';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { getProducts, getCategories, type CategoryDto } from '@/services/productService';
 import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
 import { SEO } from '@/components/SEO';
+
+const PAGE_SIZE = 12;
 
 
 const brands = ['Aquails', 'PurePro', 'Compact', 'Business', 'Mineral Plus'];
@@ -41,6 +46,11 @@ export default function Shop() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [gridView, setGridView] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const closeMobileFilter = useCallback(() => setMobileFilterOpen(false), []);
+  useBodyScrollLock(mobileFilterOpen);
+  useEscapeKey(mobileFilterOpen, closeMobileFilter);
 
   useEffect(() => {
     let cancelled = false;
@@ -125,6 +135,28 @@ export default function Shop() {
 
     return result;
   }, [products, selectedCategories, priceRange, selectedBrands, stockStatus, sortBy, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const pageStart = filteredProducts.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
+  const pageEnd = Math.min(safePage * PAGE_SIZE, filteredProducts.length);
+  const pagedProducts = useMemo(
+    () => filteredProducts.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filteredProducts, safePage],
+  );
+
+  // Filters / sort change → reset to page 1
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategories, priceRange, selectedBrands, stockStatus, sortBy, searchQuery, urlCategoryId]);
+
+  // Pagination / filter content change → scroll to top (site standard)
+  useScrollToTopOnChange([safePage, selectedCategories, priceRange, selectedBrands, stockStatus, sortBy, searchQuery]);
+
+  const goToPage = (page: number) => {
+    const next = Math.max(1, Math.min(page, totalPages));
+    setCurrentPage(next);
+  };
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -368,9 +400,12 @@ export default function Shop() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   className="fixed inset-0 bg-black/40 z-40 lg:hidden"
-                  onClick={() => setMobileFilterOpen(false)}
+                  onClick={closeMobileFilter}
                 />
                 <motion.div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Filtrele"
                   initial={{ x: '-100%' }}
                   animate={{ x: 0 }}
                   exit={{ x: '-100%' }}
@@ -379,7 +414,7 @@ export default function Shop() {
                 >
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="font-semibold text-aqua-secondary">Filtrele</h3>
-                    <button onClick={() => setMobileFilterOpen(false)}>
+                    <button type="button" aria-label="Kapat" onClick={closeMobileFilter}>
                       <X className="w-5 h-5" />
                     </button>
                   </div>
@@ -423,7 +458,7 @@ export default function Shop() {
                 )}
                 staggerDelay={0.06}
               >
-                {filteredProducts.map((product) => (
+                {pagedProducts.map((product) => (
                   <StaggerItem key={product.id}>
                     <ProductCard product={product} />
                   </StaggerItem>
@@ -432,17 +467,27 @@ export default function Shop() {
             )}
 
             {/* Pagination */}
-            {filteredProducts.length > 0 && (
-              <div className="flex items-center justify-center gap-2 mt-10">
-                <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-aqua-border text-aqua-text-secondary hover:bg-aqua-bg transition-colors">
+            {filteredProducts.length > 0 && totalPages > 1 && (
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-10">
+                <button
+                  type="button"
+                  aria-label="Önceki sayfa"
+                  disabled={safePage <= 1}
+                  onClick={() => goToPage(safePage - 1)}
+                  className="w-10 h-10 flex items-center justify-center rounded-lg border border-aqua-border text-aqua-text-secondary hover:bg-aqua-bg transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                >
                   <span className="text-sm">&lsaquo;</span>
                 </button>
-                {[1, 2, 3].map((page) => (
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
+                    type="button"
+                    aria-label={`Sayfa ${page}`}
+                    aria-current={page === safePage ? 'page' : undefined}
+                    onClick={() => goToPage(page)}
                     className={cn(
                       'w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors',
-                      page === 1
+                      page === safePage
                         ? 'bg-aqua-primary text-white border border-aqua-primary'
                         : 'border border-aqua-border text-aqua-text-secondary hover:bg-aqua-bg'
                     )}
@@ -450,11 +495,24 @@ export default function Shop() {
                     {page}
                   </button>
                 ))}
-                <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-aqua-border text-aqua-text-secondary hover:bg-aqua-bg transition-colors">
+                <button
+                  type="button"
+                  aria-label="Sonraki sayfa"
+                  disabled={safePage >= totalPages}
+                  onClick={() => goToPage(safePage + 1)}
+                  className="w-10 h-10 flex items-center justify-center rounded-lg border border-aqua-border text-aqua-text-secondary hover:bg-aqua-bg transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                >
                   <span className="text-sm">&rsaquo;</span>
                 </button>
                 <span className="text-[13px] text-aqua-text-muted ml-4">
-                  1 - {filteredProducts.length} / {filteredProducts.length} ürün
+                  {pageStart} - {pageEnd} / {filteredProducts.length} ürün
+                </span>
+              </div>
+            )}
+            {filteredProducts.length > 0 && totalPages <= 1 && (
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-10">
+                <span className="text-[13px] text-aqua-text-muted">
+                  {pageStart} - {pageEnd} / {filteredProducts.length} ürün
                 </span>
               </div>
             )}

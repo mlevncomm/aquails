@@ -116,6 +116,7 @@ export default function Checkout() {
   };
 
   const handleSubmit = async () => {
+    if (submitting) return;
     if (!customerName.trim() || !customerEmail.trim() || !customerPhone.trim()) {
       addToast('Lütfen iletişim bilgilerinizi doldurun.', 'error');
       return;
@@ -663,14 +664,21 @@ export default function Checkout() {
                 ))}
               </div>
 
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void handleSubmit();
+                }}
+              >
               <button
-                onClick={() => void handleSubmit()}
+                type="submit"
                 disabled={submitting}
                 className="flex items-center justify-center gap-2 w-full bg-aqua-primary text-white py-4 rounded-full font-semibold hover:bg-aqua-primary-dark hover:shadow-primary transition-all mt-4 disabled:opacity-50"
               >
                 <Lock className="w-4 h-4" />
                 {submitting ? 'İşleniyor...' : 'Siparişi Tamamla'}
               </button>
+              </form>
               <p className="text-[11px] text-aqua-text-muted text-center mt-3">
                 Siparişi tamamlayarak kullanım koşullarını kabul etmiş olursunuz.
               </p>
