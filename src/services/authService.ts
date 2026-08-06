@@ -1,7 +1,6 @@
-import { isSupabaseMode } from '@/lib/dataProvider';
-import { isSupabaseConfigured, requireSupabase } from '@/lib/supabase';
-import { invokeFunction } from '@/lib/api';
-import { apiClient, ensureCartSessionId } from '@/lib/apiClient';
+import { getSupabaseOrNull, isSupabaseConfigured } from '@/lib/supabase';
+import type { Profile, UserRole } from '@/types/database';
+import type { Database } from '@/types/database';
 import { useAuthStore } from '@/stores/authStore';
 
 export interface LoginCredentials {
@@ -16,282 +15,233 @@ export interface RegisterData {
   password: string;
 }
 
-export type UserRole = 'customer' | 'admin' | 'super_admin' | 'staff';
-
 export interface User {
   id: string;
   name: string;
   email: string;
-  phone: string | null;
+  phone: string;
   role: UserRole;
 }
 
-const TOKEN_KEY = 'aquails_token';
-const USER_KEY = 'aquails_user';
-
-interface AuthResponse {
-  user: User;
-  token: string;
-}
-
-function mapProfileToUser(profile: {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  role: UserRole;
-}): User {
+function mapProfile(profile: Profile): User {
   return {
     id: profile.id,
     name: profile.name,
     email: profile.email,
-    phone: profile.phone,
+    phone: profile.phone ?? '',
     role: profile.role,
   };
 }
 
-function saveExpressSession(user: User, token: string) {
-  localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
-}
-
-function clearExpressSession() {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(USER_KEY);
-}
-
-export function getAuthToken(): string | null {
-  if (isSupabaseMode) return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
+/** @deprecated Prefer getCurrentUser / initAuth session hydration. */
 export function loadUserFromStorage(): User | null {
-  if (isSupabaseMode) return null;
-  try {
-    const raw = localStorage.getItem(USER_KEY);
-    return raw ? (JSON.parse(raw) as User) : null;
-  } catch {
-    return null;
-  }
+  return useAuthStore.getState().user;
 }
 
-async function fetchProfile(userId: string): Promise<User | null> {
-  const supabase = requireSupabase();
-  const { data, error } = await supabase.from('profiles').select('id, name, email, phone, role').eq('id', userId).single();
+export async function getProfile(userId: string): Promise<User | null> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
   if (error || !data) return null;
-  return mapProfileToUser(data as User);
+  return mapProfile(data);
 }
 
-async function mergeGuestCartAfterLogin() {
-  const sessionId = localStorage.getItem('aquails_cart_session');
-  if (!sessionId) return;
-  try {
-    if (isSupabaseMode) {
-      await invokeFunction('cart-manage', { action: 'merge', sessionId });
-    } else {
-      await apiClient.post('/api/cart/merge', { sessionId });
-    }
-  } catch {
-    // non-blocking
-  }
+export async function getCurrentUser(): Promise<User | null> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return null;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return null;
+
+  const profile = await getProfile(session.user.id);
+  if (profile) return profile;
+
+  return {
+    id: session.user.id,
+    email: session.user.email ?? '',
+    name: session.user.user_metadata?.name ?? '',
+    phone: session.user.user_metadata?.phone ?? '',
+    role: 'customer',
+  };
 }
 
-export async function login(
-  credentials: LoginCredentials,
-): Promise<{ success: boolean; user?: User; error?: string }> {
-  if (isSupabaseMode) {
-    try {
-      const supabase = requireSupabase();
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: credentials.email,
-        password: credentials.password,
-      });
-      if (error || !data.user) {
-        return { success: false, error: error?.message ?? 'Giriş başarısız.' };
-      }
-      const user = await fetchProfile(data.user.id);
-      if (!user) return { success: false, error: 'Profil bulunamadı.' };
-      useAuthStore.getState().setUser(user);
-      await mergeGuestCartAfterLogin();
-      return { success: true, user };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Giriş başarısız.' };
-    }
-  }
-
-  try {
-    const data = await apiClient.post<AuthResponse>('/api/auth/login', credentials);
-    saveExpressSession(data.user, data.token);
-    useAuthStore.getState().setUser(data.user);
-    await mergeGuestCartAfterLogin();
-    return { success: true, user: data.user };
-  } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'Giriş başarısız.' };
-  }
+function supabaseRequired() {
+  return !isSupabaseConfigured()
+    ? { success: false as const, error: 'Oturum servisi yapılandırılmamış. Lütfen daha sonra tekrar deneyin.' }
+    : null;
 }
 
-export async function register(
-  data: RegisterData,
-): Promise<{ success: boolean; user?: User; error?: string }> {
-  if (isSupabaseMode) {
-    try {
-      const supabase = requireSupabase();
-      const { data: authData, error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: { name: data.name, phone: data.phone },
-        },
-      });
-      if (error) return { success: false, error: error.message };
-      if (!authData.user) return { success: false, error: 'Kayıt başarısız.' };
+export async function signIn(credentials: LoginCredentials): Promise<{ success: boolean; user?: User; error?: string }> {
+  const missing = supabaseRequired();
+  if (missing) return missing;
 
-      await supabase.from('profiles').update({ name: data.name, phone: data.phone }).eq('id', authData.user.id);
-
-      const user = await fetchProfile(authData.user.id);
-      if (user) useAuthStore.getState().setUser(user);
-      ensureCartSessionId();
-      await mergeGuestCartAfterLogin();
-      return { success: true, user: user ?? undefined };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Kayıt başarısız.' };
-    }
-  }
-
-  try {
-    const result = await apiClient.post<AuthResponse>('/api/auth/register', data);
-    saveExpressSession(result.user, result.token);
-    useAuthStore.getState().setUser(result.user);
-    ensureCartSessionId();
-    await mergeGuestCartAfterLogin();
-    return { success: true, user: result.user };
-  } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'Kayıt başarısız.' };
-  }
-}
-
-export async function forgotPassword(
-  email: string,
-): Promise<{ success: boolean; message?: string; error?: string; devResetToken?: string }> {
-  if (isSupabaseMode) {
-    try {
-      const supabase = requireSupabase();
-      const redirectTo = `${import.meta.env.VITE_APP_URL ?? window.location.origin}/#/sifre-sifirla`;
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
-      if (error) return { success: false, error: error.message };
-      return { success: true, message: 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.' };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'İşlem başarısız.' };
-    }
-  }
-
-  try {
-    const data = await apiClient.post<{ message: string; devResetToken?: string }>(
-      '/api/auth/forgot-password',
-      { email },
-    );
-    return { success: true, message: data.message, devResetToken: data.devResetToken };
-  } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'İşlem başarısız.' };
-  }
-}
-
-export async function resetPassword(
-  token: string,
-  password: string,
-): Promise<{ success: boolean; message?: string; error?: string }> {
-  if (isSupabaseMode) {
-    try {
-      const supabase = requireSupabase();
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) return { success: false, error: error.message };
-      return { success: true, message: 'Şifreniz güncellendi.' };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Şifre güncellenemedi.' };
-    }
-  }
-
-  try {
-    const data = await apiClient.post<{ message: string }>('/api/auth/reset-password', { token, password });
-    return { success: true, message: data.message };
-  } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'Şifre güncellenemedi.' };
-  }
-}
-
-export async function logout(): Promise<void> {
-  if (isSupabaseMode) {
-    try {
-      await requireSupabase().auth.signOut();
-    } catch {
-      // ignore
-    } finally {
-      useAuthStore.getState().clearUser();
-    }
-    return;
-  }
-
-  try {
-    if (getAuthToken()) await apiClient.post('/api/auth/logout');
-  } catch {
-    // ignore
-  } finally {
-    clearExpressSession();
-    useAuthStore.getState().clearUser();
-  }
-}
-
-async function initSupabaseAuth() {
-  const supabase = requireSupabase();
-  const { data } = await supabase.auth.getSession();
-  if (data.session?.user) {
-    const user = await fetchProfile(data.session.user.id);
-    if (user) useAuthStore.getState().setUser(user);
-    else useAuthStore.getState().clearUser();
-  } else {
-    useAuthStore.getState().clearUser();
-  }
-
-  supabase.auth.onAuthStateChange(async (_event, session) => {
-    if (session?.user) {
-      const user = await fetchProfile(session.user.id);
-      useAuthStore.getState().setUser(user);
-    } else {
-      useAuthStore.getState().clearUser();
-    }
+  const supabase = getSupabaseOrNull()!;
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: credentials.email,
+    password: credentials.password,
   });
+  if (error) return { success: false, error: 'E-posta veya şifre hatalı.' };
+
+  const user = await getProfile(data.user.id) ?? {
+    id: data.user.id,
+    email: data.user.email ?? credentials.email,
+    name: data.user.user_metadata?.name ?? '',
+    phone: data.user.user_metadata?.phone ?? '',
+    role: 'customer' as const,
+  };
+  useAuthStore.getState().setUser(user);
+  return { success: true, user };
 }
 
-export async function initAuth(): Promise<void> {
-  if (isSupabaseMode) {
-    try {
-      if (!isSupabaseConfigured) {
-        useAuthStore.getState().clearUser();
-        return;
-      }
-      await initSupabaseAuth();
-    } catch {
-      useAuthStore.getState().clearUser();
-    } finally {
-      useAuthStore.getState().setHydrated();
-    }
-    return;
+export async function signUp(data: RegisterData): Promise<{ success: boolean; user?: User; requiresEmailConfirmation?: boolean; error?: string }> {
+  const missing = supabaseRequired();
+  if (missing) return missing;
+
+  const supabase = getSupabaseOrNull()!;
+  const { data: authData, error } = await supabase.auth.signUp({
+    email: data.email,
+    password: data.password,
+    options: {
+      data: { name: data.name, phone: data.phone },
+    },
+  });
+  if (error) return { success: false, error: error.message };
+  if (!authData.user) return { success: false, error: 'Kayıt oluşturulamadı.' };
+
+  const user: User = {
+    id: authData.user.id,
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    role: 'customer',
+  };
+  if (!authData.session) {
+    return { success: true, requiresEmailConfirmation: true };
+  }
+  useAuthStore.getState().setUser(user);
+  return { success: true, user, requiresEmailConfirmation: false };
+}
+
+export async function signOut(): Promise<void> {
+  const supabase = getSupabaseOrNull();
+  if (supabase) await supabase.auth.signOut();
+  useAuthStore.getState().clearUser();
+}
+
+export async function forgotPassword(email: string): Promise<{ success: boolean; message?: string; error?: string }> {
+  if (!email.includes('@')) return { success: false, error: 'Geçerli bir e-posta adresi girin.' };
+
+  const missing = supabaseRequired();
+  if (missing) return missing;
+
+  const supabase = getSupabaseOrNull()!;
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/sifre-sifirla`,
+  });
+  if (error) return { success: false, error: error.message };
+  return { success: true, message: 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.' };
+}
+
+export async function updateProfile(updates: {
+  name?: string;
+  phone?: string;
+}): Promise<{ success: boolean; user?: User; error?: string }> {
+  const missing = supabaseRequired();
+  if (missing) return missing;
+
+  const supabase = getSupabaseOrNull()!;
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser) return { success: false, error: 'Oturum bulunamadı.' };
+
+  const payload: Database['public']['Tables']['profiles']['Update'] = {};
+  if (updates.name !== undefined) payload.name = updates.name;
+  if (updates.phone !== undefined) payload.phone = updates.phone;
+
+  const { error } = await supabase
+    .from('profiles')
+    .update(payload)
+    .eq('id', authUser.id);
+
+  if (error) return { success: false, error: error.message };
+
+  if (updates.name || updates.phone) {
+    await supabase.auth.updateUser({
+      data: {
+        name: updates.name,
+        phone: updates.phone,
+      },
+    });
   }
 
-  const token = getAuthToken();
-  if (!token) {
-    useAuthStore.getState().setHydrated();
-    return;
+  const user = await getProfile(authUser.id);
+  if (user) useAuthStore.getState().setUser(user);
+  return { success: true, user: user ?? undefined };
+}
+
+export async function updatePassword(
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  const missing = supabaseRequired();
+  if (missing) return missing;
+
+  if (newPassword.length < 6) {
+    return { success: false, error: 'Şifre en az 6 karakter olmalıdır.' };
   }
+
+  const supabase = getSupabaseOrNull()!;
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+/** Initialize auth: Supabase session listener. Always completes hydration. */
+export async function initAuth(): Promise<void> {
+  const supabase = getSupabaseOrNull();
 
   try {
-    const data = await apiClient.get<{ user: User }>('/api/auth/me');
-    saveExpressSession(data.user, token);
-    useAuthStore.getState().setUser(data.user);
-  } catch {
-    clearExpressSession();
-    useAuthStore.getState().clearUser();
+    if (!supabase) return;
+
+    try {
+      const user = await getCurrentUser();
+      if (user) useAuthStore.getState().setUser(user);
+    } catch {
+      // Transient Supabase errors must not leave public pages blocked.
+    }
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      void (async () => {
+        try {
+          if (_event === 'PASSWORD_RECOVERY') return;
+          if (session?.user) {
+            const profile = await getProfile(session.user.id);
+            useAuthStore.getState().setUser(profile ?? {
+              id: session.user.id,
+              email: session.user.email ?? '',
+              name: session.user.user_metadata?.name ?? '',
+              phone: session.user.user_metadata?.phone ?? '',
+              role: 'customer',
+            });
+          } else {
+            useAuthStore.getState().clearUser();
+          }
+        } catch {
+          // Ignore profile fetch races; keep existing session state.
+        } finally {
+          useAuthStore.getState().setHydrated();
+        }
+      })();
+    });
   } finally {
     useAuthStore.getState().setHydrated();
   }
 }
+
+export const login = signIn;
+export const register = signUp;
+export const logout = () => { void signOut(); };

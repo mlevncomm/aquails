@@ -31,19 +31,19 @@ export default function FAQPage() {
     <PageLayout>
       <div className="max-w-[800px] mx-auto px-4 py-8">
         <div className="mb-8 text-center">
-          <div className="flex items-center justify-center gap-2 text-[13px] text-[#8B9DAF] mb-2">
-            <Link to="/" className="hover:text-[#1A73E8]">Ana Sayfa</Link>
+          <div className="flex items-center justify-center gap-2 text-[13px] text-aq-muted mb-2">
+            <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link>
             <span>/</span>
-            <span className="text-[#5A6B7B]">SSS</span>
+            <span className="text-aq-muted">SSS</span>
           </div>
-          <h1 className="text-2xl font-bold text-[#0D2137] mb-2">Sıkça Sorulan Sorular</h1>
-          <p className="text-sm text-[#8B9DAF]">Aklınıza takılan soruların yanıtlarını burada bulabilirsiniz.</p>
+          <h1 className="text-2xl font-bold text-aq-text mb-2">Sıkça Sorulan Sorular</h1>
+          <p className="text-sm text-aq-muted">Aklınıza takılan soruların yanıtlarını burada bulabilirsiniz.</p>
         </div>
 
         {/* Categories */}
         <div className="flex flex-wrap justify-center gap-2 mb-8">
           {categories.map(c => (
-            <button key={c} className="px-4 py-2 text-sm font-medium rounded-full border border-[#D6E3F0] text-[#5A6B7B] hover:bg-[#F0F6FF] hover:text-[#1A73E8] transition-all">
+            <button key={c} className="px-4 py-2 text-sm font-semibold rounded-xl border border-aq-border/60 text-aq-muted hover:bg-aq-sky hover:text-aq-blue transition-all">
               {c}
             </button>
           ))}
@@ -52,20 +52,20 @@ export default function FAQPage() {
         {/* FAQ Accordion */}
         <div className="space-y-3">
           {faqs.map((f, i) => (
-            <div key={i} className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
+            <div key={i} className="bg-white border border-aq-border/60 rounded-2xl overflow-hidden">
               <button
                 onClick={() => setOpenIdx(openIdx === i ? null : i)}
                 className="w-full flex items-center justify-between p-5 text-left"
               >
                 <div className="flex items-center gap-3">
-                  <HelpCircle className="w-5 h-5 text-[#1A73E8] flex-shrink-0" />
-                  <span className="text-sm font-semibold text-[#0D2137]">{f.q}</span>
+                  <HelpCircle className="w-5 h-5 text-aq-blue flex-shrink-0" />
+                  <span className="text-sm font-semibold text-aq-text">{f.q}</span>
                 </div>
-                <ChevronDown className={`w-5 h-5 text-[#8B9DAF] transition-transform flex-shrink-0 ${openIdx === i ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-5 h-5 text-aq-muted transition-transform flex-shrink-0 ${openIdx === i ? 'rotate-180' : ''}`} />
               </button>
               {openIdx === i && (
                 <div className="px-5 pb-5 pl-13">
-                  <p className="text-sm text-[#5A6B7B] leading-relaxed ml-8">{f.a}</p>
+                  <p className="text-sm text-aq-muted leading-relaxed ml-8">{f.a}</p>
                 </div>
               )}
             </div>

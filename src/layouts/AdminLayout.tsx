@@ -1,259 +1,385 @@
-import { useState, useCallback } from 'react';
-import { Link, useLocation, Outlet } from 'react-router';
+import { Link, useLocation, Outlet, useNavigate } from 'react-router';
+import { useState, useEffect, useMemo } from 'react';
 import {
-  LayoutDashboard, Package, ShoppingCart, Users, Wrench, Filter,
-  Tag, Settings, LogOut, Menu, X, Bell, Search, ChevronDown,
-  BookOpen, Star, HelpCircle, RefreshCw, FileText,
-  Link2, Award
+  LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Menu, X, ChevronDown,
+  Wrench, Megaphone, Headphones, Boxes,
 } from 'lucide-react';
+import { BrandLogo } from '@/components/BrandLogo';
 import { cn } from '@/lib/utils';
-import { useNotificationStore } from '@/stores/notificationStore';
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
-import { useEscapeKey } from '@/hooks/useEscapeKey';
+import { useAuthStore } from '@/stores/authStore';
+import { logout } from '@/services/authService';
+
+interface MenuChild {
+  label: string;
+  href: string;
+}
 
 interface MenuItem {
   label: string;
   href: string;
   icon: React.ElementType;
-  badge?: number;
-  children?: { label: string; href: string }[];
+  children?: MenuChild[];
 }
 
 const menuItems: MenuItem[] = [
-  { label: 'Gösterge Paneli', href: '/admin', icon: LayoutDashboard },
+  { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   {
-    label: 'Ürün Yönetimi',
+    label: 'Katalog',
     href: '/admin/urunler',
     icon: Package,
     children: [
       { label: 'Ürün Listesi', href: '/admin/urunler' },
+      { label: 'Ürün Yükleme', href: '/admin/urun-yukleme' },
+      { label: 'Toplu Fiyat', href: '/admin/toplu-fiyat' },
       { label: 'Kategoriler', href: '/admin/kategoriler' },
       { label: 'Stok', href: '/admin/stok' },
       { label: 'Stok Bildirimleri', href: '/admin/stok-bildirimleri' },
     ],
   },
   {
-    label: 'Siparişler',
+    label: 'Sipariş & CRM',
     href: '/admin/siparisler',
     icon: ShoppingCart,
     children: [
       { label: 'Tüm Siparişler', href: '/admin/siparisler' },
       { label: 'İade/Değişim', href: '/admin/iade-degisim' },
+      { label: 'Müşteriler', href: '/admin/musteriler' },
+      { label: 'Terk Edilmiş Sepetler', href: '/admin/terk-edilmis-sepetler' },
     ],
   },
-  { label: 'Müşteriler', href: '/admin/musteriler', icon: Users },
-  { label: 'Kampanyalar', href: '/admin/kampanyalar', icon: Tag },
-  { label: 'Kuponlar', href: '/admin/kuponlar', icon: Tag },
-  { label: 'Blog', href: '/admin/blog', icon: BookOpen },
-  { label: 'Yorumlar', href: '/admin/yorumlar', icon: Star },
-  { label: 'Sorular', href: '/admin/sorular', icon: HelpCircle },
-  { label: 'Sadakat', href: '/admin/sadakat', icon: Award },
-  { label: 'Terk Edilmiş Sepetler', href: '/admin/terk-edilmis-sepetler', icon: ShoppingCart },
   {
-    label: 'Servis',
+    label: 'Pazarlama',
+    href: '/admin/kampanyalar',
+    icon: Megaphone,
+    children: [
+      { label: 'Kampanyalar', href: '/admin/kampanyalar' },
+      { label: 'Kuponlar', href: '/admin/kuponlar' },
+      { label: 'Blog', href: '/admin/blog' },
+      { label: 'Sadakat', href: '/admin/sadakat' },
+    ],
+  },
+  {
+    label: 'İçerik & Destek',
+    href: '/admin/yorumlar',
+    icon: Headphones,
+    children: [
+      { label: 'Yorumlar', href: '/admin/yorumlar' },
+      { label: 'Sorular', href: '/admin/sorular' },
+    ],
+  },
+  {
+    label: 'Servis & Abonelik',
     href: '/admin/servis-talepleri',
     icon: Wrench,
     children: [
-      { label: 'Talepler', href: '/admin/servis-talepleri' },
-      { label: 'Takvim', href: '/admin/servis-takvimi' },
+      { label: 'Servis Talepleri', href: '/admin/servis-talepleri' },
+      { label: 'Servis Takvimi', href: '/admin/servis-takvimi' },
+      { label: 'Filtre Takibi', href: '/admin/filtre-takibi' },
+      { label: 'Abonelikler', href: '/admin/abonelikler' },
     ],
   },
-  { label: 'Filtre Takibi', href: '/admin/filtre-takibi', icon: Filter },
-  { label: 'Abonelikler', href: '/admin/abonelikler', icon: RefreshCw },
-  { label: 'Raporlar', href: '/admin/raporlar', icon: FileText },
-  { label: 'Link Sayfası', href: '/admin/linkler', icon: Link2 },
-  { label: 'Ayarlar', href: '/admin/ayarlar', icon: Settings },
+  {
+    label: 'Operasyon',
+    href: '/admin/kargo',
+    icon: Boxes,
+    children: [
+      { label: 'Kargo Modülü', href: '/admin/kargo' },
+      { label: 'Raporlar', href: '/admin/raporlar' },
+      { label: 'Link Sayfası', href: '/admin/linkler' },
+    ],
+  },
+  {
+    label: 'Sistem',
+    href: '/admin/ayarlar',
+    icon: Settings,
+    children: [
+      { label: 'Ödeme Ayarları', href: '/admin/odeme-ayarlari' },
+      { label: 'Ayarlar', href: '/admin/ayarlar' },
+    ],
+  },
 ];
+
+/** Exact and prefix matches for header title. Longer prefixes win. */
+const PAGE_TITLES: { match: string | RegExp; title: string }[] = [
+  { match: /^\/admin\/urunler\/ekle$/, title: 'Yeni Ürün' },
+  { match: /^\/admin\/urunler\/[^/]+$/, title: 'Ürün Düzenle' },
+  { match: /^\/admin\/siparisler\/[^/]+$/, title: 'Sipariş Detayı' },
+  { match: '/admin/urun-yukleme', title: 'Ürün Yükleme' },
+  { match: '/admin/toplu-fiyat', title: 'Toplu Fiyat' },
+  { match: '/admin/kategoriler', title: 'Kategoriler' },
+  { match: '/admin/stok-bildirimleri', title: 'Stok Bildirimleri' },
+  { match: '/admin/stok', title: 'Stok' },
+  { match: '/admin/urunler', title: 'Ürünler' },
+  { match: '/admin/iade-degisim', title: 'İade / Değişim' },
+  { match: '/admin/siparisler', title: 'Siparişler' },
+  { match: '/admin/musteriler', title: 'Müşteriler' },
+  { match: '/admin/terk-edilmis-sepetler', title: 'Terk Edilmiş Sepetler' },
+  { match: '/admin/kampanyalar', title: 'Kampanyalar' },
+  { match: '/admin/kuponlar', title: 'Kuponlar' },
+  { match: '/admin/blog', title: 'Blog' },
+  { match: '/admin/sadakat', title: 'Sadakat' },
+  { match: '/admin/yorumlar', title: 'Yorumlar' },
+  { match: '/admin/sorular', title: 'Sorular' },
+  { match: '/admin/servis-talepleri', title: 'Servis Talepleri' },
+  { match: '/admin/servis-takvimi', title: 'Servis Takvimi' },
+  { match: '/admin/filtre-takibi', title: 'Filtre Takibi' },
+  { match: '/admin/abonelikler', title: 'Abonelikler' },
+  { match: '/admin/kargo', title: 'Kargo' },
+  { match: '/admin/raporlar', title: 'Raporlar' },
+  { match: '/admin/linkler', title: 'Link Yönetimi' },
+  { match: '/admin/odeme-ayarlari', title: 'Ödeme Ayarları' },
+  { match: '/admin/ayarlar', title: 'Ayarlar' },
+  { match: '/admin', title: 'Dashboard' },
+];
+
+function resolvePageTitle(pathname: string): string {
+  for (const entry of PAGE_TITLES) {
+    if (typeof entry.match === 'string') {
+      if (
+        pathname === entry.match ||
+        (entry.match !== '/admin' && pathname.startsWith(`${entry.match}/`))
+      ) {
+        return entry.title;
+      }
+    } else if (entry.match.test(pathname)) {
+      return entry.title;
+    }
+  }
+  return 'Yönetim Paneli';
+}
+
+function pathMatchesChild(pathname: string, href: string) {
+  if (pathname === href) return true;
+  if (href === '/admin/urunler' && pathname.startsWith('/admin/urunler/')) return true;
+  if (href === '/admin/siparisler' && pathname.startsWith('/admin/siparisler/')) return true;
+  return false;
+}
+
+function isGroupActive(pathname: string, item: MenuItem) {
+  if (!item.children) return pathname === item.href;
+  return item.children.some((c) => pathMatchesChild(pathname, c.href));
+}
 
 export function AdminLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['Ürün Yönetimi', 'Siparişler', 'Servis']);
-  const { unreadCount } = useNotificationStore();
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([
+    'Katalog',
+    'Sipariş & CRM',
+  ]);
+
+  const pageTitle = useMemo(() => resolvePageTitle(location.pathname), [location.pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    setMobileOpen(false);
+    const activeGroup = menuItems.find((item) => item.children && isGroupActive(location.pathname, item));
+    if (activeGroup && !collapsed) {
+      setExpandedMenus((prev) =>
+        prev.includes(activeGroup.label) ? prev : [...prev, activeGroup.label],
+      );
+    }
+  }, [location.pathname, collapsed]);
 
   const toggleMenu = (label: string) => {
-    setExpandedMenus(prev => prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label]);
+    setExpandedMenus((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
+    );
   };
 
   const sidebarWidth = collapsed ? 'w-[72px]' : 'w-[260px]';
-
-  const closeMobile = useCallback(() => setMobileOpen(false), []);
-  useBodyScrollLock(mobileOpen);
-  useEscapeKey(mobileOpen, closeMobile);
+  const profileInitial = (user?.name ?? 'A')[0];
 
   return (
-    <div className="min-h-[100dvh] flex bg-[#F0F6FF] relative">
-      {/* Subtle background decoration */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#1A73E8]/[0.015] rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-[260px] w-[300px] h-[300px] bg-[#00D4C8]/[0.01] rounded-full blur-3xl pointer-events-none" />
-
-      {/* Mobil Overlay - Sidebar arkası karartma */}
+    <div className="min-h-[100dvh] flex bg-aq-ice overflow-x-hidden">
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
-          onClick={closeMobile}
+          className="fixed inset-0 bg-aq-deep/30 z-40 lg:hidden backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
-          'fixed lg:static inset-y-0 left-0 z-50 bg-[#0D2137] flex flex-col transition-all duration-300 ease-in-out',
+          'fixed lg:static inset-y-0 left-0 z-50 bg-aq-deep border-r border-aq-navy flex flex-col transition-all duration-300',
           sidebarWidth,
-          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         )}
       >
-        {/* Mobile Close Button - Sidebar içinde üst köşede */}
         <button
-          onClick={closeMobile}
-          className="lg:hidden absolute top-3 right-3 w-8 h-8 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center text-white/80 transition-colors z-10"
+          type="button"
+          onClick={() => setMobileOpen(false)}
+          className="lg:hidden absolute top-3 right-3 w-9 h-9 bg-aq-navy hover:bg-aq-blue rounded-lg flex items-center justify-center text-white/70 z-10"
+          aria-label="Menüyü kapat"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Logo */}
-        <div className="px-4 py-4 border-b border-[#1A3A5C]">
-          <Link to="/admin" className="flex items-center gap-2 px-2" onClick={() => setMobileOpen(false)}>
-            <img
-              src="/images/brand/aquails-icon.png"
-              alt="Aquails"
-              className="w-8 h-8 rounded-lg flex-shrink-0"
-            />
-            {!collapsed && (
+        <div className="px-4 py-5 border-b border-aq-navy">
+          <Link to="/admin" className="flex items-center gap-3 px-1" onClick={() => setMobileOpen(false)}>
+            {collapsed ? (
+              <BrandLogo variant="icon" inverted className="text-2xl flex-shrink-0" />
+            ) : (
               <div className="min-w-0">
-                <img
-                  src="/images/brand/aquails-logo-dark.png"
-                  alt="Aquails"
-                  className="h-5 w-auto"
-                />
-                <p className="text-[10px] text-[#8B9DAF] mt-0.5">Yönetim Paneli</p>
+                <BrandLogo variant="logo" bare inverted className="text-[0.92rem] gap-[0.30em]" />
+                <p className="text-[11px] text-white/50 mt-1.5">Yönetim Paneli</p>
               </div>
             )}
           </Link>
         </div>
 
-        {/* Menu */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {menuItems.map((item) => (
-            <div key={item.label}>
-              <button
-                onClick={() => item.children ? toggleMenu(item.label) : undefined}
-                className={cn(
-                  'flex items-center gap-3 w-full px-3 py-3 rounded-xl text-[13px] font-medium transition-all min-h-[44px]',
-                  location.pathname === item.href || item.children?.some(c => location.pathname === c.href)
-                    ? 'bg-[#1A73E8]/15 text-white'
-                    : 'text-[#8B9DAF] hover:bg-white/5 hover:text-white',
-                  item.children && 'justify-between'
+        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+          {menuItems.map((item) => {
+            const active = isGroupActive(location.pathname, item);
+            return (
+              <div key={item.label}>
+                {item.children ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (collapsed) {
+                        navigate(item.href);
+                        setCollapsed(false);
+                        setExpandedMenus((prev) =>
+                          prev.includes(item.label) ? prev : [...prev, item.label],
+                        );
+                        return;
+                      }
+                      toggleMenu(item.label);
+                    }}
+                    className={cn(
+                      'flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors min-h-[44px]',
+                      active ? 'bg-aq-sky/15 text-aq-aqua' : 'text-white/70 hover:bg-white/5 hover:text-white',
+                      'justify-between',
+                    )}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <item.icon className={cn('w-[18px] h-[18px] flex-shrink-0', active && 'text-aq-aqua')} />
+                      {!collapsed && <span className="truncate">{item.label}</span>}
+                    </div>
+                    {!collapsed && (
+                      <ChevronDown
+                        className={cn(
+                          'w-3.5 h-3.5 text-white/40 transition-transform flex-shrink-0',
+                          expandedMenus.includes(item.label) && 'rotate-180',
+                        )}
+                      />
+                    )}
+                  </button>
+                ) : (
+                  <Link
+                    to={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      'flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors min-h-[44px]',
+                      active ? 'bg-aq-sky/15 text-aq-aqua' : 'text-white/70 hover:bg-white/5 hover:text-white',
+                    )}
+                  >
+                    <item.icon className={cn('w-[18px] h-[18px] flex-shrink-0', active && 'text-aq-aqua')} />
+                    {!collapsed && <span>{item.label}</span>}
+                  </Link>
                 )}
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon className={cn('w-[18px] h-[18px] flex-shrink-0', (location.pathname === item.href || item.children?.some(c => location.pathname === c.href)) ? 'text-[#1A73E8]' : '')} />
-                  {!collapsed && <span>{item.label}</span>}
-                </div>
-                {item.children && !collapsed && (
-                  <ChevronDown className={cn('w-3.5 h-3.5 transition-transform flex-shrink-0', expandedMenus.includes(item.label) && 'rotate-180')} />
-                )}
-                {item.badge && !collapsed && (
-                  <span className="w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">{item.badge}</span>
-                )}
-              </button>
 
-              {item.children && expandedMenus.includes(item.label) && !collapsed && (
-                <div className="ml-9 mt-1 space-y-1">
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.label}
-                      to={child.href}
-                      onClick={() => setMobileOpen(false)}
-                      className={cn(
-                        'block px-3 py-2.5 text-[12px] rounded-lg transition-colors min-h-[40px] flex items-center',
-                        location.pathname === child.href ? 'text-white bg-[#1A73E8]/10' : 'text-[#8B9DAF] hover:text-white'
-                      )}
-                    >
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+                {item.children && expandedMenus.includes(item.label) && !collapsed && (
+                  <div className="ml-4 mt-0.5 space-y-0.5 border-l border-aq-navy pl-3">
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.href}
+                        to={child.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          'block px-3 py-2 text-[12px] rounded-lg transition-colors min-h-[40px] flex items-center',
+                          pathMatchesChild(location.pathname, child.href)
+                            ? 'text-aq-aqua bg-aq-sky/10 font-medium'
+                            : 'text-white/50 hover:text-white hover:bg-white/5',
+                        )}
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </nav>
 
-        {/* User */}
-        <div className="p-3 border-t border-[#1A3A5C]">
-          <div className="flex items-center gap-3 px-3 py-2.5">
-            <div className="w-9 h-9 bg-[#1A73E8] rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-semibold text-white">A</span>
+        <div className="p-3 border-t border-aq-navy">
+          <Link
+            to="/admin/ayarlar"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5 transition-colors min-h-[44px]"
+          >
+            <div className="w-9 h-9 bg-aq-sky/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-sm font-semibold text-aq-aqua">{profileInitial}</span>
             </div>
             {!collapsed && (
               <div className="min-w-0">
-                <p className="text-[13px] font-medium text-white truncate">Admin</p>
-                <p className="text-[11px] text-[#8B9DAF]">Süper Admin</p>
+                <p className="text-[13px] font-medium text-white truncate">{user?.name ?? 'Admin'}</p>
+                <p className="text-[11px] text-white/50">
+                  {user?.role === 'super_admin' ? 'Süper Admin' : 'Admin'}
+                </p>
               </div>
             )}
-          </div>
-          <button className="flex items-center gap-3 w-full px-3 py-2.5 mt-1 rounded-xl text-[13px] font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors min-h-[44px]">
+          </Link>
+          <button
+            type="button"
+            onClick={() => { logout(); navigate('/giris'); }}
+            className="flex items-center gap-3 w-full px-3 py-2.5 mt-1 rounded-xl text-[13px] font-medium text-red-400 hover:bg-red-500/10 transition-colors min-h-[44px]"
+          >
             <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
             {!collapsed && 'Çıkış Yap'}
           </button>
         </div>
 
-        {/* Collapse Toggle - Desktop only */}
         <button
+          type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-white border border-[#E8F0FE] rounded-full items-center justify-center z-10 shadow-sm"
+          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-white border border-aq-border/60 rounded-full items-center justify-center z-10 shadow-sm"
+          aria-label={collapsed ? 'Menüyü genişlet' : 'Menüyü daralt'}
         >
-          <ChevronDown className={cn('w-3 h-3 text-[#5A6B7B] transition-transform', collapsed ? '-rotate-90' : 'rotate-90')} />
+          <ChevronDown className={cn('w-3 h-3 text-aq-muted transition-transform', collapsed ? '-rotate-90' : 'rotate-90')} />
         </button>
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header - Responsive */}
-        <header className="h-14 bg-white border-b border-[#E8F0FE] flex items-center justify-between px-3 sm:px-4 lg:px-6 sticky top-0 z-30">
-          {/* Left: Menu Button + Title */}
-          <div className="flex items-center gap-2 sm:gap-3">
+        <header className="h-14 bg-white/90 backdrop-blur border-b border-aq-border/60 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <button
+              type="button"
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-[#F0F6FF] text-[#5A6B7B] transition-colors"
+              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-aq-ice text-aq-muted flex-shrink-0"
               aria-label="Menüyü aç"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h2 className="text-sm sm:text-base font-semibold text-[#0D2137] truncate">
-              Yönetim Paneli
-            </h2>
-          </div>
-
-          {/* Right: Actions */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            {/* Search - hidden on very small screens */}
-            <div className="relative hidden xs:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B9DAF]" />
-              <input
-                type="text"
-                placeholder="Ara..."
-                className="pl-9 pr-4 py-2 text-sm bg-[#F8FBFF] border border-[#E8F0FE] rounded-lg focus:outline-none focus:border-[#1A73E8] w-36 sm:w-48 transition-all"
-              />
-            </div>
-
-            {/* Notifications */}
-            <button className="relative w-10 h-10 flex items-center justify-center rounded-xl hover:bg-[#F0F6FF] transition-colors text-[#8B9DAF]">
-              <Bell className="w-[18px] h-[18px]" />
-              {unreadCount() > 0 && (
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
-              )}
-            </button>
-
-            {/* Avatar */}
-            <div className="w-9 h-10 bg-[#1A73E8]/10 rounded-full flex items-center justify-center border-2 border-[#E8F0FE]">
-              <span className="text-sm font-semibold text-[#1A73E8]">A</span>
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase tracking-wider text-aq-muted/80 font-semibold hidden sm:block">
+                Aquails Admin
+              </p>
+              <h2 className="text-sm sm:text-base font-semibold text-aq-text truncate leading-tight">
+                {pageTitle}
+              </h2>
             </div>
           </div>
+          <Link
+            to="/admin/ayarlar"
+            className="w-9 h-9 bg-aq-sky rounded-full flex items-center justify-center border border-aq-aqua/30 flex-shrink-0 hover:ring-2 hover:ring-aq-aqua/30 transition-all"
+            aria-label="Profil ve Ayarlar"
+            title="Profil ve Ayarlar"
+          >
+            <span className="text-sm font-semibold text-aq-blue">{profileInitial}</span>
+          </Link>
         </header>
 
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-y-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto overflow-x-hidden w-full max-w-[1600px] mx-auto min-w-0 bg-aq-ice">
           <Outlet />
         </main>
       </div>

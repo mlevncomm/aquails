@@ -26,7 +26,7 @@ export default function ShippingPage() {
       <SEO title="Aquails" noindex />
     <PageLayout variant="gradient">
       {/* Hero */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#0D2137] via-[#1A3A5C] to-[#1A73E8] py-14 md:py-18">
+      <div className="relative overflow-hidden bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep py-16 md:py-24">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-5 right-20 w-40 h-40 border border-white rounded-full" />
           <div className="absolute bottom-5 left-10 w-24 h-24 border border-white rounded-full" />
@@ -53,20 +53,20 @@ export default function ShippingPage() {
         <div className="space-y-5">
           {/* Kargo */}
           <ScrollReveal>
-            <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6 md:p-8 shadow-sm">
+            <div className="bg-white border border-aq-border/60 rounded-2xl p-6 md:p-8 shadow-sm">
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-12 h-12 bg-[#F0F6FF] rounded-xl flex items-center justify-center">
-                  <Package className="w-6 h-6 text-[#1A73E8]" />
+                <div className="w-12 h-12 bg-aq-sky rounded-xl flex items-center justify-center">
+                  <Package className="w-6 h-6 text-aq-blue" />
                 </div>
-                <h2 className="text-lg font-semibold text-[#0D2137]">Kargo Bilgileri</h2>
+                <h2 className="text-lg font-semibold text-aq-text">Kargo Bilgileri</h2>
               </div>
               <div className="space-y-4">
                 {kargoItems.map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-[#F8FBFF]/50">
-                    <div className="w-8 h-8 bg-[#EBF3FF] rounded-lg flex items-center justify-center flex-shrink-0">
-                      <item.icon className="w-4 h-4 text-[#1A73E8]" />
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-aq-ice/50">
+                    <div className="w-8 h-8 bg-aq-sky rounded-lg flex items-center justify-center flex-shrink-0">
+                      <item.icon className="w-4 h-4 text-aq-blue" />
                     </div>
-                    <p className="text-sm text-[#5A6B7B] pt-1">{item.text}</p>
+                    <p className="text-sm text-aq-muted pt-1">{item.text}</p>
                   </div>
                 ))}
               </div>
@@ -75,20 +75,20 @@ export default function ShippingPage() {
 
           {/* Kurulum */}
           <ScrollReveal delay={0.15}>
-            <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6 md:p-8 shadow-sm">
+            <div className="bg-white border border-aq-border/60 rounded-2xl p-6 md:p-8 shadow-sm">
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
-                  <Wrench className="w-6 h-6 text-emerald-600" />
+                <div className="w-12 h-12 bg-aq-sky rounded-xl flex items-center justify-center">
+                  <Wrench className="w-6 h-6 text-aq-blue" />
                 </div>
-                <h2 className="text-lg font-semibold text-[#0D2137]">Kurulum Hizmeti</h2>
+                <h2 className="text-lg font-semibold text-aq-text">Kurulum Hizmeti</h2>
               </div>
               <div className="space-y-4">
                 {kurulumItems.map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-[#F8FBFF]/50">
-                    <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <item.icon className="w-4 h-4 text-emerald-600" />
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-aq-ice/50">
+                    <div className="w-8 h-8 bg-aq-sky rounded-lg flex items-center justify-center flex-shrink-0">
+                      <item.icon className="w-4 h-4 text-aq-blue" />
                     </div>
-                    <p className="text-sm text-[#5A6B7B] pt-1">{item.text}</p>
+                    <p className="text-sm text-aq-muted pt-1">{item.text}</p>
                   </div>
                 ))}
               </div>

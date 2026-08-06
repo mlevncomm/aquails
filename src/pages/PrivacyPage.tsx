@@ -20,7 +20,7 @@ export default function PrivacyPage() {
       <SEO title="Aquails" noindex />
     <PageLayout variant="gradient">
       {/* Hero */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#0D2137] via-[#1A3A5C] to-[#1A73E8] py-14 md:py-18">
+      <div className="relative overflow-hidden bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep py-16 md:py-24">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-5 right-20 w-40 h-40 border border-white rounded-full" />
           <div className="absolute bottom-5 left-10 w-24 h-24 border border-white rounded-full" />
@@ -45,16 +45,16 @@ export default function PrivacyPage() {
 
       <div className="max-w-[800px] mx-auto px-4 py-8 -mt-6 relative z-10">
         <ScrollReveal>
-          <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-white border border-aq-border/60 rounded-2xl overflow-hidden shadow-sm">
             {sections.map((section, i) => (
-              <div key={i} className={`p-6 md:p-8 ${i !== sections.length - 1 ? 'border-b border-[#F0F6FF]' : ''}`}>
+              <div key={i} className={`p-6 md:p-8 ${i !== sections.length - 1 ? 'border-b border-aq-border/60' : ''}`}>
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-[#F0F6FF] rounded-xl flex items-center justify-center flex-shrink-0">
-                    <section.icon className="w-5 h-5 text-[#1A73E8]" />
+                  <div className="w-10 h-10 bg-aq-sky rounded-xl flex items-center justify-center flex-shrink-0">
+                    <section.icon className="w-5 h-5 text-aq-blue" />
                   </div>
                   <div>
-                    <h2 className="text-base font-semibold text-[#0D2137] mb-2">{section.title}</h2>
-                    <p className="text-sm text-[#5A6B7B] leading-relaxed">{section.content}</p>
+                    <h2 className="text-base font-semibold text-aq-text mb-2">{section.title}</h2>
+                    <p className="text-sm text-aq-muted leading-relaxed">{section.content}</p>
                   </div>
                 </div>
               </div>

@@ -11,19 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
-
-# Environment (never commit secrets)
 .env
 .env.*
 !.env.example
-.env.local
-.env.*.local
-server/.env
-server/.env.*
-
-# Server build output
-server/dist
-server/node_modules
 
 # Editor directories and files
 .vscode/*
@@ -35,7 +25,6 @@ server/node_modules
 *.njsproj
 *.sln
 *.sw?
+supabase/.temp/
 
-# Cursor local agent rules/skills
-.cursor/
-
+.env*

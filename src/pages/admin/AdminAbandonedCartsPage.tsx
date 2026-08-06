@@ -1,103 +1,154 @@
-import { Send, RotateCcw, Trash2 } from 'lucide-react';
-import { getAbandonedCarts, getStats, sendReminder, markConverted, deleteAbandonedCart } from '@/services/abandonedCartService';
+import { useState, useEffect, useCallback } from 'react';
+import { Send, RotateCcw, Trash2, ShoppingCart } from 'lucide-react';
+import {
+  getAbandonedCarts,
+  getStats,
+  sendReminder,
+  markConverted,
+  deleteAbandonedCart,
+  type AbandonedCart,
+} from '@/services/abandonedCartService';
 import { useToastStore } from '@/components/Toast';
-import { useState } from 'react';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminStatCard,
+  AdminLoading,
+  AdminEmpty,
+  AdminCard,
+  AdminBadge,
+  AdminButton,
+} from '@/components/admin/admin-ui';
+
+const statusTone: Record<string, 'info' | 'warning' | 'success'> = {
+  new: 'info',
+  'reminder-sent': 'warning',
+  converted: 'success',
+};
+
+const statusLabel: Record<string, string> = {
+  new: 'Yeni',
+  'reminder-sent': 'Hatırlatıcı Kuyrukta',
+  converted: 'Dönüştü',
+};
 
 export default function AdminAbandonedCartsPage() {
-  const addToast = useToastStore(s => s.add);
-  const [carts, setCarts] = useState(getAbandonedCarts());
-  const stats = getStats();
+  const addToast = useToastStore((s) => s.add);
+  const [carts, setCarts] = useState<AbandonedCart[]>([]);
+  const [stats, setStats] = useState({ total: 0, new: 0, reminderSent: 0, converted: 0, avgCartValue: 0 });
+  const [loading, setLoading] = useState(true);
 
-  const refresh = () => setCarts(getAbandonedCarts());
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const [cartData, statsData] = await Promise.all([getAbandonedCarts(), getStats()]);
+    setCarts(cartData);
+    setStats(statsData);
+    setLoading(false);
+  }, []);
 
-  const handleSendReminder = (id: string) => {
-    sendReminder(id);
-    addToast('Hatırlatıcı gönderildi.', 'success');
-    refresh();
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const handleSendReminder = async (id: string) => {
+    const result = await sendReminder(id);
+    if (result.success) {
+      addToast('Hatırlatıcı e-posta kuyruğuna alındı.', 'success');
+      void refresh();
+    } else {
+      addToast(result.error ?? 'Hatırlatıcı gönderilemedi.', 'error');
+    }
   };
 
-  const handleConvert = (id: string) => {
-    markConverted(id);
-    addToast('Donusturuldu olarak isaretlendi.', 'success');
-    refresh();
+  const handleConvert = async (id: string) => {
+    const result = await markConverted(id);
+    if (result.success) {
+      addToast('Dönüştürüldü olarak işaretlendi.', 'success');
+      void refresh();
+    } else {
+      addToast(result.error ?? 'Güncellenemedi.', 'error');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteAbandonedCart(id);
-    refresh();
-  };
-
-  const statusColor: Record<string, string> = {
-    new: 'text-[#1A73E8] bg-[#F0F6FF]',
-    'reminder-sent': 'text-amber-600 bg-amber-50',
-    converted: 'text-emerald-600 bg-emerald-50',
-  };
-
-  const statusLabel: Record<string, string> = {
-    new: 'Yeni',
-    'reminder-sent': 'Hatırlatıcı Gönderildi',
-    converted: 'Donustu',
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Bu sepet kaydını silmek istediğinize emin misiniz?')) return;
+    const result = await deleteAbandonedCart(id);
+    if (result.success) void refresh();
+    else addToast(result.error ?? 'Silinemedi.', 'error');
   };
 
   return (
-    <div className="p-4 md:p-6">
-      <h1 className="text-xl md:text-2xl font-bold text-[#0D2137] mb-1">Terk Edilmiş Sepetler</h1>
-      <p className="text-sm text-[#8B9DAF] mb-6">Sepeti terk eden müşterileri takip edin, hatırlatıcı gönderin.</p>
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Terk Edilmiş Sepetler"
+        description="Sepeti terk eden müşterileri takip edin, hatırlatıcı gönderin."
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: 'Toplam', value: stats.total },
-          { label: 'Yeni', value: stats.new },
-          { label: 'Hatirlatici', value: stats.reminderSent },
-          { label: 'Donusum', value: stats.converted },
-        ].map(s => (
-          <div key={s.label} className="bg-white border border-[#E8F0FE] rounded-xl p-4">
-            <p className="text-xs text-[#8B9DAF]">{s.label}</p>
-            <p className="text-xl font-bold text-[#0D2137]">{s.value}</p>
-          </div>
-        ))}
+        <AdminStatCard label="Toplam" value={stats.total} />
+        <AdminStatCard label="Yeni" value={stats.new} />
+        <AdminStatCard label="Hatırlatıcı" value={stats.reminderSent} />
+        <AdminStatCard label="Dönüşüm" value={stats.converted} />
       </div>
 
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#E8F0FE]">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Musteri</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Urunler</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Tutar</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Son Aktivite</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Durum</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-[#8B9DAF]">İşlem</th>
-              </tr>
-            </thead>
-            <tbody>
-              {carts.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-8 text-sm text-[#8B9DAF]">Terk edilmiş sepet bulunmuyor.</td></tr>
-              ) : carts.map(c => (
-                <tr key={c.id} className="border-b border-[#F0F6FF] last:border-0">
-                  <td className="px-4 py-3 text-sm font-medium text-[#0D2137]">{c.customerName}</td>
-                  <td className="px-4 py-3 text-xs text-[#5A6B7B]">{c.items.map(i => i.productName).join(', ')}</td>
-                  <td className="px-4 py-3 text-sm font-semibold text-[#0D2137]">{c.total.toLocaleString('tr-TR')} ₺</td>
-                  <td className="px-4 py-3 text-xs text-[#8B9DAF]">{new Date(c.lastActivity).toLocaleDateString('tr-TR')}</td>
-                  <td className="px-4 py-3"><span className={`text-xs font-medium px-2 py-1 rounded-full ${statusColor[c.status]}`}>{statusLabel[c.status]}</span></td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      {c.status === 'new' && (
-                        <button onClick={() => handleSendReminder(c.id)} className="p-1.5 rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8] transition-all" title="Hatırlatıcı gönder"><Send className="w-3.5 h-3.5" /></button>
-                      )}
-                      {c.status !== 'converted' && (
-                        <button onClick={() => handleConvert(c.id)} className="p-1.5 rounded-lg hover:bg-emerald-50 text-[#8B9DAF] hover:text-emerald-500 transition-all" title="Donustur"><RotateCcw className="w-3.5 h-3.5" /></button>
-                      )}
-                      <button onClick={() => handleDelete(c.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-[#8B9DAF] hover:text-red-500 transition-all" title="Sil"><Trash2 className="w-3.5 h-3.5" /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {loading ? (
+        <AdminLoading />
+      ) : carts.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty icon={ShoppingCart} message="Terk edilmiş sepet bulunmuyor." />
+        </AdminCard>
+      ) : (
+        <div className="space-y-3">
+          {carts.map((cart) => (
+            <AdminCard key={cart.id}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                <div>
+                  <p className="text-sm font-semibold text-aq-text">{cart.customerName}</p>
+                  {cart.customerEmail && <p className="text-xs text-aq-muted">{cart.customerEmail}</p>}
+                </div>
+                <div className="flex items-center gap-2">
+                  <AdminBadge tone={statusTone[cart.status] ?? 'neutral'}>
+                    {statusLabel[cart.status] ?? cart.status}
+                  </AdminBadge>
+                  <span className="text-sm font-semibold text-aq-text">{cart.total.toLocaleString('tr-TR')}₺</span>
+                </div>
+              </div>
+              <p className="text-xs text-aq-muted mb-3">
+                {cart.items.length} ürün · Son aktivite: {new Date(cart.lastActivity).toLocaleString('tr-TR')}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {cart.status === 'new' && (
+                  <AdminButton
+                    type="button"
+                    className="text-xs min-h-0 py-1.5 px-3"
+                    onClick={() => void handleSendReminder(cart.id)}
+                  >
+                    <Send className="w-3.5 h-3.5" /> Hatırlat
+                  </AdminButton>
+                )}
+                {cart.status !== 'converted' && (
+                  <AdminButton
+                    type="button"
+                    variant="secondary"
+                    className="text-xs min-h-0 py-1.5 px-3"
+                    onClick={() => void handleConvert(cart.id)}
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" /> Dönüştü
+                  </AdminButton>
+                )}
+                <AdminButton
+                  type="button"
+                  variant="danger"
+                  className="text-xs min-h-0 py-1.5 px-3"
+                  onClick={() => void handleDelete(cart.id)}
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Sil
+                </AdminButton>
+              </div>
+            </AdminCard>
+          ))}
         </div>
-      </div>
-    </div>
+      )}
+    </AdminPageShell>
   );
 }

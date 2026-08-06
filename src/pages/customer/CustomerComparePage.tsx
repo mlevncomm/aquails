@@ -1,72 +1,157 @@
-import { useCompareStore } from '@/stores/compareStore';
+import { useMemo } from 'react';
+import { Link } from 'react-router';
+import { X, ShoppingCart, GitCompare, Loader2 } from 'lucide-react';
+import { useCompareStore, COMPARE_MAX } from '@/stores/compareStore';
 import { useCartStore } from '@/stores/cartStore';
-import { EmptyState } from '@/components/EmptyState';
-import { X, ShoppingCart, Minus } from 'lucide-react';
-import { products } from '@/data';
+import { useCatalog } from '@/hooks/useCatalog';
 import { useToastStore } from '@/components/Toast';
+import { ProductPrice } from '@/components/ProductPrice';
+import type { Product } from '@/types';
+import {
+  CustomerPageShell,
+  CustomerPageHeader,
+  CustomerCard,
+  CustomerEmpty,
+  CustomerButton,
+} from '@/components/customer/customer-ui';
 
 export default function CustomerComparePage() {
   const { ids, remove } = useCompareStore();
+  const { products, loading } = useCatalog();
   const { addItem, openDrawer } = useCartStore();
-  const addToast = useToastStore(s => s.add);
-  const compareProducts = products.filter(p => ids.includes(p.id));
+  const addToast = useToastStore((s) => s.add);
 
-  const handleAddToCart = (product: typeof products[0]) => {
+  const compareProducts = useMemo(() => {
+    const byId = new Map(products.map((p) => [p.id, p]));
+    return ids.map((id) => byId.get(id)).filter((p): p is Product => Boolean(p));
+  }, [ids, products]);
+
+  const handleAddToCart = (product: Product) => {
+    if (product.stock <= 0) {
+      addToast('Bu ürün stokta yok.', 'error');
+      return;
+    }
     addItem(product);
     addToast('Sepete eklendi', 'success');
     openDrawer();
   };
 
   return (
-      <>      <h2 className="text-lg font-semibold text-[#0D2137] mb-5">Karşılaştırma Listem ({compareProducts.length}/4)</h2>
+    <CustomerPageShell>
+      <CustomerPageHeader
+        title="Karşılaştırma"
+        description={`${compareProducts.length}/${COMPARE_MAX} ürün listede`}
+      />
 
-      {compareProducts.length === 0 ? (
-        <EmptyState icon={<Minus className="w-8 h-8" />} title="Liste Boş" description="Karşılaştırmak için ürün ekleyin." action={{ label: 'Ürünleri Keşfet', href: '/urunler' }} />
+      {loading && ids.length > 0 && compareProducts.length === 0 ? (
+        <CustomerCard>
+          <div className="flex justify-center py-10">
+            <Loader2 className="w-6 h-6 animate-spin text-aq-blue" />
+          </div>
+        </CustomerCard>
+      ) : compareProducts.length === 0 ? (
+        <CustomerCard padding={false}>
+          <CustomerEmpty
+            icon={GitCompare}
+            title="Liste boş"
+            message="Ürün kartındaki karşılaştır ikonuyla ekleyin."
+            action={
+              <Link to="/urunler">
+                <CustomerButton>Ürünleri Keşfet</CustomerButton>
+              </Link>
+            }
+          />
+        </CustomerCard>
       ) : (
-        <div className="overflow-x-auto -mx-4 px-4">
-          <table className="w-full min-w-[500px] bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
-            <thead>
-              <tr>
-                <th className="text-left p-4 w-[120px] bg-[#F8FBFF] text-xs font-semibold text-[#8B9DAF]">Özellik</th>
-                {compareProducts.map(p => (
-                  <th key={p.id} className="p-4 bg-[#F8FBFF] min-w-[160px]">
-                    <div className="relative">
-                      <button onClick={() => remove(p.id)} className="absolute -top-1 -right-1 w-5 h-5 bg-red-50 rounded-full flex items-center justify-center text-red-500"><X className="w-3 h-3" /></button>
-                      <div className="w-16 h-16 bg-[#F0F6FF] rounded-xl flex items-center justify-center mx-auto mb-2">
-                        <ShoppingCart className="w-6 h-6 text-[#1A73E8]/20" />
-                      </div>
-                      <p className="text-xs font-semibold text-[#0D2137] line-clamp-2">{p.name}</p>
-                      <p className="text-sm font-bold text-[#1A73E8]">{p.price.toLocaleString('tr-TR')}₺</p>
-                    </div>
+        <CustomerCard padding={false} className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[500px]">
+              <thead>
+                <tr>
+                  <th className="text-left p-4 w-[120px] bg-aq-ice text-xs font-semibold text-aq-muted">
+                    Özellik
                   </th>
+                  {compareProducts.map((p) => {
+                    const img = p.images?.[0] || '/images/products/placeholder.jpg';
+                    return (
+                      <th key={p.id} className="p-4 bg-aq-ice min-w-[160px]">
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              remove(p.id);
+                              addToast('Ürün listeden çıkarıldı.', 'info');
+                            }}
+                            className="absolute -top-1 -right-1 w-6 h-6 bg-red-50 rounded-full flex items-center justify-center text-red-500 hover:bg-red-100"
+                            aria-label="Kaldır"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                          <Link to={`/urun/${p.slug}`} className="block group">
+                            <div className="w-16 h-16 bg-white border border-aq-border/40 rounded-xl flex items-center justify-center mx-auto mb-2 overflow-hidden">
+                              <img
+                                src={img}
+                                alt={p.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src =
+                                    '/images/products/placeholder.jpg';
+                                }}
+                              />
+                            </div>
+                            <p className="text-xs font-semibold text-aq-text line-clamp-2 group-hover:text-aq-blue">
+                              {p.name}
+                            </p>
+                          </Link>
+                          <div className="mt-1 flex justify-center">
+                            <ProductPrice product={p} size="sm" />
+                          </div>
+                        </div>
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {['Kategori', 'Puan', 'Stok'].map((label) => (
+                  <tr key={label} className="border-t border-aq-border/60">
+                    <td className="p-4 text-xs font-medium text-aq-muted">{label}</td>
+                    {compareProducts.map((p) => (
+                      <td key={p.id} className="p-4 text-sm text-aq-text text-center">
+                        {label === 'Kategori'
+                          ? p.category || '-'
+                          : label === 'Puan'
+                            ? p.rating > 0
+                              ? `${p.rating}/5`
+                              : '-'
+                            : p.stock > 0
+                              ? `${p.stock} adet`
+                              : 'Tükendi'}
+                      </td>
+                    ))}
+                  </tr>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {['Kategori', 'Puan', 'Stok'].map(label => (
-                <tr key={label} className="border-t border-[#F0F6FF]">
-                  <td className="p-4 text-xs font-medium text-[#5A6B7B]">{label}</td>
-                  {compareProducts.map(p => (
-                    <td key={p.id} className="p-4 text-sm text-[#0D2137] text-center">
-                      {label === 'Kategori' ? p.category : label === 'Puan' ? `${p.rating}/5` : `${p.stock} adet`}
+                <tr className="border-t border-aq-border/60">
+                  <td className="p-4" />
+                  {compareProducts.map((p) => (
+                    <td key={p.id} className="p-4">
+                      <button
+                        type="button"
+                        onClick={() => handleAddToCart(p)}
+                        disabled={p.stock <= 0}
+                        aria-label="Sepete Ekle"
+                        className="mx-auto w-10 h-10 flex items-center justify-center rounded-xl border border-aq-border/60 text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-sky transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                      </button>
                     </td>
                   ))}
                 </tr>
-              ))}
-              <tr className="border-t border-[#F0F6FF]">
-                <td className="p-4" />
-                {compareProducts.map(p => (
-                  <td key={p.id} className="p-4">
-                    <button onClick={() => handleAddToCart(p)} className="w-full flex items-center justify-center gap-1.5 bg-[#1A73E8] text-white py-2 rounded-full text-xs font-semibold hover:bg-[#1557B0] transition-all">
-                      <ShoppingCart className="w-3.5 h-3.5" /> Sepete Ekle
-                    </button>
-                  </td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        </CustomerCard>
       )}
-      </>
+    </CustomerPageShell>
   );
 }

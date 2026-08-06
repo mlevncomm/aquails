@@ -1,102 +1,295 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
-import { Search, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Search, Plus, Pencil, Package, RefreshCw, Trash2, Loader2 } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import { adminGetProducts, adminDeleteProduct } from '@/services/productService';
-import type { Product } from '@/types';
+import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToastStore } from '@/components/Toast';
+import { useAdminCatalog } from '@/hooks/useAdminCatalog';
+import { deleteProduct } from '@/services/productService';
+import { bestEffortDeleteUploadedObject } from '@/services/storageService';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminFilterBar,
+  AdminInput,
+  AdminSelect,
+  AdminButton,
+  AdminLoading,
+  AdminEmpty,
+  AdminTableWrap,
+  AdminDesktopOnly,
+  AdminMobileCardList,
+  AdminCard,
+} from '@/components/admin/admin-ui';
 
 export default function AdminProductsPage() {
+  const { products, categories, loading, error, errorCode, isEmpty, reload } = useAdminCatalog();
+  const addToast = useToastStore((s) => s.add);
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
-  const [productList, setProductList] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const addToast = useToastStore((s) => s.add);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const loadProducts = () => {
-    setLoading(true);
-    setError(null);
-    adminGetProducts({ limit: 100, includeInactive: true })
-      .then((result) => setProductList(result.items))
-      .catch((err) => setError(err instanceof Error ? err.message : 'Ürünler yüklenemedi.'))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const filtered = productList.filter(p => {
+  const filtered = products.filter((p) => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
     const matchCat = catFilter === 'all' || p.category === catFilter;
     return matchSearch && matchCat;
   });
 
-  const cats = ['all', ...Array.from(new Set(productList.map(p => p.category)))];
+  const cats = ['all', ...Array.from(new Set(products.map((p) => p.category).filter(Boolean)))];
 
-  const remove = async (id: string) => {
-    try {
-      await adminDeleteProduct(id);
-      setProductList(prev => prev.filter(p => p.id !== id));
-      addToast('Ürün silindi.', 'success');
-    } catch (err) {
-      addToast(err instanceof Error ? err.message : 'Silme başarısız.', 'error');
+  const confirmDelete = async () => {
+    if (!pendingDelete || deleting) return;
+    setDeleting(true);
+    const result = await deleteProduct(pendingDelete.id);
+    if (!result.success) {
+      setDeleting(false);
+      addToast(result.error ?? 'Ürün silinemedi.', 'error');
+      return;
     }
+    for (const url of result.data?.imageUrls ?? []) {
+      void bestEffortDeleteUploadedObject(url);
+    }
+    setDeleting(false);
+    setPendingDelete(null);
+    addToast(`“${pendingDelete.name}” silindi.`, 'success');
+    void reload();
   };
 
-  if (loading) {
-    return <div className="text-center py-12 text-[#8B9DAF]">Yükleniyor...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center py-12 text-red-500">{error}</div>;
-  }
-
   return (
-      <>      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <h2 className="text-lg font-semibold text-[#0D2137]">Ürün Yönetimi</h2>
-        <Link to="/admin/urunler/ekle" className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0] transition-all w-fit">
-          <Plus className="w-4 h-4" /> Yeni Ürün
-        </Link>
-      </div>
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Ürün Yönetimi"
+        description="Katalog ürünlerini arayın, filtreleyin, düzenleyin veya silin."
+        action={
+          <div className="flex items-center gap-2">
+            <AdminButton variant="secondary" onClick={() => void reload()} disabled={loading}>
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Yenile
+            </AdminButton>
+            <Link to="/admin/urunler/ekle">
+              <AdminButton>
+                <Plus className="w-4 h-4" /> Yeni Ürün
+              </AdminButton>
+            </Link>
+          </div>
+        }
+      />
 
-      <div className="flex flex-wrap gap-3 mb-5">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B9DAF]" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Ürün ara..." className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-[#D6E3F0] rounded-xl text-[#0D2137] placeholder-[#8B9DAF] focus:outline-none focus:border-[#1A73E8] focus:ring-2 focus:ring-[#1A73E8]/10" />
+      <AdminFilterBar>
+        <div className="relative flex-1 min-w-0 sm:min-w-[220px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-aq-muted pointer-events-none" />
+          <AdminInput
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Ürün ara..."
+            className="pl-9"
+          />
         </div>
-        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="px-3 py-2 text-sm bg-white border border-[#D6E3F0] rounded-xl text-[#0D2137] focus:outline-none focus:border-[#1A73E8] focus:ring-2 focus:ring-[#1A73E8]/10 appearance-none cursor-pointer min-w-[140px]">
+        <AdminSelect
+          value={catFilter}
+          onChange={(e) => setCatFilter(e.target.value)}
+          className="sm:w-[180px]"
+        >
           <option value="all">Tüm Kategoriler</option>
-          {cats.filter(c => c !== 'all').map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-      </div>
+          {cats
+            .filter((c) => c !== 'all')
+            .map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+        </AdminSelect>
+      </AdminFilterBar>
 
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead><tr className="bg-[#F8FBFF]">
-              {['Ürün', 'Kategori', 'Fiyat', 'İndirimli', 'Stok', 'Durum', 'İşlemler'].map(h => (
-                <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-[#8B9DAF] uppercase tracking-wider whitespace-nowrap">{h}</th>
-              ))}
-            </tr></thead>
-            <tbody>
-              {filtered.map(p => (
-                <tr key={p.id} className="border-b border-[#F0F6FF] last:border-0 hover:bg-[#F8FBFF]/50 transition-colors">
-                  <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="w-10 h-10 bg-[#F0F6FF] rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"><img src={p.images?.[0] || '/images/products/placeholder.jpg'} alt={p.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }} /></div><span className="text-sm font-medium text-[#0D2137] line-clamp-1 max-w-[180px]">{p.name}</span></div></td>
-                  <td className="px-4 py-3 text-sm text-[#5A6B7B]">{p.category}</td>
-                  <td className="px-4 py-3 text-sm font-semibold text-[#0D2137]">{p.price.toLocaleString('tr-TR')}₺</td>
-                  <td className="px-4 py-3 text-sm text-[#E85454]">{p.oldPrice ? `${p.oldPrice.toLocaleString('tr-TR')}₺` : '-'}</td>
-                  <td className="px-4 py-3 text-sm text-[#0D2137]">{p.stock}</td>
-                  <td className="px-4 py-3"><StatusBadge status={p.stock <= 5 ? 'low' : 'active'} /></td>
-                  <td className="px-4 py-3"><div className="flex gap-1"><button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8]"><Pencil className="w-3.5 h-3.5" /></button><button onClick={() => remove(p.id)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-[#8B9DAF] hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button></div></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {loading ? (
+        <AdminLoading label="Ürünler yükleniyor..." />
+      ) : error ? (
+        <AdminCard padding={false}>
+          <AdminEmpty
+            icon={Package}
+            title={errorCode === 'network' ? 'Bağlantı hatası' : 'Ürünler yüklenemedi'}
+            message={error}
+            action={
+              <AdminButton onClick={() => void reload()}>
+                <RefreshCw className="w-4 h-4" /> Tekrar Dene
+              </AdminButton>
+            }
+          />
+        </AdminCard>
+      ) : isEmpty ? (
+        <AdminCard padding={false}>
+          <AdminEmpty
+            icon={Package}
+            title="Henüz ürün yok"
+            message="Veritabanında ürün kaydı bulunamadı. İlk ürünü ekleyerek başlayın."
+            action={
+              <Link to="/admin/urunler/ekle">
+                <AdminButton>
+                  <Plus className="w-4 h-4" /> Yeni Ürün Ekle
+                </AdminButton>
+              </Link>
+            }
+          />
+        </AdminCard>
+      ) : filtered.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty
+            icon={Package}
+            title="Ürün bulunamadı"
+            message="Arama veya kategori filtresine uygun ürün yok."
+          />
+        </AdminCard>
+      ) : (
+        <>
+          <AdminMobileCardList>
+            {filtered.map((p) => (
+              <AdminCard key={p.id} className="!p-4">
+                <div className="flex gap-3">
+                  <div className="w-16 h-16 rounded-xl bg-aq-ice overflow-hidden flex-shrink-0">
+                    <img
+                      src={p.images?.[0] || '/images/products/placeholder.jpg'}
+                      alt={p.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg';
+                      }}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-aq-text line-clamp-2">{p.name}</p>
+                    <p className="text-[11px] text-aq-muted mt-0.5">{p.category}</p>
+                    <div className="flex items-center justify-between mt-2 gap-2">
+                      <p className="text-sm font-bold text-aq-text">{p.price.toLocaleString('tr-TR')}₺</p>
+                      <StatusBadge status={p.isActive ? (p.stock <= 5 ? 'low' : 'active') : 'inactive'} />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-aq-border/50 gap-2">
+                  <p className="text-xs text-aq-muted">Stok: {p.stock}</p>
+                  <div className="flex items-center gap-2">
+                    <Link to={`/admin/urunler/${p.id}`}>
+                      <AdminButton variant="secondary" className="!px-3 !py-2">
+                        <Pencil className="w-3.5 h-3.5" /> Düzenle
+                      </AdminButton>
+                    </Link>
+                    <AdminButton
+                      variant="secondary"
+                      className="!px-3 !py-2 !text-red-500 hover:!bg-red-50"
+                      onClick={() => setPendingDelete({ id: p.id, name: p.name })}
+                      aria-label="Ürünü sil"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Sil
+                    </AdminButton>
+                  </div>
+                </div>
+              </AdminCard>
+            ))}
+          </AdminMobileCardList>
+
+          <AdminDesktopOnly>
+            <AdminTableWrap stickyFirst>
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-aq-ice">
+                    {['Ürün', 'Kategori', 'Fiyat', 'İndirimli', 'Stok', 'Durum', 'İşlemler'].map((h) => (
+                      <th
+                        key={h}
+                        className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase tracking-wider whitespace-nowrap"
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((p) => (
+                    <tr key={p.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 bg-aq-ice rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <img
+                              src={p.images?.[0] || '/images/products/placeholder.jpg'}
+                              alt={p.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg';
+                              }}
+                            />
+                          </div>
+                          <span className="text-sm font-medium text-aq-text line-clamp-1 max-w-[220px]">{p.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-aq-muted">{p.category}</td>
+                      <td className="px-4 py-3 text-sm font-semibold text-aq-text whitespace-nowrap">
+                        {p.price.toLocaleString('tr-TR')}₺
+                      </td>
+                      <td className="px-4 py-3 text-sm text-[#E85454] whitespace-nowrap">
+                        {p.oldPrice ? `${p.oldPrice.toLocaleString('tr-TR')}₺` : '-'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-aq-text">{p.stock}</td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={p.isActive ? (p.stock <= 5 ? 'low' : 'active') : 'inactive'} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <Link
+                            to={`/admin/urunler/${p.id}`}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue"
+                            aria-label="Ürünü düzenle"
+                            title="Düzenle"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => setPendingDelete({ id: p.id, name: p.name })}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500"
+                            aria-label="Ürünü sil"
+                            title="Sil"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {products.length > 0 && (
+                <div className="px-4 py-3 border-t border-aq-border/60 text-xs text-aq-muted">
+                  {filtered.length} / {products.length} ürün · {categories.length} kategori
+                </div>
+              )}
+            </AdminTableWrap>
+          </AdminDesktopOnly>
+        </>
+      )}
+
+      <ConfirmModal
+        open={!!pendingDelete}
+        title="Ürünü sil"
+        description={
+          pendingDelete
+            ? `“${pendingDelete.name}” kalıcı olarak silinecek. Sipariş geçmişindeki satırlar korunur; sepetlerden kaldırılır.`
+            : ''
+        }
+        confirmLabel={deleting ? 'Siliniyor…' : 'Evet, sil'}
+        cancelLabel="Vazgeç"
+        variant="danger"
+        onConfirm={() => {
+          if (!deleting) void confirmDelete();
+        }}
+        onCancel={() => {
+          if (!deleting) setPendingDelete(null);
+        }}
+      />
+
+      {deleting && (
+        <div className="fixed bottom-4 right-4 z-[80] flex items-center gap-2 rounded-xl bg-white border border-aq-border/60 shadow-sm px-3 py-2 text-xs text-aq-muted">
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-aq-blue" />
+          Ürün siliniyor…
         </div>
-        {filtered.length === 0 && <div className="text-center py-8 text-sm text-[#8B9DAF]">Ürün bulunamadı</div>}
-      </div>
-      </>
+      )}
+    </AdminPageShell>
   );
 }

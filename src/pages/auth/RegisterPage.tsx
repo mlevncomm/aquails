@@ -1,18 +1,36 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
-import { Droplets, User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router';
+import { User, Mail, Phone, Lock, Eye, EyeOff, ArrowUpRight, Check } from 'lucide-react';
 import { register } from '@/services/authService';
+import { trackReferralSignup } from '@/services/referralService';
 import { useToastStore } from '@/components/Toast';
+import { useAuthStore } from '@/stores/authStore';
+import { AuthBrand } from '@/layouts/AuthLayout';
+import { cn } from '@/lib/utils';
 
+const fieldBase =
+  'w-full rounded-2xl border bg-white/80 pl-11 pr-4 py-3 text-sm text-aq-text placeholder:text-aq-muted/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] transition-all focus:outline-none focus:border-aq-blue/50 focus:ring-4 focus:ring-aq-aqua/15';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const addToast = useToastStore(s => s.add);
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get('ref') || '';
+  const redirectTo = searchParams.get('redirect')
+    ? decodeURIComponent(searchParams.get('redirect')!)
+    : '/hesabim';
+  const addToast = useToastStore((s) => s.add);
+  const { isAuthenticated, isAdmin, hasHydrated } = useAuthStore();
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' });
   const [showPass, setShowPass] = useState(false);
   const [agree, setAgree] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (hasHydrated && isAuthenticated) {
+      navigate(isAdmin ? '/admin' : redirectTo.startsWith('/') ? redirectTo : '/hesabim', { replace: true });
+    }
+  }, [hasHydrated, isAuthenticated, isAdmin, navigate, redirectTo]);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -31,76 +49,180 @@ export default function RegisterPage() {
     if (!validate()) return;
     setLoading(true);
     const res = await register({ name: form.name, email: form.email, phone: form.phone, password: form.password });
-    setLoading(false);
     if (res.success) {
-      addToast('Kayıt başarılı! Hoş geldiniz.', 'success');
-      navigate('/hesabim', { replace: true });
+      if (res.requiresEmailConfirmation) {
+        addToast('Kayıt oluşturuldu. E-postanızdaki doğrulama bağlantısını açın.', 'success');
+        navigate('/giris', { replace: true });
+      } else {
+        if (refCode) await trackReferralSignup(refCode);
+        addToast('Kayıt başarılı! Hoş geldiniz.', 'success');
+        navigate(redirectTo.startsWith('/') ? redirectTo : '/hesabim', { replace: true });
+      }
     } else {
       addToast(res.error || 'Kayıt başarısız.', 'error');
     }
+    setLoading(false);
   };
 
-  const Input = ({ label, icon: Icon, type = 'text', field, placeholder }: { label: string; icon: React.ElementType; type?: string; field: string; placeholder: string }) => (
+  const renderInput = ({ label, icon: Icon, type = 'text', field, placeholder }: { label: string; icon: React.ElementType; type?: string; field: string; placeholder: string }) => (
     <div>
-      <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">{label}</label>
+      <label className="mb-1.5 block text-xs font-medium text-aq-muted">{label}</label>
       <div className="relative">
-        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B9DAF]" />
-        <input type={type} value={(form as Record<string, string>)[field]} onChange={e => { setForm({ ...form, [field]: e.target.value }); setErrors({ ...errors, [field]: '' }); }} placeholder={placeholder} className={`w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-[#1A73E8] focus:ring-2 focus:ring-[#1A73E8]/10 bg-[#F8FBFF] ${errors[field] ? 'border-red-300' : 'border-[#D6E3F0]'}`} />
+        <Icon className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-aq-muted" />
+        <input
+          type={type}
+          value={(form as Record<string, string>)[field]}
+          onChange={(e) => {
+            setForm({ ...form, [field]: e.target.value });
+            setErrors({ ...errors, [field]: '' });
+          }}
+          placeholder={placeholder}
+          className={cn(fieldBase, errors[field] ? 'border-red-300' : 'border-aq-border/70')}
+        />
       </div>
-      {errors[field] && <p className="text-[11px] text-red-500 mt-1">{errors[field]}</p>}
+      {errors[field] && <p className="mt-1 text-[11px] text-red-500">{errors[field]}</p>}
     </div>
   );
 
   return (
-    <div className="w-full max-w-[400px]">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <Droplets className="w-8 h-8 text-[#1A73E8]" />
-          <span className="text-2xl font-bold text-[#0D2137]">aquails</span>
-        </Link>
+    <div className="w-full">
+      <AuthBrand />
 
-        <div className="bg-white border border-[#E8F0FE] rounded-2xl p-7 shadow-sm">
-          <h1 className="text-xl font-bold text-[#0D2137] mb-1">Kayıt Ol</h1>
-          <p className="text-sm text-[#8B9DAF] mb-6">Yeni bir hesap oluşturun.</p>
+      <div className="relative overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/75 p-7 sm:p-8 shadow-[0_30px_80px_-40px_rgba(6,38,61,0.45)] backdrop-blur-xl">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-aq-aqua/15 blur-3xl" />
+        <div className="relative">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-aq-blue/70">Hesap</p>
+          <h1 className="mt-2 font-[Poppins,ui-sans-serif,sans-serif] text-2xl font-semibold tracking-tight text-aq-deep">
+            Kayıt Ol
+          </h1>
+          <p className="mt-2 text-sm text-aq-muted leading-relaxed">
+            Yeni bir Aquails hesabı oluşturun.
+            {refCode ? <span className="mt-1 block text-aq-blue">Davet kodu: {refCode}</span> : null}
+          </p>
 
-          <form onSubmit={handleSubmit} className="space-y-3.5">
-            <Input label="Ad Soyad" icon={User} field="name" placeholder="Adınız Soyadınız" />
-            <Input label="E-posta" icon={Mail} type="email" field="email" placeholder="ornek@email.com" />
-            <Input label="Telefon" icon={Phone} type="tel" field="phone" placeholder="05XX XXX XX XX" />
+          <form onSubmit={handleSubmit} className="mt-6 space-y-3.5">
+            {renderInput({ label: 'Ad Soyad', icon: User, field: 'name', placeholder: 'Adınız Soyadınız' })}
+            {renderInput({ label: 'E-posta', icon: Mail, type: 'email', field: 'email', placeholder: 'ornek@email.com' })}
+            {renderInput({ label: 'Telefon', icon: Phone, type: 'tel', field: 'phone', placeholder: '05XX XXX XX XX' })}
 
             <div>
-              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Şifre</label>
+              <label className="mb-1.5 block text-xs font-medium text-aq-muted">Şifre</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B9DAF]" />
-                <input type={showPass ? 'text' : 'password'} value={form.password} onChange={e => { setForm({ ...form, password: e.target.value }); setErrors({ ...errors, password: '' }); }} placeholder="En az 6 karakter" className={`w-full pl-10 pr-10 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-[#1A73E8] focus:ring-2 focus:ring-[#1A73E8]/10 bg-[#F8FBFF] ${errors.password ? 'border-red-300' : 'border-[#D6E3F0]'}`} />
-                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8B9DAF]">{showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+                <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-aq-muted" />
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={(e) => {
+                    setForm({ ...form, password: e.target.value });
+                    setErrors({ ...errors, password: '' });
+                  }}
+                  placeholder="En az 6 karakter"
+                  className={cn(fieldBase, 'pr-11', errors.password ? 'border-red-300' : 'border-aq-border/70')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-aq-muted"
+                >
+                  {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
-              {errors.password && <p className="text-[11px] text-red-500 mt-1">{errors.password}</p>}
+              {errors.password && <p className="mt-1 text-[11px] text-red-500">{errors.password}</p>}
             </div>
 
             <div>
-              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Şifre Tekrar</label>
+              <label className="mb-1.5 block text-xs font-medium text-aq-muted">Şifre Tekrar</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B9DAF]" />
-                <input type={showPass ? 'text' : 'password'} value={form.confirm} onChange={e => { setForm({ ...form, confirm: e.target.value }); setErrors({ ...errors, confirm: '' }); }} placeholder="Şifrenizi tekrar girin" className={`w-full pl-10 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:border-[#1A73E8] focus:ring-2 focus:ring-[#1A73E8]/10 bg-[#F8FBFF] ${errors.confirm ? 'border-red-300' : 'border-[#D6E3F0]'}`} />
+                <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-aq-muted" />
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  value={form.confirm}
+                  onChange={(e) => {
+                    setForm({ ...form, confirm: e.target.value });
+                    setErrors({ ...errors, confirm: '' });
+                  }}
+                  placeholder="Şifrenizi tekrar girin"
+                  className={cn(fieldBase, errors.confirm ? 'border-red-300' : 'border-aq-border/70')}
+                />
               </div>
-              {errors.confirm && <p className="text-[11px] text-red-500 mt-1">{errors.confirm}</p>}
+              {errors.confirm && <p className="mt-1 text-[11px] text-red-500">{errors.confirm}</p>}
             </div>
 
-            <label className="flex items-start gap-2 text-xs text-[#5A6B7B] cursor-pointer pt-1">
-              <input type="checkbox" checked={agree} onChange={e => { setAgree(e.target.checked); setErrors({ ...errors, agree: '' }); }} className="w-4 h-4 mt-0.5 accent-[#1A73E8] rounded" />
-              <span>KVKK ve üyelik sözleşmesini okudum, kabul ediyorum.</span>
-            </label>
-            {errors.agree && <p className="text-[11px] text-red-500 -mt-2">{errors.agree}</p>}
+            <div
+              className={cn(
+                'rounded-2xl border p-3.5 transition-all',
+                agree
+                  ? 'border-aq-blue/35 bg-gradient-to-br from-aq-sky/50 to-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]'
+                  : 'border-aq-border/70 bg-white/55',
+                errors.agree && 'border-red-300 bg-red-50/40',
+              )}
+            >
+              <label className="flex cursor-pointer items-start gap-3">
+                <span className="relative mt-0.5 inline-flex shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={agree}
+                    onChange={(e) => {
+                      setAgree(e.target.checked);
+                      setErrors({ ...errors, agree: '' });
+                    }}
+                    className="peer sr-only"
+                  />
+                  <span
+                    className={cn(
+                      'flex h-5 w-5 items-center justify-center rounded-md border transition-all',
+                      'border-aq-border/80 bg-white shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-aq-aqua/40',
+                      agree && 'border-aq-blue bg-gradient-to-br from-aq-blue to-[#0d6fba] text-white shadow-[0_6px_14px_-6px_rgba(18,134,216,0.8)]',
+                    )}
+                    aria-hidden
+                  >
+                    {agree ? <Check className="h-3 w-3 stroke-[3]" /> : null}
+                  </span>
+                </span>
+                <span className="text-xs leading-relaxed text-aq-muted">
+                  <Link
+                    to="/kvkk"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-semibold text-aq-blue underline-offset-2 transition-colors hover:text-aq-deep hover:underline"
+                  >
+                    KVKK
+                  </Link>
+                  {' '}aydınlatma metnini ve{' '}
+                  <Link
+                    to="/uyelik-sozlesmesi"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-semibold text-aq-blue underline-offset-2 transition-colors hover:text-aq-deep hover:underline"
+                  >
+                    üyelik sözleşmesini
+                  </Link>
+                  {' '}okudum, kabul ediyorum.
+                </span>
+              </label>
+            </div>
+            {errors.agree && <p className="-mt-1 text-[11px] text-red-500">{errors.agree}</p>}
 
-            <button type="submit" disabled={loading} className="w-full bg-[#1A73E8] text-white py-2.5 rounded-full text-sm font-semibold hover:bg-[#1557B0] hover:shadow-md transition-all disabled:opacity-60">
+            <button
+              type="submit"
+              disabled={loading}
+              className="group mt-1 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-aq-blue to-[#0d6fba] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(18,134,216,0.75)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            >
               {loading ? 'Kaydediliyor...' : 'Kayıt Ol'}
+              {!loading && <ArrowUpRight className="h-4 w-4" />}
             </button>
           </form>
 
-          <p className="text-center text-xs text-[#8B9DAF] mt-5">
-            Zaten hesabınız var mı? <Link to="/giris" className="text-[#1A73E8] font-semibold hover:underline">Giriş Yap</Link>
+          <p className="mt-6 text-center text-xs text-aq-muted">
+            Zaten hesabınız var mı?{' '}
+            <Link to="/giris" className="font-semibold text-aq-blue hover:text-aq-deep">
+              Giriş Yap
+            </Link>
           </p>
         </div>
       </div>
+    </div>
   );
 }

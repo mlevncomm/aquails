@@ -1,74 +1,236 @@
-import { useState } from 'react';
-import { Globe, Phone, Mail, MapPin, Truck, CreditCard, Image, Save, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Globe, Phone, Truck, Save, Loader2, Receipt } from 'lucide-react';
+import { getAdminSiteSettings, saveSiteSettings, type SiteSettings } from '@/services/settingsService';
+import { getTaxConfig, saveTaxConfig, type TaxConfig } from '@/services/shippingService';
+import { useToastStore } from '@/components/Toast';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminCard,
+  AdminInput,
+  AdminLabel,
+  AdminButton,
+  AdminLoading,
+} from '@/components/admin/admin-ui';
 
-export default function AdminSettingsPage() {
-  const [saved, setSaved] = useState(false);
-  const [settings, setSettings] = useState({
-    siteName: 'Aquails', phone: '0850 123 45 67', whatsapp: '0532 123 45 67', email: 'info@aquails.com.tr',
-    address: 'Teknopark İstanbul, Pendik/İstanbul',
-    facebook: 'https://facebook.com/aquails', instagram: 'https://instagram.com/aquails',
-    twitter: 'https://twitter.com/aquails', youtube: 'https://youtube.com/aquails',
-    freeShippingLimit: '1500', currency: 'TRY', taxRate: '20',
-  });
+function Section({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
+  return (
+    <AdminCard className="mb-6">
+      <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
+        <Icon className="w-4 h-4 text-aq-blue" />{title}
+      </h3>
+      {children}
+    </AdminCard>
+  );
+}
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+function TaxSection() {
+  const addToast = useToastStore((s) => s.add);
+  const [tax, setTax] = useState<TaxConfig | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    void getTaxConfig().then(setTax);
+  }, []);
+
+  const save = async () => {
+    if (!tax) return;
+    setSaving(true);
+    const res = await saveTaxConfig({ ...tax, priceIncludesVat: false });
+    setSaving(false);
+    addToast(res.success ? 'KDV ayarları kaydedildi.' : (res.error ?? 'Hata'), res.success ? 'success' : 'error');
   };
 
-  const Section = ({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) => (
-    <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6 mb-5">
-      <h3 className="text-sm font-semibold text-[#0D2137] mb-4 flex items-center gap-2"><Icon className="w-4 h-4 text-[#1A73E8]" />{title}</h3>
-      {children}
-    </div>
-  );
+  if (!tax) return null;
 
   return (
-      <>      <h2 className="text-lg font-semibold text-[#0D2137] mb-5">Site Ayarları</h2>
+    <AdminCard className="mb-6">
+      <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
+        <Receipt className="w-4 h-4 text-aq-blue" />KDV / Vergi
+      </h3>
 
-      {saved && <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-4 py-3 rounded-xl text-sm font-medium mb-5"><CheckCircle className="w-4 h-4" />Ayarlar kaydedildi.</div>}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4 max-w-2xl p-3 rounded-xl bg-aq-ice border border-aq-border/50">
+        <div>
+          <p className="text-sm font-medium text-aq-text">KDV uygula</p>
+          <p className="text-xs text-aq-muted mt-0.5">
+            {tax.enabled
+              ? 'Vitrin, sepet ve ödeme tutarlarına KDV eklenir.'
+              : 'KDV pasif — müşteri net fiyatı görür ve öder.'}
+          </p>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-aq-muted cursor-pointer shrink-0">
+          <input
+            type="checkbox"
+            checked={tax.enabled}
+            onChange={(e) => setTax({ ...tax, enabled: e.target.checked })}
+            className="w-4 h-4 accent-aq-deep"
+          />
+          {tax.enabled ? 'Aktif' : 'Pasif'}
+        </label>
+      </div>
 
-      <form onSubmit={handleSave}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl ${!tax.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div>
+          <AdminLabel>Varsayılan KDV Oranı (%)</AdminLabel>
+          <AdminInput
+            type="number"
+            min={0}
+            max={100}
+            value={tax.rate}
+            onChange={(e) => setTax({ ...tax, rate: Number(e.target.value) })}
+            disabled={!tax.enabled}
+          />
+        </div>
+        <label className="flex items-center gap-2 text-sm text-aq-muted mt-6 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={tax.displayInCheckout}
+            onChange={(e) => setTax({ ...tax, displayInCheckout: e.target.checked })}
+            disabled={!tax.enabled}
+            className="w-4 h-4 accent-aq-deep"
+          />
+          Checkout&apos;ta KDV göster
+        </label>
+      </div>
+      <div className="mt-4 p-4 bg-aq-sky border border-aq-aqua/30 rounded-xl text-xs text-aq-muted leading-relaxed max-w-3xl space-y-2">
+        <p>
+          <strong>Fiyat girişi KDV hariçtir.</strong> Admin panelinde ürün fiyatını 100₺ ve KDV oranını %20 girerseniz,
+          müşteri sepetinde ve vitrinde <strong>120₺</strong> görür.
+        </p>
+        <p>
+          Her ürünün kendi KDV oranı olabilir (ürün düzenleme ekranı). Oran girilmezse yukarıdaki varsayılan kullanılır.
+          Kargo ve kapıda ödeme ücretleri KDV hariç girilir; checkout toplamına KDV eklenir.
+        </p>
+        <p>
+          <strong>KDV pasif</strong> edildiğinde ürün, kargo ve kapıda ödeme tutarlarına vergi eklenmez;
+          kayıtlı oran korunur, tekrar aktif edilince aynı oranla devam eder.
+        </p>
+      </div>
+      <AdminButton type="button" className="mt-4" disabled={saving} onClick={() => void save()}>
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+        KDV Kaydet
+      </AdminButton>
+    </AdminCard>
+  );
+}
+
+export default function AdminSettingsPage() {
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const addToast = useToastStore((s) => s.add);
+
+  useEffect(() => {
+    void getAdminSiteSettings().then((result) => {
+      if (!result.ok) {
+        setLoadError(result.error);
+        return;
+      }
+      setSettings(result.data);
+    });
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!settings || saving) return;
+    setSaving(true);
+    const res = await saveSiteSettings(settings);
+    setSaving(false);
+    if (!res.success) {
+      addToast(res.error ?? 'Kayıt başarısız.', 'error');
+      return;
+    }
+    addToast('Ayarlar kaydedildi.', 'success');
+  };
+
+  if (loadError) {
+    return (
+      <AdminPageShell>
+        <AdminPageHeader title="Site Ayarları" description={loadError} />
+        <AdminButton type="button" onClick={() => window.location.reload()}>Tekrar Dene</AdminButton>
+      </AdminPageShell>
+    );
+  }
+
+  if (!settings) {
+    return (
+      <AdminPageShell>
+        <AdminLoading variant="spinner" label="Ayarlar yükleniyor..." />
+      </AdminPageShell>
+    );
+  }
+
+  return (
+    <AdminPageShell>
+      <AdminPageHeader title="Site Ayarları" description="İletişim ve genel site bilgileri (Header/Footer/Checkout ile aynı şema)" />
+
+      <form onSubmit={(e) => void handleSave(e)}>
         <Section title="Genel" icon={Globe}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block">Site Adı</label><input value={settings.siteName} onChange={e => setSettings({ ...settings, siteName: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block">Logo</label><div className="border-2 border-dashed border-[#D6E3F0] rounded-xl p-4 text-center hover:border-[#1A73E8] cursor-pointer transition-colors"><Image className="w-5 h-5 text-[#D6E3F0] mx-auto" /><p className="text-xs text-[#8B9DAF] mt-1">Logo yükleyin</p></div></div>
+            <div>
+              <AdminLabel>Site Adı</AdminLabel>
+              <AdminInput value={settings.siteName} onChange={(e) => setSettings({ ...settings, siteName: e.target.value })} />
+            </div>
+            <div>
+              <AdminLabel>Site Açıklaması</AdminLabel>
+              <AdminInput value={settings.siteDescription} onChange={(e) => setSettings({ ...settings, siteDescription: e.target.value })} />
+            </div>
           </div>
         </Section>
 
         <Section title="İletişim" icon={Phone}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block flex items-center gap-1"><Phone className="w-3 h-3" />Telefon</label><input value={settings.phone} onChange={e => setSettings({ ...settings, phone: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block">WhatsApp</label><input value={settings.whatsapp} onChange={e => setSettings({ ...settings, whatsapp: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block flex items-center gap-1"><Mail className="w-3 h-3" />E-posta</label><input value={settings.email} onChange={e => setSettings({ ...settings, email: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block flex items-center gap-1"><MapPin className="w-3 h-3" />Adres</label><input value={settings.address} onChange={e => setSettings({ ...settings, address: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
+            <div>
+              <AdminLabel>Telefon</AdminLabel>
+              <AdminInput value={settings.phone} onChange={(e) => setSettings({ ...settings, phone: e.target.value })} />
+            </div>
+            <div>
+              <AdminLabel>WhatsApp</AdminLabel>
+              <AdminInput value={settings.whatsapp} onChange={(e) => setSettings({ ...settings, whatsapp: e.target.value })} />
+            </div>
+            <div>
+              <AdminLabel>E-posta</AdminLabel>
+              <AdminInput value={settings.email} onChange={(e) => setSettings({ ...settings, email: e.target.value })} />
+            </div>
+            <div>
+              <AdminLabel>Adres</AdminLabel>
+              <AdminInput value={settings.address} onChange={(e) => setSettings({ ...settings, address: e.target.value })} />
+            </div>
           </div>
         </Section>
 
         <Section title="Sosyal Medya" icon={Globe}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {(['facebook', 'instagram', 'twitter', 'youtube'] as const).map(social => (
-              <div key={social}>
-                <label className="text-xs text-[#8B9DAF] mb-1 block capitalize">{social}</label>
-                <input value={settings[social]} onChange={e => setSettings({ ...settings, [social]: e.target.value })} placeholder={`https://${social}.com/...`} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" />
-              </div>
-            ))}
+            <div>
+              <AdminLabel>Instagram</AdminLabel>
+              <AdminInput value={settings.instagram} onChange={(e) => setSettings({ ...settings, instagram: e.target.value })} />
+            </div>
+            <div>
+              <AdminLabel>Facebook</AdminLabel>
+              <AdminInput value={settings.facebook} onChange={(e) => setSettings({ ...settings, facebook: e.target.value })} />
+            </div>
           </div>
         </Section>
 
-        <Section title="Kargo & Ödeme" icon={Truck}>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block flex items-center gap-1"><Truck className="w-3 h-3" />Ücretsiz Kargo Limiti (₺)</label><input value={settings.freeShippingLimit} onChange={e => setSettings({ ...settings, freeShippingLimit: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block flex items-center gap-1"><CreditCard className="w-3 h-3" />Para Birimi</label><select value={settings.currency} onChange={e => setSettings({ ...settings, currency: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl bg-white"><option value="TRY">Türk Lirası (₺)</option><option value="USD">Dolar ($)</option><option value="EUR">Euro (€)</option></select></div>
-            <div><label className="text-xs text-[#8B9DAF] mb-1 block">KDV Oranı (%)</label><input value={settings.taxRate} onChange={e => setSettings({ ...settings, taxRate: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-xl focus:outline-none focus:border-[#1A73E8]" /></div>
+        <Section title="Kargo" icon={Truck}>
+          <div className="max-w-xs">
+            <AdminLabel>Ücretsiz Kargo Limiti (₺)</AdminLabel>
+            <AdminInput
+              type="number"
+              value={settings.freeShippingLimit}
+              onChange={(e) => setSettings({ ...settings, freeShippingLimit: Number(e.target.value) })}
+            />
+            <p className="text-xs text-aq-muted mt-1">Detaylı kargo yöntemleri için Kargo Modülü sayfasını kullanın.</p>
           </div>
         </Section>
 
-        <button type="submit" className="flex items-center gap-2 bg-[#1A73E8] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#1557B0] transition-all">
-          <Save className="w-4 h-4" /> Ayarları Kaydet
-        </button>
+        <TaxSection />
+
+        <AdminButton type="submit" disabled={saving}>
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          Ayarları Kaydet
+        </AdminButton>
       </form>
-      </>
+    </AdminPageShell>
   );
 }

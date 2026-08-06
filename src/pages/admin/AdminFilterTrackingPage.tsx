@@ -1,42 +1,71 @@
-import { Bell, BellOff } from 'lucide-react';
-import { filterStatuses } from '@/data/orders';
+import { useState, useEffect } from 'react';
+import { Filter } from 'lucide-react';
+import { getServiceRequests } from '@/services/serviceRequestService';
+import type { AdminServiceRequest } from '@/services/serviceRequestService';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminTableWrap,
+  AdminEmpty,
+  AdminLoading,
+  AdminBadge,
+  AdminCard,
+} from '@/components/admin/admin-ui';
 
 export default function AdminFilterTrackingPage() {
+  const [requests, setRequests] = useState<AdminServiceRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    void getServiceRequests().then((all) => {
+      setRequests(all.filter((r) => r.type === 'Filtre Değişimi'));
+      setLoading(false);
+    });
+  }, []);
+
   return (
-      <>      <h2 className="text-lg font-semibold text-[#0D2137] mb-5">Filtre Değişim Takipleri</h2>
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Filtre Değişim Takipleri"
+        description="Salt okunur liste — filtre değişim servis talepleri"
+      />
+      <AdminCard className="mb-4 border border-amber-200 bg-amber-50">
+        <p className="text-sm text-amber-800">Bu ekran salt okunurdur; durum güncellemesi Servis Talepleri sayfasından yapılır.</p>
+      </AdminCard>
+
+      {loading ? (
+        <AdminLoading />
+      ) : requests.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty icon={Filter} message="Filtre değişim talebi bulunamadı" />
+        </AdminCard>
+      ) : (
+        <AdminTableWrap stickyFirst>
           <table className="w-full">
-            <thead><tr className="bg-[#F8FBFF]">{['Cihaz', 'Filtre', 'Son Değişim', 'Sonraki', 'Kalan', 'Hatırlatma', 'İşlem'].map(h => <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-[#8B9DAF] uppercase whitespace-nowrap">{h}</th>)}</tr></thead>
+            <thead>
+              <tr className="bg-aq-ice border-b border-aq-border/60">
+                {['Müşteri', 'Cihaz', 'Adres', 'Tarih', 'Durum', 'Teknisyen'].map((h) => (
+                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
             <tbody>
-              {filterStatuses.map((f, i) => (
-                <tr key={i} className="border-b border-[#F0F6FF] last:border-0 hover:bg-[#F8FBFF]/50">
-                  <td className="px-4 py-3 text-sm font-medium text-[#0D2137]">{f.deviceName}</td>
-                  <td className="px-4 py-3 text-sm text-[#5A6B7B]">{f.filterName}</td>
-                  <td className="px-4 py-3 text-sm text-[#5A6B7B]">15 Nis 2025</td>
-                  <td className="px-4 py-3 text-sm text-[#5A6B7B]">15 Eki 2025</td>
+              {requests.map((f) => (
+                <tr key={f.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
+                  <td className="px-4 py-3 text-sm font-medium text-aq-text">{f.customer}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{f.device}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted max-w-[200px] truncate">{f.address}</td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{f.date}</td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-1.5 bg-[#E8F0FE] rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full ${f.percentRemaining > 80 ? 'bg-emerald-400' : f.percentRemaining > 30 ? 'bg-amber-400' : 'bg-red-400'}`} style={{ width: `${f.percentRemaining}%` }} />
-                      </div>
-                      <span className={`text-xs font-semibold ${f.daysRemaining <= 30 ? 'text-red-500' : 'text-[#0D2137]'}`}>{f.daysRemaining} gün</span>
-                    </div>
+                    <AdminBadge tone="info">{f.status}</AdminBadge>
                   </td>
-                  <td className="px-4 py-3">
-                    <button className={`w-8 h-8 flex items-center justify-center rounded-lg ${f.daysRemaining <= 30 ? 'bg-[#EBF3FF] text-[#1A73E8]' : 'bg-gray-100 text-gray-400'}`}>
-                      {f.daysRemaining <= 30 ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
-                    </button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button className="text-xs bg-[#1A73E8] text-white px-3 py-1.5 rounded-lg hover:bg-[#1557B0] transition-all">Hatırlatma Gönder</button>
-                  </td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{f.tech || '—'}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-      </>
+        </AdminTableWrap>
+      )}
+    </AdminPageShell>
   );
 }

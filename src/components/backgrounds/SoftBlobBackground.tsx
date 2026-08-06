@@ -7,7 +7,7 @@ interface SoftBlobBackgroundProps {
   showGrid?: boolean;
 }
 
-export function SoftBlobBackground({ children, className, blobColor = '#1A73E8', showGrid = false }: SoftBlobBackgroundProps) {
+export function SoftBlobBackground({ children, className, blobColor = '#06263D', showGrid = false }: SoftBlobBackgroundProps) {
   return (
     <div className={cn('relative overflow-hidden', className)}>
       {/* Top right blob */}
@@ -18,7 +18,7 @@ export function SoftBlobBackground({ children, className, blobColor = '#1A73E8',
       {/* Bottom left blob */}
       <div
         className="absolute -bottom-[15%] -left-[10%] w-[400px] h-[400px] rounded-full blur-3xl pointer-events-none opacity-[0.05]"
-        style={{ backgroundColor: '#4FC3F7' }}
+        style={{ backgroundColor: '#20D3F2' }}
       />
       {/* Center subtle blob */}
       <div

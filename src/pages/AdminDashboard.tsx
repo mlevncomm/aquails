@@ -1,300 +1,506 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Banknote, ShoppingBag, Clock, Users, AlertTriangle, Wrench,
-  TrendingUp, Eye, Package, MessageSquare, Star, Bell, RefreshCw,
-  Zap, ArrowRight, Calendar
+  Package, MessageSquare, Star, Bell, RefreshCw, Zap,
+  ArrowRight, Eye, TrendingUp, Loader2, ChevronRight,
 } from 'lucide-react';
-import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
-import { getAdminDashboard } from '@/services/customerService';
-import type { Product } from '@/types';
+import {
+  getDashboardStats,
+  getSalesChartDataRange,
+  getLowStockProducts,
+  getRecentOrders,
+  getCatalogCategoryBreakdown,
+  type CategoryBreakdown,
+} from '@/services/adminStatsService';
+import { orderStatusToTr } from '@/lib/orderStatus';
+import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
-import { StatusBadge } from '@/components/shared/StatusBadge';
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell,
+} from 'recharts';
+import { AdminCard, AdminTableWrap, AdminEmpty, AdminPageShell, AdminPageHeader, AdminButton, AdminOrderStatusBadge } from '@/components/admin/admin-ui';
 
-interface DashboardOrder {
-  id: string;
-  orderNumber: string;
-  customerName: string;
-  total: number;
-  status: string;
-  createdAt: string;
-  itemCount: number;
+const PIE_COLORS = ['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b', '#f43f5e', '#06b6d4', '#6366f1'];
+
+function formatCurrency(n: number) {
+  if (n >= 1_000_000) return `₺${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `₺${(n / 1_000).toFixed(0)}K`;
+  return `₺${n.toLocaleString('tr-TR')}`;
 }
 
-interface DashboardData {
-  totalOrders: number;
-  pendingOrders: number;
-  totalRevenue: number;
-  newCustomers: number;
-  lowStockCount: number;
-  recentOrders: DashboardOrder[];
-  lowStockProducts: Product[];
+function KpiSkeleton() {
+  return (
+    <div className="animate-pulse bg-white rounded-2xl border border-aq-border/60 p-6 h-[132px]">
+      <div className="w-10 h-10 bg-aq-ice rounded-xl mb-4" />
+      <div className="h-7 w-24 bg-aq-ice rounded-lg mb-2" />
+      <div className="h-4 w-16 bg-aq-ice rounded" />
+    </div>
+  );
 }
 
-function formatCurrency(value: number) {
-  return `₺${value.toLocaleString('tr-TR')}`;
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+type ChartRange = 'week' | 'month' | 'year';
 
 export default function AdminDashboard() {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const user = useAuthStore((s) => s.user);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [chartRange, setChartRange] = useState<ChartRange>('month');
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof getDashboardStats>> | null>(null);
+  const [chartData, setChartData] = useState<Awaited<ReturnType<typeof getSalesChartDataRange>>>([]);
+  const [lowStock, setLowStock] = useState<Awaited<ReturnType<typeof getLowStockProducts>>>([]);
+  const [recentOrders, setRecentOrders] = useState<Awaited<ReturnType<typeof getRecentOrders>>>([]);
+  const [categories, setCategories] = useState<CategoryBreakdown[]>([]);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    getAdminDashboard()
-      .then((result) => {
-        if (!cancelled) setData(result as unknown as DashboardData);
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Veriler yüklenemedi.');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
+    void Promise.all([
+      getDashboardStats(),
+      getLowStockProducts(),
+      getRecentOrders(6),
+      getCatalogCategoryBreakdown(),
+    ]).then(([s, stock, orders, cats]) => {
+      setStats(s);
+      setLowStock(stock);
+      setRecentOrders(orders);
+      setCategories(cats);
+      setLoading(false);
+    });
   }, []);
 
-  if (loading) {
-    return <div className="text-center py-12 text-aqua-text-muted">Yükleniyor...</div>;
-  }
+  useEffect(() => {
+    void getSalesChartDataRange(chartRange).then(setChartData);
+  }, [chartRange]);
 
-  if (error || !data) {
-    return <div className="text-center py-12 text-aqua-danger">{error ?? 'Veriler yüklenemedi.'}</div>;
-  }
+  const todayLabel = new Date().toLocaleDateString('tr-TR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 
-  const stats = [
-    { icon: Banknote, label: 'Toplam ciro', value: formatCurrency(data.totalRevenue), color: 'bg-[#EBF3FF] text-[#1A73E8]' },
-    { icon: ShoppingBag, label: 'Toplam sipariş', value: data.totalOrders.toLocaleString('tr-TR'), color: 'bg-[#F0FDF4] text-[#00C9A7]' },
-    { icon: Clock, label: 'İşlem bekliyor', value: String(data.pendingOrders), color: 'bg-[#FFFBEB] text-[#F5A623]' },
-    { icon: Users, label: 'Yeni müşteri (30 gün)', value: data.newCustomers.toLocaleString('tr-TR'), color: 'bg-[#F3E8FF] text-[#8B5CF6]' },
-    { icon: AlertTriangle, label: 'Düşük stok', value: String(data.lowStockCount), color: 'bg-[#FEF2F2] text-[#E85454]' },
-    { icon: Wrench, label: 'Son siparişler', value: String(data.recentOrders.length), color: 'bg-[#EBF3FF] text-[#1A73E8]' },
-  ];
+  const primaryKpis = stats
+    ? [
+        {
+          label: 'Bu Ay Ciro',
+          value: formatCurrency(stats.monthlyRevenue),
+          sub: `${stats.monthlyOrders} sipariş`,
+          icon: Banknote,
+          accent: 'from-aq-blue to-aq-navy',
+          bg: 'bg-aq-sky',
+          text: 'text-aq-blue',
+          href: '/admin/raporlar',
+        },
+        {
+          label: 'Bugünkü Ciro',
+          value: formatCurrency(stats.todayRevenue),
+          sub: 'Günlük toplam',
+          icon: TrendingUp,
+          accent: 'from-emerald-500 to-teal-600',
+          bg: 'bg-emerald-50',
+          text: 'text-emerald-700',
+          href: '/admin/raporlar',
+        },
+        {
+          label: 'Bekleyen Sipariş',
+          value: String(stats.pendingOrders),
+          sub: 'İşlem bekliyor',
+          icon: Clock,
+          accent: 'from-amber-500 to-orange-500',
+          bg: 'bg-amber-50',
+          text: 'text-amber-700',
+          href: '/admin/siparisler',
+        },
+        {
+          label: 'Toplam Müşteri',
+          value: stats.totalCustomers.toLocaleString('tr-TR'),
+          sub: stats.newCustomersToday > 0 ? `+${stats.newCustomersToday} bugün` : 'Kayıtlı müşteri',
+          icon: Users,
+          accent: 'from-violet-500 to-purple-600',
+          bg: 'bg-violet-50',
+          text: 'text-violet-700',
+          href: '/admin/musteriler',
+        },
+      ]
+    : [];
 
-  const operationCards = [
-    { icon: Package, label: 'Düşük Stok', value: data.lowStockCount, href: '/admin/stok', color: 'bg-red-50 text-red-500 border-red-200', iconBg: 'bg-red-100' },
-    { icon: ShoppingBag, label: 'Bekleyen Sipariş', value: data.pendingOrders, href: '/admin/siparisler', color: 'bg-sky-50 text-sky-600 border-sky-200', iconBg: 'bg-sky-100' },
-    { icon: Users, label: 'Yeni Müşteri', value: data.newCustomers, href: '/admin/musteriler', color: 'bg-blue-50 text-blue-600 border-blue-200', iconBg: 'bg-blue-100' },
-    { icon: Banknote, label: 'Toplam Ciro', value: formatCurrency(data.totalRevenue), href: '/admin/raporlar', color: 'bg-indigo-50 text-indigo-600 border-indigo-200', iconBg: 'bg-indigo-100' },
-    { icon: Bell, label: 'Stok Bildirimleri', value: data.lowStockCount, href: '/admin/stok-bildirimleri', color: 'bg-rose-50 text-rose-600 border-rose-200', iconBg: 'bg-rose-100' },
-    { icon: Wrench, label: 'Servis Takvimi', value: '—', href: '/admin/servis-takvimi', color: 'bg-emerald-50 text-emerald-600 border-emerald-200', iconBg: 'bg-emerald-100' },
-  ];
+  const operations = stats
+    ? [
+        { label: 'Bugünkü Kurulum', value: stats.todayInstallations, href: '/admin/servis-takvimi', icon: Wrench, urgent: stats.todayInstallations > 0 },
+        { label: 'Bekleyen Servis', value: stats.pendingService, href: '/admin/servis-talepleri', icon: Clock, urgent: stats.pendingService > 0 },
+        { label: 'Düşük Stok', value: stats.lowStockCount, href: '/admin/stok', icon: Package, urgent: stats.lowStockCount > 0 },
+        { label: 'Terk Edilmiş Sepet', value: stats.abandonedCarts, href: '/admin/terk-edilmis-sepetler', icon: ShoppingBag, urgent: stats.abandonedCarts > 0 },
+        { label: 'Okunmamış Soru', value: stats.unreadQuestions, href: '/admin/sorular', icon: MessageSquare, urgent: stats.unreadQuestions > 0 },
+        { label: 'Onay Bekleyen Yorum', value: stats.unreadReviews, href: '/admin/yorumlar', icon: Star, urgent: stats.unreadReviews > 0 },
+        { label: 'Kritik Uyarı', value: stats.criticalAlerts, href: '/admin/stok-bildirimleri', icon: Bell, urgent: stats.criticalAlerts > 0 },
+        { label: 'Bekleyen İade', value: stats.pendingReturns, href: '/admin/iade-degisim', icon: RefreshCw, urgent: stats.pendingReturns > 0 },
+        { label: 'Aktif Abonelik', value: stats.activeSubscriptions, href: '/admin/abonelikler', icon: Zap, urgent: false },
+      ]
+    : [];
 
-  const criticalStockAlerts = data.lowStockProducts.filter((p) => p.stock <= 3);
+  const attentionItems = useMemo(() => operations.filter((o) => o.urgent), [operations]);
+
+  const pieData = categories.map((c, i) => ({
+    name: c.name,
+    value: c.count,
+    color: PIE_COLORS[i % PIE_COLORS.length],
+  }));
+
+  const maxChartSales = Math.max(...chartData.map((d) => d.sales), 1);
+
+  const yFormatter = (v: number) => {
+    if (maxChartSales < 1000) return `₺${v}`;
+    if (maxChartSales < 1_000_000) return `₺${(v / 1000).toFixed(0)}K`;
+    return `${(v / 1_000_000).toFixed(1)}M`;
+  };
 
   return (
-      <>
-      <StaggerContainer className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6" staggerDelay={0.08}>
-        {stats.map((stat) => (
-          <StaggerItem key={stat.label}>
-            <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-              <div className="flex items-center justify-between">
-                <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center', stat.color.split(' ')[0])}>
-                  <stat.icon className={cn('w-5 h-5', stat.color.split(' ')[1])} />
-                </div>
-                <TrendingUp className="w-3 h-3 text-aqua-text-muted" />
-              </div>
-              <p className="text-xl font-bold text-aqua-secondary mt-3">{stat.value}</p>
-              <p className="text-xs text-aqua-text-muted mt-0.5">{stat.label}</p>
-            </div>
-          </StaggerItem>
-        ))}
-      </StaggerContainer>
+    <AdminPageShell className="space-y-8 pb-4">
+      <AdminPageHeader
+        title={`Hoş geldiniz${user?.name ? `, ${user.name.split(' ')[0]}` : ''}`}
+        description={`${todayLabel.charAt(0).toUpperCase() + todayLabel.slice(1)} · Mağazanızın güncel özetine göz atın.`}
+        action={
+          <>
+            <Link to="/admin/siparisler">
+              <AdminButton>
+                <ShoppingBag className="w-4 h-4" />
+                Siparişler
+              </AdminButton>
+            </Link>
+            <Link to="/admin/urunler">
+              <AdminButton variant="secondary">
+                <Package className="w-4 h-4" />
+                Ürünler
+              </AdminButton>
+            </Link>
+          </>
+        }
+      />
 
-      <ScrollReveal delay={0.2} className="mb-6">
-        <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-aqua-secondary flex items-center gap-2">
-              <Package className="w-5 h-5 text-aqua-primary" />
-              Operasyon Özeti
-            </h3>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-            {operationCards.map((card) => (
-              <Link
-                key={card.label}
-                to={card.href}
-                className={cn(
-                  'flex flex-col items-center text-center p-4 rounded-xl border transition-all hover:shadow-md hover:-translate-y-0.5',
-                  card.color
-                )}
-              >
-                <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center mb-2', card.iconBg)}>
-                  <card.icon className="w-5 h-5" />
+      {/* Primary KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6">
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)
+          : primaryKpis.map((kpi) => (
+            <Link
+              key={kpi.label}
+              to={kpi.href}
+              className="group relative bg-white rounded-2xl border border-aq-border/60 p-6 hover:border-aq-blue/25 transition-all overflow-hidden"
+            >
+              <div className={cn('absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r opacity-70', kpi.accent)} />
+              <div className="flex items-start justify-between">
+                <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center', kpi.bg)}>
+                  <kpi.icon className={cn('w-5 h-5', kpi.text)} />
                 </div>
-                <span className="text-lg font-bold">{card.value}</span>
-                <span className="text-[11px] font-medium opacity-80 mt-0.5">{card.label}</span>
-              </Link>
-            ))}
+                <ChevronRight className="w-4 h-4 text-aq-muted/60 group-hover:text-aq-muted group-hover:translate-x-0.5 transition-all" />
+              </div>
+              <p className="text-2xl font-bold text-aq-text mt-4 tracking-tight">{kpi.value}</p>
+              <p className="text-sm font-medium text-aq-muted mt-0.5">{kpi.label}</p>
+              <p className="text-xs text-aq-muted mt-1">{kpi.sub}</p>
+            </Link>
+          ))}
+      </div>
+
+      {/* Attention banner */}
+      {!loading && attentionItems.length > 0 && (
+        <AdminCard className="!p-0 overflow-hidden border-amber-200/60 bg-gradient-to-r from-amber-50/80 to-white">
+          <div className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex items-center gap-2 text-amber-800">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-semibold">{attentionItems.length} konu dikkat gerektiriyor</span>
+            </div>
+            <div className="flex flex-wrap gap-2 sm:ml-auto">
+              {attentionItems.slice(0, 4).map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-amber-200 text-xs font-medium text-amber-900 hover:bg-amber-50 transition-colors"
+                >
+                  {item.label}
+                  <span className="font-semibold">{item.value}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </AdminCard>
+      )}
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 lg:gap-6">
+        <AdminCard className="xl:col-span-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div>
+              <h2 className="text-base font-semibold text-aq-text">Satış Trendi</h2>
+              <p className="text-xs text-aq-muted mt-0.5">Dönemsel ciro grafiği</p>
+            </div>
+            <div className="flex bg-aq-ice rounded-xl p-1 self-start">
+              {([
+                ['week', 'Haftalık'],
+                ['month', 'Aylık'],
+                ['year', 'Yıllık'],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setChartRange(key)}
+                  className={cn(
+                    'px-3 py-1.5 text-xs font-medium rounded-lg transition-all',
+                    chartRange === key
+                      ? 'bg-white text-aq-blue shadow-sm'
+                      : 'text-aq-muted hover:text-aq-muted',
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {loading ? (
+            <div className="h-[280px] flex items-center justify-center text-aq-muted">
+              <Loader2 className="w-6 h-6 animate-spin" />
+            </div>
+          ) : chartData.every((d) => d.sales === 0) ? (
+            <div className="h-[280px] flex flex-col items-center justify-center text-center px-4">
+              <div className="w-14 h-14 rounded-2xl bg-aq-ice flex items-center justify-center mb-3">
+                <TrendingUp className="w-6 h-6 text-aq-muted/60" />
+              </div>
+              <p className="text-sm font-medium text-aq-muted">Henüz satış verisi yok</p>
+              <p className="text-xs text-aq-muted mt-1">İlk siparişler geldiğinde grafik burada görünecek.</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="dashSalesGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={yFormatter} width={48} />
+                <Tooltip
+                  formatter={(value: number) => [`₺${value.toLocaleString('tr-TR')}`, 'Ciro']}
+                  contentStyle={{
+                    backgroundColor: '#fff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  }}
+                />
+                <Area type="monotone" dataKey="sales" stroke="#0ea5e9" strokeWidth={2} fill="url(#dashSalesGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </AdminCard>
+
+        <AdminCard>
+          <h2 className="text-base font-semibold text-aq-text">Katalog Dağılımı</h2>
+          <p className="text-xs text-aq-muted mt-0.5 mb-5">Ürün sayısına göre kategoriler</p>
+          {loading ? (
+            <div className="h-[220px] flex items-center justify-center">
+              <Loader2 className="w-6 h-6 animate-spin text-aq-muted" />
+            </div>
+          ) : pieData.length === 0 ? (
+            <AdminEmpty message="Kategori verisi yok" />
+          ) : (
+            <>
+              <div className="relative">
+                <ResponsiveContainer width="100%" height={180}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={52}
+                      outerRadius={78}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {pieData.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-2xl font-bold text-aq-text">
+                    {pieData.reduce((s, c) => s + c.value, 0)}
+                  </span>
+                  <span className="text-[11px] text-aq-muted">ürün</span>
+                </div>
+              </div>
+              <div className="space-y-2 mt-2 max-h-[160px] overflow-y-auto pr-1">
+                {pieData.map((cat) => (
+                  <div key={cat.name} className="flex items-center justify-between text-xs gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                      <span className="text-aq-muted truncate">{cat.name}</span>
+                    </div>
+                    <span className="font-semibold text-aq-text flex-shrink-0">{cat.value}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </AdminCard>
+      </div>
+
+      {/* Operations grid */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-base font-semibold text-aq-text">Operasyon Özeti</h2>
+            <p className="text-xs text-aq-muted mt-0.5">Tüm metrikler — tıklayarak ilgili sayfaya gidin</p>
           </div>
         </div>
-      </ScrollReveal>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          {loading
+            ? Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="animate-pulse h-24 bg-white rounded-xl border border-aq-border/60" />
+            ))
+            : operations.map((op) => (
+              <Link
+                key={op.label}
+                to={op.href}
+                className={cn(
+                  'flex flex-col justify-between p-4 rounded-xl border bg-white transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-aq-blue/30 min-h-[96px] group',
+                  op.urgent ? 'border-amber-200 bg-amber-50/30' : 'border-aq-border/60',
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <op.icon className={cn('w-4 h-4 transition-colors', op.urgent ? 'text-amber-600' : 'text-aq-muted group-hover:text-aq-blue')} />
+                  {op.urgent && <span className="w-2 h-2 rounded-full bg-amber-500" />}
+                </div>
+                <div className="mt-3">
+                  <p className="text-xl font-semibold text-aq-text leading-none">{op.value}</p>
+                  <p className="text-[11px] text-aq-muted mt-1.5 leading-snug group-hover:text-aq-text transition-colors">{op.label}</p>
+                </div>
+              </Link>
+            ))}
+        </div>
+      </div>
 
-      <ScrollReveal delay={0.5} className="mb-6">
-        <div className="bg-white border border-aqua-border-light rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-aqua-bg">
-            <h3 className="text-base font-semibold text-aqua-secondary">Son Siparişler</h3>
-            <Link to="/admin/siparisler" className="text-[13px] text-aqua-primary hover:underline">Tümünü Gör</Link>
+      {/* Recent orders + low stock */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 lg:gap-6">
+        <AdminTableWrap className="xl:col-span-2">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-aq-border/60">
+            <div>
+              <h2 className="text-base font-semibold text-aq-text">Son Siparişler</h2>
+              <p className="text-xs text-aq-muted">En son gelen siparişler</p>
+            </div>
+            <Link to="/admin/siparisler" className="text-xs font-medium text-aq-blue hover:text-aq-navy flex items-center gap-1">
+              Tümünü gör <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <div className="overflow-x-auto">
+          {loading ? (
+            <div className="py-16 flex justify-center text-aq-muted"><Loader2 className="w-6 h-6 animate-spin" /></div>
+          ) : recentOrders.length === 0 ? (
+            <AdminEmpty message="Henüz sipariş yok" />
+          ) : (
             <table className="w-full">
               <thead>
-                <tr className="bg-aqua-bg/50">
-                  {['Sipariş No', 'Müşteri', 'Ürün', 'Tutar', 'Durum', 'Tarih', 'İşlem'].map((h) => (
-                    <th key={h} className="text-left px-6 py-3 text-[11px] font-semibold text-aqua-text-muted uppercase tracking-wider">
+                <tr className="bg-aq-ice/80">
+                  {['Sipariş', 'Müşteri', 'Tutar', 'Durum', ''].map((h) => (
+                    <th key={h} className="text-left px-5 py-3 text-[10px] font-semibold text-aq-muted uppercase tracking-wider">
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {data.recentOrders.map((order, i) => (
-                  <motion.tr
-                    key={order.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.04 }}
-                    className="border-b border-aqua-bg last:border-0 hover:bg-aqua-bg/30 transition-colors"
-                  >
-                    <td className="px-6 py-3.5 text-sm font-medium text-aqua-primary">{order.orderNumber}</td>
-                    <td className="px-6 py-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 bg-aqua-primary/10 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-bold text-aqua-primary">{order.customerName[0]}</span>
+                {recentOrders.map((order) => {
+                  const statusTr = orderStatusToTr(order.status);
+                  const customerName = (order.profiles as { name?: string } | null)?.name ?? 'Müşteri';
+                  return (
+                    <tr key={order.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
+                      <td className="px-5 py-3.5">
+                        <p className="text-sm font-semibold text-aq-blue">{order.order_number}</p>
+                        <p className="text-[11px] text-aq-muted">
+                          {new Date(order.created_at).toLocaleDateString('tr-TR')}
+                        </p>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 bg-aq-sky rounded-full flex items-center justify-center text-xs font-medium text-aq-blue">
+                            {customerName[0]}
+                          </div>
+                          <span className="text-sm text-aq-muted">{customerName}</span>
                         </div>
-                        <span className="text-sm font-medium text-aqua-secondary">{order.customerName}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-3.5 text-[13px] text-aqua-text-secondary">{order.itemCount} ürün</td>
-                    <td className="px-6 py-3.5 text-sm font-semibold text-aqua-secondary">{formatCurrency(order.total)}</td>
-                    <td className="px-6 py-3.5">
-                      <StatusBadge status={order.status} />
-                    </td>
-                    <td className="px-6 py-3.5 text-[13px] text-aqua-text-muted">{formatDate(order.createdAt)}</td>
-                    <td className="px-6 py-3.5">
-                      <Link to={`/admin/siparisler/${order.id}`} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aqua-bg transition-colors">
-                        <Eye className="w-4 h-4 text-aqua-text-muted" />
-                      </Link>
-                    </td>
-                  </motion.tr>
-                ))}
+                      </td>
+                      <td className="px-5 py-3.5 text-sm font-semibold text-aq-text">
+                        {Number(order.total).toLocaleString('tr-TR')}₺
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <AdminOrderStatusBadge status={statusTr} />
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <Link
+                          to={`/admin/siparisler/${order.id}`}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-sky text-aq-muted hover:text-aq-blue transition-colors"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-            {data.recentOrders.length === 0 && (
-              <div className="text-center py-8 text-sm text-aqua-text-muted">Henüz sipariş yok</div>
+          )}
+        </AdminTableWrap>
+
+        <AdminCard>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-semibold text-aq-text">Düşük Stok</h2>
+              <p className="text-xs text-aq-muted">10 adet ve altı</p>
+            </div>
+            {lowStock.length > 0 && (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600">
+                {lowStock.length}
+              </span>
             )}
           </div>
-        </div>
-      </ScrollReveal>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-5">
-        <ScrollReveal delay={0.6}>
-          <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold text-aqua-secondary flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4 text-aqua-danger" />
-                Kritik Stok Uyarıları
-              </h4>
-              <span className="bg-aqua-danger/10 text-aqua-danger text-[11px] font-semibold px-2 py-0.5 rounded-md">{criticalStockAlerts.length} Ürün</span>
+          {loading ? (
+            <div className="py-12 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-aq-muted" /></div>
+          ) : lowStock.length === 0 ? (
+            <div className="text-center py-10">
+              <Package className="w-8 h-8 text-aq-border mx-auto mb-2" />
+              <p className="text-sm text-aq-muted">Stoklar yeterli</p>
             </div>
-            <div className="space-y-3">
-              {criticalStockAlerts.map((p) => (
-                <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl bg-red-50/50 border border-red-100">
-                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Package className="w-4 h-4 text-red-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-aqua-secondary line-clamp-1">{p.name}</p>
-                    <p className="text-[10px] text-aqua-text-muted">{p.slug}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <span className="text-lg font-bold text-aqua-danger">{p.stock}</span>
-                    <p className="text-[10px] text-aqua-text-muted">adet</p>
-                  </div>
-                </div>
-              ))}
-              {criticalStockAlerts.length === 0 && (
-                <p className="text-sm text-aqua-text-muted text-center py-4">Kritik stok yok</p>
-              )}
-            </div>
-            <Link to="/admin/stok" className="flex items-center justify-center gap-1.5 mt-4 text-xs font-semibold text-aqua-primary hover:text-aqua-primary-dark transition-colors">
-              Tüm Stokları Gör <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </ScrollReveal>
-
-        <ScrollReveal delay={0.65}>
-          <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold text-aqua-secondary flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-aqua-primary" />
-                Servis Takvimi
-              </h4>
-            </div>
-            <p className="text-sm text-aqua-text-muted text-center py-6">Servis randevularını takvimden görüntüleyin.</p>
-            <Link to="/admin/servis-takvimi" className="flex items-center justify-center gap-1.5 mt-4 text-xs font-semibold text-aqua-primary hover:text-aqua-primary-dark transition-colors">
-              Takvimi Gör <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </ScrollReveal>
-
-        <ScrollReveal delay={0.7}>
-          <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold text-aqua-secondary">Düşük Stok Ürünleri</h4>
-              <span className="bg-aqua-danger/10 text-aqua-danger text-[11px] font-semibold px-2 py-0.5 rounded-md">{data.lowStockProducts.length} Ürün</span>
-            </div>
-            <div className="space-y-3">
-              {data.lowStockProducts.slice(0, 5).map((p) => (
-                <div key={p.id} className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-aqua-bg rounded-lg flex items-center justify-center flex-shrink-0">
-                    <ShoppingBag className="w-4 h-4 text-aqua-primary/30" />
-                  </div>
-                  <p className="text-[13px] font-medium text-aqua-secondary flex-1 line-clamp-1">{p.name}</p>
-                  <span className="text-xs text-aqua-danger font-medium flex-shrink-0">{p.stock} adet</span>
-                </div>
-              ))}
-            </div>
-            <Link to="/admin/stok" className="flex items-center justify-center gap-1.5 mt-4 text-xs font-semibold text-aqua-primary hover:text-aqua-primary-dark transition-colors">
-              Stok Yönetimi <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </ScrollReveal>
-
-        <ScrollReveal delay={0.55}>
-          <div className="bg-white border border-aqua-border-light rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold text-aqua-secondary flex items-center gap-1.5">
-                <MessageSquare className="w-4 h-4 text-aqua-primary" />
-                Hızlı Erişim
-              </h4>
-            </div>
+          ) : (
             <div className="space-y-2">
-              {[
-                { label: 'Müşteriler', href: '/admin/musteriler', icon: Users },
-                { label: 'Kuponlar', href: '/admin/kuponlar', icon: Star },
-                { label: 'Stok Bildirimleri', href: '/admin/stok-bildirimleri', icon: Bell },
-                { label: 'İadeler', href: '/admin/iade-degisim', icon: RefreshCw },
-                { label: 'Abonelikler', href: '/admin/abonelikler', icon: Zap },
-              ].map((item) => (
-                <Link key={item.href} to={item.href} className="flex items-center gap-3 p-3 rounded-xl hover:bg-aqua-bg/50 transition-colors group">
-                  <item.icon className="w-4 h-4 text-aqua-primary" />
-                  <span className="text-[13px] font-medium text-aqua-secondary group-hover:text-aqua-primary transition-colors">{item.label}</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-aqua-text-muted ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Link>
+              {lowStock.slice(0, 6).map((p) => (
+                <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-aq-ice transition-colors">
+                  <div className={cn(
+                    'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
+                    p.stock <= 3 ? 'bg-red-50' : 'bg-amber-50',
+                  )}>
+                    <Package className={cn('w-4 h-4', p.stock <= 3 ? 'text-red-500' : 'text-amber-500')} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-aq-text line-clamp-1">{p.name}</p>
+                    <p className="text-[10px] text-aq-muted">{p.sku}</p>
+                  </div>
+                  <span className={cn(
+                    'text-sm font-semibold flex-shrink-0',
+                    p.stock <= 3 ? 'text-red-600' : 'text-amber-600',
+                  )}>
+                    {p.stock}
+                  </span>
+                </div>
               ))}
             </div>
-          </div>
-        </ScrollReveal>
+          )}
+          <Link
+            to="/admin/stok"
+            className="flex items-center justify-center gap-1.5 mt-5 pt-4 border-t border-aq-border/60 text-xs font-semibold text-aq-blue hover:text-aq-navy"
+          >
+            Stok yönetimi <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </AdminCard>
       </div>
-      </>
+    </AdminPageShell>
   );
 }

@@ -34,12 +34,12 @@ export default function CampaignDetail() {
     <PageLayout variant="blue">
       {/* Breadcrumb */}
       <div className="max-w-[800px] mx-auto px-4 pt-6">
-        <div className="flex items-center gap-2 text-[13px] text-[#8B9DAF]">
-          <Link to="/" className="hover:text-[#1A73E8]">Ana Sayfa</Link>
+        <div className="flex items-center gap-2 text-[13px] text-aq-muted">
+          <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link>
           <span>/</span>
-          <Link to="/kampanyalar" className="hover:text-[#1A73E8]">Kampanyalar</Link>
+          <Link to="/kampanyalar" className="hover:text-aq-blue">Kampanyalar</Link>
           <span>/</span>
-          <span className="text-[#5A6B7B]">{c.title}</span>
+          <span className="text-aq-muted">{c.title}</span>
         </div>
       </div>
 
@@ -49,7 +49,7 @@ export default function CampaignDetail() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-gradient-to-br from-[#1A73E8] via-[#2B7DE9] to-[#00C9A7] rounded-2xl p-8 text-white mb-6 relative overflow-hidden"
+          className="bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep rounded-2xl p-8 text-white mb-6 relative overflow-hidden"
         >
           {/* Decorative circles */}
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -70,14 +70,14 @@ export default function CampaignDetail() {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={copyCode}
-                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-6 py-3 rounded-full transition-all backdrop-blur-sm"
+                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all backdrop-blur-sm"
               >
                 <Gift className="w-4 h-4" />
                 {c.code} - Kopyala
               </button>
               <Link
                 to="/urunler"
-                className="flex items-center gap-2 bg-white text-[#1A73E8] text-sm font-semibold px-6 py-3 rounded-full hover:bg-white/90 hover:shadow-lg transition-all"
+                className="flex items-center gap-2 bg-white text-aq-blue text-sm font-semibold px-6 py-3 rounded-xl hover:bg-white/90 hover:shadow-sm transition-all"
               >
                 Alışverişe Başla <ArrowRight className="w-4 h-4" />
               </Link>
@@ -93,12 +93,12 @@ export default function CampaignDetail() {
               { icon: Clock, title: 'Son Tarih', desc: c.endDate },
               { icon: Truck, title: 'Kargo', desc: 'Ücretsiz' },
             ].map((item) => (
-              <div key={item.title} className="bg-white border border-[#E8F0FE] rounded-xl p-5 text-center hover:shadow-sm transition-all">
-                <div className="w-10 h-10 bg-[#F0F6FF] rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <item.icon className="w-5 h-5 text-[#1A73E8]" />
+              <div key={item.title} className="bg-white border border-aq-border/60 rounded-xl p-5 text-center hover:shadow-sm transition-all">
+                <div className="w-10 h-10 bg-aq-sky rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <item.icon className="w-5 h-5 text-aq-blue" />
                 </div>
-                <p className="text-xs text-[#8B9DAF] mb-1">{item.title}</p>
-                <p className="text-sm font-bold text-[#0D2137]">{item.desc}</p>
+                <p className="text-xs text-aq-muted mb-1">{item.title}</p>
+                <p className="text-sm font-semibold text-aq-text">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -106,8 +106,8 @@ export default function CampaignDetail() {
 
         {/* How to Use */}
         <ScrollReveal delay={0.3}>
-          <div className="bg-white border border-[#E8F0FE] rounded-2xl p-6 md:p-8">
-            <h3 className="text-base font-semibold text-[#0D2137] mb-4">Kampanya Nasıl Kullanılır?</h3>
+          <div className="bg-white border border-aq-border/60 rounded-2xl p-6 md:p-8">
+            <h3 className="text-base font-semibold text-aq-text mb-4">Kampanya Nasıl Kullanılır?</h3>
             <div className="space-y-4">
               {[
                 'Ürünler sayfasından dilediğiniz ürünleri sepete ekleyin.',
@@ -116,10 +116,10 @@ export default function CampaignDetail() {
                 'Ödeme adımına geçerek alışverişinizi tamamlayın.',
               ].map((step, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className="w-7 h-7 bg-[#EBF3FF] rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-bold text-[#1A73E8]">{i + 1}</span>
+                  <div className="w-7 h-7 bg-aq-sky rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-semibold text-aq-blue">{i + 1}</span>
                   </div>
-                  <p className="text-sm text-[#5A6B7B] pt-1">{step}</p>
+                  <p className="text-sm text-aq-muted pt-1">{step}</p>
                 </div>
               ))}
             </div>
@@ -131,7 +131,7 @@ export default function CampaignDetail() {
           <div className="mt-6 text-center">
             <Link
               to="/urunler"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-[#1A73E8] to-[#1557B0] text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg hover:shadow-[#1A73E8]/20 transition-all"
+              className="inline-flex items-center gap-2 bg-aq-blue text-white px-8 py-3 rounded-xl font-semibold hover:bg-aq-deep hover:text-white transition-all"
             >
               Tüm Ürünleri Gör <ChevronRight className="w-5 h-5" />
             </Link>

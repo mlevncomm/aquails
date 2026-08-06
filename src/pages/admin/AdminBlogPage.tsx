@@ -1,43 +1,168 @@
-import { useState } from 'react';
-import { Plus, Pencil, Trash2, Eye, BookOpen } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Trash2, BookOpen, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router';
 import { useToastStore } from '@/components/Toast';
-
-const initial = [
-  { id: '1', title: 'Su Arıtma Cihazı Nasıl Çalışır?', category: 'Teknik Bilgiler', status: 'published', date: '2026-06-05', views: 1240 },
-  { id: '2', title: 'Filtre Değişim Sıklığı', category: 'Bakım Önerileri', status: 'published', date: '2026-06-01', views: 890 },
-  { id: '3', title: 'Arıtılmış Su İçmenin Faydaları', category: 'Sağlıklı Yaşam', status: 'draft', date: '2026-05-28', views: 0 },
-];
+import { getBlogPosts, toggleBlogStatus, deleteBlogPost, createBlogPost, type BlogPostListItem } from '@/services/blogService';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminCard,
+  AdminInput,
+  AdminLabel,
+  AdminButton,
+  AdminTableWrap,
+  AdminLoading,
+  AdminEmpty,
+  AdminBadge,
+} from '@/components/admin/admin-ui';
 
 export default function AdminBlogPage() {
-  const [posts, setPosts] = useState(initial);
-  const addToast = useToastStore(s => s.add);
-  const remove = (id: string) => { setPosts(prev => prev.filter(p => p.id !== id)); addToast('Yazı silindi.', 'success'); };
-  const toggleStatus = (id: string) => { setPosts(prev => prev.map(p => p.id === id ? { ...p, status: p.status === 'published' ? 'draft' : 'published' } : p)); addToast('Durum güncellendi.', 'info'); };
+  const [posts, setPosts] = useState<BlogPostListItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ title: '', category: 'Genel', content: '' });
+  const addToast = useToastStore((s) => s.add);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setPosts(await getBlogPosts());
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const remove = async (id: string) => {
+    if (!window.confirm('Bu yazıyı silmek istediğinize emin misiniz?')) return;
+    const result = await deleteBlogPost(id);
+    if (result.success) {
+      addToast('Yazı silindi.', 'success');
+      void load();
+    } else {
+      addToast(result.error ?? 'Silinemedi.', 'error');
+    }
+  };
+
+  const toggleStatus = async (id: string, current: 'draft' | 'published') => {
+    const result = await toggleBlogStatus(id, current === 'published' ? 'draft' : 'published');
+    if (result.success) {
+      addToast('Durum güncellendi.', 'info');
+      void load();
+    } else {
+      addToast(result.error ?? 'Durum güncellenemedi.', 'error');
+    }
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await createBlogPost(form);
+    if (result.success) {
+      addToast('Yazı oluşturuldu (taslak).', 'success');
+      setShowForm(false);
+      setForm({ title: '', category: 'Genel', content: '' });
+      void load();
+    } else {
+      addToast(result.error ?? 'Oluşturulamadı.', 'error');
+    }
+  };
 
   return (
-      <>      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-semibold text-[#0D2137]">Blog Yönetimi</h2>
-        <button className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0]"><Plus className="w-4 h-4" /> Yeni Yazı</button>
-      </div>
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
+    <AdminPageShell>
+      <AdminPageHeader
+        title="Blog Yönetimi"
+        description="Blog yazılarını oluşturun ve yayınlayın."
+        action={
+          <AdminButton onClick={() => setShowForm(true)}>
+            <Plus className="w-4 h-4" /> Yeni Yazı
+          </AdminButton>
+        }
+      />
+
+      {showForm && (
+        <AdminCard className="mb-6">
+          <form onSubmit={(e) => void handleCreate(e)} className="space-y-4 max-w-xl">
+            <div>
+              <AdminLabel>Başlık</AdminLabel>
+              <AdminInput required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            </div>
+            <div>
+              <AdminLabel>Kategori</AdminLabel>
+              <AdminInput value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+            </div>
+            <div className="flex gap-2">
+              <AdminButton type="submit">Oluştur</AdminButton>
+              <AdminButton type="button" variant="ghost" onClick={() => setShowForm(false)}>İptal</AdminButton>
+            </div>
+          </form>
+        </AdminCard>
+      )}
+
+      {loading ? (
+        <AdminLoading label="Yazılar yükleniyor..." />
+      ) : posts.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty icon={BookOpen} message="Henüz blog yazısı yok" />
+        </AdminCard>
+      ) : (
+        <AdminTableWrap stickyFirst>
           <table className="w-full">
-            <thead><tr className="bg-[#F8FBFF]">{['Başlık', 'Kategori', 'Durum', 'Tarih', 'Görüntülenme', 'İşlem'].map(h => <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-[#8B9DAF] uppercase whitespace-nowrap">{h}</th>)}</tr></thead>
+            <thead>
+              <tr className="bg-aq-ice border-b border-aq-border/60">
+                {['Başlık', 'Kategori', 'Durum', 'Tarih', 'Görüntülenme', 'İşlem'].map((h) => (
+                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
             <tbody>
-              {posts.map(p => (
-                <tr key={p.id} className="border-b border-[#F0F6FF] last:border-0 hover:bg-[#F8FBFF]/50">
-                  <td className="px-4 py-3"><div className="flex items-center gap-2"><div className="w-8 h-8 bg-[#F0F6FF] rounded-lg flex items-center justify-center"><BookOpen className="w-4 h-4 text-[#1A73E8]" /></div><span className="text-sm font-medium text-[#0D2137] line-clamp-1 max-w-[200px]">{p.title}</span></div></td>
-                  <td className="px-4 py-3 text-sm text-[#5A6B7B]">{p.category}</td>
-                  <td className="px-4 py-3"><button onClick={() => toggleStatus(p.id)} className={`text-xs font-medium px-2 py-0.5 rounded-full ${p.status === 'published' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>{p.status === 'published' ? 'Yayında' : 'Taslak'}</button></td>
-                  <td className="px-4 py-3 text-sm text-[#8B9DAF]">{p.date}</td>
-                  <td className="px-4 py-3 text-sm text-[#0D2137]">{p.views.toLocaleString('tr-TR')}</td>
-                  <td className="px-4 py-3"><div className="flex gap-1"><button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8]"><Eye className="w-3.5 h-3.5" /></button><button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8]"><Pencil className="w-3.5 h-3.5" /></button><button onClick={() => remove(p.id)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-[#8B9DAF] hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button></div></td>
+              {posts.map((p) => (
+                <tr key={p.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-aq-ice rounded-lg flex items-center justify-center">
+                        <BookOpen className="w-4 h-4 text-aq-blue" />
+                      </div>
+                      <span className="text-sm font-medium text-aq-text line-clamp-1 max-w-[200px]">{p.title}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{p.category}</td>
+                  <td className="px-4 py-3">
+                    <button type="button" onClick={() => void toggleStatus(p.id, p.status)}>
+                      <AdminBadge tone={p.status === 'published' ? 'success' : 'warning'}>
+                        {p.status === 'published' ? 'Yayında' : 'Taslak'}
+                      </AdminBadge>
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{p.date}</td>
+                  <td className="px-4 py-3 text-sm text-aq-text">{p.views.toLocaleString('tr-TR')}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-1">
+                      {p.status === 'published' && (
+                        <Link
+                          to={`/blog/${p.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue"
+                          title="Yayında görüntüle"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </Link>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => void remove(p.id)}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-      </>
+        </AdminTableWrap>
+      )}
+    </AdminPageShell>
   );
 }

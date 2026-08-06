@@ -1,52 +1,31 @@
 import { Link } from 'react-router';
-import { Home, Search, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { PageLayout } from '@/layouts/PageLayout';
-import { SEO } from '@/components/SEO';
+import { Home, Search } from 'lucide-react';
 
+/** Visible 404 for unknown SPA routes — never a blank screen. */
 export default function NotFoundPage() {
   return (
-    <>
-      <SEO
-        title="Sayfa Bulunamadı | Aquails"
-        description="Aradığınız sayfa bulunamadı. Ana sayfa veya ürünlere dönebilirsiniz."
-        canonical="/404"
-      />
-      <PageLayout>
-        <div className="max-w-[560px] mx-auto px-4 py-20 text-center">
-          <p className="text-6xl font-bold text-aqua-primary mb-2">404</p>
-          <h1 className="text-2xl font-bold text-aqua-secondary mb-3">Sayfa bulunamadı</h1>
-          <p className="text-sm text-aqua-text-muted mb-8">
-            Bu bağlantı taşınmış veya hiç var olmamış olabilir. Aşağıdan devam edebilirsiniz.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 bg-aqua-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-aqua-primary-dark transition-colors"
-            >
-              <Home className="w-4 h-4" /> Ana Sayfa
-            </Link>
-            <Link
-              to="/urunler"
-              className="inline-flex items-center gap-2 border border-aqua-border text-aqua-secondary px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-aqua-bg transition-colors"
-            >
-              <ShoppingBag className="w-4 h-4" /> Ürünler
-            </Link>
-            <Link
-              to="/arama"
-              className="inline-flex items-center gap-2 border border-aqua-border text-aqua-secondary px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-aqua-bg transition-colors"
-            >
-              <Search className="w-4 h-4" /> Ara
-            </Link>
-          </div>
-          <button
-            type="button"
-            onClick={() => window.history.back()}
-            className="inline-flex items-center gap-1.5 mt-6 text-sm text-aqua-text-muted hover:text-aqua-primary transition-colors"
+    <div className="min-h-[70vh] flex items-center justify-center px-4">
+      <div className="max-w-md w-full text-center">
+        <p className="text-sm font-semibold text-aq-blue tracking-wide">404</p>
+        <h1 className="mt-2 text-2xl font-bold text-aq-text">Sayfa bulunamadı</h1>
+        <p className="mt-2 text-sm text-aq-muted">
+          Aradığınız adres taşınmış veya hiç var olmamış olabilir.
+        </p>
+        <div className="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-aq-blue px-4 py-2.5 text-sm font-medium text-white"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Geri dön
-          </button>
+            <Home className="w-4 h-4" /> Ana Sayfa
+          </Link>
+          <Link
+            to="/urunler"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-aq-border px-4 py-2.5 text-sm font-medium text-aq-text"
+          >
+            <Search className="w-4 h-4" /> Ürünleri İncele
+          </Link>
         </div>
-      </PageLayout>
-    </>
+      </div>
+    </div>
   );
 }

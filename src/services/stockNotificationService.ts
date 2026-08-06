@@ -1,44 +1,70 @@
-import { apiClient } from '@/lib/apiClient';
-import { isSupabaseMode } from '@/lib/dataProvider';
-import { invokeFunction } from '@/lib/api';
-import { requireSupabase } from '@/lib/supabase';
+import { getSupabaseOrNull } from '@/lib/supabase';
+import { formatDateTR } from '@/lib/format';
+import type { DbStockNotification } from '@/types/database';
 
-export async function requestNotification(productId: string, email: string, phone?: string) {
-  if (isSupabaseMode) {
-    return invokeFunction('stock-notification', { productId, email, phone });
-  }
-  return apiClient.post('/api/stock-notifications', { productId, email, phone });
+export interface StockNotification {
+  id: string;
+  productName: string;
+  email: string;
+  date: string;
+  notified: boolean;
 }
 
-export async function adminGetNotifications() {
-  if (isSupabaseMode) {
-    const { data, error } = await requireSupabase()
-      .from('stock_notifications')
-      .select('*, products(name, slug)')
-      .order('created_at', { ascending: false });
-    if (error) throw new Error(error.message);
-    return data ?? [];
-  }
-  return apiClient.get('/api/admin/stock-notifications');
+export async function subscribeStockAlert(input: {
+  productId: string;
+  productName: string;
+  email: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  const { data, error } = await supabase.rpc('subscribe_stock_notification', {
+    p_product_id: input.productId,
+    p_email: input.email,
+  });
+
+  if (error) return { success: false, error: error.message };
+  const result = data as { success?: boolean } | null;
+  if (!result?.success) return { success: false, error: 'Bildirim kaydı oluşturulamadı.' };
+  return { success: true };
 }
 
-export async function adminMarkNotified(id: string) {
-  if (isSupabaseMode) {
-    const { data, error } = await requireSupabase()
-      .from('stock_notifications')
-      .update({ status: 'notified', notified_at: new Date().toISOString() })
-      .eq('id', id)
-      .select('*')
-      .single();
-    if (error) throw new Error(error.message);
-    return data;
-  }
-  return apiClient.patch(`/api/admin/stock-notifications/${id}/mark-notified`);
+export async function getStockNotifications(): Promise<StockNotification[]> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('stock_notifications')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error || !data) return [];
+  return (data as DbStockNotification[]).map((n) => ({
+    id: n.id,
+    productName: n.product_name,
+    email: n.email,
+    date: formatDateTR(n.created_at),
+    notified: n.notified,
+  }));
 }
 
-export async function adminNotifyStockBack(productId: string) {
-  if (isSupabaseMode) {
-    return invokeFunction('stock-notification', { action: 'notify-pending', productId });
-  }
-  return apiClient.post('/api/admin/stock-notifications/notify', { productId });
+export async function markNotified(id: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  const { data, error } = await supabase.rpc('queue_stock_notification', { p_notification_id: id });
+  if (error) return { success: false, error: error.message };
+  const result = data as { success?: boolean } | null;
+  if (!result?.success) return { success: false, error: 'Bildirim kuyruğa alınamadı.' };
+  return { success: true };
+}
+
+export async function deleteStockNotification(id: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  const { data, error } = await supabase.from('stock_notifications').delete().eq('id', id).select('id');
+  if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Bildirim silinemedi veya yetkiniz yok.' };
+  return { success: true };
 }

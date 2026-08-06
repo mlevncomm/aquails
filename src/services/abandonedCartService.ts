@@ -1,3 +1,5 @@
+import { getSupabaseOrNull } from '@/lib/supabase';
+
 interface CartItem {
   productId: string;
   productName: string;
@@ -17,52 +19,131 @@ export interface AbandonedCart {
   reminderSentAt?: string;
 }
 
-export function trackAbandonedCart(items: CartItem[], customerName: string, customerEmail?: string): void {
+const SESSION_KEY = 'aquails_abandoned_cart_session';
+
+function getSessionId(): string {
+  let id = localStorage.getItem(SESSION_KEY);
+  if (!id) {
+    id = `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(SESSION_KEY, id);
+  }
+  return id;
+}
+
+function mapCart(row: {
+  id: string;
+  customer_name: string;
+  customer_email: string | null;
+  items: unknown;
+  total: number;
+  last_activity: string;
+  status: AbandonedCart['status'];
+  reminder_sent_at: string | null;
+}): AbandonedCart {
+  return {
+    id: row.id,
+    customerName: row.customer_name,
+    customerEmail: row.customer_email ?? undefined,
+    items: Array.isArray(row.items) ? (row.items as CartItem[]) : [],
+    total: Number(row.total),
+    lastActivity: row.last_activity,
+    status: row.status,
+    reminderSentAt: row.reminder_sent_at ?? undefined,
+  };
+}
+
+export async function syncAbandonedCart(
+  items: CartItem[],
+  customerName = 'Misafir',
+  customerEmail?: string
+): Promise<void> {
   if (!items.length) return;
-  const carts = getAbandonedCarts();
-  const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  carts.unshift({
-    id: Date.now().toString(),
-    customerName,
-    customerEmail,
-    items,
-    total,
-    lastActivity: new Date().toISOString(),
-    status: 'new',
+
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return;
+
+  const sessionId = getSessionId();
+  await supabase.rpc('sync_abandoned_cart', {
+    p_session_id: sessionId,
+    p_customer_name: customerName,
+    p_customer_email: customerEmail ?? null,
+    p_items: items as unknown as Record<string, unknown>[],
   });
-  localStorage.setItem('abandoned-carts', JSON.stringify(carts.slice(0, 100)));
 }
 
-export function getAbandonedCarts(): AbandonedCart[] {
-  return JSON.parse(localStorage.getItem('abandoned-carts') || '[]');
+/** @deprecated Use syncAbandonedCart instead */
+export function trackAbandonedCart(items: CartItem[], customerName: string, customerEmail?: string): void {
+  void syncAbandonedCart(items, customerName, customerEmail);
 }
 
-export function sendReminder(id: string): void {
-  const carts = getAbandonedCarts();
-  const c = carts.find(c => c.id === id);
-  if (c) { c.status = 'reminder-sent'; c.reminderSentAt = new Date().toISOString(); }
-  localStorage.setItem('abandoned-carts', JSON.stringify(carts));
+export async function getAbandonedCarts(): Promise<AbandonedCart[]> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('abandoned_carts')
+    .select('*')
+    .order('last_activity', { ascending: false });
+
+  if (error || !data) return [];
+  return data.map(mapCart);
 }
 
-export function markConverted(id: string): void {
-  const carts = getAbandonedCarts();
-  const c = carts.find(c => c.id === id);
-  if (c) c.status = 'converted';
-  localStorage.setItem('abandoned-carts', JSON.stringify(carts));
+export async function completeAbandonedCart(): Promise<void> {
+  const sessionId = localStorage.getItem(SESSION_KEY);
+  if (!sessionId) return;
+
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return;
+
+  await supabase.rpc('mark_abandoned_cart_converted', { p_session_id: sessionId });
+  localStorage.removeItem(SESSION_KEY);
 }
 
-export function deleteAbandonedCart(id: string): void {
-  const carts = getAbandonedCarts().filter(c => c.id !== id);
-  localStorage.setItem('abandoned-carts', JSON.stringify(carts));
+export async function sendReminder(id: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  const { data, error } = await supabase.rpc('queue_abandoned_cart_reminder', { p_cart_id: id });
+
+  if (error) return { success: false, error: error.message };
+  const result = data as { success?: boolean; error?: string } | null;
+  if (!result?.success) return { success: false, error: result?.error === 'missing_email' ? 'Müşteri e-postası bulunmuyor.' : 'Hatırlatıcı kuyruğa alınamadı.' };
+  return { success: true };
 }
 
-export function getStats() {
-  const carts = getAbandonedCarts();
+export async function markConverted(id: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  const { data, error } = await supabase
+    .from('abandoned_carts')
+    .update({ status: 'converted' })
+    .eq('id', id)
+    .select('id');
+
+  if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Sepet güncellenemedi veya yetkiniz yok.' };
+  return { success: true };
+}
+
+export async function deleteAbandonedCart(id: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  const { data, error } = await supabase.from('abandoned_carts').delete().eq('id', id).select('id');
+  if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Sepet silinemedi veya yetkiniz yok.' };
+  return { success: true };
+}
+
+export async function getStats() {
+  const carts = await getAbandonedCarts();
   return {
     total: carts.length,
-    new: carts.filter(c => c.status === 'new').length,
-    reminderSent: carts.filter(c => c.status === 'reminder-sent').length,
-    converted: carts.filter(c => c.status === 'converted').length,
+    new: carts.filter((c) => c.status === 'new').length,
+    reminderSent: carts.filter((c) => c.status === 'reminder-sent').length,
+    converted: carts.filter((c) => c.status === 'converted').length,
     avgCartValue: carts.length ? Math.round(carts.reduce((s, c) => s + c.total, 0) / carts.length) : 0,
   };
 }

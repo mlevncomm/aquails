@@ -1,65 +1,141 @@
-import { useSubscriptionStore } from '@/stores/subscriptionStore';
-import { EmptyState } from '@/components/EmptyState';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router';
 import { RefreshCw, Pause, Play } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
+import { useAuthStore } from '@/stores/authStore';
+import {
+  getCustomerSubscriptions,
+  updateSubscriptionStatus,
+  type CustomerSubscription,
+} from '@/services/subscriptionService';
+import {
+  CustomerPageShell,
+  CustomerPageHeader,
+  CustomerCard,
+  CustomerEmpty,
+  CustomerLoading,
+  CustomerBadge,
+  CustomerButton,
+} from '@/components/customer/customer-ui';
 
-const statusLabels: Record<string, { text: string; color: string }> = {
-  active: { text: 'Aktif', color: 'bg-emerald-50 text-emerald-600' },
-  paused: { text: 'Duraklatıldı', color: 'bg-amber-50 text-amber-600' },
-  cancelled: { text: 'İptal', color: 'bg-gray-100 text-gray-500' },
+const statusTone: Record<string, 'success' | 'warning' | 'neutral'> = {
+  active: 'success',
+  paused: 'warning',
+  cancelled: 'neutral',
 };
-
+const statusText: Record<string, string> = {
+  active: 'Aktif',
+  paused: 'Duraklatıldı',
+  cancelled: 'İptal',
+};
 const planLabels: Record<string, string> = { '6ay': '6 Aylık', '12ay': '12 Aylık', premium: 'Premium' };
 
 export default function CustomerSubscriptionsPage() {
-  const { subscriptions, pause, resume } = useSubscriptionStore();
+  const user = useAuthStore((s) => s.user);
   const addToast = useToastStore((s) => s.add);
+  const [subscriptions, setSubscriptions] = useState<CustomerSubscription[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadSubscriptions = async () => {
+    if (!user) return;
+    const data = await getCustomerSubscriptions(user.id);
+    setSubscriptions(data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    void loadSubscriptions();
+  }, [user]);
+
+  const handlePause = async (id: string) => {
+    const res = await updateSubscriptionStatus(id, 'paused');
+    if (res.success) {
+      addToast('Abonelik duraklatıldı.', 'info');
+      void loadSubscriptions();
+    } else {
+      addToast(res.error ?? 'İşlem başarısız.', 'error');
+    }
+  };
+
+  const handleResume = async (id: string) => {
+    const res = await updateSubscriptionStatus(id, 'active');
+    if (res.success) {
+      addToast('Abonelik devam ettirildi.', 'success');
+      void loadSubscriptions();
+    } else {
+      addToast(res.error ?? 'İşlem başarısız.', 'error');
+    }
+  };
+
+  if (loading) {
+    return (
+      <CustomerPageShell>
+        <CustomerLoading rows={3} />
+      </CustomerPageShell>
+    );
+  }
 
   return (
-    <>
-      <h2 className="text-lg font-semibold text-[#0D2137] mb-5">Aboneliklerim</h2>
+    <CustomerPageShell>
+      <CustomerPageHeader
+        title="Aboneliklerim"
+        description="Filtre aboneliklerinizi yönetin."
+      />
 
       {subscriptions.length === 0 ? (
-        <EmptyState
-          icon={<RefreshCw className="w-8 h-8" />}
-          title="Aktif Aboneliğiniz Yok"
-          description="Filtre aboneliği oluşturarak filtrelerinizin düzenli olarak gelmesini sağlayabilirsiniz."
-          action={{ label: 'Abonelikleri İncele', href: '/filtre-aboneligi' }}
-        />
+        <CustomerCard padding={false}>
+          <CustomerEmpty
+            icon={RefreshCw}
+            title="Aktif aboneliğiniz yok"
+            message="Filtre aboneliği oluşturarak filtrelerinizin düzenli gelmesini sağlayın."
+            action={
+              <Link to="/filtre-aboneligi">
+                <CustomerButton>Abonelikleri İncele</CustomerButton>
+              </Link>
+            }
+          />
+        </CustomerCard>
       ) : (
         <div className="space-y-4">
-          {subscriptions.map((sub) => {
-            const status = statusLabels[sub.status];
-            return (
-              <div key={sub.id} className="bg-white border border-[#E8F0FE] rounded-2xl p-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-sm font-semibold text-[#0D2137]">{planLabels[sub.plan]} Filtre Paketi</h3>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${status.color}`}>{status.text}</span>
-                    </div>
-                    <p className="text-xs text-[#8B9DAF]">{sub.deviceName}</p>
+          {subscriptions.map((sub) => (
+            <CustomerCard key={sub.id}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <h3 className="text-sm font-semibold text-aq-text">
+                      {planLabels[sub.plan] ?? sub.plan} Filtre Paketi
+                    </h3>
+                    <CustomerBadge tone={statusTone[sub.status] ?? 'neutral'}>
+                      {statusText[sub.status] ?? sub.status}
+                    </CustomerBadge>
                   </div>
-                  <span className="text-lg font-bold text-[#0D2137]">{sub.price}₺<span className="text-xs text-[#8B9DAF] font-normal">/dönem</span></span>
+                  <p className="text-xs text-aq-muted">{sub.device}</p>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-[#8B9DAF] mb-4 pb-4 border-b border-[#F0F6FF]">
-                  <span>Sonraki Teslimat: <strong className="text-[#0D2137]">{sub.nextDelivery}</strong></span>
-                </div>
-                {sub.status === 'active' && (
-                  <button onClick={() => { pause(sub.id); addToast('Abonelik duraklatıldı.', 'info'); }} className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium border border-[#D6E3F0] rounded-xl text-[#5A6B7B] hover:bg-[#F8FBFF]">
-                    <Pause className="w-3.5 h-3.5" /> Duraklat
-                  </button>
-                )}
-                {sub.status === 'paused' && (
-                  <button onClick={() => { resume(sub.id); addToast('Abonelik devam ettirildi.', 'success'); }} className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium bg-[#1A73E8] text-white rounded-xl hover:bg-[#1557B0]">
-                    <Play className="w-3.5 h-3.5" /> Devam Ettir
-                  </button>
-                )}
+                <span className="text-lg font-semibold text-aq-text tabular-nums">
+                  {sub.price.toLocaleString('tr-TR')}₺
+                  <span className="text-xs text-aq-muted font-normal">/dönem</span>
+                </span>
               </div>
-            );
-          })}
+              <div className="flex items-center gap-4 text-xs text-aq-muted mb-4 pb-4 border-b border-aq-border/60">
+                <span>
+                  Sonraki Teslimat:{' '}
+                  <strong className="text-aq-text">{sub.nextDelivery}</strong>
+                </span>
+              </div>
+              {sub.status === 'active' && (
+                <CustomerButton variant="secondary" onClick={() => void handlePause(sub.id)}>
+                  <Pause className="w-3.5 h-3.5" /> Duraklat
+                </CustomerButton>
+              )}
+              {sub.status === 'paused' && (
+                <CustomerButton onClick={() => void handleResume(sub.id)}>
+                  <Play className="w-3.5 h-3.5" /> Devam Ettir
+                </CustomerButton>
+              )}
+            </CustomerCard>
+          ))}
         </div>
       )}
-    </>
+    </CustomerPageShell>
   );
 }

@@ -1,29 +1,34 @@
-import { Link, Outlet } from 'react-router';
+import { Outlet, Link } from 'react-router';
+import { BrandLogo } from '@/components/BrandLogo';
 
 export function AuthLayout() {
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-[#E8F4FD] via-[#F0F6FF] to-[#C5E0F8] p-4 relative overflow-hidden">
-      {/* Soft blob decorations */}
-      <div className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] bg-[#1A73E8]/[0.05] rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-[20%] -left-[10%] w-[400px] h-[400px] bg-[#4FC3F7]/[0.06] rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#1A73E8]/[0.02] rounded-full blur-3xl pointer-events-none" />
-      
-      {/* Subtle wave at top */}
-      <svg className="absolute top-0 left-0 w-full h-32 pointer-events-none opacity-30" viewBox="0 0 1440 120" preserveAspectRatio="none">
-        <path fill="rgba(26,115,232,0.03)" d="M0,60L48,55C96,50,192,40,288,45C384,50,480,70,576,75C672,80,768,70,864,60C960,50,1056,40,1152,42C1248,45,1344,60,1392,67L1440,75L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z" />
-      </svg>
-      
-      {/* Logo */}
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20">
-        <Link to="/">
-          <img src="/images/brand/aquails-logo-light.png" alt="Aquails" className="h-8 w-auto" />
-        </Link>
+    <div className="relative min-h-[100dvh] w-full max-w-[100vw] overflow-x-hidden flex items-center justify-center p-5 sm:p-8 bg-[#F7FBFE]">
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_10%_-10%,rgba(32,211,242,0.18),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_95%_10%,rgba(18,134,216,0.16),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_110%,rgba(6,38,61,0.06),transparent)]" />
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(6,38,61,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(6,38,61,0.35) 1px, transparent 1px)',
+            backgroundSize: '56px 56px',
+          }}
+        />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-md">
+      <div className="relative z-10 w-full max-w-[420px]">
         <Outlet />
       </div>
     </div>
+  );
+}
+
+export function AuthBrand() {
+  return (
+    <Link to="/" className="mb-8 flex justify-center" aria-label="Aquails Ana Sayfa">
+      <BrandLogo variant="logo" bare className="text-[1.2rem] gap-[0.32em]" />
+    </Link>
   );
 }

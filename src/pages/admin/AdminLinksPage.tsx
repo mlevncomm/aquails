@@ -3,10 +3,25 @@ import { Link } from 'react-router';
 import {
   Plus, Pencil, Trash2, Eye, GripVertical, Check,
   ShoppingBag, Droplet, Filter, Gift, RefreshCw, Wrench,
-  Truck, MessageCircle, Phone, Instagram, ExternalLink
+  Truck, MessageCircle, Phone, Instagram, ExternalLink, Link2,
 } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
 import { cn } from '@/lib/utils';
+import { getAdminNavLinks, saveNavLinks, type NavLinkItem } from '@/services/settingsService';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminBreadcrumb,
+  AdminCard,
+  AdminInput,
+  AdminSelect,
+  AdminLabel,
+  AdminButton,
+  AdminTableWrap,
+  AdminLoading,
+  AdminEmpty,
+  AdminStatCard,
+} from '@/components/admin/admin-ui';
 
 const iconOptions = [
   { value: 'ShoppingBag', label: 'Alışveriş', icon: ShoppingBag },
@@ -22,58 +37,63 @@ const iconOptions = [
   { value: 'ExternalLink', label: 'Dış Link', icon: ExternalLink },
 ];
 
-const defaultLinks = [
-  { id: '1', title: 'Ürünleri İncele', url: '/urunler', icon: 'ShoppingBag', active: true, featured: false, order: 1 },
-  { id: '2', title: 'En Çok Satan Su Arıtma Cihazları', url: '/urunler?kategori=su-aritma-cihazlari', icon: 'Droplet', active: true, featured: true, order: 2 },
-  { id: '3', title: 'Filtre Setleri', url: '/urunler?kategori=filtreler', icon: 'Filter', active: true, featured: false, order: 3 },
-  { id: '4', title: 'Kampanyalar', url: '/kampanyalar', icon: 'Gift', active: true, featured: false, order: 4 },
-  { id: '5', title: 'Filtre Aboneliği', url: '/filtre-aboneligi', icon: 'RefreshCw', active: true, featured: false, order: 5 },
-  { id: '6', title: 'Servis Randevusu Al', url: '/servis-randevusu', icon: 'Wrench', active: true, featured: true, order: 6 },
-  { id: '7', title: 'Sipariş Takip', url: '/siparis-takip', icon: 'Truck', active: true, featured: false, order: 7 },
-  { id: '8', title: 'WhatsApp Destek', url: 'https://wa.me/905321234567', icon: 'MessageCircle', active: true, featured: false, order: 8 },
-  { id: '9', title: 'Instagram', url: 'https://instagram.com/aquails', icon: 'Instagram', active: true, featured: false, order: 9 },
-  { id: '10', title: 'İletişim', url: '/iletisim', icon: 'Phone', active: true, featured: false, order: 10 },
-];
-
-interface LinkItem {
-  id: string;
-  title: string;
-  url: string;
-  icon: string;
-  active: boolean;
-  featured: boolean;
-  order: number;
-}
+type LinkItem = NavLinkItem;
 
 export default function AdminLinksPage() {
-  const addToast = useToastStore(s => s.add);
-  const [links, setLinks] = useState<LinkItem[]>(() => {
-    const saved = localStorage.getItem('admin-links');
-    return saved ? JSON.parse(saved) : defaultLinks;
-  });
+  const addToast = useToastStore((s) => s.add);
+  const [links, setLinks] = useState<LinkItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<LinkItem | null>(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [newForm, setNewForm] = useState<Partial<LinkItem>>({ title: '', url: '', icon: 'ExternalLink', active: true, featured: false });
+  const [newForm, setNewForm] = useState<Partial<LinkItem>>({
+    title: '',
+    url: '',
+    icon: 'ExternalLink',
+    active: true,
+    featured: false,
+  });
 
   useEffect(() => {
-    localStorage.setItem('admin-links', JSON.stringify(links));
-  }, [links]);
+    void getAdminNavLinks().then((result) => {
+      if (!result.ok) {
+        addToast(result.error, 'error');
+        setLoading(false);
+        return;
+      }
+      setLinks(result.data);
+      setLoading(false);
+    });
+  }, [addToast]);
+
+  const persistLinks = async (next: LinkItem[], successMessage: string) => {
+    const res = await saveNavLinks(next);
+    if (!res.success) {
+      addToast(res.error ?? 'Kaydedilemedi.', 'error');
+      return false;
+    }
+    setLinks(next);
+    addToast(successMessage, 'success');
+    return true;
+  };
 
   const handleToggleActive = (id: string) => {
-    setLinks(prev => prev.map(l => l.id === id ? { ...l, active: !l.active } : l));
-    addToast('Durum güncellendi', 'success');
+    void persistLinks(
+      links.map((l) => (l.id === id ? { ...l, active: !l.active } : l)),
+      'Durum güncellendi',
+    );
   };
 
   const handleToggleFeatured = (id: string) => {
-    setLinks(prev => prev.map(l => l.id === id ? { ...l, featured: !l.featured } : l));
-    addToast('Öne çıkan durumu güncellendi', 'success');
+    void persistLinks(
+      links.map((l) => (l.id === id ? { ...l, featured: !l.featured } : l)),
+      'Öne çıkan durumu güncellendi',
+    );
   };
 
   const handleDelete = (id: string) => {
     if (confirm('Bu bağlantıyı silmek istediğinize emin misiniz?')) {
-      setLinks(prev => prev.filter(l => l.id !== id));
-      addToast('Bağlantı silindi', 'success');
+      void persistLinks(links.filter((l) => l.id !== id), 'Bağlantı silindi');
     }
   };
 
@@ -83,18 +103,21 @@ export default function AdminLinksPage() {
     setShowAdd(false);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editForm?.title || !editForm?.url) {
       addToast('Başlık ve URL zorunludur.', 'error');
       return;
     }
-    setLinks(prev => prev.map(l => l.id === editForm.id ? editForm : l));
+    const ok = await persistLinks(
+      links.map((l) => (l.id === editForm.id ? editForm : l)),
+      'Bağlantı güncellendi',
+    );
+    if (!ok) return;
     setIsEditing(false);
     setEditForm(null);
-    addToast('Bağlantı güncellendi', 'success');
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!newForm.title || !newForm.url) {
       addToast('Başlık ve URL zorunludur.', 'error');
       return;
@@ -108,162 +131,241 @@ export default function AdminLinksPage() {
       featured: false,
       order: links.length + 1,
     };
-    setLinks(prev => [...prev, newLink]);
+    const ok = await persistLinks([...links, newLink], 'Yeni bağlantı eklendi');
+    if (!ok) return;
     setShowAdd(false);
     setNewForm({ title: '', url: '', icon: 'ExternalLink', active: true, featured: false });
-    addToast('Yeni bağlantı eklendi', 'success');
   };
 
   const getIcon = (iconName: string) => {
-    const found = iconOptions.find(o => o.value === iconName);
+    const found = iconOptions.find((o) => o.value === iconName);
     return found ? found.icon : ExternalLink;
   };
 
   const sortedLinks = [...links].sort((a, b) => a.order - b.order);
-  const activeCount = links.filter(l => l.active).length;
+  const activeCount = links.filter((l) => l.active).length;
 
   return (
-    <div className="p-4 md:p-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2 text-[13px] text-[#8B9DAF] mb-1">
-            <Link to="/admin" className="hover:text-[#1A73E8]">Admin</Link>
-            <span>/</span>
-            <span className="text-[#5A6B7B]">Link Sayfası Yönetimi</span>
+    <AdminPageShell>
+      <AdminBreadcrumb items={[{ label: 'Admin', to: '/admin' }, { label: 'Link Sayfası Yönetimi' }]} />
+      <AdminPageHeader
+        title="Link Sayfası Yönetimi"
+        description="Instagram bio bağlantı sayfasındaki linkleri yönetin."
+        action={
+          <div className="flex items-center gap-3">
+            <Link
+              to="/all-links"
+              target="_blank"
+              className="flex items-center gap-2 text-sm font-medium text-aq-blue hover:underline"
+            >
+              <Eye className="w-4 h-4" /> Sayfayı Görüntüle
+            </Link>
+            <AdminButton
+              onClick={() => {
+                setShowAdd(true);
+                setIsEditing(false);
+              }}
+            >
+              <Plus className="w-4 h-4" /> Link Ekle
+            </AdminButton>
           </div>
-          <h1 className="text-xl md:text-2xl font-bold text-[#0D2137]">Link Sayfası Yönetimi</h1>
-          <p className="text-sm text-[#8B9DAF] mt-1">Instagram bio bağlantı sayfasındaki linkleri yönetin.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <a href="/#/all-links" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-medium text-[#1A73E8] hover:underline">
-            <Eye className="w-4 h-4" /> Sayfayı Görüntüle
-          </a>
-          <button onClick={() => { setShowAdd(true); setIsEditing(false); }} className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1557B0] transition-all">
-            <Plus className="w-4 h-4" /> Link Ekle
-          </button>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: 'Toplam Link', value: links.length },
-          { label: 'Aktif', value: activeCount },
-          { label: 'Pasif', value: links.length - activeCount },
-          { label: 'One Cikan', value: links.filter(l => l.featured).length },
-        ].map(s => (
-          <div key={s.label} className="bg-white border border-[#E8F0FE] rounded-xl p-4">
-            <p className="text-xs text-[#8B9DAF]">{s.label}</p>
-            <p className="text-2xl font-bold text-[#0D2137]">{s.value}</p>
-          </div>
-        ))}
+        <AdminStatCard label="Toplam Link" value={links.length} />
+        <AdminStatCard label="Aktif" value={activeCount} />
+        <AdminStatCard label="Pasif" value={links.length - activeCount} />
+        <AdminStatCard label="Öne Çıkan" value={links.filter((l) => l.featured).length} />
       </div>
 
-      {/* Add Form */}
       {showAdd && (
-        <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5 mb-6">
-          <h3 className="text-sm font-semibold text-[#0D2137] mb-4">Yeni Link Ekle</h3>
+        <AdminCard className="mb-6">
+          <p className="text-sm font-semibold text-aq-text mb-4">Yeni Link Ekle</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Baslik *</label>
-              <input value={newForm.title} onChange={e => setNewForm({ ...newForm, title: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg focus:outline-none focus:border-[#1A73E8]" placeholder="Link basligi" />
+              <AdminLabel>Başlık *</AdminLabel>
+              <AdminInput
+                value={newForm.title}
+                onChange={(e) => setNewForm({ ...newForm, title: e.target.value })}
+                placeholder="Link başlığı"
+              />
             </div>
             <div>
-              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">URL *</label>
-              <input value={newForm.url} onChange={e => setNewForm({ ...newForm, url: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg focus:outline-none focus:border-[#1A73E8]" placeholder="/sayfa veya https://..." />
+              <AdminLabel>URL *</AdminLabel>
+              <AdminInput
+                value={newForm.url}
+                onChange={(e) => setNewForm({ ...newForm, url: e.target.value })}
+                placeholder="/sayfa veya https://..."
+              />
             </div>
             <div>
-              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Ikon</label>
-              <select value={newForm.icon} onChange={e => setNewForm({ ...newForm, icon: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg focus:outline-none focus:border-[#1A73E8]">
-                {iconOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
+              <AdminLabel>İkon</AdminLabel>
+              <AdminSelect
+                value={newForm.icon}
+                onChange={(e) => setNewForm({ ...newForm, icon: e.target.value })}
+              >
+                {iconOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </AdminSelect>
             </div>
           </div>
           <div className="flex items-center gap-3 mt-4">
-            <button onClick={handleAdd} className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1557B0] transition-all">Ekle</button>
-            <button onClick={() => setShowAdd(false)} className="text-sm text-[#8B9DAF] hover:text-[#5A6B7B]">Iptal</button>
+            <AdminButton onClick={handleAdd}>Ekle</AdminButton>
+            <AdminButton variant="ghost" onClick={() => setShowAdd(false)}>
+              İptal
+            </AdminButton>
           </div>
-        </div>
+        </AdminCard>
       )}
 
-      {/* Edit Form */}
       {isEditing && editForm && (
-        <div className="bg-white border border-[#E8F0FE] rounded-2xl p-5 mb-6">
-          <h3 className="text-sm font-semibold text-[#0D2137] mb-4">Link Duzenle</h3>
+        <AdminCard className="mb-6">
+          <p className="text-sm font-semibold text-aq-text mb-4">Link Düzenle</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Baslik *</label>
-              <input value={editForm.title} onChange={e => setEditForm({ ...editForm, title: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg focus:outline-none focus:border-[#1A73E8]" />
+              <AdminLabel>Başlık *</AdminLabel>
+              <AdminInput
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+              />
             </div>
             <div>
-              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">URL *</label>
-              <input value={editForm.url} onChange={e => setEditForm({ ...editForm, url: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg focus:outline-none focus:border-[#1A73E8]" />
+              <AdminLabel>URL *</AdminLabel>
+              <AdminInput
+                value={editForm.url}
+                onChange={(e) => setEditForm({ ...editForm, url: e.target.value })}
+              />
             </div>
             <div>
-              <label className="text-xs font-medium text-[#5A6B7B] mb-1.5 block">Ikon</label>
-              <select value={editForm.icon} onChange={e => setEditForm({ ...editForm, icon: e.target.value })} className="w-full px-3 py-2 text-sm border border-[#D6E3F0] rounded-lg focus:outline-none focus:border-[#1A73E8]">
-                {iconOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
+              <AdminLabel>İkon</AdminLabel>
+              <AdminSelect
+                value={editForm.icon}
+                onChange={(e) => setEditForm({ ...editForm, icon: e.target.value })}
+              >
+                {iconOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </AdminSelect>
             </div>
           </div>
           <div className="flex items-center gap-3 mt-4">
-            <button onClick={handleSaveEdit} className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1557B0] transition-all">Kaydet</button>
-            <button onClick={() => { setIsEditing(false); setEditForm(null); }} className="text-sm text-[#8B9DAF] hover:text-[#5A6B7B]">Iptal</button>
+            <AdminButton onClick={handleSaveEdit}>Kaydet</AdminButton>
+            <AdminButton
+              variant="ghost"
+              onClick={() => {
+                setIsEditing(false);
+                setEditForm(null);
+              }}
+            >
+              İptal
+            </AdminButton>
           </div>
-        </div>
+        </AdminCard>
       )}
 
-      {/* Links Table */}
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
+      {loading ? (
+        <AdminLoading label="Linkler yükleniyor..." />
+      ) : sortedLinks.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty icon={Link2} message="Henüz link yok." />
+        </AdminCard>
+      ) : (
+        <AdminTableWrap stickyFirst>
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#E8F0FE]">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Sira</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Baslik</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-[#8B9DAF]">URL</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-[#8B9DAF]">Aktif</th>
-                <th className="text-center px-4 py-3 text-xs font-semibold text-[#8B9DAF]">One Cikan</th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-[#8B9DAF]">İşlemler</th>
+              <tr className="bg-aq-ice border-b border-aq-border/60">
+                {['Sıra', 'Başlık', 'URL', 'Aktif', 'Öne Çıkan', 'İşlemler'].map((h) => (
+                  <th
+                    key={h}
+                    className={cn(
+                      'px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap',
+                      h === 'Aktif' || h === 'Öne Çıkan' ? 'text-center' : h === 'İşlemler' ? 'text-right' : 'text-left',
+                    )}
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {sortedLinks.map(link => {
+              {sortedLinks.map((link) => {
                 const Icon = getIcon(link.icon);
                 return (
-                  <tr key={link.id} className={cn('border-b border-[#F0F6FF] last:border-0', !link.active && 'opacity-50')}>
+                  <tr
+                    key={link.id}
+                    className={cn(
+                      'border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50',
+                      !link.active && 'opacity-50',
+                    )}
+                  >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <GripVertical className="w-3.5 h-3.5 text-[#D6E3F0]" />
-                        <span className="text-xs text-[#8B9DAF]">{link.order}</span>
+                        <GripVertical className="w-3.5 h-3.5 text-aq-border" />
+                        <span className="text-xs text-aq-muted">{link.order}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 bg-[#F0F6FF] rounded-lg flex items-center justify-center">
-                          <Icon className="w-3.5 h-3.5 text-[#1A73E8]" />
+                        <div className="w-7 h-7 bg-aq-ice rounded-lg flex items-center justify-center">
+                          <Icon className="w-3.5 h-3.5 text-aq-blue" />
                         </div>
-                        <span className="text-sm font-medium text-[#0D2137]">{link.title}</span>
+                        <span className="text-sm font-medium text-aq-text">{link.title}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-xs text-[#8B9DAF] truncate max-w-[200px] block">{link.url}</span>
+                      <span className="text-xs text-aq-muted truncate max-w-[200px] block">{link.url}</span>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <button onClick={() => handleToggleActive(link.id)} className={cn('w-8 h-5 rounded-full transition-all relative', link.active ? 'bg-[#00C9A7]' : 'bg-[#D6E3F0]')}>
-                        <div className={cn('w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 transition-all shadow-sm', link.active ? 'left-[18px]' : 'left-0.5')} />
+                      <button
+                        type="button"
+                        onClick={() => handleToggleActive(link.id)}
+                        className={cn(
+                          'w-8 h-5 rounded-full transition-all relative',
+                          link.active ? 'bg-aq-aqua' : 'bg-aq-border',
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 transition-all shadow-sm',
+                            link.active ? 'left-[18px]' : 'left-0.5',
+                          )}
+                        />
                       </button>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <button onClick={() => handleToggleFeatured(link.id)} className={cn('p-1.5 rounded-lg transition-all', link.featured ? 'bg-[#F0F6FF] text-[#1A73E8]' : 'text-[#D6E3F0]')}>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeatured(link.id)}
+                        className={cn(
+                          'p-1.5 rounded-lg transition-all',
+                          link.featured ? 'bg-aq-ice text-aq-blue' : 'text-aq-border',
+                        )}
+                      >
                         <Check className="w-3.5 h-3.5" />
                       </button>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => handleEdit(link)} className="p-1.5 rounded-lg hover:bg-[#F0F6FF] text-[#8B9DAF] hover:text-[#1A73E8] transition-all"><Pencil className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => handleDelete(link.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-[#8B9DAF] hover:text-red-500 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(link)}
+                          className="p-1.5 rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue transition-all"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(link.id)}
+                          className="p-1.5 rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500 transition-all"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -271,18 +373,25 @@ export default function AdminLinksPage() {
               })}
             </tbody>
           </table>
-        </div>
-      </div>
+        </AdminTableWrap>
+      )}
 
-      {/* Preview hint */}
-      <div className="mt-6 bg-[#F0F6FF] border border-[#E8F0FE] rounded-xl p-4 flex items-start gap-3">
-        <Eye className="w-5 h-5 text-[#1A73E8] flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-[#0D2137]">Onizleme</p>
-          <p className="text-xs text-[#5A6B7B] mt-1">Yaptiginiz degisiklikler aninda All Links sayfasina yansir. Sayfayi goruntule butonu ile kontrol edebilirsiniz.</p>
-          <p className="text-xs text-[#8B9DAF] mt-1">Not: Bu yonetim paneli localStorage uzerinde calisir. Tarayici verileri temizlenirse varsayilan ayarlara doner.</p>
+      <AdminCard className="mt-6">
+        <div className="flex items-start gap-3">
+          <Eye className="w-5 h-5 text-aq-blue flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-aq-text">Önizleme</p>
+            <p className="text-xs text-aq-muted mt-1">
+              Yaptığınız değişiklikler anında All Links sayfasına yansır. Sayfayı görüntüle butonu ile
+              kontrol edebilirsiniz.
+            </p>
+            <p className="text-xs text-aq-muted mt-1">
+              Not: Bu yönetim paneli localStorage üzerinde çalışır. Tarayıcı verileri temizlenirse
+              varsayılan ayarlara döner.
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
+      </AdminCard>
+    </AdminPageShell>
   );
 }

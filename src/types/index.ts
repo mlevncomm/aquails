@@ -3,11 +3,14 @@ export interface Product {
   slug: string;
   name: string;
   category: string;
+  categorySlug: string;
   subcategory: string;
   description: string;
   shortDescription: string;
   price: number;
   oldPrice: number | null;
+  /** Ürün bazlı KDV oranı (%); yoksa site varsayılanı kullanılır */
+  taxRate?: number;
   rating: number;
   reviewCount: number;
   stock: number;

@@ -1,20 +1,25 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router';
-import { useCallback } from 'react';
-import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import {
+  X,
+  Plus,
+  Minus,
+  Trash2,
+  ShoppingBag,
+  ArrowUpRight,
+  Sparkles,
+  Truck,
+} from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
-import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
-import { useEscapeKey } from '@/hooks/useEscapeKey';
+import { useCartPricing } from '@/hooks/useCartPricing';
+import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
+import { CartLinePrice } from '@/components/CartLinePrice';
+import { cn } from '@/lib/utils';
 
 export function CartDrawer() {
-  const { items, isDrawerOpen, closeDrawer, updateQuantity, removeItem, getSubtotal } = useCartStore();
-  const subtotal = getSubtotal();
-  const shipping = subtotal >= 1500 ? 0 : 49;
-  const total = subtotal + shipping;
-
-  const onClose = useCallback(() => closeDrawer(), [closeDrawer]);
-  useBodyScrollLock(isDrawerOpen);
-  useEscapeKey(isDrawerOpen, onClose);
+  const { items, isDrawerOpen, closeDrawer, updateQuantity, removeItem } = useCartStore();
+  const { taxConfig, taxTotals } = useCartPricing(items);
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <AnimatePresence>
@@ -25,54 +30,96 @@ export function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-aqua-secondary/40 z-50"
-            onClick={onClose}
-            aria-hidden="true"
+            className="fixed inset-0 z-50 bg-aq-deep/45 backdrop-blur-[2px]"
+            onClick={closeDrawer}
           />
 
           <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Sepet"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="fixed top-0 right-0 bottom-0 w-full max-w-[420px] bg-white z-50 shadow-drawer flex flex-col"
+            className="fixed top-0 right-0 bottom-0 z-50 flex w-full max-w-[420px] flex-col overflow-hidden border-l border-white/40 bg-[#F7FBFE] shadow-drawer"
           >
+            <div className="pointer-events-none absolute inset-0" aria-hidden>
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_40%_at_100%_0%,rgba(32,211,242,0.16),transparent_55%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_30%_at_0%_100%,rgba(18,134,216,0.1),transparent_50%)]" />
+            </div>
+
             {/* Header */}
-            <div className="flex items-center justify-between p-5 border-b border-aqua-border-light">
-              <h3 className="text-lg font-semibold text-aqua-secondary flex items-center gap-2">
-                <ShoppingBag className="w-5 h-5 text-aqua-primary" />
-                Sepetim
-              </h3>
+            <div className="relative z-10 flex items-center justify-between border-b border-aq-border/40 bg-white/70 px-5 py-4 backdrop-blur-xl">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-aq-blue/70">
+                  Alışveriş
+                </p>
+                <div className="mt-1 flex items-center gap-2.5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-aq-blue to-[#0d6fba] text-white shadow-[0_10px_20px_-10px_rgba(18,134,216,0.85)]">
+                    <ShoppingBag className="h-4 w-4" />
+                  </span>
+                  <h3 className="font-[Poppins,ui-sans-serif,sans-serif] text-lg font-semibold tracking-tight text-aq-deep">
+                    Sepetim
+                  </h3>
+                  {itemCount > 0 && (
+                    <span className="rounded-full bg-aq-sky px-2 py-0.5 text-[11px] font-semibold text-aq-blue">
+                      {itemCount} ürün
+                    </span>
+                  )}
+                </div>
+              </div>
               <button
+                type="button"
                 onClick={closeDrawer}
-                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-aqua-bg transition-colors"
+                aria-label="Sepeti kapat"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-aq-border/60 bg-white/80 text-aq-muted transition-all hover:border-aq-blue/30 hover:bg-aq-sky hover:text-aq-deep"
               >
-                <X className="w-5 h-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            {/* Items */}
-            <div className="flex-1 overflow-y-auto p-5">
+            {/* Body */}
+            <div className="relative z-10 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-5">
               {items.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <ShoppingBag className="w-16 h-16 text-aqua-border mb-4" />
-                  <p className="text-lg font-semibold text-aqua-text-muted">Sepetiniz boş</p>
-                  <p className="text-sm text-aqua-text-muted mt-1">
-                    Ürünleri keşfetmeye başlayın
+                <div className="flex h-full flex-col items-center justify-center px-2 text-center">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 scale-150 rounded-full bg-aq-aqua/20 blur-2xl" />
+                    <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/80 bg-white/80 shadow-[0_20px_50px_-28px_rgba(6,38,61,0.45)] backdrop-blur-xl">
+                      <ShoppingBag className="h-10 w-10 text-aq-blue/55" strokeWidth={1.5} />
+                      <span className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-aq-aqua to-aq-blue text-white shadow-md">
+                        <Sparkles className="h-3.5 w-3.5" />
+                      </span>
+                    </div>
+                  </div>
+                  <h4 className="font-[Poppins,ui-sans-serif,sans-serif] text-xl font-semibold tracking-tight text-aq-deep">
+                    Sepetiniz boş
+                  </h4>
+                  <p className="mt-2 max-w-[240px] text-sm leading-relaxed text-aq-muted">
+                    Su arıtma ürünlerini keşfedin, size uygun çözümü sepetinize ekleyin.
                   </p>
-                  <Link
-                    to="/urunler"
-                    onClick={closeDrawer}
-                    className="mt-5 bg-aqua-primary text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-aqua-primary-dark transition-colors"
-                  >
-                    Alışverişe Başla
-                  </Link>
+                  <div className="mt-6 flex w-full max-w-[280px] flex-col gap-2.5">
+                    <Link
+                      to="/urunler"
+                      onClick={closeDrawer}
+                      className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-aq-blue to-[#0d6fba] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(18,134,216,0.75)] transition-all hover:-translate-y-0.5"
+                    >
+                      Alışverişe Başla
+                      <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </Link>
+                    <Link
+                      to="/urun-secim-sihirbazi"
+                      onClick={closeDrawer}
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-aq-border/70 bg-white/70 px-5 py-3 text-sm font-medium text-aq-muted transition-colors hover:border-aq-blue/35 hover:text-aq-blue"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Ürün sihirbazı
+                    </Link>
+                  </div>
+                  <div className="mt-8 flex items-center gap-2 rounded-full border border-aq-border/50 bg-white/60 px-3.5 py-2 text-[11px] text-aq-muted">
+                    <Truck className="h-3.5 w-3.5 text-aq-blue" />
+                    Ücretsiz kargo fırsatlarını kaçırmayın
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <AnimatePresence mode="popLayout">
                     {items.map((item) => (
                       <motion.div
@@ -82,53 +129,55 @@ export function CartDrawer() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20, height: 0, marginBottom: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="flex items-center gap-3 pb-4 border-b border-aqua-border-light last:border-0"
+                        className="flex min-w-0 items-center gap-3 rounded-2xl border border-white/80 bg-white/80 p-3 shadow-[0_12px_30px_-24px_rgba(6,38,61,0.45)] backdrop-blur-sm"
                       >
-                        {/* Image */}
-                        <div className="w-[60px] h-[60px] bg-aqua-bg rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-aq-border/40 bg-aq-ice">
                           <img
                             src={item.product.images?.[0] || '/images/products/placeholder.jpg'}
                             alt={item.product.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg';
+                            }}
                           />
                         </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-aqua-secondary truncate">
-                            {item.product.name}
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-aq-text">{item.product.name}</p>
+                          <p className="mt-1 text-sm font-semibold text-aq-deep">
+                            <CartLinePrice product={item.product} quantity={item.quantity} />
                           </p>
-                          <p className="text-sm font-semibold text-aqua-secondary mt-1">
-                            {(item.product.price * item.quantity).toLocaleString('tr-TR')}₺
-                          </p>
-
-                          {/* Quantity */}
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="mt-2.5 inline-flex items-center gap-1 rounded-xl border border-aq-border/50 bg-aq-ice/80 p-0.5">
                             <button
+                              type="button"
                               onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-aqua-bg text-aqua-text-secondary hover:bg-aqua-border-light transition-colors"
+                              className="flex h-7 w-7 items-center justify-center rounded-lg text-aq-muted transition-colors hover:bg-white hover:text-aq-deep"
+                              aria-label="Azalt"
                             >
-                              <Minus className="w-3 h-3" />
+                              <Minus className="h-3 w-3" />
                             </button>
-                            <span className="text-sm font-semibold w-6 text-center">
+                            <span className="w-7 text-center text-sm font-semibold text-aq-deep">
                               {item.quantity}
                             </span>
                             <button
+                              type="button"
                               onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-aqua-bg text-aqua-text-secondary hover:bg-aqua-border-light transition-colors"
+                              className="flex h-7 w-7 items-center justify-center rounded-lg text-aq-muted transition-colors hover:bg-white hover:text-aq-deep"
+                              aria-label="Artır"
                             >
-                              <Plus className="w-3 h-3" />
+                              <Plus className="h-3 w-3" />
                             </button>
                           </div>
                         </div>
-
-                        {/* Delete */}
                         <button
+                          type="button"
                           onClick={() => removeItem(item.product.id)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg text-aqua-text-muted hover:bg-aqua-danger/10 hover:text-aqua-danger transition-colors flex-shrink-0"
+                          aria-label="Ürünü kaldır"
+                          className={cn(
+                            'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl',
+                            'text-aq-muted transition-colors hover:bg-red-50 hover:text-red-500',
+                          )}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </motion.div>
                     ))}
@@ -137,34 +186,28 @@ export function CartDrawer() {
               )}
             </div>
 
-            {/* Footer */}
             {items.length > 0 && (
-              <div className="p-5 border-t border-aqua-border-light bg-white">
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-aqua-text-secondary">Ara Toplam</span>
-                    <span className="font-medium text-aqua-secondary">
-                      {subtotal.toLocaleString('tr-TR')}₺
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-aqua-text-secondary">Kargo</span>
-                    <span className={shipping === 0 ? 'text-aqua-success font-medium' : 'font-medium text-aqua-secondary'}>
-                      {shipping === 0 ? 'Ücretsiz' : `${shipping}₺`}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-base font-semibold pt-2 border-t border-aqua-border-light">
-                    <span className="text-aqua-secondary">Toplam</span>
-                    <span className="text-aqua-secondary">{total.toLocaleString('tr-TR')}₺</span>
-                  </div>
-                </div>
+              <div className="relative z-10 border-t border-aq-border/40 bg-white/80 p-5 min-w-0 backdrop-blur-xl">
+                <OrderPriceBreakdown
+                  totals={taxTotals}
+                  taxConfig={taxConfig}
+                  totalLabel="Toplam"
+                  compact
+                />
                 <Link
                   to="/odeme"
                   onClick={closeDrawer}
-                  className="flex items-center justify-center gap-2 w-full bg-aqua-primary text-white py-3.5 rounded-full font-semibold hover:bg-aqua-primary-dark hover:shadow-primary transition-all"
+                  className="group mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-aq-blue to-[#0d6fba] py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(18,134,216,0.75)] transition-all hover:-translate-y-0.5"
                 >
                   Ödemeye Geç
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </Link>
+                <Link
+                  to="/sepet"
+                  onClick={closeDrawer}
+                  className="mt-2.5 block text-center text-xs font-medium text-aq-muted transition-colors hover:text-aq-blue"
+                >
+                  Sepet sayfasına git
                 </Link>
               </div>
             )}

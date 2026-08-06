@@ -1,273 +1,568 @@
-import { apiClient } from '@/lib/apiClient';
-import { isSupabaseMode } from '@/lib/dataProvider';
-import { requireSupabase } from '@/lib/supabase';
-import { mapDbProduct, type DbProduct } from '@/types/database';
-import type { Product } from '@/types';
+import { getSupabaseOrNull, isSupabaseConfigured } from '@/lib/supabase';
+import {
+  products as localProducts,
+  categories as localCategories,
+  getProductBySlug as getLocalProductBySlug,
+  getRelatedProducts as getLocalRelatedProducts,
+} from '@/data/products';
+import type { Product, Category } from '@/types';
+import type { DbProduct, DbCategory, DbProductImage } from '@/types/database';
+import { fail, mapDbError, ok, type MutationResult } from '@/lib/mutationResult';
 
-export interface ProductListParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-  category?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  sort?: 'price_asc' | 'price_desc' | 'newest' | 'rating';
+type ProductWithRelations = DbProduct & {
+  categories: DbCategory | DbCategory[] | null;
+  product_images: DbProductImage[] | null;
+  category_id?: string;
+  sku?: string;
+  is_active?: boolean;
+  tax_rate?: number | null;
+};
+
+export type AdminProduct = Product & {
+  categoryId: string;
+  sku: string;
+  isActive: boolean;
+  imageRecords: DbProductImage[];
+};
+
+export type CatalogLoadResult =
+  | { ok: true; products: Product[]; source: 'remote' | 'local' }
+  | { ok: false; error: string; code: 'not_configured' | 'network' | 'query' };
+
+function getCategoryName(relation: DbCategory | DbCategory[] | null): string {
+  if (!relation) return '';
+  if (Array.isArray(relation)) return relation[0]?.name ?? '';
+  return relation.name;
 }
 
-export interface PaginatedProducts {
-  items: Product[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+function getCategorySlug(relation: DbCategory | DbCategory[] | null): string {
+  if (!relation) return '';
+  if (Array.isArray(relation)) return relation[0]?.slug ?? '';
+  return relation.slug;
 }
 
-export interface CategoryDto {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-  icon: string;
-  productCount: number;
-  isActive?: boolean;
-}
+function mapDbProduct(row: ProductWithRelations): Product {
+  const images = (row.product_images ?? [])
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((img) => img.url);
+  const categoryName = getCategoryName(row.categories);
+  const categorySlug = getCategorySlug(row.categories);
 
-function buildQuery(params: Record<string, string | number | boolean | undefined>) {
-  const search = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== '') search.set(key, String(value));
-  }
-  const query = search.toString();
-  return query ? `?${query}` : '';
-}
-
-const PRODUCT_SELECT = '*, categories(slug, name, icon, description)';
-
-async function supabaseGetProducts(params: ProductListParams = {}): Promise<PaginatedProducts> {
-  const supabase = requireSupabase();
-  const page = params.page ?? 1;
-  const limit = params.limit ?? 12;
-  const from = (page - 1) * limit;
-  const to = from + limit - 1;
-
-  let query = supabase
-    .from('products')
-    .select(PRODUCT_SELECT, { count: 'exact' })
-    .eq('is_active', true);
-
-  if (params.search) query = query.or(`name.ilike.%${params.search}%,description.ilike.%${params.search}%`);
-  if (params.minPrice != null) query = query.gte('price', params.minPrice);
-  if (params.maxPrice != null) query = query.lte('price', params.maxPrice);
-  if (params.category) {
-    const { data: cat } = await supabase.from('categories').select('id').eq('slug', params.category).maybeSingle();
-    if (cat) query = query.eq('category_id', cat.id);
-  }
-
-  switch (params.sort) {
-    case 'price_asc':
-      query = query.order('price', { ascending: true });
-      break;
-    case 'price_desc':
-      query = query.order('price', { ascending: false });
-      break;
-    case 'rating':
-      query = query.order('rating', { ascending: false });
-      break;
-    default:
-      query = query.order('created_at', { ascending: false });
-  }
-
-  const { data, count, error } = await query.range(from, to);
-  if (error) throw new Error(error.message);
-
-  const total = count ?? 0;
   return {
-    items: (data ?? []).map((row) => mapDbProduct(row as DbProduct)),
-    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    category: categoryName,
+    categorySlug,
+    subcategory: categoryName,
+    description: row.description,
+    shortDescription: row.short_description,
+    price: Number(row.price),
+    oldPrice: row.old_price != null ? Number(row.old_price) : null,
+    taxRate: row.tax_rate != null ? Number(row.tax_rate) : undefined,
+    rating: Number(row.rating),
+    reviewCount: row.review_count,
+    stock: row.stock,
+    images: images.length ? images : ['/images/products/placeholder.jpg'],
+    features: Array.isArray(row.features) ? row.features : [],
+    specifications:
+      row.specifications && typeof row.specifications === 'object'
+        ? (row.specifications as Record<string, string>)
+        : {},
+    badge: row.badge ?? undefined,
+    discountPercent: row.discount_percent ?? undefined,
   };
 }
 
-async function supabaseGetProduct(slug: string): Promise<Product> {
-  const supabase = requireSupabase();
+function mapAdminProduct(row: ProductWithRelations): AdminProduct {
+  const product = mapDbProduct(row);
+  return {
+    ...product,
+    categoryId: row.category_id ?? '',
+    sku: row.sku ?? '',
+    isActive: row.is_active !== false,
+    imageRecords: [...(row.product_images ?? [])].sort((a, b) => a.sort_order - b.sort_order),
+  };
+}
+
+function mapDbCategory(row: DbCategory, productCount = 0): Category {
+  return {
+    id: row.slug,
+    name: row.name,
+    slug: row.slug,
+    icon: row.icon ?? 'Package',
+    productCount,
+  };
+}
+
+const PRODUCT_SELECT = `
+  *,
+  categories (*),
+  product_images (*)
+`;
+
+export async function getProducts(): Promise<Product[]> {
+  const result = await loadPublicProducts();
+  if (result.ok) return result.products;
+  if (result.code === 'not_configured') return [...localProducts];
+  return [];
+}
+
+/** Public catalog loader — no silent local fallback when Supabase is configured. */
+export async function loadPublicProducts(): Promise<CatalogLoadResult> {
+  if (!isSupabaseConfigured()) {
+    return { ok: true, products: [...localProducts], source: 'local' };
+  }
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { ok: false, error: 'Supabase yapılandırılmamış.', code: 'not_configured' };
+
+  const { data, error } = await supabase
+    .from('products')
+    .select(PRODUCT_SELECT)
+    .eq('is_active', true)
+    .order('name');
+
+  if (error) {
+    return {
+      ok: false,
+      error: mapDbError(error.message, 'Ürünler yüklenemedi.'),
+      code: /network|fetch|timeout/i.test(error.message) ? 'network' : 'query',
+    };
+  }
+  return {
+    ok: true,
+    products: (data as unknown as ProductWithRelations[] | null)?.map(mapDbProduct) ?? [],
+    source: 'remote',
+  };
+}
+
+async function fetchProductBySlugFromSupabase(slug: string): Promise<Product | undefined> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return undefined;
+
   const { data, error } = await supabase
     .from('products')
     .select(PRODUCT_SELECT)
     .eq('slug', slug)
     .eq('is_active', true)
-    .single();
-  if (error || !data) throw new Error('Ürün bulunamadı');
-  return mapDbProduct(data as DbProduct);
+    .maybeSingle();
+
+  if (error || !data) return undefined;
+  return mapDbProduct(data as unknown as ProductWithRelations);
 }
 
-async function supabaseGetRelated(productId: string, limit = 4): Promise<Product[]> {
-  const supabase = requireSupabase();
-  const { data: product } = await supabase.from('products').select('category_id').eq('id', productId).single();
-  if (!product?.category_id) return [];
+export async function getProduct(slug: string): Promise<Product | undefined> {
+  if (!isSupabaseConfigured()) return getLocalProductBySlug(slug);
+  return fetchProductBySlugFromSupabase(slug);
+}
 
-  const { data } = await supabase
+export async function getProductById(id: string): Promise<Product | undefined> {
+  if (!isSupabaseConfigured()) return localProducts.find((p) => p.id === id);
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return undefined;
+
+  const { data, error } = await supabase
     .from('products')
     .select(PRODUCT_SELECT)
-    .eq('category_id', product.category_id)
-    .eq('is_active', true)
-    .neq('id', productId)
-    .limit(limit);
+    .eq('id', id)
+    .maybeSingle();
 
-  return (data ?? []).map((row) => mapDbProduct(row as DbProduct));
+  if (error || !data) return undefined;
+  return mapDbProduct(data as unknown as ProductWithRelations);
 }
 
-async function supabaseGetCategories(): Promise<CategoryDto[]> {
-  const supabase = requireSupabase();
-  const { data: categories, error } = await supabase
-    .from('categories')
-    .select('id, slug, name, description, icon, is_active')
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true });
-  if (error) throw new Error(error.message);
+export async function bulkUpdateProductPrices(
+  categorySlug: string,
+  mode: 'percent' | 'fixed_add' | 'set_tax',
+  value: number,
+): Promise<{ success: boolean; count?: number; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
-  const { data: products } = await supabase.from('products').select('category_id').eq('is_active', true);
-  const counts = new Map<string, number>();
-  for (const p of products ?? []) {
-    if (p.category_id) counts.set(String(p.category_id), (counts.get(String(p.category_id)) ?? 0) + 1);
+  const { data, error } = await supabase.rpc('bulk_update_product_prices', {
+    p_category_slug: categorySlug,
+    p_mode: mode,
+    p_value: value,
+  });
+
+  if (error) return { success: false, error: mapDbError(error.message) };
+  return { success: true, count: data as number };
+}
+
+export async function importProductsBatch(
+  rows: AdminProductForm[],
+): Promise<{ success: boolean; imported: number; errors: string[] }> {
+  let imported = 0;
+  const errors: string[] = [];
+  for (const row of rows) {
+    const res = await createProduct(row);
+    if (res.success) imported++;
+    else errors.push(`${row.name}: ${res.error}`);
   }
-
-    return (categories ?? []).map((c) => ({
-      id: String(c.id),
-      slug: String(c.slug),
-      name: String(c.name),
-      description: String(c.description ?? ''),
-      icon: String(c.icon ?? 'Package'),
-      productCount: counts.get(String(c.id)) ?? 0,
-      isActive: Boolean(c.is_active),
-    }));
-}
-
-async function supabaseGetCategory(slug: string): Promise<CategoryDto> {
-  const categories = await supabaseGetCategories();
-  const found = categories.find((c) => c.slug === slug);
-  if (!found) throw new Error('Kategori bulunamadı');
-  return found;
-}
-
-export async function getProducts(params: ProductListParams = {}): Promise<PaginatedProducts> {
-  if (isSupabaseMode) return supabaseGetProducts(params);
-  return apiClient.get<PaginatedProducts>(`/api/products${buildQuery(params as Record<string, string | number | boolean | undefined>)}`);
-}
-
-export async function getProduct(slug: string): Promise<Product> {
-  if (isSupabaseMode) return supabaseGetProduct(slug);
-  return apiClient.get<Product>(`/api/products/${slug}`);
+  return { success: errors.length === 0, imported, errors };
 }
 
 export async function getRelated(productId: string, limit = 4): Promise<Product[]> {
-  if (isSupabaseMode) return supabaseGetRelated(productId, limit);
-  return apiClient.get<Product[]>(`/api/products/${productId}/related?limit=${limit}`);
+  const all = await getProducts();
+  const source = all.find((p) => p.id === productId);
+  if (!source) {
+    if (!isSupabaseConfigured()) return getLocalRelatedProducts(productId, limit);
+    return [];
+  }
+
+  return all
+    .filter((p) => p.category === source.category && p.id !== productId)
+    .slice(0, limit);
 }
 
 export async function searchProducts(query: string): Promise<Product[]> {
-  const result = await getProducts({ search: query, limit: 50 });
-  return result.items;
-}
+  const q = query.toLowerCase().trim();
+  if (!q) return getProducts();
 
-export async function getCategories(): Promise<CategoryDto[]> {
-  if (isSupabaseMode) return supabaseGetCategories();
-  return apiClient.get<CategoryDto[]>('/api/categories');
-}
-
-export async function getCategory(slug: string): Promise<CategoryDto> {
-  if (isSupabaseMode) return supabaseGetCategory(slug);
-  return apiClient.get<CategoryDto>(`/api/categories/${slug}`);
-}
-
-export async function adminGetProducts(params: ProductListParams & { includeInactive?: boolean; lowStock?: boolean } = {}) {
-  if (isSupabaseMode) {
-    const supabase = requireSupabase();
-    let query = supabase.from('products').select(PRODUCT_SELECT, { count: 'exact' });
-    if (!params.includeInactive) query = query.eq('is_active', true);
-    if (params.lowStock) query = query.lte('stock', 5);
-    if (params.search) query = query.ilike('name', `%${params.search}%`);
-    const page = params.page ?? 1;
-    const limit = params.limit ?? 20;
-    const from = (page - 1) * limit;
-    const { data, count, error } = await query.range(from, from + limit - 1).order('created_at', { ascending: false });
-    if (error) throw new Error(error.message);
-    const total = count ?? 0;
-    return {
-      items: (data ?? []).map((row) => mapDbProduct(row as DbProduct)),
-      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
-    };
+  if (!isSupabaseConfigured()) {
+    return localProducts.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        p.slug.toLowerCase().includes(q),
+    );
   }
-  return apiClient.get<PaginatedProducts>(
-    `/api/admin/products${buildQuery({
-      ...params,
-      includeInactive: params.includeInactive ? 'true' : undefined,
-      lowStock: params.lowStock ? 'true' : undefined,
-    })}`,
-  );
+
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('products')
+    .select(PRODUCT_SELECT)
+    .eq('is_active', true)
+    .or(`name.ilike.%${q}%,slug.ilike.%${q}%`);
+
+  if (error) return [];
+  return (data as unknown as ProductWithRelations[] | null)?.map(mapDbProduct) ?? [];
 }
 
-export async function adminCreateProduct(body: Record<string, unknown>) {
-  if (isSupabaseMode) {
-    const supabase = requireSupabase();
-    const { data, error } = await supabase.from('products').insert(body).select(PRODUCT_SELECT).single();
-    if (error) throw new Error(error.message);
-    return mapDbProduct(data as DbProduct);
+export interface AdminProductForm {
+  name: string;
+  slug: string;
+  categoryId: string;
+  sku?: string;
+  shortDescription: string;
+  description: string;
+  price: number;
+  oldPrice?: number | null;
+  taxRate?: number;
+  stock: number;
+  isActive: boolean;
+  specifications: Record<string, string>;
+}
+
+export type AdminProductLoadError = {
+  code: 'not_found' | 'forbidden' | 'network' | 'schema' | 'not_configured';
+  message: string;
+};
+
+export async function getAdminProducts(): Promise<
+  | { ok: true; products: AdminProduct[] }
+  | { ok: false; error: string; code: 'not_configured' | 'network' | 'query' | 'forbidden' }
+> {
+  if (!isSupabaseConfigured()) {
+    return { ok: false, error: 'Supabase yapılandırılmamış.', code: 'not_configured' };
   }
-  return apiClient.post<Product>('/api/admin/products', body);
-}
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { ok: false, error: 'Supabase yapılandırılmamış.', code: 'not_configured' };
 
-export async function adminUpdateProduct(id: string, body: Record<string, unknown>) {
-  if (isSupabaseMode) {
-    const supabase = requireSupabase();
-    const { data, error } = await supabase.from('products').update(body).eq('id', id).select(PRODUCT_SELECT).single();
-    if (error) throw new Error(error.message);
-    return mapDbProduct(data as DbProduct);
+  const { data, error } = await supabase
+    .from('products')
+    .select(PRODUCT_SELECT)
+    .order('name');
+
+  if (error) {
+    const msg = mapDbError(error.message, 'Ürünler yüklenemedi.');
+    const code =
+      /42501|permission|rls|row-level/i.test(error.message) ? 'forbidden'
+        : /network|fetch|timeout/i.test(error.message) ? 'network'
+          : 'query';
+    return { ok: false, error: msg, code };
   }
-  return apiClient.patch<Product>(`/api/admin/products/${id}`, body);
+
+  return {
+    ok: true,
+    products: (data as unknown as ProductWithRelations[] | null)?.map(mapAdminProduct) ?? [],
+  };
 }
 
-export async function adminDeleteProduct(id: string) {
-  if (isSupabaseMode) {
-    const supabase = requireSupabase();
-    const { data, error } = await supabase.from('products').update({ is_active: false }).eq('id', id).select(PRODUCT_SELECT).single();
-    if (error) throw new Error(error.message);
-    return mapDbProduct(data as DbProduct);
+export async function getAdminProductById(
+  id: string,
+): Promise<{ ok: true; product: AdminProduct } | { ok: false; error: AdminProductLoadError }> {
+  if (!isSupabaseConfigured()) {
+    return { ok: false, error: { code: 'not_configured', message: 'Supabase yapılandırılmamış.' } };
   }
-  return apiClient.delete<Product>(`/api/admin/products/${id}`);
-}
-
-export async function adminGetCategories() {
-  if (isSupabaseMode) return supabaseGetCategories();
-  return apiClient.get<CategoryDto[]>('/api/admin/categories');
-}
-
-export async function adminCreateCategory(body: Record<string, unknown>) {
-  if (isSupabaseMode) {
-    const supabase = requireSupabase();
-    const { data, error } = await supabase.from('categories').insert(body).select('*').single();
-    if (error) throw new Error(error.message);
-    return data;
+  const supabase = getSupabaseOrNull();
+  if (!supabase) {
+    return { ok: false, error: { code: 'not_configured', message: 'Supabase yapılandırılmamış.' } };
   }
-  return apiClient.post<CategoryDto>('/api/admin/categories', body);
+
+  const { data, error } = await supabase
+    .from('products')
+    .select(PRODUCT_SELECT)
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) {
+    const message = mapDbError(error.message);
+    if (/42501|permission|rls|row-level/i.test(error.message)) {
+      return { ok: false, error: { code: 'forbidden', message } };
+    }
+    if (/network|fetch|timeout/i.test(error.message)) {
+      return { ok: false, error: { code: 'network', message } };
+    }
+    if (/column|schema|does not exist/i.test(error.message)) {
+      return { ok: false, error: { code: 'schema', message } };
+    }
+    return { ok: false, error: { code: 'schema', message } };
+  }
+
+  if (!data) {
+    return { ok: false, error: { code: 'not_found', message: 'Ürün bulunamadı.' } };
+  }
+
+  return { ok: true, product: mapAdminProduct(data as unknown as ProductWithRelations) };
 }
 
-export async function adminUpdateCategory(id: string, body: Record<string, unknown>) {
-  if (isSupabaseMode) {
-    const supabase = requireSupabase();
-    const { data, error } = await supabase.from('categories').update(body).eq('id', id).select('*').single();
-    if (error) throw new Error(error.message);
-    return data;
-  }
-  return apiClient.patch<CategoryDto>(`/api/admin/categories/${id}`, body);
+export function normalizeSlug(raw: string): string {
+  return raw
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9ğüşıöç\s-]/gi, '')
+    .replace(/[ğ]/g, 'g')
+    .replace(/[ü]/g, 'u')
+    .replace(/[ş]/g, 's')
+    .replace(/[ı]/g, 'i')
+    .replace(/[ö]/g, 'o')
+    .replace(/[ç]/g, 'c')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
-export async function adminDeleteCategory(id: string) {
-  if (isSupabaseMode) {
-    const supabase = requireSupabase();
-    const { data, error } = await supabase.from('categories').update({ is_active: false }).eq('id', id).select('*').single();
-    if (error) throw new Error(error.message);
-    return data;
+export function validateAdminProductForm(input: AdminProductForm): string | null {
+  if (!input.name.trim()) return 'Ürün adı zorunludur.';
+  const slug = normalizeSlug(input.slug || input.name);
+  if (!slug) return 'Ürün adresi (slug) zorunludur.';
+  if (!input.categoryId) return 'Kategori seçilmelidir.';
+  if (!Number.isFinite(input.price) || input.price < 0) return 'Geçerli bir fiyat girin.';
+  if (!Number.isFinite(input.stock) || input.stock < 0) return 'Geçerli bir stok değeri girin.';
+  if (input.oldPrice != null && (!Number.isFinite(input.oldPrice) || input.oldPrice < 0)) {
+    return 'Geçerli bir eski fiyat girin.';
   }
-  return apiClient.delete<CategoryDto>(`/api/admin/categories/${id}`);
+  if (input.taxRate != null && (!Number.isFinite(input.taxRate) || input.taxRate < 0 || input.taxRate > 100)) {
+    return 'KDV oranı 0–100 arasında olmalıdır.';
+  }
+  return null;
+}
+
+export async function updateProduct(
+  id: string,
+  input: AdminProductForm,
+): Promise<MutationResult<AdminProduct>> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return fail('Servis yapılandırılmamış.');
+
+  const validation = validateAdminProductForm(input);
+  if (validation) return fail(validation);
+
+  const slug = normalizeSlug(input.slug);
+  const { data, error } = await supabase.rpc('admin_update_product', {
+    p_id: id,
+    p_name: input.name.trim(),
+    p_slug: slug,
+    p_category_id: input.categoryId,
+    p_sku: input.sku?.trim() || `AQ-${slug}`,
+    p_short_description: input.shortDescription,
+    p_description: input.description,
+    p_price: input.price,
+    p_old_price: input.oldPrice ?? null,
+    p_stock: input.stock,
+    p_is_active: input.isActive,
+    p_specifications: input.specifications,
+    p_tax_rate: input.taxRate == null ? 20 : input.taxRate,
+  });
+
+  if (error) return fail(mapDbError(error.message, 'Ürün güncellenemedi.'));
+  if (!data) return fail('Ürün güncellenemedi (satır bulunamadı).');
+
+  const reloaded = await getAdminProductById(id);
+  if (!reloaded.ok) return fail(reloaded.error.message);
+  return ok(reloaded.product);
+}
+
+export async function setProductPrimaryImage(
+  productId: string,
+  imageId: string,
+): Promise<MutationResult> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return fail('Servis yapılandırılmamış.');
+
+  const { error } = await supabase.rpc('admin_set_product_primary_image', {
+    p_product_id: productId,
+    p_image_id: imageId,
+  });
+  if (error) return fail(mapDbError(error.message, 'Ana görsel ayarlanamadı.'));
+  return ok();
+}
+
+export async function addProductImageRecord(
+  productId: string,
+  url: string,
+  altText?: string | null,
+  sortOrder?: number | null,
+): Promise<MutationResult<DbProductImage>> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return fail('Servis yapılandırılmamış.');
+
+  const { data, error } = await supabase.rpc('admin_add_product_image', {
+    p_product_id: productId,
+    p_url: url,
+    p_alt_text: altText ?? null,
+    p_sort_order: sortOrder ?? null,
+  });
+  if (error) return fail(mapDbError(error.message, 'Görsel kaydı eklenemedi.'));
+  if (!data) return fail('Görsel kaydı eklenemedi.');
+  return ok(data as DbProductImage);
+}
+
+export async function reorderProductImages(
+  productId: string,
+  orderedIds: string[],
+): Promise<MutationResult> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return fail('Servis yapılandırılmamış.');
+  const { error } = await supabase.rpc('admin_reorder_product_images', {
+    p_product_id: productId,
+    p_ordered_ids: orderedIds,
+  });
+  if (error) return fail(mapDbError(error.message, 'Sıralama güncellenemedi.'));
+  return ok();
+}
+
+export async function deleteProductImageRecord(
+  imageId: string,
+): Promise<MutationResult<{ url: string; product_id: string }>> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return fail('Servis yapılandırılmamış.');
+  const { data, error } = await supabase.rpc('admin_delete_product_image_record', {
+    p_image_id: imageId,
+  });
+  if (error) return fail(mapDbError(error.message, 'Görsel silinemedi.'));
+  const result = data as { success?: boolean; url?: string; product_id?: string } | null;
+  if (!result?.success || !result.url || !result.product_id) {
+    return fail('Görsel silinemedi.');
+  }
+  return ok({ url: result.url, product_id: result.product_id });
+}
+
+/** Admin: ürünü kalıcı siler (sepet satırlarını temizler; sipariş satırları ürün id'sini null yapar). */
+export async function deleteProduct(
+  productId: string,
+): Promise<MutationResult<{ id: string; name?: string; imageUrls: string[] }>> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return fail('Servis yapılandırılmamış.');
+  const { data, error } = await supabase.rpc('admin_delete_product', {
+    p_product_id: productId,
+  });
+  if (error) return fail(mapDbError(error.message, 'Ürün silinemedi.'));
+  const result = data as {
+    success?: boolean;
+    error?: string;
+    id?: string;
+    name?: string;
+    image_urls?: string[] | null;
+  } | null;
+  if (!result?.success) {
+    if (result?.error === 'not_found') return fail('Ürün bulunamadı.');
+    return fail('Ürün silinemedi.');
+  }
+  return ok({
+    id: result.id ?? productId,
+    name: result.name,
+    imageUrls: Array.isArray(result.image_urls) ? result.image_urls : [],
+  });
+}
+
+
+export async function createProduct(
+  input: AdminProductForm,
+): Promise<MutationResult<{ id: string }>> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return fail('Servis yapılandırılmamış.');
+
+  const validation = validateAdminProductForm(input);
+  if (validation) return fail(validation);
+
+  const slug = normalizeSlug(input.slug);
+  const { data, error } = await supabase
+    .from('products')
+    .insert({
+      name: input.name.trim(),
+      slug,
+      category_id: input.categoryId,
+      sku: input.sku?.trim() || `AQ-${slug}`,
+      short_description: input.shortDescription,
+      description: input.description,
+      price: input.price,
+      old_price: input.oldPrice ?? null,
+      stock: input.stock,
+      is_active: input.isActive,
+      specifications: input.specifications,
+      rating: 0,
+      review_count: 0,
+      tax_rate: input.taxRate == null ? 20 : input.taxRate,
+    })
+    .select('id')
+    .single();
+
+  if (error || !data) return fail(mapDbError(error?.message, 'Ürün oluşturulamadı.'));
+  return ok({ id: data.id });
+}
+
+export async function getCategoryOptions(): Promise<{ id: string; name: string; slug: string; isActive: boolean }[]> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name, slug, is_active')
+    .order('sort_order');
+
+  if (error) return [];
+  return (data ?? []).map((c) => ({
+    id: c.id,
+    name: c.is_active ? c.name : `${c.name} (pasif)`,
+    slug: c.slug,
+    isActive: c.is_active,
+  }));
+}
+
+export async function getCategories(): Promise<Category[]> {
+  if (!isSupabaseConfigured()) {
+    return localCategories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.id,
+      icon: c.icon,
+      productCount: c.productCount,
+    }));
+  }
+
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('is_active', true)
+    .order('sort_order');
+
+  if (error) return [];
+  return (data as DbCategory[] | null)?.map((row) => mapDbCategory(row)) ?? [];
 }

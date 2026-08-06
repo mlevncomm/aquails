@@ -1,198 +1,298 @@
-# Aquails — Su Arıtma E-Ticaret Platformu
+# Aquails
 
-Aquails, Vite + React + TypeScript ile geliştirilmiş bir su arıtma e-ticaret uygulamasıdır. Production mimarisi **Vercel (frontend)** + **Supabase (Postgres, Auth, RLS, Edge Functions, Storage)** üzerine kuruludur.
+Aquails, su arıtma cihazları ve yedek parçaları için geliştirilmiş bir e-ticaret platformudur.
 
-Geçiş sürecinde Express backend paralel modda (`VITE_DATA_PROVIDER=express`) çalıştırılabilir.
+## Hedef Mimari
 
-## Gereksinimler
+| Katman | Teknoloji |
+|--------|-----------|
+| Frontend deploy | **Vercel** (Vite SPA) |
+| Database | **Supabase Postgres** |
+| Auth | **Supabase Auth** |
+| File storage | **Supabase Storage** (planlı) |
+| Kritik server işlemleri | **Supabase Edge Functions** / Vercel Functions |
 
-- Node.js 20+
-- [Supabase CLI](https://supabase.com/docs/guides/cli)
-- (Opsiyonel) Docker — yerel Supabase için
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────────────┐
+│   Vercel    │────▶│  React SPA   │────▶│ Supabase (anon key) │
+│  Static CDN │     │  Vite + TS   │     │  RLS-protected DB   │
+└─────────────┘     └──────────────┘     └─────────────────────┘
+                            │                       ▲
+                            └──── Edge Functions ───┘
+                                  (service role)
+                                  ödeme, stok, webhook
+```
+
+### Frontend'den YAPILMAYACAK işlemler
+
+Aşağıdaki işlemler **yalnızca server-side** (Edge Function / Vercel Function) üzerinden yapılmalıdır:
+
+- Ödeme oturumu oluşturma (PayTR)
+- Ödeme webhook doğrulama
+- Sipariş oluşturma ve stok düşme (atomik)
+- Kargo entegrasyonu ve takip numarası
+- E-posta / SMS / WhatsApp bildirimleri
+
+Placeholder fonksiyonlar: `supabase/functions/create-checkout-session`, `supabase/functions/payment-webhook`
 
 ## Kurulum
 
 ```bash
 npm install
-cp .env.example .env
+cp .env.example .env   # Supabase URL ve anon key ekleyin
+npm run dev
 ```
 
-### Frontend env (Vite — Vercel + local `.env`)
+Uygulama `http://localhost:3000` adresinde çalışır.
 
-Bu proje **Vite** kullanır. Next.js `NEXT_PUBLIC_*` değişkenleri **kullanılmaz**.
+### Ortam Değişkenleri
 
-| Next.js (kullanma) | Vite (kullan) |
-|--------------------|---------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | `VITE_SUPABASE_URL` |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `VITE_SUPABASE_ANON_KEY` |
+| Değişken | Açıklama | Nerede |
+|----------|----------|--------|
+| `VITE_SUPABASE_URL` | Supabase proje URL'i | `.env`, Vercel |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon (public) key | `.env`, Vercel |
+| `SITE_URL` | Public site origin (PayTR / auth redirects) | `.env`, Vercel |
+| `DATABASE_URL` | Pooler (transaction mode, port 6543) | `.env` only — **commit etmeyin** |
+| `DIRECT_URL` | Pooler (session mode, port 5432) | `.env` only — migration için |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role (API / scripts) | Vercel server env, CI |
+| `PAYTR_MERCHANT_ID` | PayTR mağaza numarası | Vercel server env |
+| `PAYTR_MERCHANT_KEY` / `PAYTR_MERCHANT_SALT` | PayTR imza sırları | Vercel server env |
+| `PAYTR_TEST_MODE` | Test için `1`, canlı için `0` | Vercel server env |
+| `RESEND_API_KEY` / `EMAIL_FROM` | Transactional e-posta | Vercel server env |
+| `CRON_SECRET` | E-posta outbox Bearer secret | Vercel server env + Supabase Vault |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `npm run admin:create` | local `.env` only |
+| `TEST_EMAIL` / `TEST_PASSWORD` | e2e scriptleri | local `.env` only |
 
-Yalnızca şu public değişkenler frontend bundle'a girer:
+> **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` ve PayTR secret'ları **asla** frontend'e veya `VITE_*` env'e konmamalıdır.
 
-| Variable | Açıklama |
-|----------|----------|
-| `VITE_SUPABASE_URL` | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon / publishable key |
-| `VITE_APP_URL` | Site URL (auth redirect, referral link) |
-| `VITE_DATA_PROVIDER` | `supabase` (default) veya `express` |
+### Ürün görselleri (Storage)
 
-**Local (`.env`):**
+Admin ürün galerisi Supabase Storage bucket `product-images` kullanır.
 
-```env
-VITE_SUPABASE_URL=https://tsbiicekqgxjokhyxria.supabase.co
-VITE_SUPABASE_ANON_KEY=<Supabase publishable key>
-VITE_DATA_PROVIDER=supabase
-VITE_APP_URL=http://localhost:3000
-```
+`20260717000100_audit_completion_rpcs` migration’ı bucket’ı ve admin yazma / public okuma storage politikalarını oluşturur.
+Ayrı manuel bucket oluşturmaya gerek yoktur.
 
-**Production (Vercel → Environment Variables):**
-
-```env
-VITE_SUPABASE_URL=https://tsbiicekqgxjokhyxria.supabase.co
-VITE_SUPABASE_ANON_KEY=<Supabase publishable key>
-VITE_DATA_PROVIDER=supabase
-VITE_APP_URL=<production domain>
-```
-
-> **Güvenlik:** `SUPABASE_SERVICE_ROLE_KEY` **asla** Vercel'e, frontend `.env` dosyasına veya client bundle'a eklenmemelidir. Yalnızca Supabase Edge Function secrets üzerinden kullanılır.
-
-Legacy Express modu için (opsiyonel): `VITE_API_URL=http://localhost:4000`
-
-## Yerel Supabase
-
-```bash
-npm run supabase:start
-npm run supabase:reset    # migrations + seed
-npm run supabase:seed     # ürün seed SQL üret (004_seed_products.sql)
-```
-
-### Admin kullanıcı (production öncesi zorunlu)
-
-1. Auth kullanıcısı oluştur (`auth.users` insert → `profiles` otomatik oluşur):
-
-```bash
-supabase auth admin create-user \
-  --email admin@aquails.com \
-  --password 'Admin123!' \
-  --email-confirm
-```
-
-2. Admin rolünü **`profiles.role`** üzerinden ata (Auth metadata değil — güvenilir kaynak `profiles` tablosudur):
+**Migration sonrası doğrulama:**
 
 ```sql
-UPDATE public.profiles
-SET role = 'super_admin'
-WHERE email = 'admin@aquails.com';
+select id, public from storage.buckets where id = 'product-images';
+select policyname, cmd from pg_policies
+where schemaname = 'storage' and tablename = 'objects'
+  and (qual::text ilike '%product-images%' or with_check::text ilike '%product-images%');
 ```
 
-3. Admin girişi sonrası `RouteGuard` ve Edge Functions `profiles.role IN ('admin','super_admin')` kontrolü yapar.
+### Production release sırası
 
-Edge Functions (yerel):
+1. Backup / PITR durumunu doğrulayın.
+2. Vercel server env + Supabase Vault secret’larını tamamlayın (`SITE_URL`, `CRON_SECRET`, PayTR, Resend, service role, …).
+3. Migration’ları sırayla uygulayın (pending olanlar dahil):
+   - `20260717000100_audit_completion_rpcs` (bucket + policies dahil)
+   - `20260718000100_production_hardening`
+   - `20260718000200_email_outbox_pg_cron` (+ Vault secret’ları)
+   - `20260718000300_email_outbox_reliability`
+   - `20260724000100_admin_catalog_reliability`
+4. Signed-in admin smoke (ürün listesi, güncelleme, görsel galeri, ayarlar).
+5. PR’ı ready yapıp `main`’e merge edin.
+6. Production deploy — **`main` merge otomatik production deploy tetikleyebilir** (Vercel production branch). Deploy’u bilinçli yapın.
+
+> Bu repository’deki agent/PR işleri production migration veya production deploy uygulamaz; yalnız kod + preview doğrular.
+
+### E-posta outbox zamanlama (Supabase pg_cron)
+
+Vercel Hobby planı saatlik Cron Job'lara izin vermez; `vercel.json` içinde Cron tanımı yoktur.
+Outbox worker (`/api/process-email-outbox`) her 10 dakikada bir Supabase `pg_cron` + `pg_net` ile tetiklenir.
+
+1. Vercel'e `SITE_URL`, `CRON_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM` ekleyin.
+2. Aynı `SITE_URL` ve `CRON_SECRET` değerlerini Supabase Vault'a yazın (**SQL migration içine yazmayın**):
+
+```sql
+select vault.create_secret('https://www.aquails.com', 'aquails_site_url');
+select vault.create_secret('your-cron-secret', 'aquails_cron_secret');
+```
+
+3. Migration `20260718000200_email_outbox_pg_cron.sql` uygulandığında job `aquails-process-email-outbox` oluşturulur.
+4. Vault secret'ları eksikse istek **gönderilmez** (fail-closed); secret değerleri loglanmaz.
+5. Endpoint `Authorization: Bearer <CRON_SECRET>` olmadan 401 döner.
+
+### PayTR yerel test
+
+Kartlı ödeme Vercel Functions (`api/paytr-init.ts`, `api/payment-webhook.ts`) üzerinden çalışır.
+`npm run dev` (Vite) `/api` route'larını sunmaz; yerel ödeme testi için:
 
 ```bash
+npx vercel dev
+```
+
+Vercel'e `SITE_URL`, `VITE_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY` ve PayTR secret'larını ekleyin.
+
+### Supabase CLI Kurulumu
+
+[Supabase CLI](https://supabase.com/docs/guides/cli) kurulu olmalıdır.
+
+```bash
+# 1. Supabase hesabına giriş
+supabase login
+
+# 2. Remote projeyi bağla
+supabase link --project-ref lumwisbjvlggtdjcahtj
+
+# 3. .env dosyasına DIRECT_URL ekleyin (bkz. .env.example)
+
+# 4. Migration'ları remote veritabanına uygula
+npm run db:push
+
+# 5. Seed verisini yükle
+npm run db:seed
+```
+
+**Alternatif (Supabase CLI doğrudan):**
+
+```bash
+supabase db push --db-url "$DIRECT_URL" --yes
+```
+
+#### Seed verisi
+
+`supabase/config.toml` içinde seed tanımlıdır:
+
+```toml
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+```
+
+**Remote (staging / ilk kurulum):**
+
+```bash
+npm run db:seed
+```
+
+**Alternatif yöntemler:**
+
+```bash
+# Supabase Dashboard → SQL Editor → supabase/seed.sql içeriğini yapıştırıp çalıştırın
+
+# veya doğrudan psql ile
+psql "$DATABASE_URL" -f supabase/seed.sql
+```
+
+**Local geliştirme:**
+
+```bash
+# Local Supabase stack (API, DB, Studio, Edge Runtime)
+supabase start
+
+# Migration + seed ile local DB'yi sıfırla
+supabase db reset
+
+# Edge Functions local serve
 supabase functions serve
 ```
 
-## Geliştirme
+Local servis portları (`supabase/config.toml`):
 
-```bash
-# Supabase modu (varsayılan)
-npm run dev
+| Servis | Port |
+|--------|------|
+| API | 54321 |
+| Database | 54322 |
+| Studio | 54323 |
+| Inbucket (e-posta test) | 54324 |
 
-# Express legacy modu
-VITE_DATA_PROVIDER=express npm run dev
-npm run dev:server   # ayrı terminal
-```
+Migration dosyası: `supabase/migrations/20260709160000_initial_schema.sql`
 
-## Scripts
+**Oluşturulan tablolar (14):** `profiles`, `categories`, `products`, `product_images`, `addresses`, `carts`, `cart_items`, `orders`, `order_items`, `coupons`, `product_questions`, `reviews`, `service_requests`, `abandoned_carts` (+ RLS politikaları ve auth trigger).
 
-| Script | Açıklama |
-|--------|----------|
-| `npm run dev` | Vite dev server |
-| `npm run build` | Production build |
-| `npm run typecheck` | TypeScript kontrol |
-| `npm run test` | Vitest unit testler |
-| `npm run supabase:start` | Yerel Supabase başlat |
-| `npm run supabase:reset` | DB sıfırla + migrate + seed |
-| `npm run supabase:seed` | products.ts → SQL seed üret |
-| `npm run supabase:types` | DB tiplerini üret |
-
-## Mimari
-
-```
-Frontend (Vercel SPA)
-  └── VITE_DATA_PROVIDER
-        ├── supabase → Supabase Auth + RLS reads + Edge Functions (writes)
-        └── express  → server/ Express API (legacy)
-```
-
-**Kritik yazma işlemleri** (checkout, sepet, kupon, admin sipariş durumu) Edge Functions üzerinden yapılır.
-
-- Checkout: atomik Postgres RPC (`checkout_order`) — stok, kupon, sipariş, ödeme tek transaction
-- Guest/user sepet: `cart-manage` Edge Function (client doğrudan `carts`/`cart_items` yazamaz)
-- Service role: yalnızca Edge Function içinde `Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')`
+> `VITE_SUPABASE_ANON_KEY` değerini Supabase Dashboard → **Project Settings → API → anon public** alanından alıp `.env` ve Vercel'e ekleyin.
 
 ## Vercel Deploy
 
-1. Repo'yu Vercel'e bağlayın
-2. **Build command:** `npm run build` ( `vercel.json` içinde tanımlı)
-3. **Output directory:** `dist`
-4. **Environment variables** (Vite `VITE_*` prefix — `NEXT_PUBLIC_*` değil):
+1. GitHub reposunu Vercel'e bağlayın
+2. Framework: **Vite**
+3. Build command: `npm run build`
+4. Output directory: `dist`
+5. **Environment Variables** (Vercel → Settings → Environment Variables):
 
-   | Name | Example value |
-   |------|---------------|
-   | `VITE_SUPABASE_URL` | `https://tsbiicekqgxjokhyxria.supabase.co` |
-   | `VITE_SUPABASE_ANON_KEY` | Supabase publishable / anon key |
-   | `VITE_APP_URL` | `https://your-domain.vercel.app` |
-   | `VITE_DATA_PROVIDER` | `supabase` |
+| Değişken | Ortam | Public? |
+|----------|-------|---------|
+| `VITE_SUPABASE_URL` | Production, Preview, Development | Evet (build-time) |
+| `VITE_SUPABASE_ANON_KEY` | Production, Preview, Development | Evet (build-time) |
+| `SITE_URL` | Production, Preview | Hayır (server) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Production, Preview | Hayır (server) — PayTR + email worker |
+| `PAYTR_MERCHANT_ID` | Production, Preview | Hayır (server) |
+| `PAYTR_MERCHANT_KEY` | Production, Preview | Hayır (server) |
+| `PAYTR_MERCHANT_SALT` | Production, Preview | Hayır (server) |
+| `PAYTR_TEST_MODE` | Production, Preview | Hayır (server) |
+| `RESEND_API_KEY` / `EMAIL_FROM` / `CRON_SECRET` | Production, Preview | Hayır (server) |
 
-5. **SPA fallback:** `vercel.json` → `"rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]`
+> `SUPABASE_SERVICE_ROLE_KEY` **Vercel server-only** env olmalıdır (`api/paytr-init.ts`, `api/payment-webhook.ts`, `api/process-email-outbox.ts`). Frontend'e veya `VITE_*` olarak eklenmez.
 
-> **Vercel'e eklenmemesi gerekenler:** `NEXT_PUBLIC_*`, `SUPABASE_SERVICE_ROLE_KEY`, database password, Iyzico/PayTR secret'ları.
+6. `vercel.json` SPA fallback rewrite'ları içerir
 
-## Supabase Production Deploy
+> Uygulama şu an `HashRouter` kullanır (`/#/urunler`). Vercel rewrite'ları BrowserRouter'a geçiş için hazırdır.
+
+### Ödeme ve e-posta worker secret'ları
+
+PayTR ve email outbox worker secret'ları **yalnızca** Vercel proje ayarlarında server environment olarak tanımlanır:
 
 ```bash
-supabase link --project-ref <ref>
-supabase db push
-supabase functions deploy
-supabase secrets set \
-  SUPABASE_SERVICE_ROLE_KEY=<service-role-key> \
-  APP_URL=https://your-production-domain.com
+# Vercel dashboard > Project Settings > Environment Variables
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+PAYTR_MERCHANT_ID=your-merchant-id
+PAYTR_MERCHANT_KEY=your-merchant-key
+PAYTR_MERCHANT_SALT=your-merchant-salt
+PAYTR_TEST_MODE=1
+RESEND_API_KEY=your-resend-key
+EMAIL_FROM=Aquails <noreply@example.com>
+CRON_SECRET=your-cron-secret
 ```
 
-Storage bucket'ları ve storage policy'leri migration ile gelir:
+Bu secret'lar yalnızca Vercel Functions tarafından okunur; frontend'e, `VITE_*` değişkenlerine veya `site_settings` tablosuna yazılmaz.
 
-- `001_initial_schema.sql` — bucket tanımları (`product-images`, `blog-images`, `campaign-images`, `avatars`)
-- `002_rls_policies.sql` — storage.objects RLS policy'leri
+## Veri Katmanı
 
-## Güvenlik checklist
+| Özellik | Kaynak |
+|---------|--------|
+| Ürünler / blog / kuponlar | Supabase (`productService`, `blogService`, `couponService`) |
+| Auth | Supabase Auth + `profiles` (şifre sıfırlama: `/sifre-sifirla`) |
+| Sepet | Zustand persist + girişli kullanıcıda `sync_user_cart` RPC |
+| Sipariş takip (misafir) | `track_order_by_number_and_contact` RPC |
+| Ödeme | Vercel `/api/paytr-*` + havale/COD için admin `admin_confirm_offline_payment` |
+| Görseller | Supabase Storage bucket `product-images` |
 
-- [x] RLS tüm tablolarda etkin (`002_rls_policies.sql`)
-- [x] Kullanıcı yalnızca kendi `orders`, `addresses`, `profiles`, `subscriptions`, `loyalty_transactions`, `notifications` kayıtlarını okur
-- [x] Admin/super_admin admin policy'leri ile tüm admin CRUD
-- [x] Public yalnızca aktif ürün/kategori + published blog + aktif kampanya okur
-- [x] Guest cart: `carts`/`cart_items` için INSERT/UPDATE/DELETE policy yok → yalnızca Edge Function (service role)
-- [x] Checkout fiyat/stok DB'den; atomik transaction
-- [x] Admin rolü `profiles.role` üzerinden (JWT metadata değil)
+Supabase yapılandırılmamışsa katalog servisleri statik `src/data` fallback'ine düşer; auth/ödeme çalışmaz.
 
-## Production smoke test listesi
+## Scriptler
 
-Deploy sonrası manuel doğrulama:
+| Komut | Açıklama |
+|-------|----------|
+| `npm run dev` | Geliştirme sunucusu |
+| `npm run build` | Production build |
+| `npm run preview` | Build önizleme |
+| `npm run lint` | ESLint |
+| `npm run test:kdv` | Vergi ve sepet toplam testleri |
+| `npm run test:security` | Kritik RLS/RPC sertleştirme kontrolleri |
+| `npm run test:e2e` | İzole Supabase test projesinde checkout testi (`E2E_ALLOW_MUTATION=true`) |
 
-- [ ] Ürün listeleme (Shop / Home)
-- [ ] Ürün detay (slug)
-- [ ] Register (yeni müşteri)
-- [ ] Login (müşteri)
-- [ ] Customer profile görüntüleme/güncelleme
-- [ ] Sepete ürün ekleme (guest + login)
-- [ ] Kupon uygulama (`validate-coupon` EF)
-- [ ] Checkout ile sipariş oluşturma
-- [ ] Stok düşme (sipariş sonrası `products.stock`)
-- [ ] Admin login (`profiles.role = super_admin`)
-- [ ] Admin order status update (`admin-order-status` EF)
-- [ ] Servis slot booking (checkout veya `create-service-request`)
-- [ ] RLS: başka kullanıcının order kaydına erişememe (anon/authenticated farklı user)
+## Proje Yapısı
 
-## Legacy Express
+```
+src/
+  lib/supabase.ts       # Supabase client
+  services/             # authService, productService, ...
+  stores/               # Zustand state
+  types/database.ts     # Supabase row types
+supabase/
+  config.toml           # Supabase CLI config
+  migrations/           # Postgres schema + RLS
+  seed.sql              # Örnek kategori/ürün seed
+  functions/            # Edge Function placeholders
+vercel.json             # Vercel SPA config
+docs/backend-roadmap.md # Detaylı API planı
+```
 
-`server/` klasörü parallel/legacy mod için korunmuştur. Detaylar: [server/DEPLOY.md](server/DEPLOY.md)
+## Teknolojiler
+
+- React 19 + TypeScript + Vite 7
+- Tailwind CSS 3 + shadcn/ui
+- Supabase (Auth, Postgres, Edge Functions)
+- Zustand, React Router 7

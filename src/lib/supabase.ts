@@ -1,23 +1,33 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/database';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+export function isSupabaseConfigured(): boolean {
+  return Boolean(supabaseUrl && supabaseAnonKey);
+}
 
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl!, supabaseAnonKey!, {
+let client: SupabaseClient<Database> | null = null;
+
+export function getSupabase(): SupabaseClient<Database> {
+  if (!isSupabaseConfigured()) {
+    throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+  }
+  if (!client) {
+    client = createClient<Database>(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
       },
-    })
-  : (null as ReturnType<typeof createClient> | null);
-
-export function requireSupabase() {
-  if (!isSupabaseConfigured || !supabase) {
-    throw new Error('Supabase yapılandırılmamış. VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY ayarlayın.');
+    });
   }
-  return supabase;
+  return client;
+}
+
+/** Returns client when configured, otherwise null (for graceful fallback). */
+export function getSupabaseOrNull(): SupabaseClient<Database> | null {
+  if (!isSupabaseConfigured()) return null;
+  return getSupabase();
 }

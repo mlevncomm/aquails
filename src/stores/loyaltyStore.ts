@@ -1,14 +1,14 @@
 import { create } from 'zustand';
-import { getLoyaltyData, earnPoints, redeemPoints, convertPointsToCoupon, type LoyaltyData } from '@/services/loyaltyService';
+import {
+  getLoyaltyData,
+  earnPoints,
+  redeemPoints,
+  convertPointsToCoupon,
+  type LoyaltyData,
+} from '@/services/loyaltyService';
+import { getCurrentUser } from '@/services/authService';
 
-const emptyData: LoyaltyData = {
-  points: 0,
-  transactions: [],
-  totalPoints: 0,
-  availablePoints: 0,
-  totalRedeemed: 0,
-  totalEarned: 0,
-};
+const emptyData: LoyaltyData = { totalPoints: 0, availablePoints: 0, totalRedeemed: 0 };
 
 interface LoyaltyState {
   data: LoyaltyData;
@@ -20,21 +20,36 @@ interface LoyaltyState {
 
 export const useLoyaltyStore = create<LoyaltyState>((set) => ({
   data: emptyData,
-  refresh: async () => set({ data: await getLoyaltyData() }),
+  refresh: async () => {
+    const user = await getCurrentUser();
+    const data = await getLoyaltyData(user?.id);
+    set({ data });
+  },
   earn: async (amount, description) => {
-    await earnPoints(amount, description);
-    set({ data: await getLoyaltyData() });
+    const user = await getCurrentUser();
+    if (!user) return;
+    await earnPoints(user.id, amount, description);
+    const data = await getLoyaltyData(user.id);
+    set({ data });
   },
   redeem: async (amount, description) => {
-    const ok = await redeemPoints(amount, description);
-    set({ data: await getLoyaltyData() });
-    return ok;
+    const user = await getCurrentUser();
+    if (!user) return false;
+    const result = await redeemPoints(user.id, amount, description);
+    if (result.success) {
+      const data = await getLoyaltyData(user.id);
+      set({ data });
+      return true;
+    }
+    return false;
   },
   convert: async (points) => {
     const coupon = await convertPointsToCoupon(points);
-    set({ data: await getLoyaltyData() });
+    const user = await getCurrentUser();
+    if (user) {
+      const data = await getLoyaltyData(user.id);
+      set({ data });
+    }
     return coupon;
   },
 }));
-
-void useLoyaltyStore.getState().refresh();

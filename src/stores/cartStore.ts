@@ -1,29 +1,42 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { CartItem, Product } from '@/types';
-import {
-  addCartItem,
-  clearCartApi,
-  fetchCart,
-  mapCartToStoreItems,
-  removeCartItem,
-  updateCartItem,
-} from '@/services/cartService';
+import { syncAbandonedCart } from '@/services/abandonedCartService';
+import { syncUserCartToServer } from '@/services/cartSyncService';
+import { useAuthStore } from '@/stores/authStore';
 
-interface StoreCartItem extends CartItem {
-  cartItemId: string;
+export interface AppliedCartCoupon {
+  code: string;
+  discount: number;
+  type: string;
+}
+
+function trackAbandonedCartFromStore(items: CartItem[]): void {
+  if (!items.length) return;
+  const user = useAuthStore.getState().user;
+  syncAbandonedCart(
+    items.map((item) => ({
+      productId: item.product.id,
+      productName: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      image: item.product.images?.[0],
+    })),
+    user?.name ?? 'Misafir',
+    user?.email
+  );
+  void syncUserCartToServer(items);
 }
 
 interface CartStore {
-  items: StoreCartItem[];
-  subtotal: number;
-  itemCount: number;
+  items: CartItem[];
   isDrawerOpen: boolean;
-  isLoading: boolean;
-  syncCart: () => Promise<void>;
-  addItem: (product: Product, quantity?: number) => Promise<void>;
-  removeItem: (productId: string) => Promise<void>;
-  updateQuantity: (productId: string, quantity: number) => Promise<void>;
-  clearCart: () => Promise<void>;
+  appliedCoupon: AppliedCartCoupon | null;
+  setAppliedCoupon: (coupon: AppliedCartCoupon | null) => void;
+  addItem: (product: Product, quantity?: number) => void;
+  removeItem: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
   toggleDrawer: () => void;
   closeDrawer: () => void;
   openDrawer: () => void;
@@ -32,92 +45,69 @@ interface CartStore {
   getSubtotal: () => number;
 }
 
-function applyCart(set: (partial: Partial<CartStore>) => void, cart: Awaited<ReturnType<typeof fetchCart>>) {
-  set({
-    items: mapCartToStoreItems(cart).map((item) => ({
-      cartItemId: item.id,
-      product: item.product,
-      quantity: item.quantity,
-    })),
-    subtotal: cart.subtotal,
-    itemCount: cart.itemCount,
-  });
-}
+export const useCartStore = create<CartStore>()(
+  persist(
+    (set, get) => ({
+      items: [],
+      isDrawerOpen: false,
+      appliedCoupon: null,
+      setAppliedCoupon: (coupon) => set({ appliedCoupon: coupon }),
 
-export const useCartStore = create<CartStore>((set, get) => ({
-  items: [],
-  subtotal: 0,
-  itemCount: 0,
-  isDrawerOpen: false,
-  isLoading: false,
+      addItem: (product, quantity = 1) => {
+        set((state) => {
+          const existingItem = state.items.find((item) => item.product.id === product.id);
+          const nextItems = existingItem
+            ? state.items.map((item) =>
+                item.product.id === product.id
+                  ? { ...item, quantity: item.quantity + quantity }
+                  : item
+              )
+            : [...state.items, { product, quantity }];
+          trackAbandonedCartFromStore(nextItems);
+          return { items: nextItems };
+        });
+      },
 
-  syncCart: async () => {
-    set({ isLoading: true });
-    try {
-      const cart = await fetchCart();
-      applyCart(set, cart);
-    } catch {
-      // keep local state on failure
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+      removeItem: (productId) => {
+        set((state) => {
+          const nextItems = state.items.filter((item) => item.product.id !== productId);
+          trackAbandonedCartFromStore(nextItems);
+          return { items: nextItems };
+        });
+      },
 
-  addItem: async (product, quantity = 1) => {
-    set({ isLoading: true });
-    try {
-      const cart = await addCartItem(product.id, quantity);
-      applyCart(set, cart);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+      updateQuantity: (productId, quantity) => {
+        if (quantity <= 0) {
+          get().removeItem(productId);
+          return;
+        }
+        set((state) => {
+          const nextItems = state.items.map((item) =>
+            item.product.id === productId ? { ...item, quantity } : item
+          );
+          trackAbandonedCartFromStore(nextItems);
+          return { items: nextItems };
+        });
+      },
 
-  removeItem: async (productId) => {
-    const item = get().items.find((i) => i.product.id === productId);
-    if (!item) return;
-    set({ isLoading: true });
-    try {
-      const cart = await removeCartItem(item.cartItemId);
-      applyCart(set, cart);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+      clearCart: () => set({ items: [], appliedCoupon: null }),
 
-  updateQuantity: async (productId, quantity) => {
-    if (quantity <= 0) {
-      await get().removeItem(productId);
-      return;
-    }
-    const item = get().items.find((i) => i.product.id === productId);
-    if (!item) return;
-    set({ isLoading: true });
-    try {
-      const cart = await updateCartItem(item.cartItemId, quantity);
-      applyCart(set, cart);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+      toggleDrawer: () => set((state) => ({ isDrawerOpen: !state.isDrawerOpen })),
+      closeDrawer: () => set({ isDrawerOpen: false }),
+      openDrawer: () => set({ isDrawerOpen: true }),
 
-  clearCart: async () => {
-    set({ isLoading: true });
-    try {
-      const cart = await clearCartApi();
-      applyCart(set, cart);
-    } finally {
-      set({ isLoading: false });
-    }
-  },
+      getTotalItems: () => {
+        return get().items.reduce((total, item) => total + item.quantity, 0);
+      },
 
-  toggleDrawer: () => set((state) => ({ isDrawerOpen: !state.isDrawerOpen })),
-  closeDrawer: () => set({ isDrawerOpen: false }),
-  openDrawer: () => set({ isDrawerOpen: true }),
+      getTotalPrice: () => {
+        return get().items.reduce((total, item) => total + item.product.price * item.quantity, 0);
+      },
 
-  getTotalItems: () => get().itemCount || get().items.reduce((t, i) => t + i.quantity, 0),
-  getTotalPrice: () => get().subtotal || get().items.reduce((t, i) => t + i.product.price * i.quantity, 0),
-  getSubtotal: () => get().getTotalPrice(),
-}));
-
-void useCartStore.getState().syncCart();
+      getSubtotal: () => {
+        return get().getTotalPrice();
+      },
+    }),
+    { name: 'aquails_cart' }
+  )
+);

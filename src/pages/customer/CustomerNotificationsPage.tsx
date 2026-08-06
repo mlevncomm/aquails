@@ -1,64 +1,147 @@
-import { useNotificationStore } from '@/stores/notificationStore';
-import { EmptyState } from '@/components/EmptyState';
-import { Package, Truck, Filter, Wrench, Tag, Info, Trash2, Bell } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Package, Truck, Filter, Wrench, Tag, Info, Bell } from 'lucide-react';
+import { useAuthStore } from '@/stores/authStore';
+import {
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  type Notification,
+} from '@/services/notificationService';
+import {
+  CustomerPageShell,
+  CustomerPageHeader,
+  CustomerCard,
+  CustomerEmpty,
+  CustomerLoading,
+  CustomerButton,
+} from '@/components/customer/customer-ui';
+import { cn } from '@/lib/utils';
 
-const typeIcons: Record<string, React.ElementType> = { order: Package, shipping: Truck, filter: Filter, service: Wrench, campaign: Tag, system: Info };
+const typeIcons: Record<string, React.ElementType> = {
+  order: Package,
+  shipping: Truck,
+  filter: Filter,
+  service: Wrench,
+  campaign: Tag,
+  promo: Tag,
+  system: Info,
+  info: Info,
+};
+
 const typeColors: Record<string, string> = {
-  order: 'bg-blue-50 text-blue-600', shipping: 'bg-purple-50 text-purple-600', filter: 'bg-emerald-50 text-emerald-600',
-  service: 'bg-orange-50 text-orange-600', campaign: 'bg-pink-50 text-pink-600', system: 'bg-gray-100 text-gray-500',
+  order: 'bg-aq-sky text-aq-blue',
+  shipping: 'bg-aq-ice text-aq-deep',
+  filter: 'bg-aq-sky/70 text-aq-blue',
+  service: 'bg-amber-50 text-amber-700',
+  campaign: 'bg-aq-sky text-aq-blue',
+  promo: 'bg-aq-sky text-aq-blue',
+  system: 'bg-aq-ice text-aq-muted',
+  info: 'bg-aq-ice text-aq-muted',
 };
 
 export default function CustomerNotificationsPage() {
-  const { notifications, markAsRead, markAllRead, deleteNotification } = useNotificationStore();
+  const user = useAuthStore((s) => s.user);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadNotifications = async () => {
+    if (!user) return;
+    const data = await getNotifications(user.id);
+    setNotifications(data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    void loadNotifications();
+  }, [user]);
+
+  const handleMarkRead = async (id: string) => {
+    await markNotificationRead(id);
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
+  };
+
+  const handleMarkAllRead = async () => {
+    if (!user) return;
+    await markAllNotificationsRead(user.id);
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  };
+
+  if (loading) {
+    return (
+      <CustomerPageShell>
+        <CustomerLoading rows={4} />
+      </CustomerPageShell>
+    );
+  }
+
+  const hasUnread = notifications.some((n) => !n.isRead);
 
   return (
-    <>
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-semibold text-[#0D2137]">Bildirimlerim</h2>
-        {notifications.some((n) => !n.read) && (
-          <button onClick={markAllRead} className="text-xs font-medium text-[#1A73E8] hover:underline">
-            Tümünü Okundu İşaretle
-          </button>
-        )}
-      </div>
-      <div className="space-y-2">
-        {notifications.length === 0 ? (
-          <EmptyState
-            icon={<Bell className="w-8 h-8" />}
-            title="Bildirim Bulunmuyor"
-            description="Yeni bildirimleriniz olduğunda burada görünecek."
+    <CustomerPageShell>
+      <CustomerPageHeader
+        title="Bildirimlerim"
+        description="Sipariş, servis ve kampanya güncellemeleri"
+        action={
+          hasUnread ? (
+            <CustomerButton variant="ghost" onClick={() => void handleMarkAllRead()}>
+              Tümünü okundu işaretle
+            </CustomerButton>
+          ) : undefined
+        }
+      />
+
+      {notifications.length === 0 ? (
+        <CustomerCard padding={false}>
+          <CustomerEmpty
+            icon={Bell}
+            title="Bildirim yok"
+            message="Yeni bildirimleriniz olduğunda burada görünecek."
           />
-        ) : (
-          notifications.map((n) => {
+        </CustomerCard>
+      ) : (
+        <div className="space-y-2">
+          {notifications.map((n) => {
             const Icon = typeIcons[n.type] || Info;
             return (
-              <div
+              <button
                 key={n.id}
-                onClick={() => markAsRead(n.id)}
-                className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                  n.read ? 'bg-white border border-[#E8F0FE]' : 'bg-[#F0F6FF] border border-[#1A73E8]/20'
-                }`}
+                type="button"
+                onClick={() => void handleMarkRead(n.id)}
+                className={cn(
+                  'flex items-start gap-3 p-4 rounded-2xl w-full text-left transition-all border',
+                  n.isRead
+                    ? 'bg-white border-aq-border/60'
+                    : 'bg-white border-aq-blue/20 shadow-[0_1px_2px_rgba(18,134,216,0.06)]',
+                )}
               >
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${typeColors[n.type]}`}>
+                <div
+                  className={cn(
+                    'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
+                    typeColors[n.type] ?? typeColors.info,
+                  )}
+                >
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm ${n.read ? 'text-[#5A6B7B]' : 'text-[#0D2137] font-medium'}`}>{n.title}</p>
-                  <p className="text-xs text-[#8B9DAF] mt-0.5">{n.message}</p>
-                  <p className="text-[10px] text-[#8B9DAF] mt-1">{new Date(n.createdAt).toLocaleDateString('tr-TR')}</p>
+                  <p
+                    className={cn(
+                      'text-sm',
+                      n.isRead ? 'text-aq-muted' : 'text-aq-text font-semibold',
+                    )}
+                  >
+                    {n.title}
+                  </p>
+                  <p className="text-xs text-aq-muted mt-0.5 leading-relaxed">{n.message}</p>
+                  <p className="text-[10px] text-aq-muted mt-1.5">{n.date}</p>
                 </div>
-                {!n.read && <div className="w-2 h-2 bg-[#1A73E8] rounded-full flex-shrink-0 mt-1.5" />}
-                <button
-                  onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
-                  className="p-1 hover:bg-red-50 rounded-lg text-[#8B9DAF] hover:text-red-500 transition-all"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
+                {!n.isRead && (
+                  <div className="w-2 h-2 bg-aq-blue rounded-full flex-shrink-0 mt-2" />
+                )}
+              </button>
             );
-          })
-        )}
-      </div>
-    </>
+          })}
+        </div>
+      )}
+    </CustomerPageShell>
   );
 }

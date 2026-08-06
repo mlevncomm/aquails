@@ -1,90 +1,121 @@
 import { useState, useEffect } from 'react';
-import { Wrench, Clock, MapPin, User } from 'lucide-react';
-import { adminGetSlots, type ServiceSlot } from '@/services/serviceCalendarService';
+import { Wrench, MapPin, User } from 'lucide-react';
+import { getServiceRequests } from '@/services/serviceRequestService';
+import type { AdminServiceRequest } from '@/services/serviceRequestService';
+import {
+  AdminPageShell,
+  AdminPageHeader,
+  AdminTableWrap,
+  AdminEmpty,
+  AdminLoading,
+  AdminBadge,
+  AdminCard,
+} from '@/components/admin/admin-ui';
 
-const statusColors: Record<string, string> = {
-  available: 'bg-amber-50 text-amber-600',
-  booked: 'bg-emerald-50 text-emerald-600',
-  completed: 'bg-gray-100 text-gray-500',
+const statusTones: Record<string, 'success' | 'warning' | 'neutral' | 'danger'> = {
+  scheduled: 'success',
+  pending: 'warning',
+  completed: 'neutral',
+  cancelled: 'danger',
 };
+
 const statusLabels: Record<string, string> = {
-  available: 'Bekliyor',
-  booked: 'Planlandı',
+  scheduled: 'Planlandı',
+  pending: 'Bekliyor',
   completed: 'Tamamlandı',
+  cancelled: 'İptal',
 };
-
-function formatDate(date: string) {
-  return new Date(date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
-}
 
 export default function AdminServiceCalendarPage() {
-  const [slots, setSlots] = useState<ServiceSlot[]>([]);
+  const [appointments, setAppointments] = useState<AdminServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    adminGetSlots()
-      .then((data) => { if (!cancelled) setSlots(data); })
-      .catch((err) => { if (!cancelled) setError(err instanceof Error ? err.message : 'Randevular yüklenemedi.'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+    void getServiceRequests().then((data) => {
+      setAppointments(data.filter((r) => r.status === 'scheduled' || r.status === 'pending'));
+      setLoading(false);
+    });
   }, []);
 
-  const weekDays = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
   const today = new Date();
-  const weekDates = Array.from({ length: 7 }, (_, i) => {
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() - today.getDay() + 1 + i);
     return d;
   });
 
-  if (loading) {
-    return <div className="text-center py-12 text-[#8B9DAF]">Yükleniyor...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center py-12 text-red-500">{error}</div>;
-  }
-
   return (
-      <>      <h2 className="text-lg font-semibold text-[#0D2137] mb-5">Servis Takvimi</h2>
+    <AdminPageShell>
+      <AdminPageHeader title="Servis Takvimi" description="Salt okunur görünüm — planlanmış servis randevuları" />
+      <AdminCard className="mb-4 border border-amber-200 bg-amber-50">
+        <p className="text-sm text-amber-800">Bu ekran salt okunurdur; atama ve durum güncellemesi Servis Talepleri sayfasından yapılır.</p>
+      </AdminCard>
 
       <div className="grid grid-cols-7 gap-2 mb-6">
         {weekDays.map((d, i) => {
-          const date = weekDates[i];
-          const isToday = date.toDateString() === today.toDateString();
+          const isToday = d.toDateString() === today.toDateString();
           return (
-            <div key={d} className={`text-center p-3 rounded-xl ${isToday ? 'bg-[#1A73E8] text-white' : 'bg-white border border-[#E8F0FE]'}`}>
-              <p className={`text-xs ${isToday ? 'text-white/80' : 'text-[#8B9DAF]'}`}>{d}</p>
-              <p className="text-lg font-bold">{date.getDate()}</p>
+            <div
+              key={i}
+              className={`text-center p-3 rounded-xl ${isToday ? 'bg-aq-deep text-white' : 'bg-white border border-aq-border/60'}`}
+            >
+              <p className={`text-xs ${isToday ? 'text-aq-sky' : 'text-aq-muted'}`}>
+                {d.toLocaleDateString('tr-TR', { weekday: 'short' })}
+              </p>
+              <p className="text-lg font-semibold">{d.getDate()}</p>
             </div>
           );
         })}
       </div>
 
-      <div className="bg-white border border-[#E8F0FE] rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
+      {loading ? (
+        <AdminLoading label="Randevular yükleniyor..." />
+      ) : appointments.length === 0 ? (
+        <AdminCard padding={false}>
+          <AdminEmpty icon={Wrench} message="Planlanmış randevu yok" />
+        </AdminCard>
+      ) : (
+        <AdminTableWrap stickyFirst>
           <table className="w-full">
-            <thead><tr className="bg-[#F8FBFF]">{['Müşteri', 'Tür', 'Tarih', 'Saat', 'Adres', 'Durum'].map(h => <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-[#8B9DAF] uppercase whitespace-nowrap">{h}</th>)}</tr></thead>
+            <thead>
+              <tr className="bg-aq-ice border-b border-aq-border/60">
+                {['Müşteri', 'Tür', 'Tarih', 'Adres', 'Teknisyen', 'Durum'].map((h) => (
+                  <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
             <tbody>
-              {slots.map(a => (
-                <tr key={a.id} className="border-b border-[#F0F6FF] last:border-0 hover:bg-[#F8FBFF]/50">
-                  <td className="px-4 py-3"><div className="flex items-center gap-2"><User className="w-4 h-4 text-[#8B9DAF]" /><span className="text-sm font-medium text-[#0D2137]">{a.customerName ?? a.label}</span></div></td>
-                  <td className="px-4 py-3"><span className="flex items-center gap-1 text-sm text-[#5A6B7B]"><Wrench className="w-3.5 h-3.5" />{a.serviceType ?? a.label}</span></td>
-                  <td className="px-4 py-3 text-sm text-[#0D2137]">{formatDate(a.date)}</td>
-                  <td className="px-4 py-3"><span className="flex items-center gap-1 text-sm text-[#5A6B7B]"><Clock className="w-3.5 h-3.5" />{a.time}</span></td>
-                  <td className="px-4 py-3"><span className="flex items-center gap-1 text-sm text-[#5A6B7B]"><MapPin className="w-3.5 h-3.5" />{a.address ?? '—'}</span></td>
-                  <td className="px-4 py-3"><span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColors[a.status] ?? 'bg-gray-100 text-gray-500'}`}>{statusLabels[a.status] ?? a.status}</span></td>
+              {appointments.map((a) => (
+                <tr key={a.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-aq-muted" />
+                      <span className="text-sm font-medium text-aq-text">{a.customer}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="flex items-center gap-1 text-sm text-aq-muted">
+                      <Wrench className="w-3.5 h-3.5" />{a.type}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-aq-text">{a.date}</td>
+                  <td className="px-4 py-3">
+                    <span className="flex items-center gap-1 text-sm text-aq-muted max-w-[180px] truncate">
+                      <MapPin className="w-3.5 h-3.5 flex-shrink-0" />{a.address}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-aq-muted">{a.tech || '—'}</td>
+                  <td className="px-4 py-3">
+                    <AdminBadge tone={statusTones[a.status] ?? 'neutral'}>
+                      {statusLabels[a.status] ?? a.status}
+                    </AdminBadge>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-        {slots.length === 0 && <div className="text-center py-8 text-sm text-[#8B9DAF]">Randevu bulunamadı</div>}
-      </div>
-      </>
+        </AdminTableWrap>
+      )}
+    </AdminPageShell>
   );
 }
