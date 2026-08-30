@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Filter, ArrowRight, ShoppingCart, RefreshCw, CheckCircle, Droplet } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
-import { products } from '@/data';
 import { SEO } from '@/components/SEO';
+import { getProducts } from '@/services/productService';
 
 
 const deviceModels = [
@@ -26,13 +26,27 @@ export default function FilterGuidePage() {
   const [usageMonths, setUsageMonths] = useState('6');
   const [need, setNeed] = useState('');
   const [showResult, setShowResult] = useState(false);
+  const [filterProducts, setFilterProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getProducts().then((products) => {
+      if (cancelled) return;
+      setFilterProducts(
+        products
+          .filter((p) => p.category === 'Filtreler' || p.category === 'Membran Filtreler')
+          .slice(0, 4),
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleNext = () => {
     if (step < 2) setStep(step + 1);
     else setShowResult(true);
   };
-
-  const filterProducts = products.filter(p => p.category === 'Filtreler' || p.category === 'Membran Filtreler').slice(0, 4);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { products } from '@/data';
+import type { Product } from '@/types';
 
 export interface TDSInput {
   tdsValue: number;
@@ -13,7 +13,7 @@ export interface TDSResult {
   description: string;
   color: string;
   recommendedDeviceType: string;
-  recommendedProducts: typeof products;
+  recommendedProducts: Product[];
   mineralFilterNeeded: boolean;
   tips: string[];
 }
@@ -59,12 +59,7 @@ export function analyzeTDS(input: TDSInput): TDSResult {
     mineralFilterNeeded = true;
   }
 
-  const recommendedProducts = products.filter(p => {
-    if (level === 'high') return p.category === 'Su Arıtma Cihazları' || p.category === 'Direkt Akış Su Arıtma';
-    if (level === 'medium') return p.category === 'Su Arıtma Cihazları';
-    if (level === 'ideal') return p.category === 'Su Arıtma Cihazları' || p.category === 'Filtreler';
-    return p.category === 'Su Arıtma Cihazları' || p.category === 'Direkt Akış Su Arıtma';
-  }).slice(0, 3);
+  const recommendedProducts: Product[] = [];
 
   const tips: string[] = [];
   if (input.waterIssues.includes('kirec')) tips.push('Kireç probleminiz için 7 aşamalı RO sistemi önerilir.');

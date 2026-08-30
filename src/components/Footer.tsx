@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import { BrandLogo } from '@/components/BrandLogo';
 import { useCatalog } from '@/hooks/useCatalog';
-import { categories as staticCategories } from '@/data';
 import { getSiteConfig, type SiteConfig } from '@/services/settingsService';
 import { CONTACT_PHONE_DISPLAY, telHref } from '@/lib/contact';
 import { cn } from '@/lib/utils';
@@ -42,7 +41,7 @@ function FooterLink({ to, children }: { to: string; children: React.ReactNode })
 
 export function Footer() {
   const { categories: loadedCategories } = useCatalog();
-  const categories = (loadedCategories.length > 0 ? loadedCategories : staticCategories).slice(0, 5);
+  const categories = loadedCategories.slice(0, 5);
   const [site, setSite] = useState<SiteConfig | null>(null);
 
   useEffect(() => {

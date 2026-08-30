@@ -13,7 +13,6 @@ import { ProductCard } from '@/components/ProductCard';
 import { SEO } from '@/components/SEO';
 import { getOrganizationSchema, getWebsiteSchema } from '@/components/SchemaOrg';
 import { AquailsButton, SectionHeading, MetricStat } from '@/components/design';
-import { products as staticProducts, categories as staticCategories } from '@/data';
 import { useCatalog } from '@/hooks/useCatalog';
 import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
@@ -115,8 +114,8 @@ function CategoryCard({
 
 export default function Home() {
   const { products, categories } = useCatalog();
-  const catalogProducts = products.length > 0 ? products : staticProducts;
-  const catalogCategories = categories.length > 0 ? categories : staticCategories;
+  const catalogProducts = products;
+  const catalogCategories = categories;
   const [activeTab, setActiveTab] = useState('cok-satanlar');
 
   const shownCategories = catalogCategories.slice(0, 6);

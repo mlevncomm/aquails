@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { Search, SlidersHorizontal, LayoutGrid, List, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,6 +43,7 @@ export default function Shop() {
   const [gridView, setGridView] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const shopTopRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (products.length > 0) {
@@ -114,6 +115,39 @@ export default function Shop() {
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategories, priceRange, selectedBrands, stockStatus, sortBy, searchQuery]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const prevScrollRestoration = window.history.scrollRestoration;
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    const frame = requestAnimationFrame(scrollToTop);
+    const timeout = setTimeout(scrollToTop, 80);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timeout);
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = prevScrollRestoration;
+      }
+    };
+  }, [currentPage]);
+
+  const handlePageChange = useCallback((page: number, event?: React.MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    event?.currentTarget.blur();
+    setCurrentPage(page);
+  }, []);
 
   const syncCategoryUrl = useCallback((cats: string[]) => {
     if (cats.length === 1) {
@@ -265,7 +299,7 @@ export default function Shop() {
       />
       <PageLayout>
         {/* Hero */}
-        <div className="relative bg-white py-12 md:py-16 overflow-hidden border-b border-aq-border/50">
+        <div ref={shopTopRef} className="relative bg-white py-12 md:py-16 overflow-hidden border-b border-aq-border/50">
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-aq-sky/40 rounded-full blur-3xl pointer-events-none" />
           <div className="page-container relative">
             <nav className="text-[13px] text-aq-muted mb-4">
@@ -490,7 +524,7 @@ export default function Shop() {
                   <button
                     type="button"
                     disabled={currentPage <= 1}
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    onClick={(event) => handlePageChange(Math.max(1, currentPage - 1), event)}
                     className="w-10 h-10 flex items-center justify-center rounded-full border border-aq-border/60 text-aq-muted hover:bg-aq-ice transition-colors disabled:opacity-40"
                   >
                     <span className="text-sm">&lsaquo;</span>
@@ -499,7 +533,7 @@ export default function Shop() {
                     <button
                       key={page}
                       type="button"
-                      onClick={() => setCurrentPage(page)}
+                      onClick={(event) => handlePageChange(page, event)}
                       className={cn(
                         'w-10 h-10 flex items-center justify-center rounded-full text-sm font-medium transition-colors',
                         page === currentPage
@@ -513,7 +547,7 @@ export default function Shop() {
                   <button
                     type="button"
                     disabled={currentPage >= totalPages}
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={(event) => handlePageChange(Math.min(totalPages, currentPage + 1), event)}
                     className="w-10 h-10 flex items-center justify-center rounded-full border border-aq-border/60 text-aq-muted hover:bg-aq-ice transition-colors disabled:opacity-40"
                   >
                     <span className="text-sm">&rsaquo;</span>

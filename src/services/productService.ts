@@ -1,10 +1,4 @@
 import { getSupabaseOrNull, isSupabaseConfigured } from '@/lib/supabase';
-import {
-  products as localProducts,
-  categories as localCategories,
-  getProductBySlug as getLocalProductBySlug,
-  getRelatedProducts as getLocalRelatedProducts,
-} from '@/data/products';
 import type { Product, Category } from '@/types';
 import type { DbProduct, DbCategory, DbProductImage } from '@/types/database';
 import { fail, mapDbError, ok, type MutationResult } from '@/lib/mutationResult';
@@ -104,14 +98,13 @@ const PRODUCT_SELECT = `
 export async function getProducts(): Promise<Product[]> {
   const result = await loadPublicProducts();
   if (result.ok) return result.products;
-  if (result.code === 'not_configured') return [...localProducts];
   return [];
 }
 
-/** Public catalog loader — no silent local fallback when Supabase is configured. */
+/** Public catalog loader — no local fallback; requires Supabase configuration. */
 export async function loadPublicProducts(): Promise<CatalogLoadResult> {
   if (!isSupabaseConfigured()) {
-    return { ok: true, products: [...localProducts], source: 'local' };
+    return { ok: false, error: 'Supabase yapılandırılmamış.', code: 'not_configured' };
   }
   const supabase = getSupabaseOrNull();
   if (!supabase) return { ok: false, error: 'Supabase yapılandırılmamış.', code: 'not_configured' };
@@ -152,12 +145,12 @@ async function fetchProductBySlugFromSupabase(slug: string): Promise<Product | u
 }
 
 export async function getProduct(slug: string): Promise<Product | undefined> {
-  if (!isSupabaseConfigured()) return getLocalProductBySlug(slug);
+  if (!isSupabaseConfigured()) return undefined;
   return fetchProductBySlugFromSupabase(slug);
 }
 
 export async function getProductById(id: string): Promise<Product | undefined> {
-  if (!isSupabaseConfigured()) return localProducts.find((p) => p.id === id);
+  if (!isSupabaseConfigured()) return undefined;
   const supabase = getSupabaseOrNull();
   if (!supabase) return undefined;
 
@@ -206,7 +199,6 @@ export async function getRelated(productId: string, limit = 4): Promise<Product[
   const all = await getProducts();
   const source = all.find((p) => p.id === productId);
   if (!source) {
-    if (!isSupabaseConfigured()) return getLocalRelatedProducts(productId, limit);
     return [];
   }
 
@@ -220,12 +212,7 @@ export async function searchProducts(query: string): Promise<Product[]> {
   if (!q) return getProducts();
 
   if (!isSupabaseConfigured()) {
-    return localProducts.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.slug.toLowerCase().includes(q),
-    );
+    return [];
   }
 
   const supabase = getSupabaseOrNull();
@@ -545,13 +532,7 @@ export async function getCategoryOptions(): Promise<{ id: string; name: string; 
 
 export async function getCategories(): Promise<Category[]> {
   if (!isSupabaseConfigured()) {
-    return localCategories.map((c) => ({
-      id: c.id,
-      name: c.name,
-      slug: c.id,
-      icon: c.icon,
-      productCount: c.productCount,
-    }));
+    return [];
   }
 
   const supabase = getSupabaseOrNull();

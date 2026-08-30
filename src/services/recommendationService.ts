@@ -1,4 +1,3 @@
-import { products as fallbackProducts } from '@/data';
 import type { Product } from '@/types';
 
 export interface WizardAnswers {
@@ -207,14 +206,14 @@ function generateTags(product: Product, answers: WizardAnswers): string[] {
 }
 
 /**
- * Canlı katalogdan (veya fallback) cihaz önerileri üretir.
+ * Canlı katalogdan cihaz önerileri üretir.
  * Filtre / musluk aksesuarlarını hariç tutar.
  */
 export function getRecommendations(
   answers: WizardAnswers,
-  catalog: Product[] = fallbackProducts,
+ catalog: Product[] = [],
 ): Recommendation[] {
-  const pool = (catalog.length > 0 ? catalog : fallbackProducts).filter(isDeviceProduct);
+ const pool = catalog.filter(isDeviceProduct);
 
   const scored = pool.map((p) => ({
     product: p,

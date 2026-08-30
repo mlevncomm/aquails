@@ -16,7 +16,6 @@ import { useCompareStore } from '@/stores/compareStore';
 import { logout } from '@/services/authService';
 import { getSiteConfig } from '@/services/settingsService';
 import { CONTACT_PHONE_DISPLAY, telHref } from '@/lib/contact';
-import { categories as staticCategories } from '@/data';
 import { useCatalog } from '@/hooks/useCatalog';
 import { BrandLogo } from '@/components/BrandLogo';
 import { cn } from '@/lib/utils';
@@ -103,7 +102,7 @@ function HeaderIconButton({
 
 export function Header() {
   const { categories: loadedCategories } = useCatalog();
-  const categories = loadedCategories.length > 0 ? loadedCategories : staticCategories;
+  const categories = loadedCategories;
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -159,6 +158,7 @@ export function Header() {
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 12);
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
