@@ -6,19 +6,20 @@ import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { openWhatsApp, getServiceRequestMessage } from '@/services/whatsappService';
 import { SEO } from '@/components/SEO';
+import { CONTACT_PHONE_DISPLAY } from '@/lib/contact';
 
 
 const cities = [
-  { name: 'İstanbul', sameDay: true, avgTime: '2 saat', phone: '0212 123 45 67' },
-  { name: 'Ankara', sameDay: true, avgTime: '3 saat', phone: '0312 123 45 67' },
-  { name: 'İzmir', sameDay: true, avgTime: '3 saat', phone: '0232 123 45 67' },
-  { name: 'Antalya', sameDay: false, avgTime: '1 gun', phone: '0242 123 45 67' },
-  { name: 'Bursa', sameDay: true, avgTime: '4 saat', phone: '0224 123 45 67' },
-  { name: 'Kocaeli', sameDay: true, avgTime: '3 saat', phone: '0262 123 45 67' },
-  { name: 'Konya', sameDay: false, avgTime: '1 gun', phone: '0332 123 45 67' },
-  { name: 'Adana', sameDay: false, avgTime: '1 gun', phone: '0322 123 45 67' },
-  { name: 'Gaziantep', sameDay: false, avgTime: '1-2 gun', phone: '0342 123 45 67' },
-  { name: 'Kayseri', sameDay: false, avgTime: '1 gun', phone: '0352 123 45 67' },
+  { name: 'İstanbul', sameDay: true, avgTime: '2 saat', phone: CONTACT_PHONE_DISPLAY },
+  { name: 'Ankara', sameDay: true, avgTime: '3 saat', phone: CONTACT_PHONE_DISPLAY },
+  { name: 'İzmir', sameDay: true, avgTime: '3 saat', phone: CONTACT_PHONE_DISPLAY },
+  { name: 'Antalya', sameDay: false, avgTime: '1 gun', phone: CONTACT_PHONE_DISPLAY },
+  { name: 'Bursa', sameDay: true, avgTime: '4 saat', phone: CONTACT_PHONE_DISPLAY },
+  { name: 'Kocaeli', sameDay: true, avgTime: '3 saat', phone: CONTACT_PHONE_DISPLAY },
+  { name: 'Konya', sameDay: false, avgTime: '1 gun', phone: CONTACT_PHONE_DISPLAY },
+  { name: 'Adana', sameDay: false, avgTime: '1 gun', phone: CONTACT_PHONE_DISPLAY },
+  { name: 'Gaziantep', sameDay: false, avgTime: '1-2 gun', phone: CONTACT_PHONE_DISPLAY },
+  { name: 'Kayseri', sameDay: false, avgTime: '1 gun', phone: CONTACT_PHONE_DISPLAY },
 ];
 
 const processSteps = [

@@ -3,6 +3,7 @@ import { Shield, Award, Users, Droplets, Clock, MapPin, Wrench, Leaf, Heart, Tar
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
 import { SEO } from '@/components/SEO';
+import { CONTACT_PHONE_DISPLAY, telHref } from '@/lib/contact';
 
 
 const stats = [
@@ -147,7 +148,7 @@ export default function AboutPage() {
                 <p className="text-sm text-aq-muted leading-relaxed">81 ilde yetkili servis noktalarımızla hızlı kurulum, bakım ve onarım hizmeti sunuyoruz. Servis talebiniz için hemen bize ulaşın.</p>
                 <div className="flex flex-wrap gap-3 mt-5">
                   <Link to="/servis-randevusu" className="inline-flex items-center gap-2 bg-aq-blue text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all">Servis Talebi <ArrowRight className="w-4 h-4" /></Link>
-                  <a href="tel:08501234567" className="inline-flex items-center gap-2 border border-aq-border/60 text-aq-muted px-5 py-2.5 rounded-full text-sm font-semibold hover:border-aq-blue hover:text-aq-blue transition-all"><Phone className="w-4 h-4" />0850 123 45 67</a>
+                  <a href={telHref()} className="inline-flex items-center gap-2 border border-aq-border/60 text-aq-muted px-5 py-2.5 rounded-full text-sm font-semibold hover:border-aq-blue hover:text-aq-blue transition-all"><Phone className="w-4 h-4" />{CONTACT_PHONE_DISPLAY}</a>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">

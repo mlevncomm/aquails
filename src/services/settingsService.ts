@@ -1,5 +1,6 @@
 import { getSupabaseOrNull } from '@/lib/supabase';
 import { fail, ok, type MutationResult } from '@/lib/mutationResult';
+import { CONTACT_PHONE_DISPLAY, CONTACT_WHATSAPP_DIGITS, resolveContactPhone } from '@/lib/contact';
 
 /** Canonical site settings shared by admin write + public Header/Footer/Contact/Checkout. */
 export interface SiteConfig {
@@ -50,8 +51,8 @@ export type SettingsResult<T> =
 const DEFAULT_SITE: SiteConfig = {
   siteName: 'Aquails',
   siteDescription: 'Su arıtma cihazları ve filtre sistemleri',
-  phone: '',
-  whatsapp: '',
+  phone: CONTACT_PHONE_DISPLAY,
+  whatsapp: CONTACT_PHONE_DISPLAY,
   email: '',
   address: '',
   facebook: '',
@@ -66,7 +67,7 @@ const DEFAULT_SITE: SiteConfig = {
 
 const DEFAULT_NAV_LINKS: NavLinkItem[] = [
   { id: '1', title: 'Ürünleri İncele', url: '/urunler', icon: 'ShoppingBag', active: true, featured: true, order: 1 },
-  { id: '2', title: 'WhatsApp Destek', url: 'https://wa.me/905321234567', icon: 'MessageCircle', active: true, featured: true, order: 2 },
+  { id: '2', title: 'WhatsApp Destek', url: `https://wa.me/${CONTACT_WHATSAPP_DIGITS}`, icon: 'MessageCircle', active: true, featured: true, order: 2 },
   { id: '3', title: 'Su Arıtma Cihazları', url: '/urunler?kategori=su-aritma', icon: 'Droplet', active: true, featured: false, order: 3 },
   { id: '4', title: 'Kampanyalar', url: '/kampanyalar', icon: 'Gift', active: true, featured: false, order: 4 },
   { id: '5', title: 'Filtre Aboneliği', url: '/filtre-aboneligi', icon: 'RefreshCw', active: true, featured: false, order: 5 },
@@ -97,8 +98,8 @@ function normalizeSite(raw: Record<string, unknown> | null | undefined): SiteCon
   return {
     siteName: String(r.siteName ?? DEFAULT_SITE.siteName),
     siteDescription: String(r.siteDescription ?? DEFAULT_SITE.siteDescription),
-    phone: String(r.phone ?? r.contactPhone ?? DEFAULT_SITE.phone),
-    whatsapp: String(r.whatsapp ?? DEFAULT_SITE.whatsapp),
+    phone: resolveContactPhone(String(r.phone ?? r.contactPhone ?? DEFAULT_SITE.phone)),
+    whatsapp: resolveContactPhone(String(r.whatsapp ?? DEFAULT_SITE.whatsapp)),
     email: String(r.email ?? r.contactEmail ?? DEFAULT_SITE.email),
     address: String(r.address ?? DEFAULT_SITE.address),
     facebook: String(r.facebook ?? DEFAULT_SITE.facebook),

@@ -13,6 +13,7 @@ import { SEO } from '@/components/SEO';
 import { useCatalog } from '@/hooks/useCatalog';
 import { openWhatsApp, getWhatsAppUrl } from '@/services/whatsappService';
 import { getNavLinks } from '@/services/settingsService';
+import { telHref } from '@/lib/contact';
 import { cn } from '@/lib/utils';
 
 const categoryIconMap: Record<string, ElementType> = {
@@ -370,7 +371,7 @@ export default function AllLinksPage() {
               {[
                 { icon: Instagram, href: 'https://instagram.com/aquails', label: 'Instagram', external: true },
                 { icon: MessageCircle, href: getWhatsAppUrl(), label: 'WhatsApp', external: true },
-                { icon: Phone, href: 'tel:08501234567', label: 'Telefon', external: true },
+                { icon: Phone, href: telHref(), label: 'Telefon', external: true },
                 { icon: Mail, href: 'mailto:info@aquails.com.tr', label: 'E-posta', external: true },
                 { icon: Globe, href: '/', label: 'Web Sitesi', external: false },
               ].map((s) =>

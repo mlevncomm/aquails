@@ -1,4 +1,6 @@
-const WHATSAPP_NUMBER = '905321234567';
+import { CONTACT_WHATSAPP_DIGITS } from '@/lib/contact';
+
+const WHATSAPP_NUMBER = CONTACT_WHATSAPP_DIGITS;
 
 export function getWhatsAppUrl(message?: string): string {
   const base = `https://wa.me/${WHATSAPP_NUMBER}`;

@@ -7,6 +7,7 @@ import { BrandLogo } from '@/components/BrandLogo';
 import { useCatalog } from '@/hooks/useCatalog';
 import { categories as staticCategories } from '@/data';
 import { getSiteConfig, type SiteConfig } from '@/services/settingsService';
+import { CONTACT_PHONE_DISPLAY, telHref } from '@/lib/contact';
 import { cn } from '@/lib/utils';
 
 const quickLinks = [
@@ -54,7 +55,7 @@ export function Footer() {
     };
   }, []);
 
-  const phone = site?.phone || '0850 123 45 67';
+  const phone = site?.phone || CONTACT_PHONE_DISPLAY;
   const email = site?.email || 'info@aquails.com.tr';
   const address = site?.address || 'Teknopark İstanbul, Pendik/İstanbul';
   const year = new Date().getFullYear();
@@ -178,7 +179,7 @@ export function Footer() {
               İletişim
             </h3>
             <a
-              href={`tel:${phone.replace(/\s/g, '')}`}
+              href={telHref(phone)}
               className="group mb-5 inline-flex flex-col"
             >
               <span className="text-[11px] text-white/35 mb-1">Hemen ara</span>

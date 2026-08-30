@@ -1,3 +1,5 @@
+import { CONTACT_PHONE_SCHEMA } from '@/lib/contact';
+
 interface ProductSchemaProps {
   name: string;
   description: string;
@@ -27,7 +29,7 @@ export function getOrganizationSchema() {
     ],
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+90-500-123-4567',
+      telephone: CONTACT_PHONE_SCHEMA,
       contactType: 'customer service',
       areaServed: 'TR',
       availableLanguage: 'Turkish',
@@ -140,7 +142,7 @@ export function getLocalBusinessSchema() {
     name: 'Aquails',
     description: 'Su arıtma cihazları, filtre setleri ve servis çözümleri',
     url: SITE_URL,
-    telephone: '+90-500-123-4567',
+    telephone: CONTACT_PHONE_SCHEMA,
     email: 'info@aquails.com',
     address: {
       '@type': 'PostalAddress',

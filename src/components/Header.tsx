@@ -15,6 +15,7 @@ import { useFavoritesStore } from '@/stores/favoritesStore';
 import { useCompareStore } from '@/stores/compareStore';
 import { logout } from '@/services/authService';
 import { getSiteConfig } from '@/services/settingsService';
+import { CONTACT_PHONE_DISPLAY, telHref } from '@/lib/contact';
 import { categories as staticCategories } from '@/data';
 import { useCatalog } from '@/hooks/useCatalog';
 import { BrandLogo } from '@/components/BrandLogo';
@@ -110,7 +111,7 @@ export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileCatsOpen, setMobileCatsOpen] = useState(false);
-  const [phone, setPhone] = useState('0850 123 45 67');
+  const [phone, setPhone] = useState(CONTACT_PHONE_DISPLAY);
   const [freeShippingLimit, setFreeShippingLimit] = useState(1500);
   const location = useLocation();
   const navigate = useNavigate();
@@ -214,7 +215,7 @@ export function Header() {
             </Link>
             <span className="mx-1 h-3 w-px bg-white/15" />
             <a
-              href={`tel:${phone.replace(/\s/g, '')}`}
+              href={telHref(phone)}
               className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium tabular-nums text-aq-aqua transition-colors hover:bg-aq-aqua/10"
             >
               <Phone className="h-3 w-3" strokeWidth={2.25} />

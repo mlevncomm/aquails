@@ -7,6 +7,7 @@ import { useToastStore } from '@/components/Toast';
 import { SEO } from '@/components/SEO';
 import { submitContactMessage } from '@/services/contactService';
 import { getSiteConfig } from '@/services/settingsService';
+import { CONTACT_PHONE_DISPLAY, CONTACT_WHATSAPP_DIGITS } from '@/lib/contact';
 
 const sikSorulan = [
   { q: 'Siparişim ne zaman elime ulaşır?', a: 'Stoktaki ürünler için ortalama 1-3 iş günü içinde kargo teslimatı sağlanır.' },
@@ -16,7 +17,7 @@ const sikSorulan = [
 
 function toWaLink(whatsapp: string): string {
   const digits = whatsapp.replace(/\D/g, '');
-  if (!digits) return 'https://wa.me/905321234567';
+  if (!digits) return `https://wa.me/${CONTACT_WHATSAPP_DIGITS}`;
   const normalized = digits.startsWith('90') ? digits : digits.startsWith('0') ? `90${digits.slice(1)}` : `90${digits}`;
   return `https://wa.me/${normalized}`;
 }
@@ -25,8 +26,8 @@ export default function ContactPage() {
   const addToast = useToastStore(s => s.add);
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [phone, setPhone] = useState('0850 123 45 67');
-  const [whatsapp, setWhatsapp] = useState('0532 123 45 67');
+  const [phone, setPhone] = useState(CONTACT_PHONE_DISPLAY);
+  const [whatsapp, setWhatsapp] = useState(CONTACT_PHONE_DISPLAY);
   const [email, setEmail] = useState('info@aquails.com.tr');
   const [address, setAddress] = useState('Pendik, İstanbul');
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: 'Genel Bilgi', message: '' });

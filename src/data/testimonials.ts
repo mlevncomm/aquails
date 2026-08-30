@@ -54,7 +54,7 @@ export const faqItems: FAQItem[] = [
   {
     id: '5',
     question: 'Acil servis talebi nasıl oluşturabilirim?',
-    answer: '7/24 acil servis hattımızı (0850 123 45 67) arayarak veya web sitemizden \'Servis Talep Et\' butonunu kullanarak acil servis talebi oluşturabilirsiniz. Talebiniz en yakın servis noktasına yönlendirilir ve ortalama 2 saat içinde dönüş sağlanır.',
+    answer: '7/24 acil servis hattımızı (+90 535 223 03 16) arayarak veya web sitemizden \'Servis Talep Et\' butonunu kullanarak acil servis talebi oluşturabilirsiniz. Talebiniz en yakın servis noktasına yönlendirilir ve ortalama 2 saat içinde dönüş sağlanır.',
   },
   {
     id: '6',

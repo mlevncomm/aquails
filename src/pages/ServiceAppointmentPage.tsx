@@ -7,6 +7,7 @@ import { useToastStore } from '@/components/Toast';
 import { SEO } from '@/components/SEO';
 import { useAuthStore } from '@/stores/authStore';
 import { createServiceRequest } from '@/services/serviceRequestService';
+import { CONTACT_PHONE_DISPLAY, telHref } from '@/lib/contact';
 
 
 const serviceTypes = [
@@ -169,7 +170,7 @@ export default function ServiceAppointmentPage() {
             <div className="bg-gradient-to-br from-aq-blue to-aq-aqua-hover rounded-2xl p-5 text-white">
               <h3 className="text-base font-semibold mb-1">Hızlı Destek</h3>
               <p className="text-xs text-white/70 mb-3">Acil durumlar için 7/24 telefon desteği</p>
-              <a href="tel:08501234567" className="flex items-center gap-2 text-sm font-semibold"><Phone className="w-4 h-4" /> 0850 123 45 67</a>
+              <a href={telHref()} className="flex items-center gap-2 text-sm font-semibold"><Phone className="w-4 h-4" /> {CONTACT_PHONE_DISPLAY}</a>
             </div>
             <div className="bg-white border border-aq-border/60 rounded-2xl p-5">
               <h3 className="text-sm font-semibold text-aq-text mb-3">Servis Kapsami</h3>
