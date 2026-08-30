@@ -5,6 +5,7 @@ import { Filter, ArrowRight, ShoppingCart, RefreshCw, CheckCircle, Droplet } fro
 import { PageLayout } from '@/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { getProducts } from '@/services/productService';
+import type { Product } from '@/types';
 
 
 const deviceModels = [
@@ -26,7 +27,7 @@ export default function FilterGuidePage() {
   const [usageMonths, setUsageMonths] = useState('6');
   const [need, setNeed] = useState('');
   const [showResult, setShowResult] = useState(false);
-  const [filterProducts, setFilterProducts] = useState<any[]>([]);
+  const [filterProducts, setFilterProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     let cancelled = false;

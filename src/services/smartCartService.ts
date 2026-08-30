@@ -5,6 +5,7 @@ interface CartItem {
   quantity: number;
 }
 
-export function getSmartRecommendations(_cartItems: CartItem[]): Product[] {
+export function getSmartRecommendations(cartItems: CartItem[]): Product[] {
+  void cartItems;
   return [];
 }
