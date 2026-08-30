@@ -1,4 +1,5 @@
 import { getSupabaseOrNull, isSupabaseConfigured } from '@/lib/supabase';
+import { products as localCatalogProducts } from '@/data/products';
 import type { Product, Category } from '@/types';
 import type { DbProduct, DbCategory, DbProductImage } from '@/types/database';
 import { fail, mapDbError, ok, type MutationResult } from '@/lib/mutationResult';
@@ -101,10 +102,14 @@ export async function getProducts(): Promise<Product[]> {
   return [];
 }
 
-/** Public catalog loader — no local fallback; requires Supabase configuration. */
+/** Public catalog loader — keep a safe local catalog only when Supabase is not configured. */
 export async function loadPublicProducts(): Promise<CatalogLoadResult> {
   if (!isSupabaseConfigured()) {
-    return { ok: false, error: 'Supabase yapılandırılmamış.', code: 'not_configured' };
+    return {
+      ok: true,
+      products: localCatalogProducts,
+      source: 'local',
+    };
   }
   const supabase = getSupabaseOrNull();
   if (!supabase) return { ok: false, error: 'Supabase yapılandırılmamış.', code: 'not_configured' };
