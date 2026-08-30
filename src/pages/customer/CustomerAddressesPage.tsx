@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MapPin, Plus, Pencil, Trash2, Home, Building2, Star } from 'lucide-react';
 import {
   getAddresses,
@@ -40,16 +40,16 @@ export default function CustomerAddressesPage() {
     isDefault: false,
   });
 
-  const loadAddresses = async () => {
+  const loadAddresses = useCallback(async () => {
     if (!user) return;
     const data = await getAddresses(user.id);
     setAddresses(data);
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     void loadAddresses();
-  }, [user]);
+  }, [loadAddresses]);
 
   const resetForm = () => {
     setForm({

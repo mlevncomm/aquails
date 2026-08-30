@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { ProductPrice } from '@/components/ProductPrice';
@@ -23,16 +23,16 @@ export default function CustomerFavoritesPage() {
   const [favorites, setFavorites] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadFavorites = async () => {
+  const loadFavorites = useCallback(async () => {
     if (!user) return;
     const data = await getFavoriteProducts(user.id);
     setFavorites(data);
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     void loadFavorites();
-  }, [user]);
+  }, [loadFavorites]);
 
   const handleAddToCart = (p: Product) => {
     addItem(p);

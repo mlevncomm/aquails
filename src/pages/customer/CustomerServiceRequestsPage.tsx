@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Wrench, Plus, X, MapPin, Calendar, FileText } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/components/Toast';
@@ -51,12 +51,12 @@ export default function CustomerServiceRequestsPage() {
     description: '',
   });
 
-  const loadRequests = async () => {
+  const loadRequests = useCallback(async () => {
     if (!user) return;
     const data = await getCustomerServiceRequests(user.id);
     setRequests(data);
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -67,7 +67,7 @@ export default function CustomerServiceRequestsPage() {
         setForm((f) => (f.address ? f : { ...f, address: formatAddressLabel(data[0]) }));
       }
     });
-  }, [user]);
+  }, [user, loadRequests]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

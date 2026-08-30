@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Package, Truck, Filter, Wrench, Tag, Info, Bell } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import {
@@ -44,16 +44,16 @@ export default function CustomerNotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     if (!user) return;
     const data = await getNotifications(user.id);
     setNotifications(data);
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     void loadNotifications();
-  }, [user]);
+  }, [loadNotifications]);
 
   const handleMarkRead = async (id: string) => {
     await markNotificationRead(id);

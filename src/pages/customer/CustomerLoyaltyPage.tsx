@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Award, Gift, TrendingUp, History } from 'lucide-react';
 import { EARN_RULES, getLoyaltyData, redeemPoints, getLoyaltyHistory } from '@/services/loyaltyService';
 import { useAuthStore } from '@/stores/authStore';
@@ -24,7 +24,7 @@ export default function CustomerLoyaltyPage() {
   const [redeeming, setRedeeming] = useState(false);
   const [convertAmount, setConvertAmount] = useState(500);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user) return;
     const [loyalty, hist] = await Promise.all([
       getLoyaltyData(user.id),
@@ -33,11 +33,11 @@ export default function CustomerLoyaltyPage() {
     setData(loyalty);
     setHistory(hist);
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     void loadData();
-  }, [user]);
+  }, [loadData]);
 
   const handleConvert = async () => {
     if (!user) return;

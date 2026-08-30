@@ -66,7 +66,7 @@ export default function SearchResults() {
         break;
     }
     return res;
-  }, [products, query, sort, catFilter, priceRange, categories]);
+  }, [products, query, sort, catFilter, priceRange]);
 
   const activeFilters = [
     ...(catFilter !== 'all' ? [{ label: catFilter, onRemove: () => setCatFilter('all') }] : []),

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { RotateCcw, Plus, X } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
 import { useAuthStore } from '@/stores/authStore';
@@ -56,7 +56,7 @@ export default function CustomerReturnsPage() {
     description: '',
   });
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user) return;
     const [returnData, orderData] = await Promise.all([
       getCustomerReturns(user.id),
@@ -65,11 +65,11 @@ export default function CustomerReturnsPage() {
     setReturns(returnData);
     setOrders(orderData);
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     void loadData();
-  }, [user]);
+  }, [loadData]);
 
   const handleOrderChange = (orderId: string) => {
     const order = orders.find((o) => o.id === orderId);

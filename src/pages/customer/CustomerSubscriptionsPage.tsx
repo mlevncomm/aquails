@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router';
 import { RefreshCw, Pause, Play } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
@@ -36,16 +36,16 @@ export default function CustomerSubscriptionsPage() {
   const [subscriptions, setSubscriptions] = useState<CustomerSubscription[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadSubscriptions = async () => {
+  const loadSubscriptions = useCallback(async () => {
     if (!user) return;
     const data = await getCustomerSubscriptions(user.id);
     setSubscriptions(data);
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     void loadSubscriptions();
-  }, [user]);
+  }, [loadSubscriptions]);
 
   const handlePause = async (id: string) => {
     const res = await updateSubscriptionStatus(id, 'paused');

@@ -187,7 +187,7 @@ export default function Checkout() {
       user?.name ?? 'Misafir',
       user?.email
     );
-  }, [items, isCompleted, navigate, addToast, user?.name, user?.email]);
+  }, [items, isCompleted, navigate, addToast, user?.name, user?.email, taxConfig.rate]);
 
   const selectSavedAddress = (addr: Address) => {
     setSelectedAddressId(addr.id);

@@ -123,19 +123,22 @@ export default function AdminDashboard() {
       ]
     : [];
 
-  const operations = stats
-    ? [
-        { label: 'Bugünkü Kurulum', value: stats.todayInstallations, href: '/admin/servis-takvimi', icon: Wrench, urgent: stats.todayInstallations > 0 },
-        { label: 'Bekleyen Servis', value: stats.pendingService, href: '/admin/servis-talepleri', icon: Clock, urgent: stats.pendingService > 0 },
-        { label: 'Düşük Stok', value: stats.lowStockCount, href: '/admin/stok', icon: Package, urgent: stats.lowStockCount > 0 },
-        { label: 'Terk Edilmiş Sepet', value: stats.abandonedCarts, href: '/admin/terk-edilmis-sepetler', icon: ShoppingBag, urgent: stats.abandonedCarts > 0 },
-        { label: 'Okunmamış Soru', value: stats.unreadQuestions, href: '/admin/sorular', icon: MessageSquare, urgent: stats.unreadQuestions > 0 },
-        { label: 'Onay Bekleyen Yorum', value: stats.unreadReviews, href: '/admin/yorumlar', icon: Star, urgent: stats.unreadReviews > 0 },
-        { label: 'Kritik Uyarı', value: stats.criticalAlerts, href: '/admin/stok-bildirimleri', icon: Bell, urgent: stats.criticalAlerts > 0 },
-        { label: 'Bekleyen İade', value: stats.pendingReturns, href: '/admin/iade-degisim', icon: RefreshCw, urgent: stats.pendingReturns > 0 },
-        { label: 'Aktif Abonelik', value: stats.activeSubscriptions, href: '/admin/abonelikler', icon: Zap, urgent: false },
-      ]
-    : [];
+  const operations = useMemo(
+    () => stats
+      ? [
+          { label: 'Bugünkü Kurulum', value: stats.todayInstallations, href: '/admin/servis-takvimi', icon: Wrench, urgent: stats.todayInstallations > 0 },
+          { label: 'Bekleyen Servis', value: stats.pendingService, href: '/admin/servis-talepleri', icon: Clock, urgent: stats.pendingService > 0 },
+          { label: 'Düşük Stok', value: stats.lowStockCount, href: '/admin/stok', icon: Package, urgent: stats.lowStockCount > 0 },
+          { label: 'Terk Edilmiş Sepet', value: stats.abandonedCarts, href: '/admin/terk-edilmis-sepetler', icon: ShoppingBag, urgent: stats.abandonedCarts > 0 },
+          { label: 'Okunmamış Soru', value: stats.unreadQuestions, href: '/admin/sorular', icon: MessageSquare, urgent: stats.unreadQuestions > 0 },
+          { label: 'Onay Bekleyen Yorum', value: stats.unreadReviews, href: '/admin/yorumlar', icon: Star, urgent: stats.unreadReviews > 0 },
+          { label: 'Kritik Uyarı', value: stats.criticalAlerts, href: '/admin/stok-bildirimleri', icon: Bell, urgent: stats.criticalAlerts > 0 },
+          { label: 'Bekleyen İade', value: stats.pendingReturns, href: '/admin/iade-degisim', icon: RefreshCw, urgent: stats.pendingReturns > 0 },
+          { label: 'Aktif Abonelik', value: stats.activeSubscriptions, href: '/admin/abonelikler', icon: Zap, urgent: false },
+        ]
+      : [],
+    [stats],
+  );
 
   const attentionItems = useMemo(() => operations.filter((o) => o.urgent), [operations]);
 
