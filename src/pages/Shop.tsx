@@ -294,7 +294,7 @@ export default function Shop() {
     <>
       <SEO
         title="Aquails Ürünleri | Su Arıtma Cihazları ve Filtreler"
-        description="Aquails su arıtma cihazları, filtre setleri, tezgah altı sistemler ve endüstriyel arıtma çözümleri. Ücretsiz kurulum ve 2 yıl garanti."
+        description="Aquails su arıtma cihazları, filtre setleri, tezgah altı sistemler ve arıtma çözümleri. Ürünleri karşılaştırın, ihtiyacınıza uygun sistemi keşfedin."
         canonical="/urunler"
       />
       <PageLayout>
