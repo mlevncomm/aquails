@@ -44,8 +44,9 @@ function inject(template, data) {
   return html;
 }
 async function writeRoute(route, html) {
-  const file = path.join(DIST, route.replace(/^\/+/, '') + '.html');
-  await mkdir(path.dirname(file), { recursive: true });
+  const dir = path.join(DIST, route.replace(/^\/+/, ''));
+  const file = path.join(dir, 'index.html');
+  await mkdir(dir, { recursive: true });
   await writeFile(file, html, 'utf8');
 }
 function graph(nodes) {

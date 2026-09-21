@@ -375,6 +375,5 @@
       "source": "/links",
       "destination": "/index.html"
     }
-  ],
-  "cleanUrls": true
+  ]
 }
