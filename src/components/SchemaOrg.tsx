@@ -168,6 +168,42 @@ export function getArticleSchema({
   return schema;
 }
 
+export function getCollectionPageSchema({
+  name,
+  description,
+  path,
+  products,
+}: {
+  name: string;
+  description: string;
+  path: string;
+  products: { name: string; slug: string }[];
+}) {
+  const url = `${SITE_URL}${path}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${url}#collection`,
+    url,
+    name,
+    description,
+    inLanguage: 'tr-TR',
+    isPartOf: {
+      '@id': WEBSITE_ID,
+    },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: products.length,
+      itemListElement: products.map((product, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `${SITE_URL}/urun/${product.slug}`,
+        name: product.name,
+      })),
+    },
+  };
+}
+
 export function getFAQSchema(questions: { question: string; answer: string }[]) {
   return {
     '@context': 'https://schema.org',
