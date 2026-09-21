@@ -75,11 +75,15 @@ export default async function middleware(request: Request) {
   if (!route || !/^[a-z0-9-]+$/.test(route.slug)) return next();
 
   // Existing build-time routes keep the fast static/prerendered response.
-  if (wasPrerendered(route.kind, route.slug)) return next();
+  if (wasPrerendered(route.kind, route.slug)) {
+    return next({ headers: { 'X-Aquails-SEO-Route': 'prerendered' } });
+  }
 
   // Content created in the admin after the last deployment remains reachable.
   if (await existsInCatalog(route.kind, route.slug)) {
-    return rewrite(new URL('/index.html', request.url));
+    return rewrite(new URL('/index.html', request.url), {
+      headers: { 'X-Aquails-SEO-Route': 'live-fallback' },
+    });
   }
 
   return new Response('Not Found', {
@@ -87,6 +91,7 @@ export default async function middleware(request: Request) {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Robots-Tag': 'noindex, nofollow',
+      'X-Aquails-SEO-Route': 'not-found',
       'Cache-Control': 'public, max-age=0, s-maxage=60',
     },
   });
