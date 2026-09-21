@@ -236,6 +236,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/kategori/:categorySlug",
+      "destination": "/index.html"
+    },
+    {
       "source": "/urun/:slug",
       "destination": "/index.html"
     },
