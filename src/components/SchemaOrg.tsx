@@ -36,11 +36,22 @@ export function getOrganizationSchema() {
       url: `${SITE_URL}/images/brand/logo.png`,
     },
     description: 'Su arıtma cihazları, filtre setleri ve servis çözümleri',
+    knowsAbout: [
+      'Su arıtma cihazları',
+      'Ters ozmoz',
+      'Su filtreleri',
+      'Membran filtreler',
+      'Su arıtma cihazı bakımı',
+      'Su arıtma cihazı kurulumu',
+    ],
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: CONTACT_PHONE_SCHEMA,
       contactType: 'customer service',
-      areaServed: 'TR',
+      areaServed: {
+        '@type': 'Country',
+        name: 'Türkiye',
+      },
       availableLanguage: ['tr'],
     },
   };
@@ -181,11 +192,16 @@ export function getLocalBusinessSchema() {
     description: 'Su arıtma cihazları, filtre setleri ve servis çözümleri',
     url: SITE_URL,
     telephone: CONTACT_PHONE_SCHEMA,
-    email: 'info@aquails.com',
+    email: 'info@aquails.com.tr',
     address: {
       '@type': 'PostalAddress',
-      addressLocality: 'İstanbul',
+      addressLocality: 'Pendik',
+      addressRegion: 'İstanbul',
       addressCountry: 'TR',
+    },
+    areaServed: {
+      '@type': 'Country',
+      name: 'Türkiye',
     },
     parentOrganization: {
       '@id': ORGANIZATION_ID,
