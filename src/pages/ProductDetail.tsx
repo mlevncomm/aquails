@@ -118,7 +118,7 @@ export default function ProductDetail() {
   const breadcrumbSchema = getBreadcrumbSchema([
     { name: 'Ana Sayfa', url: '/' },
     { name: 'Ürünler', url: '/urunler' },
-    { name: product.category, url: `/urunler?kategori=${product.categorySlug}` },
+    { name: product.category, url: `/kategori/${product.categorySlug}` },
     { name: product.name, url: `/urun/${product.slug}` },
   ]);
 
