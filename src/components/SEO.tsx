@@ -17,7 +17,7 @@ interface SEOProps {
 const DEFAULT_DESCRIPTION =
   'Aquails su arıtma cihazları, filtre setleri, servis randevusu ve filtre aboneliği çözümleriyle eviniz ve iş yeriniz için güvenilir su teknolojileri sunar.';
 const DEFAULT_OG_IMAGE = '/images/brand/aquails-og.jpg';
-export const SITE_URL = 'https://aquails.com';
+export const SITE_URL = 'https://www.aquails.com';
 
 function absoluteUrl(value: string): string {
   if (/^https?:\/\//i.test(value)) return value;
