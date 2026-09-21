@@ -20,7 +20,7 @@ interface ArticleSchemaProps {
   dateModified?: string;
 }
 
-const SITE_URL = 'https://aquails.com';
+const SITE_URL = 'https://www.aquails.com';
 const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 const WEBSITE_ID = `${SITE_URL}/#website`;
 
