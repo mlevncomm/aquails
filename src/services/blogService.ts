@@ -21,6 +21,8 @@ export interface PublicBlogPost {
   image: string;
   readTime: string;
   date: string;
+  publishedAt: string;
+  modifiedAt: string;
 }
 
 const BLOG_IMAGE_CYCLE = [
@@ -63,6 +65,8 @@ function mapPublicPost(row: DbBlogPost, index: number): PublicBlogPost {
     image: BLOG_IMAGE_CYCLE[index % BLOG_IMAGE_CYCLE.length],
     readTime: estimateReadTime(row.content),
     date: formatDateTR(row.created_at),
+    publishedAt: row.created_at,
+    modifiedAt: row.updated_at,
   };
 }
 
