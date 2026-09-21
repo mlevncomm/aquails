@@ -18,12 +18,6 @@ const STATIC_PATHS = [
   '/hakkimizda',
   '/iletisim',
   '/sss',
-  '/kargo-kurulum',
-  '/iade',
-  '/mesafeli-satis',
-  '/gizlilik',
-  '/kvkk',
-  '/uyelik-sozlesmesi',
 ] as const;
 
 type SitemapRow = {
