@@ -34,6 +34,15 @@ function escapeXml(value: string): string {
     .replace(/'/g, '&apos;');
 }
 
+function isIndexableSlug(slug: string): boolean {
+  const normalized = slug.trim().toLowerCase();
+
+  if (!normalized || normalized.length > 160) return false;
+  if (normalized.includes('http') || normalized.includes('://') || normalized.includes('/')) return false;
+  if (/(^|-)kopya(?:-\d+)?$/.test(normalized)) return false;
+  return /^[a-z0-9-]+$/.test(normalized);
+}
+
 function entry(path: string, lastModified?: string | null): string {
   const loc = escapeXml(`${SITE_URL}${path}`);
   const lastmod = lastModified
@@ -72,21 +81,25 @@ async function loadCatalogUrls(): Promise<string[]> {
       .order('updated_at', { ascending: false }),
   ]);
 
-  const urls: string[] = [];
+  const urls = new Set<string>();
 
   if (!productsResult.error) {
     for (const row of (productsResult.data ?? []) as SitemapRow[]) {
-      if (row.slug) urls.push(entry(`/urun/${encodeURIComponent(row.slug)}`, row.updated_at));
+      if (row.slug && isIndexableSlug(row.slug)) {
+        urls.add(entry(`/urun/${encodeURIComponent(row.slug)}`, row.updated_at));
+      }
     }
   }
 
   if (!blogResult.error) {
     for (const row of (blogResult.data ?? []) as SitemapRow[]) {
-      if (row.slug) urls.push(entry(`/blog/${encodeURIComponent(row.slug)}`, row.updated_at));
+      if (row.slug && isIndexableSlug(row.slug)) {
+        urls.add(entry(`/blog/${encodeURIComponent(row.slug)}`, row.updated_at));
+      }
     }
   }
 
-  return urls;
+  return [...urls];
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

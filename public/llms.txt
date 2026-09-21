@@ -1,0 +1,36 @@
+# Aquails
+
+> Aquails, Türkiye'de su arıtma cihazları, filtre sistemleri, yedek parçalar, kurulum ve bakım hizmetleri sunan bir su teknolojileri markasıdır.
+
+Canonical website: https://www.aquails.com
+Language: Turkish (tr-TR)
+Primary market: Türkiye
+
+## Core pages
+
+- Ana sayfa: https://www.aquails.com/
+- Ürünler: https://www.aquails.com/urunler
+- Blog / bilgi merkezi: https://www.aquails.com/blog
+- Filtre seçim rehberi: https://www.aquails.com/filtre-secim-rehberi
+- Su kalitesi testi: https://www.aquails.com/su-kalitesi-testi
+- Filtre hesaplayıcı: https://www.aquails.com/filtre-hesaplayici
+- Servis ağı: https://www.aquails.com/servis-agimiz
+- Servis randevusu: https://www.aquails.com/servis-randevusu
+- Hakkımızda: https://www.aquails.com/hakkimizda
+- İletişim: https://www.aquails.com/iletisim
+- Sık sorulan sorular: https://www.aquails.com/sss
+- XML sitemap: https://www.aquails.com/sitemap.xml
+
+## Main topics
+
+Aquails publishes information about:
+- su arıtma cihazları
+- ters ozmoz (reverse osmosis / RO)
+- membran ve su filtreleri
+- filtre değişim periyotları
+- su arıtma cihazı kurulumu ve bakımı
+- ev ve iş yeri su arıtma sistemleri
+- bina giriş filtrasyonu
+- su sebilleri ve arıtmalı sebiller
+
+For current product availability, prices and technical specifications, use the canonical product pages listed in the XML sitemap.
