@@ -236,14 +236,6 @@
       "destination": "/index.html"
     },
     {
-      "source": "/kategori/:categorySlug",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/urun/:slug",
-      "destination": "/index.html"
-    },
-    {
       "source": "/sepet",
       "destination": "/index.html"
     },
@@ -273,10 +265,6 @@
     },
     {
       "source": "/blog",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/blog/:slug",
       "destination": "/index.html"
     },
     {
@@ -387,5 +375,6 @@
       "source": "/links",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "cleanUrls": true
 }
