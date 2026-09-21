@@ -28,7 +28,8 @@ function toGraph(schema: JsonLdNode | JsonLdNode[]): JsonLdNode {
   if (!Array.isArray(schema)) return schema;
 
   const graph = schema.map((node) => {
-    const { ['@context']: _context, ...rest } = node;
+    const rest = { ...node };
+    delete rest['@context'];
     return rest;
   });
 
