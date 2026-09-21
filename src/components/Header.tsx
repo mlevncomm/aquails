@@ -495,7 +495,7 @@ export function Header() {
                               transition={{ delay: Math.min(i * 0.03, 0.2) }}
                             >
                               <Link
-                                to={`/urunler?kategori=${cat.id}`}
+                                to={`/kategori/${cat.id}`}
                                 onClick={() => setIsMegaOpen(false)}
                                 className="group flex items-start gap-3 rounded-2xl border border-transparent px-3 py-3 transition-all duration-250 hover:border-aq-border/70 hover:bg-aq-ice/80 hover:shadow-[0_8px_24px_-16px_rgba(18,134,216,0.35)]"
                               >
@@ -694,7 +694,7 @@ export function Header() {
                               return (
                                 <Link
                                   key={cat.id}
-                                  to={`/urunler?kategori=${cat.id}`}
+                                  to={`/kategori/${cat.id}`}
                                   onClick={() => setIsMobileMenuOpen(false)}
                                   className="flex items-center gap-3 px-3 py-2.5 text-sm text-aq-muted hover:bg-aq-ice hover:text-aq-blue rounded-2xl transition-colors"
                                 >
