@@ -64,6 +64,83 @@ function gross(price, tax) {
 
 const template = await readFile(path.join(DIST, 'index.html'), 'utf8');
 
+const staticMeta = {
+  '/urunler': [
+    'Aquails Ürünleri | Su Arıtma Cihazları ve Filtreler',
+    'Aquails su arıtma cihazları, filtre setleri, tezgah altı sistemler ve arıtma çözümleri. Ürünleri karşılaştırın, ihtiyacınıza uygun sistemi keşfedin.',
+  ],
+  '/kampanyalar': [
+    'Aquails Kampanyaları | Su Arıtma Fırsatları',
+    'Aquails kampanyaları ve indirim fırsatları. Su arıtma cihazlarında özel fiyatları ve güncel avantajları inceleyin.',
+  ],
+  '/blog': [
+    'Aquails Blog | Su Arıtma Rehberi ve Filtre Bakımı',
+    'Su arıtma teknolojileri, filtre bakımı, su kalitesi ve sağlıklı yaşam hakkında kapsamlı rehberler ve bilgilendirici yazılar.',
+  ],
+  '/filtre-aboneligi': [
+    'Filtre Aboneliği | Aquails',
+    'Aquails filtre aboneliği ile filtre değişim planınızı düzenli takip edin ve uygun filtre çözümlerine kolayca ulaşın.',
+  ],
+  '/servis-randevusu': [
+    'Aquails Servis Randevusu | Kurulum ve Filtre Değişimi',
+    'Aquails servis randevusu oluşturun. Kurulum, filtre değişimi, bakım ve teknik servis taleplerinizi iletin.',
+  ],
+  '/urun-secim-sihirbazi': [
+    'Ürün Seçim Sihirbazı | Aquails',
+    'Birkaç soruya cevap vererek eviniz veya iş yeriniz için ihtiyaçlarınıza uygun Aquails su arıtma cihazlarını keşfedin.',
+  ],
+  '/filtre-hesaplayici': [
+    'Filtre Değişim Hesaplayıcı | Aquails',
+    'Aquails filtre değişim sürenizi hesaplayın. Cihaz modeli ve kullanım bilgilerinize göre filtre bakım zamanınızı planlayın.',
+  ],
+  '/su-kalitesi-testi': [
+    'Su Kalitesi Testi | Aquails',
+    'Suyunuzun TDS değeri ve kullanım ihtiyacına göre su kalitesi hakkında bilgi edinin ve uygun arıtma seçeneklerini keşfedin.',
+  ],
+  '/servis-agimiz': [
+    'Aquails Servis Ağı | Kurulum ve Bakım',
+    'Aquails servis ağı hakkında bilgi alın. Su arıtma cihazı kurulumu, bakım ve teknik servis seçeneklerini inceleyin.',
+  ],
+  '/filtre-secim-rehberi': [
+    'Filtre Seçim Rehberi | Aquails',
+    'Aquails filtre seçim rehberi ile cihazınıza ve kullanım ihtiyacınıza uygun filtre ve membran seçeneklerini keşfedin.',
+  ],
+  '/hakkimizda': [
+    'Hakkımızda | Aquails',
+    'Aquails su arıtma teknolojileri, filtre çözümleri ve servis hizmetleriyle ev ve işletmeler için temiz su çözümleri geliştirir.',
+  ],
+  '/iletisim': [
+    'İletişim | Aquails',
+    'Aquails iletişim bilgileri. Su arıtma cihazları, ürün seçimi, servis ve destek talepleriniz için bize ulaşın.',
+  ],
+  '/sss': [
+    'Sıkça Sorulan Sorular | Aquails',
+    'Aquails su arıtma cihazları hakkında sık sorulan soruların yanıtlarını; kurulum, filtre değişimi, servis ve kullanım başlıklarında inceleyin.',
+  ],
+};
+
+for (const [route, values] of Object.entries(staticMeta)) {
+  const canonical = SITE + route;
+  await writeRoute(route, inject(template, {
+    title: values[0],
+    description: values[1],
+    canonical,
+    schema: graph([
+      org,
+      site,
+      {
+        '@type': route === '/urunler' || route === '/blog' ? 'CollectionPage' : 'WebPage',
+        '@id': canonical + '#webpage',
+        url: canonical,
+        name: values[0],
+        description: values[1],
+        inLanguage: 'tr-TR',
+        isPartOf: { '@id': SITE + '/#website' },
+      },
+    ]),
+  }));
+}
+
 for (const [slug, values] of Object.entries(categoryMeta)) {
   const canonical = SITE + '/kategori/' + slug;
   await writeRoute('/kategori/' + slug, inject(template, {
