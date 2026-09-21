@@ -109,11 +109,8 @@ export default function ProductDetail() {
     name: product.name,
     description: product.shortDescription || product.description,
     image: product.images?.[0] || '/images/products/placeholder.jpg',
-    sku: product.id,
+    slug: product.slug,
     price: getProductGrossPrice(product),
-    oldPrice: product.oldPrice != null ? getProductGrossPrice({ ...product, price: product.oldPrice }) : undefined,
-    rating: product.rating,
-    reviewCount: product.reviewCount,
     category: product.category,
     availability: product.stock > 0 ? 'InStock' : 'OutOfStock',
   });
@@ -204,7 +201,7 @@ export default function ProductDetail() {
         ogDescription={product.shortDescription || product.description}
         ogImage={product.images?.[0] || '/images/brand/aquails-og.jpg'}
         canonical={`/urun/${product.slug}`}
-        schema={{ ...productSchema, ...breadcrumbSchema }}
+        schema={[productSchema, breadcrumbSchema]}
       />
       <PageLayout>
       {/* Breadcrumb */}

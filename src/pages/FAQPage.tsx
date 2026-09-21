@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
+import { getFAQSchema } from '@/components/SchemaOrg';
 
 
 const faqs = [
@@ -27,6 +28,7 @@ export default function FAQPage() {
         title="Sıkça Sorulan Sorular | Aquails"
         description="Aquails su arıtma cihazları hakkında en çok sorulan sorular ve yanıtları. Kurulum, garanti, filtre değişimi ve daha fazlası."
         canonical="/sss"
+        schema={getFAQSchema(faqs.map((item) => ({ question: item.q, answer: item.a })))}
       />
     <PageLayout>
       <div className="max-w-[800px] mx-auto px-4 py-8">

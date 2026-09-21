@@ -1,10 +1,13 @@
 import { Link } from 'react-router';
 import { Home, Search } from 'lucide-react';
+import { SEO } from '@/components/SEO';
 
 /** Visible 404 for unknown SPA routes — never a blank screen. */
 export default function NotFoundPage() {
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4">
+    <>
+      <SEO title="Sayfa Bulunamadı | Aquails" noindex />
+      <div className="min-h-[70vh] flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         <p className="text-sm font-semibold text-aq-blue tracking-wide">404</p>
         <h1 className="mt-2 text-2xl font-bold text-aq-text">Sayfa bulunamadı</h1>
@@ -27,5 +30,6 @@ export default function NotFoundPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

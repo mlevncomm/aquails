@@ -4,35 +4,44 @@ interface ProductSchemaProps {
   name: string;
   description: string;
   image: string;
-  sku: string;
+  slug: string;
+  sku?: string;
   price: number;
-  oldPrice?: number;
-  rating?: number;
-  reviewCount?: number;
   category?: string;
   availability?: 'InStock' | 'OutOfStock' | 'PreOrder';
 }
 
-const SITE_URL = 'https://aquails.com';
+interface ArticleSchemaProps {
+  title: string;
+  description: string;
+  slug: string;
+  image?: string;
+  datePublished?: string;
+  dateModified?: string;
+}
+
+const SITE_URL = 'https://www.aquails.com';
+const ORGANIZATION_ID = `${SITE_URL}/#organization`;
+const WEBSITE_ID = `${SITE_URL}/#website`;
 
 export function getOrganizationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': ORGANIZATION_ID,
     name: 'Aquails',
     url: SITE_URL,
-    logo: `${SITE_URL}/images/brand/logo.png`,
-    description: 'Daha Temiz Su, Daha Akıllı Teknoloji',
-    sameAs: [
-      'https://instagram.com/aquails',
-      'https://facebook.com/aquails',
-    ],
+    logo: {
+      '@type': 'ImageObject',
+      url: `${SITE_URL}/images/brand/logo.png`,
+    },
+    description: 'Su arıtma cihazları, filtre setleri ve servis çözümleri',
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: CONTACT_PHONE_SCHEMA,
       contactType: 'customer service',
       areaServed: 'TR',
-      availableLanguage: 'Turkish',
+      availableLanguage: ['tr'],
     },
   };
 }
@@ -41,8 +50,13 @@ export function getWebsiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': WEBSITE_ID,
     name: 'Aquails',
     url: SITE_URL,
+    publisher: {
+      '@id': ORGANIZATION_ID,
+    },
+    inLanguage: 'tr-TR',
     potentialAction: {
       '@type': 'SearchAction',
       target: `${SITE_URL}/arama?q={search_term_string}`,
@@ -55,21 +69,21 @@ export function getProductSchema({
   name,
   description,
   image,
+  slug,
   sku,
   price,
-  oldPrice,
-  rating = 4.5,
-  reviewCount = 24,
   category = 'Su Arıtma Cihazı',
   availability = 'InStock',
 }: ProductSchemaProps) {
+  const productUrl = `${SITE_URL}/urun/${slug}`;
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
+    '@id': `${productUrl}#product`,
+    url: productUrl,
     name,
     description,
-    image: image.startsWith('http') ? image : `${SITE_URL}${image}`,
-    sku,
+    image: [image.startsWith('http') ? image : `${SITE_URL}${image}`],
     brand: {
       '@type': 'Brand',
       name: 'Aquails',
@@ -77,32 +91,18 @@ export function getProductSchema({
     category,
     offers: {
       '@type': 'Offer',
-      url: `${SITE_URL}/urun/${sku.toLowerCase()}`,
+      url: productUrl,
       priceCurrency: 'TRY',
-      price: price.toString(),
+      price: Number(price.toFixed(2)),
       availability: `https://schema.org/${availability}`,
+      itemCondition: 'https://schema.org/NewCondition',
       seller: {
-        '@type': 'Organization',
-        name: 'Aquails',
+        '@id': ORGANIZATION_ID,
       },
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: rating.toString(),
-      reviewCount: reviewCount.toString(),
-      bestRating: '5',
-      worstRating: '1',
     },
   };
 
-  if (oldPrice && oldPrice > price) {
-    (schema.offers as Record<string, unknown>).priceSpecification = {
-      '@type': 'PriceSpecification',
-      price: price.toString(),
-      priceCurrency: 'TRY',
-    };
-    (schema.offers as Record<string, unknown>).priceValidUntil = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
-  }
+  if (sku) schema.sku = sku;
 
   return schema;
 }
@@ -118,6 +118,43 @@ export function getBreadcrumbSchema(items: { name: string; url: string }[]) {
       item: item.url.startsWith('http') ? item.url : `${SITE_URL}${item.url}`,
     })),
   };
+}
+
+export function getArticleSchema({
+  title,
+  description,
+  slug,
+  image,
+  datePublished,
+  dateModified,
+}: ArticleSchemaProps) {
+  const url = `${SITE_URL}/blog/${slug}`;
+  const schema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    '@id': `${url}#article`,
+    headline: title,
+    description,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+    author: {
+      '@id': ORGANIZATION_ID,
+    },
+    publisher: {
+      '@id': ORGANIZATION_ID,
+    },
+    inLanguage: 'tr-TR',
+  };
+
+  if (image) {
+    schema.image = [image.startsWith('http') ? image : `${SITE_URL}${image}`];
+  }
+  if (datePublished) schema.datePublished = datePublished;
+  if (dateModified) schema.dateModified = dateModified;
+
+  return schema;
 }
 
 export function getFAQSchema(questions: { question: string; answer: string }[]) {
@@ -139,6 +176,7 @@ export function getLocalBusinessSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
+    '@id': `${SITE_URL}/#localbusiness`,
     name: 'Aquails',
     description: 'Su arıtma cihazları, filtre setleri ve servis çözümleri',
     url: SITE_URL,
@@ -146,29 +184,11 @@ export function getLocalBusinessSchema() {
     email: 'info@aquails.com',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Pendik',
       addressLocality: 'İstanbul',
       addressCountry: 'TR',
     },
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: '40.8780',
-      longitude: '29.2566',
+    parentOrganization: {
+      '@id': ORGANIZATION_ID,
     },
-    openingHoursSpecification: [
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        opens: '09:00',
-        closes: '18:00',
-      },
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Saturday'],
-        opens: '10:00',
-        closes: '16:00',
-      },
-    ],
-    priceRange: '₺₺',
   };
 }

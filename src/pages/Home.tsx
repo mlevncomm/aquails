@@ -144,7 +144,7 @@ export default function Home() {
         title="Aquails | Yeni Nesil Su Arıtma Teknolojisi"
         description="Aquails, eviniz ve işletmeniz için sağlıklı, güvenilir ve ölçülebilir su kalitesi sunar. Su arıtma cihazları, filtre setleri ve servis çözümleri."
         canonical="/"
-        schema={{ ...getOrganizationSchema(), ...getWebsiteSchema() }}
+        schema={[getOrganizationSchema(), getWebsiteSchema()]}
       />
       <PageLayout>
         {/* ========== 1. HERO ========== */}

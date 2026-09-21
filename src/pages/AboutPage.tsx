@@ -28,7 +28,7 @@ const milestones = [
   { year: '2011', title: 'Kuruluş', desc: 'İstanbul Pendik\'te su arıtma sektörüne giriş.' },
   { year: '2015', title: 'Büyüme', desc: 'Türkiye geneline servis ağı kurulumu, 5.000+ müşteri.' },
   { year: '2018', title: 'Teknoloji', desc: 'Akıllı su arıtma sistemleri ve IoT entegrasyonu.' },
-  { year: '2021', title: 'Liderlik', desc: 'E-ticaret platformu, 50.000+ mutlu müşteri, 500+ servis noktası.' },
+  { year: '2021', title: 'Liderlik', desc: 'E-ticaret platformu ve Türkiye geneline yayılan servis ağıyla büyüme.' },
   { year: '2024', title: 'Aquails', desc: 'Yeni nesil Aquails markası ile premium su arıtma deneyimi.' },
 ];
 
@@ -37,7 +37,7 @@ export default function AboutPage() {
     <>
       <SEO
         title="Hakkımızda | Aquails"
-        description="Aquails, 2008'den beri su arıtma teknolojilerinde güvenilir çözüm ortağınız. Temiz su, sağlıklı gelecek misyonuyla çalışıyoruz."
+        description="Aquails su arıtma teknolojileri, filtre çözümleri ve servis hizmetleriyle ev ve işletmeler için temiz su çözümleri geliştirir."
         canonical="/hakkimizda"
       />
     <PageLayout>

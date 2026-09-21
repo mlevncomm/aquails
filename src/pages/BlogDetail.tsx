@@ -5,6 +5,7 @@ import { Clock, ArrowLeft, Share2, MessageCircle, Loader2 } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { SEO } from '@/components/SEO';
+import { getArticleSchema, getBreadcrumbSchema } from '@/components/SchemaOrg';
 import { getBlogPostBySlug, type PublicBlogPostDetail } from '@/services/blogService';
 import { openWhatsApp } from '@/services/whatsappService';
 
@@ -44,12 +45,30 @@ export default function BlogDetail() {
     );
   }
 
+  const articleSchema = getArticleSchema({
+    title: post.title,
+    description: post.excerpt,
+    slug: post.slug,
+    image: post.image,
+    datePublished: post.publishedAt,
+    dateModified: post.modifiedAt,
+  });
+
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Ana Sayfa', url: '/' },
+    { name: 'Blog', url: '/blog' },
+    { name: post.title, url: `/blog/${post.slug}` },
+  ]);
+
   return (
     <>
       <SEO
         title={`${post.title} | Aquails Blog`}
         description={post.excerpt}
+        ogImage={post.image}
+        ogType="article"
         canonical={`/blog/${slug}`}
+        schema={[articleSchema, breadcrumbSchema]}
       />
       <PageLayout variant="gradient">
         <div className="relative overflow-hidden bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep py-16 md:py-20">
