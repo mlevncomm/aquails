@@ -232,10 +232,6 @@
       "destination": "/api/sitemap"
     },
     {
-      "source": "/urunler",
-      "destination": "/index.html"
-    },
-    {
       "source": "/sepet",
       "destination": "/index.html"
     },
@@ -256,39 +252,11 @@
       "destination": "/index.html"
     },
     {
-      "source": "/kampanyalar",
-      "destination": "/index.html"
-    },
-    {
       "source": "/kampanya/:slug",
       "destination": "/index.html"
     },
     {
-      "source": "/blog",
-      "destination": "/index.html"
-    },
-    {
       "source": "/siparis-takip",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/servis-randevusu",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/filtre-aboneligi",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/hakkimizda",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/iletisim",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/sss",
       "destination": "/index.html"
     },
     {
@@ -313,26 +281,6 @@
     },
     {
       "source": "/kargo-kurulum",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/urun-secim-sihirbazi",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/filtre-hesaplayici",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/su-kalitesi-testi",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/servis-agimiz",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/filtre-secim-rehberi",
       "destination": "/index.html"
     },
     {
