@@ -232,7 +232,155 @@
       "destination": "/api/sitemap"
     },
     {
-      "source": "/((?!api/|assets/).*)",
+      "source": "/urunler",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/urun/:slug",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/sepet",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/odeme",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/odeme/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/arama",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/karsilastir",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/kampanyalar",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/kampanya/:slug",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/blog",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/blog/:slug",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/siparis-takip",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/servis-randevusu",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/filtre-aboneligi",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/hakkimizda",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/iletisim",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/sss",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/gizlilik",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/kvkk",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/uyelik-sozlesmesi",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/mesafeli-satis",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/iade",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/kargo-kurulum",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/urun-secim-sihirbazi",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/filtre-hesaplayici",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/su-kalitesi-testi",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/servis-agimiz",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/filtre-secim-rehberi",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/giris",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/kayit-ol",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/sifremi-unuttum",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/sifre-sifirla",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/hesabim",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/hesabim/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/all-links",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/links",
       "destination": "/index.html"
     }
   ]
