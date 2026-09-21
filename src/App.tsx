@@ -105,6 +105,7 @@ export default function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/urunler" element={<Shop />} />
+          <Route path="/kategori/:categorySlug" element={<Shop />} />
           <Route path="/urun/:slug" element={<ProductDetail />} />
           <Route path="/sepet" element={<Cart />} />
           <Route path="/odeme" element={<Checkout />} />
