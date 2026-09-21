@@ -8,6 +8,8 @@
     <meta name="description" content="Aquails su arıtma cihazları, filtre setleri, servis randevusu ve filtre aboneliği çözümleriyle eviniz ve iş yeriniz için güvenilir su teknolojileri sunar." />
     <meta name="keywords" content="su arıtma cihazı, su arıtma, filtre, ters ozmoz, Aquails, arıtma cihazı, su filtresi" />
     <meta name="author" content="Aquails" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#031421" />
     <meta name="msapplication-TileColor" content="#031421" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -33,6 +35,46 @@
     <meta property="og:site_name" content="Aquails" />
     <meta property="og:locale" content="tr_TR" />
     <meta property="og:type" content="website" />
+
+    <!-- Baseline entity graph for crawlers before the SPA boots. Route SEO replaces this node. -->
+    <script id="aquails-schema-jsonld" type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.aquails.com/#organization",
+            "name": "Aquails",
+            "url": "https://www.aquails.com",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.aquails.com/images/brand/logo.png"
+            },
+            "description": "Su arıtma cihazları, filtre setleri ve servis çözümleri",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+90-535-223-0316",
+              "contactType": "customer service",
+              "areaServed": {
+                "@type": "Country",
+                "name": "Türkiye"
+              },
+              "availableLanguage": ["tr"]
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.aquails.com/#website",
+            "name": "Aquails",
+            "url": "https://www.aquails.com",
+            "publisher": {
+              "@id": "https://www.aquails.com/#organization"
+            },
+            "inLanguage": "tr-TR"
+          }
+        ]
+      }
+    </script>
 
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
