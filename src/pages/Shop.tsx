@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { Search, SlidersHorizontal, LayoutGrid, List, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PageLayout } from '@/layouts/PageLayout';
@@ -10,6 +10,8 @@ import { EmptyState } from '@/components/EmptyState';
 import { useCatalog } from '@/hooks/useCatalog';
 import { cn } from '@/lib/utils';
 import { SEO } from '@/components/SEO';
+import { getBreadcrumbSchema, getCollectionPageSchema } from '@/components/SchemaOrg';
+import { getCategorySeo } from '@/lib/categorySeo';
 
 const PAGE_SIZE = 12;
 
@@ -31,8 +33,11 @@ const sortOptions = [
 
 export default function Shop() {
   const { products, categories, loading, error } = useCatalog();
+  const navigate = useNavigate();
+  const { categorySlug } = useParams<{ categorySlug?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const urlCategoryId = searchParams.get('kategori');
+  const queryCategoryId = searchParams.get('kategori');
+  const urlCategoryId = categorySlug || queryCategoryId;
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const maxPrice = useMemo(() => Math.max(...products.map((p) => p.price), 150000), [products]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 150000]);
@@ -62,6 +67,26 @@ export default function Shop() {
   }, [urlCategoryId]);
 
   const activeCategory = urlCategoryId ? categories.find((c) => c.id === urlCategoryId) : null;
+  const categorySeo = activeCategory ? getCategorySeo(activeCategory.id, activeCategory.name) : null;
+  const categoryProducts = activeCategory
+    ? products.filter((product) => product.categorySlug === activeCategory.id)
+    : [];
+  const categoryPath = activeCategory ? `/kategori/${activeCategory.id}` : '/urunler';
+  const categorySchema = activeCategory && categorySeo
+    ? [
+        getCollectionPageSchema({
+          name: categorySeo.heading,
+          description: categorySeo.description,
+          path: categoryPath,
+          products: categoryProducts.map((product) => ({ name: product.name, slug: product.slug })),
+        }),
+        getBreadcrumbSchema([
+          { name: 'Ana Sayfa', url: '/' },
+          { name: 'Ürünler', url: '/urunler' },
+          { name: activeCategory.name, url: categoryPath },
+        ]),
+      ]
+    : undefined;
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -151,18 +176,16 @@ export default function Shop() {
 
   const syncCategoryUrl = useCallback((cats: string[]) => {
     if (cats.length === 1) {
-      setSearchParams({ kategori: cats[0] });
+      navigate(`/kategori/${cats[0]}`);
     } else {
+      navigate('/urunler');
       setSearchParams({});
     }
-  }, [setSearchParams]);
+  }, [navigate, setSearchParams]);
 
   const toggleCategory = (cat: string) => {
-    setSelectedCategories((prev) => {
-      const next = prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat];
-      syncCategoryUrl(next);
-      return next;
-    });
+    const next = selectedCategories.includes(cat) ? [] : [cat];
+    syncCategoryUrl(next);
   };
 
   const toggleBrand = (brand: string) => {
@@ -177,6 +200,7 @@ export default function Shop() {
     setSelectedBrands([]);
     setStockStatus('all');
     setSearchQuery('');
+    navigate('/urunler');
     setSearchParams({});
     setCurrentPage(1);
   };
@@ -293,9 +317,11 @@ export default function Shop() {
   return (
     <>
       <SEO
-        title="Aquails Ürünleri | Su Arıtma Cihazları ve Filtreler"
-        description="Aquails su arıtma cihazları, filtre setleri, tezgah altı sistemler ve arıtma çözümleri. Ürünleri karşılaştırın, ihtiyacınıza uygun sistemi keşfedin."
-        canonical="/urunler"
+        title={categorySeo?.title ?? 'Aquails Ürünleri | Su Arıtma Cihazları ve Filtreler'}
+        description={categorySeo?.description ?? 'Aquails su arıtma cihazları, filtre setleri, tezgah altı sistemler ve arıtma çözümleri. Ürünleri karşılaştırın, ihtiyacınıza uygun sistemi keşfedin.'}
+        canonical={categoryPath}
+        noindex={Boolean(urlCategoryId && !loading && !activeCategory)}
+        schema={categorySchema}
       />
       <PageLayout>
         {/* Hero */}
@@ -316,12 +342,11 @@ export default function Shop() {
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-5">
               <div>
                 <h1 className="text-2xl md:text-3xl lg:text-[2.1rem] font-bold text-aq-text tracking-tight">
-                  {activeCategory ? activeCategory.name : 'Aquails Ürünleri'}
+                  {categorySeo?.heading ?? 'Aquails Ürünleri'}
                 </h1>
-                <p className="text-sm text-aq-muted mt-2 max-w-xl leading-relaxed">
-                  {activeCategory
-                    ? `${activeCategory.productCount} ürün — ihtiyacınıza uygun su arıtma çözümlerini keşfedin.`
-                    : 'Eviniz ve işletmeniz için premium su arıtma çözümleri.'}
+                <p className="text-sm text-aq-muted mt-2 max-w-2xl leading-relaxed">
+                  {categorySeo?.intro
+                    ?? 'Eviniz ve işletmeniz için su arıtma cihazları, filtreler ve tamamlayıcı çözümleri inceleyin.'}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -362,10 +387,7 @@ export default function Shop() {
             <div className="flex flex-wrap gap-2 mt-6">
               <button
                 type="button"
-                onClick={() => {
-                  setSelectedCategories([]);
-                  setSearchParams({});
-                }}
+                onClick={() => navigate('/urunler')}
                 className={cn(
                   'px-3.5 py-1.5 rounded-full text-xs font-medium transition-all border',
                   selectedCategories.length === 0
@@ -378,10 +400,9 @@ export default function Shop() {
               {categories.map((cat) => {
                 const active = selectedCategories.includes(cat.id);
                 return (
-                  <button
+                  <Link
                     key={cat.id}
-                    type="button"
-                    onClick={() => toggleCategory(cat.id)}
+                    to={`/kategori/${cat.id}`}
                     className={cn(
                       'px-3.5 py-1.5 rounded-full text-xs font-medium transition-all border',
                       active
@@ -390,7 +411,7 @@ export default function Shop() {
                     )}
                   >
                     {cat.name}
-                  </button>
+                  </Link>
                 );
               })}
             </div>
