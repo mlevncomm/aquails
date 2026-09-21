@@ -87,7 +87,7 @@ function CategoryCard({
 
   return (
     <Link
-      to={`/urunler?kategori=${id}`}
+      to={`/kategori/${id}`}
       className="group flex h-full min-w-0 w-full max-w-full flex-col overflow-hidden rounded-xl border border-aq-border/60 bg-white transition-all duration-300 hover:border-aq-blue/20 sm:rounded-2xl"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-aq-ice">

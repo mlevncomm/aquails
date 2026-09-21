@@ -10,6 +10,13 @@ Primary market: Türkiye
 
 - Ana sayfa: https://www.aquails.com/
 - Ürünler: https://www.aquails.com/urunler
+- Direkt akış RO: https://www.aquails.com/kategori/direkt-akis-ro
+- Klasik RO sistemleri: https://www.aquails.com/kategori/klasik-ro-sistemleri
+- Kompakt sistemler: https://www.aquails.com/kategori/soft-kompakt
+- Arıtmalı sebiller: https://www.aquails.com/kategori/sebiller
+- Bina giriş filtrasyonu: https://www.aquails.com/kategori/bina-giris-filtrasyon
+- Filtreler ve membranlar: https://www.aquails.com/kategori/filtreler-membranlar
+- Musluklar ve aksesuarlar: https://www.aquails.com/kategori/musluklar-aksesuarlar
 - Blog / bilgi merkezi: https://www.aquails.com/blog
 - Filtre seçim rehberi: https://www.aquails.com/filtre-secim-rehberi
 - Su kalitesi testi: https://www.aquails.com/su-kalitesi-testi

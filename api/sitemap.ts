@@ -68,7 +68,7 @@ async function loadCatalogUrls(): Promise<string[]> {
     },
   });
 
-  const [productsResult, blogResult] = await Promise.all([
+  const [productsResult, blogResult, categoriesResult] = await Promise.all([
     client
       .from('products')
       .select('slug, updated_at')
@@ -79,6 +79,11 @@ async function loadCatalogUrls(): Promise<string[]> {
       .select('slug, updated_at')
       .eq('status', 'published')
       .order('updated_at', { ascending: false }),
+    client
+      .from('categories')
+      .select('slug')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true }),
   ]);
 
   const urls = new Set<string>();
@@ -95,6 +100,14 @@ async function loadCatalogUrls(): Promise<string[]> {
     for (const row of (blogResult.data ?? []) as SitemapRow[]) {
       if (row.slug && isIndexableSlug(row.slug)) {
         urls.add(entry(`/blog/${encodeURIComponent(row.slug)}`, row.updated_at));
+      }
+    }
+  }
+
+  if (!categoriesResult.error) {
+    for (const row of (categoriesResult.data ?? []) as { slug: string }[]) {
+      if (row.slug && isIndexableSlug(row.slug)) {
+        urls.add(entry(`/kategori/${encodeURIComponent(row.slug)}`));
       }
     }
   }
