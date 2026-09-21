@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 
-const SITE_URL = 'https://aquails.com';
+const SITE_URL = 'https://www.aquails.com';
 
 const STATIC_PATHS = [
   '/',
