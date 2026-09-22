@@ -2,6 +2,8 @@
 
 Aquails, su arıtma cihazları ve yedek parçaları için geliştirilmiş bir e-ticaret platformudur.
 
+**Ürün geliştirme ve teknik uygulama:** [Wexon.dev](https://www.wexon.dev/projeler/aquails-e-ticaret-platformu)
+
 ## Hedef Mimari
 
 | Katman | Teknoloji |
