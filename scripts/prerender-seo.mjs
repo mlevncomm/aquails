@@ -24,6 +24,19 @@ function short(value, max = 158) {
 function esc(value) {
   return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+function fallbackMarkup(data) {
+  if (!data?.heading || !data?.description) return '';
+  const links = (data.links || [])
+    .map((link) => '<a href="' + esc(link.href) + '">' + esc(link.label) + '</a>')
+    .join(' · ');
+  return [
+    '<main data-aquails-seo-fallback style="max-width:72rem;margin:0 auto;padding:2rem;font-family:system-ui,sans-serif">',
+    '<h1>' + esc(data.heading) + '</h1>',
+    '<p>' + esc(data.description) + '</p>',
+    links ? '<nav aria-label="İlgili sayfalar">' + links + '</nav>' : '',
+    '</main>'
+  ].join('');
+}
 function meta(html, attr, key, value) {
   const re = new RegExp('<meta\\s+' + attr + '="' + key + '"\\s+content="[^"]*"\\s*\\/?>', 'i');
   const tag = '<meta ' + attr + '="' + key + '" content="' + esc(value) + '" />';
@@ -41,6 +54,8 @@ function inject(template, data) {
   html = html.replace('</head>', '    <link rel="canonical" href="' + esc(data.canonical) + '" />\n  </head>');
   const schema = '<script id="aquails-schema-jsonld" type="application/ld+json">' + JSON.stringify(data.schema).replace(/</g, '\\u003c') + '</script>';
   html = html.replace(/<script id="aquails-schema-jsonld" type="application\/ld\+json">[\s\S]*?<\/script>/i, schema);
+  const fallback = fallbackMarkup(data.fallback);
+  if (fallback) html = html.replace('<div id="root"></div>', '<div id="root">' + fallback + '</div>');
   return html;
 }
 async function writeRoute(route, html) {
@@ -63,6 +78,31 @@ function gross(price, tax) {
 }
 
 const template = await readFile(path.join(DIST, 'index.html'), 'utf8');
+
+await writeFile(path.join(DIST, 'index.html'), inject(template, {
+  title: 'Aquails | Daha Temiz Su, Daha Akıllı Teknoloji',
+  description: 'Aquails su arıtma cihazları, filtre setleri, servis randevusu ve filtre aboneliği çözümleriyle eviniz ve iş yeriniz için güvenilir su teknolojileri sunar.',
+  canonical: SITE + '/',
+  schema: graph([org, site, {
+    '@type': 'WebPage',
+    '@id': SITE + '/#webpage',
+    url: SITE + '/',
+    name: 'Aquails | Daha Temiz Su, Daha Akıllı Teknoloji',
+    description: 'Aquails su arıtma cihazları, filtre setleri, servis randevusu ve filtre aboneliği çözümleriyle eviniz ve iş yeriniz için güvenilir su teknolojileri sunar.',
+    inLanguage: 'tr-TR',
+    isPartOf: { '@id': SITE + '/#website' }
+  }]),
+  fallback: {
+    heading: 'Su Arıtma Cihazları ve Filtre Çözümleri',
+    description: 'Aquails; ev ve iş yerleri için su arıtma cihazları, filtre çözümleri, servis ve bakım hizmetleri sunar.',
+    links: [
+      { href: '/urunler', label: 'Su arıtma ürünleri' },
+      { href: '/blog', label: 'Su arıtma rehberi' },
+      { href: '/servis-randevusu', label: 'Servis randevusu' },
+      { href: '/iletisim', label: 'İletişim' }
+    ]
+  }
+}), 'utf8');
 
 const staticMeta = {
   '/urunler': [
@@ -138,6 +178,15 @@ for (const [route, values] of Object.entries(staticMeta)) {
         isPartOf: { '@id': SITE + '/#website' },
       },
     ]),
+    fallback: {
+      heading: values[0].replace(/\s+\|\s+Aquails.*$/, ''),
+      description: values[1],
+      links: [
+        { href: '/urunler', label: 'Ürünler' },
+        { href: '/blog', label: 'Blog' },
+        { href: '/iletisim', label: 'İletişim' }
+      ]
+    }
   }));
 }
 
@@ -147,7 +196,15 @@ for (const [slug, values] of Object.entries(categoryMeta)) {
     title: values[0],
     description: values[1],
     canonical,
-    schema: graph([org, site, { '@type': 'CollectionPage', '@id': canonical + '#collection', url: canonical, name: values[0], description: values[1], inLanguage: 'tr-TR' }])
+    schema: graph([org, site, { '@type': 'CollectionPage', '@id': canonical + '#collection', url: canonical, name: values[0], description: values[1], inLanguage: 'tr-TR' }]),
+    fallback: {
+      heading: values[0].replace(/\s+\|\s+Aquails.*$/, ''),
+      description: values[1],
+      links: [
+        { href: '/urunler', label: 'Tüm ürünler' },
+        { href: '/blog', label: 'Su arıtma rehberi' }
+      ]
+    }
   }));
 }
 
@@ -209,7 +266,16 @@ for (const p of pr.data || []) {
     canonical,
     type: 'product',
     image: image.startsWith('http') ? image : SITE + image,
-    schema: graph(nodes)
+    schema: graph(nodes),
+    fallback: {
+      heading: p.name,
+      description,
+      links: [
+        { href: '/urunler', label: 'Tüm ürünler' },
+        ...(catSlug ? [{ href: '/kategori/' + catSlug, label: catName }] : []),
+        { href: '/iletisim', label: 'İletişim' }
+      ]
+    }
   }));
 }
 
@@ -238,7 +304,15 @@ for (const post of br.data || []) {
       { name: 'Ana Sayfa', path: '/' },
       { name: 'Blog', path: '/blog' },
       { name: post.title, path: '/blog/' + post.slug }
-    ])])
+    ])]),
+    fallback: {
+      heading: post.title,
+      description,
+      links: [
+        { href: '/blog', label: 'Tüm yazılar' },
+        { href: '/urunler', label: 'Ürünler' }
+      ]
+    }
   }));
 }
 
