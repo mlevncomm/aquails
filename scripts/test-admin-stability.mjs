@@ -52,8 +52,15 @@ if (existsSync('dist/index.html')) {
 
 // --- vercel rewrite safety ---
 const vercel = readFileSync('vercel.json', 'utf8');
-if (/api\/\|assets\//.test(vercel) || /\(\?!api\/\|assets\/\)/.test(vercel)) ok('vercel rewrite excludes api and assets');
-else bad('vercel rewrite excludes api and assets');
+// SPA rewrites must never swallow /api or /assets: either every rewrite targets an explicit
+// route, or a catch-all rewrite excludes api/ and assets/ with a negative lookahead.
+const rewriteSources = (JSON.parse(vercel).rewrites ?? []).map((r) => r.source);
+const unsafeCatchAll = rewriteSources.filter(
+  (source) => /^\/(\(\.\*\)|:path\*|:path\+)$/.test(source) || (/\(\.\*\)/.test(source) && !/api\/\|assets\//.test(source)),
+);
+const hitsApiOrAssets = rewriteSources.filter((source) => /^\/(api|assets)(\/|$)/.test(source));
+if (unsafeCatchAll.length === 0 && hitsApiOrAssets.length === 0) ok('vercel rewrite excludes api and assets');
+else bad('vercel rewrite excludes api and assets', [...unsafeCatchAll, ...hitsApiOrAssets].join(', '));
 if (/no-cache/.test(vercel) && /immutable/.test(vercel)) ok('vercel cache headers for html/assets');
 else bad('vercel cache headers for html/assets');
 
