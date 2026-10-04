@@ -4,6 +4,7 @@ import {
   prerenderedCategorySlugs,
   prerenderedProductSlugs,
 } from './seo-routes.generated';
+import { resolveLegacyProductSlug } from './src/lib/legacyProductSlugs';
 
 type RouteKind = 'product' | 'blog' | 'category';
 
@@ -73,6 +74,13 @@ export default async function middleware(request: Request) {
   const url = new URL(request.url);
   const route = parseRoute(url.pathname);
   if (!route || !/^[a-z0-9-]+$/.test(route.slug)) return next();
+
+  // Renamed products keep their old links working.
+  const renamedSlug = route.kind === 'product' ? resolveLegacyProductSlug(route.slug) : null;
+  if (renamedSlug) {
+    const target = new URL('/urun/' + renamedSlug + url.search, request.url);
+    return Response.redirect(target, 301);
+  }
 
   // Existing build-time routes keep the fast static/prerendered response.
   if (wasPrerendered(route.kind, route.slug)) {
