@@ -169,6 +169,12 @@ sql_paths = ["./seed.sql"]
 npm run db:seed
 ```
 
+`supabase/seed.sql` ve yerel yedek katalog (`src/data/products.ts`) canlı katalogdan üretilir. Admin panelinde ürünler değiştikten sonra güncellemek için `.env.local` içinde `VITE_SUPABASE_URL` ve `VITE_SUPABASE_ANON_KEY` tanımlıyken:
+
+```bash
+npm run catalog:export
+```
+
 **Alternatif yöntemler:**
 
 ```bash

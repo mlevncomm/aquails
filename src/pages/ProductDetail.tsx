@@ -26,6 +26,7 @@ import { ProductPrice } from '@/components/ProductPrice';
 import { ProductImageGallery } from '@/components/ProductImageGallery';
 import { getProductGrossPrice } from '@/lib/pricing';
 import { cn } from '@/lib/utils';
+import { parsePurificationStages, STAGES_SPEC_KEY } from '@/lib/purificationStages';
 
 const tabs = [
   { id: 'description', label: 'Ürün Açıklaması' },
@@ -104,6 +105,8 @@ export default function ProductDetail() {
       </>
     );
   }
+
+  const stages = parsePurificationStages(product.specifications);
 
   const productSchema = getProductSchema({
     name: product.name,
@@ -526,7 +529,7 @@ export default function ProductDetail() {
                 transition={{ duration: 0.2 }}
                 className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12"
               >
-                <div className="lg:col-span-7 min-w-0">
+                <div className={cn('min-w-0', stages.length > 0 ? 'lg:col-span-7' : 'lg:col-span-12')}>
                   <div className="relative">
                     <p
                       className={cn(
@@ -551,32 +554,28 @@ export default function ProductDetail() {
                   )}
                 </div>
 
-                <div className="lg:col-span-5 min-w-0">
-                  <h4 className="text-[11px] font-semibold tracking-[0.14em] uppercase text-aq-muted mb-4">
-                    7 Aşamalı Arıtma
-                  </h4>
-                  <ol className="space-y-0 divide-y divide-aq-border/70 rounded-2xl border border-aq-border/80 bg-aq-ice/40 overflow-hidden">
-                    {[
-                      { t: '5 Mikron Sediment', d: 'Pas, kum ve tortuları tutar.' },
-                      { t: 'GAC Aktif Karbon', d: 'Klor, kötü koku ve tadı giderir.' },
-                      { t: 'CTO Karbon Blok', d: 'Klor kalıntılarını ve organik bileşikleri temizler.' },
-                      { t: 'RO Membran', d: 'Bakteri, virüs, ağır metaller ve %99.9 safsızlığı giderir.' },
-                      { t: 'Post Karbon', d: 'Son tat ve koku düzenlemesi.' },
-                      { t: 'Mineral Filtre', d: 'Kalsiyum ve magnezyumu suya katar.' },
-                      { t: 'UV Sterilizasyon', d: 'Son aşamada mikrop temizliği.' },
-                    ].map((step, i) => (
-                      <li key={step.t} className="flex gap-3 px-4 py-3.5">
-                        <span className="text-[11px] font-semibold text-aq-blue tabular-nums pt-0.5 w-5 flex-shrink-0">
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <div className="min-w-0">
-                          <p className="text-[13px] sm:text-sm font-semibold text-aq-text">{step.t}</p>
-                          <p className="text-[12px] sm:text-[13px] text-aq-muted mt-0.5 leading-relaxed">{step.d}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
+                {stages.length > 0 && (
+                  <div className="lg:col-span-5 min-w-0">
+                    <h4 className="text-[11px] font-semibold tracking-[0.14em] uppercase text-aq-muted mb-4">
+                      {stages.length} Aşamalı Arıtma
+                    </h4>
+                    <ol className="space-y-0 divide-y divide-aq-border/70 rounded-2xl border border-aq-border/80 bg-aq-ice/40 overflow-hidden">
+                      {stages.map((step, i) => (
+                        <li key={`${i}-${step.title}`} className="flex gap-3 px-4 py-3.5">
+                          <span className="text-[11px] font-semibold text-aq-blue tabular-nums pt-0.5 w-5 flex-shrink-0">
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-[13px] sm:text-sm font-semibold text-aq-text">{step.title}</p>
+                            {step.detail && (
+                              <p className="text-[12px] sm:text-[13px] text-aq-muted mt-0.5 leading-relaxed">{step.detail}</p>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -589,7 +588,9 @@ export default function ProductDetail() {
                 transition={{ duration: 0.2 }}
                 className="grid grid-cols-1 sm:grid-cols-2 gap-px rounded-2xl border border-aq-border/80 overflow-hidden bg-aq-border/60"
               >
-                {Object.entries(product.specifications).map(([key, value]) => (
+                {Object.entries(product.specifications)
+                  .filter(([key]) => key !== STAGES_SPEC_KEY)
+                  .map(([key, value]) => (
                   <div
                     key={key}
                     className="flex flex-col gap-1 bg-white px-4 py-4 sm:px-5"
