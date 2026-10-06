@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { SEO } from '@/components/SEO';
 import { getBreadcrumbSchema, getCollectionPageSchema } from '@/components/SchemaOrg';
 import { getCategorySeo } from '@/lib/categorySeo';
+import { PageHero } from '@/components/PageHero';
 
 const PAGE_SIZE = 12;
 
@@ -217,7 +218,7 @@ export default function Shop() {
   const renderFilterContent = () => (
     <div className="space-y-6">
       <div>
-        <h4 className="text-sm font-semibold text-aq-text pb-3 border-b border-aq-border/60">Kategoriler</h4>
+        <h4 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-aq-muted pb-3 border-b border-aq-border/70">Kategoriler</h4>
         <div className="mt-3 space-y-2">
           {categories.map((cat) => (
             <label key={cat.id} className="flex items-center justify-between cursor-pointer group">
@@ -227,13 +228,13 @@ export default function Shop() {
                   className={cn(
                     'w-4 h-4 rounded border flex items-center justify-center transition-all',
                     selectedCategories.includes(cat.id)
-                      ? 'bg-aq-blue border-aq-blue'
-                      : 'border-aq-border/60 group-hover:border-aq-blue',
+                      ? 'bg-aq-ink border-aq-ink'
+                      : 'border-aq-border group-hover:border-aq-ink',
                   )}
                 >
                   {selectedCategories.includes(cat.id) && <Check className="w-3 h-3 text-white" />}
                 </div>
-                <span className="text-sm text-aq-muted group-hover:text-aq-text transition-colors">{cat.name}</span>
+                <span className="text-[13px] text-aq-ink/75 group-hover:text-aq-ink transition-colors">{cat.name}</span>
               </div>
               <span className="text-xs text-aq-muted">({cat.productCount})</span>
             </label>
@@ -242,13 +243,13 @@ export default function Shop() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold text-aq-text pb-3 border-b border-aq-border/60">Fiyat Aralığı</h4>
+        <h4 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-aq-muted pb-3 border-b border-aq-border/70">Fiyat Aralığı</h4>
         <div className="mt-3 flex items-center gap-2">
           <input
             type="number"
             value={priceRange[0]}
             onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-            className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/20 bg-white"
+            className="w-full px-3 py-2 text-sm rounded-lg bg-aq-cloud text-aq-ink focus:outline-none focus:ring-2 focus:ring-aq-ink/15"
             placeholder="Min"
           />
           <span className="text-aq-muted">-</span>
@@ -256,14 +257,14 @@ export default function Shop() {
             type="number"
             value={priceRange[1]}
             onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-            className="w-full px-3 py-2 text-sm border border-aq-border/60 rounded-xl focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/20 bg-white"
+            className="w-full px-3 py-2 text-sm rounded-lg bg-aq-cloud text-aq-ink focus:outline-none focus:ring-2 focus:ring-aq-ink/15"
             placeholder="Max"
           />
         </div>
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold text-aq-text pb-3 border-b border-aq-border/60">Marka / Seri</h4>
+        <h4 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-aq-muted pb-3 border-b border-aq-border/70">Marka / Seri</h4>
         <div className="mt-3 space-y-2">
           {brands.map((brand) => (
             <label key={brand} className="flex items-center gap-2.5 cursor-pointer group">
@@ -272,8 +273,8 @@ export default function Shop() {
                 className={cn(
                   'w-4 h-4 rounded border flex items-center justify-center transition-all',
                   selectedBrands.includes(brand)
-                    ? 'bg-aq-blue border-aq-blue'
-                    : 'border-aq-border/60 group-hover:border-aq-blue',
+                    ? 'bg-aq-ink border-aq-ink'
+                    : 'border-aq-border group-hover:border-aq-ink',
                 )}
               >
                 {selectedBrands.includes(brand) && <Check className="w-3 h-3 text-white" />}
@@ -285,7 +286,7 @@ export default function Shop() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold text-aq-text pb-3 border-b border-aq-border/60">Stok Durumu</h4>
+        <h4 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-aq-muted pb-3 border-b border-aq-border/70">Stok Durumu</h4>
         <div className="mt-3 space-y-2">
           {stockOptions.map((opt) => (
             <label key={opt.value} className="flex items-center gap-2.5 cursor-pointer">
@@ -293,10 +294,10 @@ export default function Shop() {
                 onClick={() => setStockStatus(opt.value)}
                 className={cn(
                   'w-4 h-4 rounded-full border flex items-center justify-center transition-all',
-                  stockStatus === opt.value ? 'border-aq-blue' : 'border-aq-border/60',
+                  stockStatus === opt.value ? 'border-aq-ink' : 'border-aq-border',
                 )}
               >
-                {stockStatus === opt.value && <div className="w-2 h-2 bg-aq-blue rounded-full" />}
+                {stockStatus === opt.value && <div className="w-2 h-2 bg-aq-ink rounded-full" />}
               </div>
               <span className="text-sm text-aq-muted">{opt.label}</span>
             </label>
@@ -307,7 +308,7 @@ export default function Shop() {
       <button
         type="button"
         onClick={clearFilters}
-        className="w-full py-2.5 text-sm font-semibold text-aq-blue border border-aq-blue/40 rounded-xl hover:bg-aq-blue hover:text-white transition-all"
+        className="w-full py-2.5 text-sm font-semibold text-aq-ink border border-aq-ink/15 rounded-full hover:border-aq-ink transition-colors"
       >
         Filtreleri Temizle
       </button>
@@ -325,74 +326,26 @@ export default function Shop() {
       />
       <PageLayout>
         {/* Hero */}
-        <div ref={shopTopRef} className="relative bg-white py-12 md:py-16 overflow-hidden border-b border-aq-border/50">
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-aq-sky/40 rounded-full blur-3xl pointer-events-none" />
-          <div className="page-container relative">
-            <nav className="text-[13px] text-aq-muted mb-4">
-              <Link to="/" className="text-aq-blue hover:underline">Ana Sayfa</Link>
-              <span className="mx-2">/</span>
-              <Link to="/urunler" className="text-aq-blue hover:underline">Ürünler</Link>
-              {activeCategory && (
-                <>
-                  <span className="mx-2">/</span>
-                  <span className="text-aq-text">{activeCategory.name}</span>
-                </>
-              )}
-            </nav>
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-5">
-              <div>
-                <h1 className="text-2xl md:text-3xl lg:text-[2.1rem] font-bold text-aq-text tracking-tight">
-                  {categorySeo?.heading ?? 'Aquails Ürünleri'}
-                </h1>
-                <p className="text-sm text-aq-muted mt-2 max-w-2xl leading-relaxed">
-                  {categorySeo?.intro
-                    ?? 'Eviniz ve işletmeniz için su arıtma cihazları, filtreler ve tamamlayıcı çözümleri inceleyin.'}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="text-[13px] text-aq-muted font-medium">
-                  {filteredProducts.length} ürün bulundu
-                </span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3.5 py-2 text-sm border border-aq-border/60 rounded-full bg-white focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/20"
-                >
-                  {sortOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-                <div className="hidden md:flex border border-aq-border/60 rounded-full overflow-hidden bg-white">
-                  <button
-                    type="button"
-                    onClick={() => setGridView(true)}
-                    aria-label="Izgara görünümü"
-                    className={cn('p-2.5 transition-colors', gridView ? 'bg-aq-deep text-white' : 'text-aq-muted hover:bg-aq-ice')}
-                  >
-                    <LayoutGrid className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGridView(false)}
-                    aria-label="Liste görünümü"
-                    className={cn('p-2.5 transition-colors', !gridView ? 'bg-aq-deep text-white' : 'text-aq-muted hover:bg-aq-ice')}
-                  >
-                    <List className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
+        <div ref={shopTopRef}>
+          <PageHero
+            eyebrow={activeCategory ? 'Kategori' : 'Mağaza'}
+            title={categorySeo?.heading ?? 'Aquails Ürünleri'}
+            description={categorySeo?.intro
+              ?? 'Eviniz ve işletmeniz için su arıtma cihazları, filtreler ve tamamlayıcı çözümleri inceleyin.'}
+            breadcrumbs={activeCategory
+              ? [{ label: 'Ürünler', to: '/urunler' }, { label: activeCategory.name }]
+              : [{ label: 'Ürünler' }]}
+          >
             {/* Category chips */}
-            <div className="flex flex-wrap gap-2 mt-6">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => navigate('/urunler')}
                 className={cn(
-                  'px-3.5 py-1.5 rounded-full text-xs font-medium transition-all border',
+                  'px-4 py-2 rounded-full text-xs font-semibold transition-all',
                   selectedCategories.length === 0
-                    ? 'bg-aq-deep text-white border-aq-deep'
-                    : 'bg-white text-aq-muted border-aq-border/60 hover:border-aq-blue hover:text-aq-blue',
+                    ? 'bg-aq-ink text-white'
+                    : 'bg-white text-aq-ink/70 ring-1 ring-aq-border hover:text-aq-ink hover:ring-aq-ink/30',
                 )}
               >
                 Tümü
@@ -404,10 +357,10 @@ export default function Shop() {
                     key={cat.id}
                     to={`/kategori/${cat.id}`}
                     className={cn(
-                      'px-3.5 py-1.5 rounded-full text-xs font-medium transition-all border',
+                      'px-4 py-2 rounded-full text-xs font-semibold transition-all',
                       active
-                        ? 'bg-aq-sky text-aq-blue border-aq-blue/30'
-                        : 'bg-white text-aq-muted border-aq-border/60 hover:border-aq-blue hover:text-aq-blue',
+                        ? 'bg-aq-ink text-white'
+                        : 'bg-white text-aq-ink/70 ring-1 ring-aq-border hover:text-aq-ink hover:ring-aq-ink/30',
                     )}
                   >
                     {cat.name}
@@ -415,37 +368,76 @@ export default function Shop() {
                 );
               })}
             </div>
+          </PageHero>
+
+          {/* Result toolbar */}
+          <div className="border-b border-aq-border/60 bg-white">
+            <div className="page-container flex flex-wrap items-center justify-between gap-3 py-4">
+              <div className="relative w-full sm:max-w-xs">
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-aq-muted" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Ürün veya model ara…"
+                  aria-label="Ürünlerde ara"
+                  className="w-full rounded-full bg-aq-cloud py-2.5 pl-10 pr-4 text-sm text-aq-ink placeholder:text-aq-muted focus:outline-none focus:ring-2 focus:ring-aq-ink/15"
+                />
+              </div>
+              <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
+                <span className="text-[13px] text-aq-muted">
+                  <span className="font-semibold text-aq-ink">{filteredProducts.length}</span> ürün
+                </span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  aria-label="Sıralama"
+                  className="px-4 py-2 text-sm border border-aq-border/70 rounded-full bg-white text-aq-ink focus:outline-none focus:border-aq-blue"
+                >
+                  {sortOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <div className="hidden md:flex border border-aq-border/70 rounded-full overflow-hidden bg-white">
+                  <button
+                    type="button"
+                    onClick={() => setGridView(true)}
+                    aria-label="Izgara görünümü"
+                    className={cn('p-2.5 transition-colors', gridView ? 'bg-aq-ink text-white' : 'text-aq-muted hover:bg-aq-cloud')}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGridView(false)}
+                    aria-label="Liste görünümü"
+                    className={cn('p-2.5 transition-colors', !gridView ? 'bg-aq-ink text-white' : 'text-aq-muted hover:bg-aq-cloud')}
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="page-container py-10 md:py-12">
-          {/* Search */}
-          <div className="mb-6 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-aq-muted" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Ürün, kategori veya model ara..."
-              className="w-full pl-11 pr-4 py-3.5 border border-aq-border/60 rounded-2xl text-sm focus:outline-none focus:border-aq-blue focus:ring-2 focus:ring-aq-aqua/20 bg-white shadow-sm"
-            />
-          </div>
-
-          <div className="flex gap-8">
+        <div className="page-container py-10 md:py-14">
+          <div className="flex gap-10">
             <button
               type="button"
               onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-              className="lg:hidden fixed bottom-6 left-6 z-40 bg-aq-blue text-white p-4 rounded-full shadow-sm shadow-aq-deep/15"
+              className="lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-40 inline-flex items-center gap-2 bg-aq-ink text-white pl-4 pr-5 py-3 rounded-full text-sm font-semibold shadow-[0_12px_30px_-10px_rgba(11,37,64,0.6)]"
             >
-              <SlidersHorizontal className="w-5 h-5" />
+              <SlidersHorizontal className="w-4 h-4" />
+              Filtrele
             </button>
 
-            <aside className="hidden lg:block w-[280px] flex-shrink-0">
-              <div className="bg-white border border-aq-border/60 rounded-2xl p-6 sticky top-24 shadow-sm">
+            <aside className="hidden lg:block w-[220px] flex-shrink-0">
+              <div className="sticky top-24">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="font-semibold text-aq-text">Filtrele</h3>
+                  <h3 className="text-[15px] font-semibold text-aq-ink">Filtrele</h3>
                   {hasActiveFilters && (
-                    <button type="button" onClick={clearFilters} className="text-xs text-[#E85454] hover:underline">
+                    <button type="button" onClick={clearFilters} className="text-xs font-medium text-aq-muted underline-offset-4 hover:text-aq-ink hover:underline">
                       Temizle
                     </button>
                   )}
@@ -491,7 +483,7 @@ export default function Shop() {
                     return (
                       <span
                         key={catSlug}
-                        className="inline-flex items-center gap-1.5 bg-aq-sky text-aq-blue text-xs font-medium px-3 py-1.5 rounded-full border border-aq-blue/15"
+                        className="inline-flex items-center gap-1.5 bg-aq-cloud text-aq-blue text-xs font-medium px-3 py-1.5 rounded-full border border-aq-blue/15"
                       >
                         {cat?.name ?? catSlug}
                         <button type="button" onClick={() => toggleCategory(catSlug)} className="hover:text-[#E85454]">
@@ -518,7 +510,7 @@ export default function Shop() {
                     <button
                       type="button"
                       onClick={clearFilters}
-                      className="inline-flex items-center gap-2 bg-aq-blue text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all"
+                      className="inline-flex items-center gap-2 bg-aq-ink text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-aq-ink-soft hover:text-white transition-all"
                     >
                       Filtreleri Temizle
                     </button>
@@ -527,8 +519,8 @@ export default function Shop() {
               ) : (
                 <StaggerContainer
                   className={cn(
-                    'grid gap-5',
-                    gridView ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1 max-w-2xl',
+                    'grid gap-x-3 gap-y-7 sm:gap-x-5 sm:gap-y-9',
+                    gridView ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 max-w-2xl',
                   )}
                   staggerDelay={0.06}
                 >

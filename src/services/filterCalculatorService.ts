@@ -76,12 +76,3 @@ export function calculateFilterChange(input: FilterCalcInput): FilterCalcResult 
   return { nextChangeDate: nextDate, daysRemaining, status, statusLabel, statusColor, recommendedFilters };
 }
 
-export function saveFilterReminder(input: FilterCalcInput & { email?: string; phone?: string }): void {
-  const reminders = JSON.parse(localStorage.getItem('filter-reminders') || '[]');
-  reminders.push({ ...input, id: Date.now().toString(), createdAt: new Date().toISOString() });
-  localStorage.setItem('filter-reminders', JSON.stringify(reminders));
-}
-
-export function getFilterReminders(): Array<FilterCalcInput & { id: string; createdAt: string }> {
-  return JSON.parse(localStorage.getItem('filter-reminders') || '[]');
-}

@@ -1,9 +1,8 @@
-import { Link } from 'react-router';
-import { motion } from 'framer-motion';
-import { Check, X, Clock, Package, RotateCcw, Sparkles, ShieldCheck } from 'lucide-react';
+import { Check, X, Clock, Package, Sparkles, ShieldCheck } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { SEO } from '@/components/SEO';
+import { PageHero } from '@/components/PageHero';
 
 
 const conditions = [
@@ -20,36 +19,20 @@ export default function ReturnPolicyPage() {
     <>
       <SEO title="Aquails" noindex />
     <PageLayout variant="gradient">
-      {/* Hero */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep py-16 md:py-24">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-5 right-20 w-40 h-40 border border-white rounded-full" />
-          <div className="absolute bottom-5 left-10 w-24 h-24 border border-white rounded-full" />
-        </div>
-        <div className="max-w-[800px] mx-auto px-4 relative z-10">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div className="flex items-center gap-2 text-sm text-white/60 mb-4">
-              <Link to="/" className="hover:text-white transition-colors">Ana Sayfa</Link>
-              <span>/</span>
-              <span className="text-white/80">İade Politikası</span>
-            </div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
-                <RotateCcw className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white">İade Politikası</h1>
-            </div>
-            <p className="text-white/70 text-sm">14 gün koşulsuz iade garantisi.</p>
-          </motion.div>
-        </div>
-      </div>
+      <PageHero
+        size="sm"
+        title="İade Politikası"
+        description="14 gün koşulsuz iade garantisi."
+        breadcrumbs={[{ label: 'İade Politikası' }]}
+        image="/images/lifestyle/story-lake.jpg"
+      />
 
       <div className="max-w-[800px] mx-auto px-4 py-8 -mt-6 relative z-10">
         {/* Conditions */}
         <ScrollReveal>
-          <div className="bg-white border border-aq-border/60 rounded-2xl p-6 md:p-8 mb-6 shadow-sm">
+          <div className="bg-white rounded-2xl p-6 md:p-8 mb-6 shadow-soft">
             <h2 className="text-base font-semibold text-aq-text mb-5 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-aq-blue" />
+              <ShieldCheck className="w-5 h-5 text-aq-ink" />
               İade Koşulları
             </h2>
             <div className="space-y-3">
@@ -73,9 +56,9 @@ export default function ReturnPolicyPage() {
               { icon: Package, title: 'Ücretsiz İade', desc: 'Kargo ücreti tarafımızdan karşılanır' },
               { icon: Sparkles, title: 'Hızlı İade', desc: '3-5 iş günü içinde geri ödeme' },
             ].map(item => (
-              <div key={item.title} className="bg-white border border-aq-border/60 rounded-2xl p-5 text-center transition-all">
-                <div className="w-12 h-12 bg-aq-sky rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <item.icon className="w-6 h-6 text-aq-blue" />
+              <div key={item.title} className="bg-white rounded-2xl p-5 text-center transition-all shadow-soft">
+                <div className="w-12 h-12 bg-aq-cloud rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <item.icon className="w-6 h-6 text-aq-ink" />
                 </div>
                 <h3 className="text-sm font-semibold text-aq-text">{item.title}</h3>
                 <p className="text-xs text-aq-muted mt-1">{item.desc}</p>

@@ -46,7 +46,7 @@ export default function CustomerComparePage() {
       {loading && ids.length > 0 && compareProducts.length === 0 ? (
         <CustomerCard>
           <div className="flex justify-center py-10">
-            <Loader2 className="w-6 h-6 animate-spin text-aq-blue" />
+            <Loader2 className="w-6 h-6 animate-spin text-aq-ink" />
           </div>
         </CustomerCard>
       ) : compareProducts.length === 0 ? (
@@ -88,7 +88,7 @@ export default function CustomerComparePage() {
                             <X className="w-3 h-3" />
                           </button>
                           <Link to={`/urun/${p.slug}`} className="block group">
-                            <div className="w-16 h-16 bg-white border border-aq-border/40 rounded-xl flex items-center justify-center mx-auto mb-2 overflow-hidden">
+                            <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center mx-auto mb-2 overflow-hidden shadow-soft">
                               <img
                                 src={img}
                                 alt={p.name}
@@ -140,7 +140,7 @@ export default function CustomerComparePage() {
                         onClick={() => handleAddToCart(p)}
                         disabled={p.stock <= 0}
                         aria-label="Sepete Ekle"
-                        className="mx-auto w-10 h-10 flex items-center justify-center rounded-xl border border-aq-border/60 text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-sky transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="mx-auto w-10 h-10 flex items-center justify-center rounded-xl text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-cloud transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <ShoppingCart className="w-4 h-4" />
                       </button>

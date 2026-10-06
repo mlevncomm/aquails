@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 import { Search, SlidersHorizontal, X, ArrowUpDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PageLayout } from '@/layouts/PageLayout';
@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { ProductGridSkeleton } from '@/components/Skeleton';
 import { useCatalog } from '@/hooks/useCatalog';
 import { cn } from '@/lib/utils';
+import { PageHero } from '@/components/PageHero';
 
 const sortOptions = [
   { label: 'Önerilen', value: 'default' },
@@ -80,19 +81,12 @@ export default function SearchResults() {
 
   return (
     <PageLayout>
-      <div className="relative bg-gradient-to-br from-aq-ice via-white to-aq-sky/50 border-b border-aq-border/60">
-        <div className="page-container py-10 md:py-12">
-          <div className="flex items-center gap-2 text-[13px] text-aq-muted mb-2">
-            <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link>
-            <span>/</span>
-            <span className="text-aq-text">Arama</span>
-          </div>
-          <h1 className="text-xl md:text-2xl lg:text-[1.75rem] font-bold text-aq-text">
-            {query ? `"${query}" arama sonuçları` : 'Tüm Ürünler'}
-          </h1>
-          <p className="text-sm text-aq-muted mt-1.5">{filtered.length} ürün bulundu</p>
-        </div>
-      </div>
+      <PageHero
+        size="sm"
+        title={query ? `"${query}" arama sonuçları` : 'Tüm Ürünler'}
+        description={`${filtered.length} ürün bulundu`}
+        breadcrumbs={[{ label: 'Arama' }]}
+      />
 
       <div className="page-container py-8">
         <div className="flex flex-col lg:flex-row gap-6">
@@ -104,7 +98,7 @@ export default function SearchResults() {
               <h3 className="font-semibold text-aq-text">Filtreler</h3>
               <button type="button" onClick={() => setShowFilters(false)}><X className="w-5 h-5" /></button>
             </div>
-            <div className="bg-white border border-aq-border/60 rounded-2xl p-5 space-y-5 shadow-sm">
+            <div className="bg-white rounded-2xl p-5 space-y-5 shadow-soft">
               <div>
                 <h4 className="text-sm font-semibold text-aq-text mb-2">Kategori</h4>
                 <select
@@ -163,7 +157,7 @@ export default function SearchResults() {
             {activeFilters.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {activeFilters.map((f) => (
-                  <span key={f.label} className="inline-flex items-center gap-1 bg-aq-sky text-aq-blue text-xs px-3 py-1.5 rounded-full border border-aq-blue/15">
+                  <span key={f.label} className="inline-flex items-center gap-1 bg-aq-cloud text-aq-blue text-xs px-3 py-1.5 rounded-full border border-aq-blue/15">
                     {f.label}
                     <button type="button" onClick={f.onRemove}><X className="w-3 h-3" /></button>
                   </span>
@@ -184,7 +178,7 @@ export default function SearchResults() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5"
+                className="grid grid-cols-2 xl:grid-cols-3 gap-x-3 gap-y-7 sm:gap-x-5 sm:gap-y-9"
               >
                 {filtered.map((p) => (
                   <ProductCard key={p.id} product={p} />

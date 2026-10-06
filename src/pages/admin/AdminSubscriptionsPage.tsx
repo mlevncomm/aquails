@@ -71,7 +71,7 @@ export default function AdminSubscriptionsPage() {
         <AdminTableWrap stickyFirst>
           <table className="w-full">
             <thead>
-              <tr className="bg-aq-ice border-b border-aq-border/60">
+              <tr className="bg-aq-cloud border-b border-aq-border/60">
                 {['Müşteri', 'Plan', 'Cihaz', 'Sonraki Teslimat', 'Tutar', 'Durum', 'İşlem'].map((h) => (
                   <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
                     {h}
@@ -83,12 +83,12 @@ export default function AdminSubscriptionsPage() {
               {subs.map((s) => {
                 const st = statusLabels[s.status];
                 return (
-                  <tr key={s.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
-                    <td className="px-4 py-3 text-sm font-medium text-aq-text">{s.customer}</td>
+                  <tr key={s.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-cloud/50">
+                    <td className="px-4 py-3 text-sm font-medium text-aq-ink">{s.customer}</td>
                     <td className="px-4 py-3 text-sm text-aq-muted">{s.plan}</td>
                     <td className="px-4 py-3 text-sm text-aq-muted">{s.device}</td>
                     <td className="px-4 py-3 text-sm text-aq-muted">{s.nextDelivery}</td>
-                    <td className="px-4 py-3 text-sm font-semibold text-aq-text">{s.price.toLocaleString('tr-TR')}₺</td>
+                    <td className="px-4 py-3 text-sm font-semibold text-aq-ink">{s.price.toLocaleString('tr-TR')}₺</td>
                     <td className="px-4 py-3">
                       <AdminBadge tone={st.tone}>{st.text}</AdminBadge>
                     </td>

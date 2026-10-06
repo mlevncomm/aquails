@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router';
+import { useMemo, useState } from 'react';
+import { Link, useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calculator, AlertTriangle, CheckCircle,
@@ -7,16 +7,15 @@ import {
 } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { useToastStore } from '@/components/Toast';
-import { calculateFilterChange, saveFilterReminder, type FilterCalcInput, type FilterCalcResult } from '@/services/filterCalculatorService';
+import { calculateFilterChange, type FilterCalcInput, type FilterCalcResult } from '@/services/filterCalculatorService';
+import { addFilterDevice } from '@/services/filterTrackingService';
+import { useAuthStore } from '@/stores/authStore';
+import { useCatalog } from '@/hooks/useCatalog';
 import { SEO } from '@/components/SEO';
+import { PageHero } from '@/components/PageHero';
 
 
-const deviceModels = [
-  'Aquails Smart RO Pro', 'Aquails BlueDrop DirectFlow', 'Aquails Compact UnderSink',
-  'Aquails WaterChef 600GPD', 'Aquails DirectFlow 400GPD', 'Aquails Premium 8 Stage',
-  'Aquails Ultra Compact', 'Aquails Smart Digital RO', 'Aquails Office Pro',
-  'Diğer',
-];
+const DEVICE_CATEGORIES = new Set(['direkt-akis-ro', 'klasik-ro-sistemleri', 'soft-kompakt', 'sebiller', 'bina-giris-filtrasyon']);
 
 export default function FilterCalculatorPage() {
   const addToast = useToastStore(s => s.add);
@@ -30,25 +29,54 @@ export default function FilterCalculatorPage() {
     hasTasteIssue: false,
     createReminder: true,
   });
-  const [email, setEmail] = useState('');
+  const user = useAuthStore((s) => s.user);
+  const location = useLocation();
+  const { products } = useCatalog();
+  const [reminderState, setReminderState] = useState<'idle' | 'saved' | 'login'>('idle');
 
-  const handleCalculate = (e: React.FormEvent) => {
+  // Real catalog devices (RO systems, dispensers, whole-house) instead of a hard-coded list.
+  const deviceModels = useMemo(() => {
+    const names = products.filter((p) => DEVICE_CATEGORIES.has(p.categorySlug)).map((p) => p.name);
+    return [...Array.from(new Set(names)).sort((a, b) => a.localeCompare(b, 'tr')), 'Diğer'];
+  }, [products]);
+
+  const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.deviceModel || !form.lastChangeDate) {
       addToast('Lütfen cihaz modeli ve son değişim tarihini girin.', 'error');
       return;
     }
+    if (form.lastChangeDate > new Date().toISOString().slice(0, 10)) {
+      addToast('Son değişim tarihi gelecekte olamaz.', 'error');
+      return;
+    }
     const res = calculateFilterChange(form);
     setResult(res);
     setSubmitted(true);
-    if (form.createReminder && email) {
-      saveFilterReminder({ ...form, email });
-      addToast('Filtre hatırlatıcınız oluşturuldu!', 'success');
+    setReminderState('idle');
+
+    if (!form.createReminder) return;
+    if (!user) {
+      setReminderState('login');
+      return;
+    }
+    const interval = Math.max(30, Math.round((res.nextChangeDate.getTime() - new Date(form.lastChangeDate).getTime()) / 86400000));
+    const saved = await addFilterDevice(user.id, {
+      deviceName: form.deviceModel,
+      filterName: 'Filtre seti',
+      changeIntervalDays: interval,
+      installedAt: form.lastChangeDate,
+    });
+    if (saved.success) {
+      setReminderState('saved');
+      addToast('Hatırlatıcı hesabınıza eklendi.', 'success');
+    } else {
+      addToast(saved.error ?? 'Hatırlatıcı kaydedilemedi.', 'error');
     }
   };
 
   const statusConfig = {
-    healthy: { icon: CheckCircle, bg: 'bg-aq-sky', border: 'border-aq-aqua/30', text: 'text-aq-blue', iconColor: 'text-aq-aqua' },
+    healthy: { icon: CheckCircle, bg: 'bg-aq-cloud', border: 'border-aq-aqua/30', text: 'text-aq-blue', iconColor: 'text-aq-aqua' },
     approaching: { icon: AlertTriangle, bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', iconColor: 'text-amber-500' },
     overdue: { icon: AlertTriangle, bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', iconColor: 'text-red-500' },
   };
@@ -61,15 +89,13 @@ export default function FilterCalculatorPage() {
         canonical="/filtre-hesaplayici"
       />
     <PageLayout>
-      <section className="relative bg-gradient-to-br from-aq-ice via-white to-aq-sky/40 py-12 md:py-16">
-        <div className="page-container text-center">
-          <div className="w-14 h-14 bg-white rounded-2xl shadow-sm mx-auto mb-4 flex items-center justify-center">
-            <Calculator className="w-7 h-7 text-aq-blue" />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-aq-text">Filtre Değişim Zamanınızı Hesaplayın</h1>
-          <p className="text-sm text-aq-muted mt-2 max-w-lg mx-auto">Cihaz modelinizi ve kullanım bilgilerinizi girin, bir sonraki filtre değişim tarihinizi öğrenin.</p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Filtre hesaplayıcı"
+        title="Filtre Değişim Zamanınızı Hesaplayın"
+        description="Cihaz modelinizi ve kullanım bilgilerinizi girin, bir sonraki filtre değişim tarihinizi öğrenin."
+        breadcrumbs={[{ label: 'Filtre Hesaplayıcı' }]}
+        image="/images/filter-subscription.jpg"
+      />
 
       <div className="max-w-[600px] mx-auto px-4 sm:px-6 py-10">
         <AnimatePresence mode="wait">
@@ -79,8 +105,8 @@ export default function FilterCalculatorPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onSubmit={handleCalculate}
-              className="bg-white border border-aq-border/60 rounded-2xl p-6 space-y-5"
+              onSubmit={(e) => void handleCalculate(e)}
+              className="bg-white rounded-2xl p-6 space-y-5 shadow-soft"
             >
               <div>
                 <label className="text-xs font-medium text-aq-muted mb-1.5 block">Cihaz Modeli *</label>
@@ -144,7 +170,7 @@ export default function FilterCalculatorPage() {
                       onClick={() => setForm({ ...form, hasTasteIssue: opt.value })}
                       className={`flex-1 py-2.5 text-sm font-medium rounded-xl border-2 transition-all ${
                         form.hasTasteIssue === opt.value
-                          ? 'border-aq-deep bg-aq-sky text-aq-blue'
+                          ? 'border-aq-deep bg-aq-cloud text-aq-blue'
                           : 'border-aq-border/60 text-aq-muted'
                       }`}
                     >
@@ -167,7 +193,7 @@ export default function FilterCalculatorPage() {
                       onClick={() => setForm({ ...form, createReminder: opt.value })}
                       className={`flex-1 py-2.5 text-sm font-medium rounded-xl border-2 transition-all ${
                         form.createReminder === opt.value
-                          ? 'border-aq-deep bg-aq-sky text-aq-blue'
+                          ? 'border-aq-deep bg-aq-cloud text-aq-blue'
                           : 'border-aq-border/60 text-aq-muted'
                       }`}
                     >
@@ -178,21 +204,16 @@ export default function FilterCalculatorPage() {
               </div>
 
               {form.createReminder && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                  <label className="text-xs font-medium text-aq-muted mb-1.5 block">E-posta Adresiniz</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="Hatırlatıcı için e-posta"
-                    className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue"
-                  />
-                </motion.div>
+                <p className="text-xs text-aq-muted">
+                  {user
+                    ? 'Hatırlatıcı Hesabım > Filtre Takibi bölümüne eklenecek; değişim zamanı yaklaşınca bildirim alırsınız.'
+                    : 'Hatırlatıcı oluşturmak için hesabınıza giriş yapmanız gerekir; sonuç ekranında giriş bağlantısı gösterilir.'}
+                </p>
               )}
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 bg-aq-blue text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all"
+                className="w-full flex items-center justify-center gap-2 bg-aq-ink text-white py-3.5 rounded-full text-sm font-semibold hover:bg-aq-ink-soft hover:text-white transition-all"
               >
                 <Calculator className="w-4 h-4" /> Hesapla
               </button>
@@ -216,21 +237,34 @@ export default function FilterCalculatorPage() {
                     </div>
                   </div>
 
+                  {reminderState === 'saved' && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
+                      Hatırlatıcınız Filtre Takibi listenize eklendi.
+                      <Link to="/hesabim/filtre-takibi" className="font-semibold underline underline-offset-4">Görüntüle</Link>
+                    </div>
+                  )}
+                  {reminderState === 'login' && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-aq-cloud px-5 py-4 text-sm text-aq-ink">
+                      Hatırlatıcı için giriş yapın; hesaplamanızı tekrar yapmanız yeterli.
+                      <Link to={`/giris?redirect=${encodeURIComponent(location.pathname)}`} className="rounded-full bg-aq-ink px-4 py-2 text-xs font-semibold text-white">Giriş Yap</Link>
+                    </div>
+                  )}
+
                   {/* Recommended Filters */}
-                  <div className="bg-white border border-aq-border/60 rounded-2xl p-5">
+                  <div className="bg-white rounded-2xl p-5 shadow-soft">
                     <h4 className="text-sm font-semibold text-aq-text mb-3">Önerilen Filtreler</h4>
                     <div className="space-y-2">
                       {result.recommendedFilters.map((f, i) => (
                         <div key={i} className="flex items-center gap-2 text-sm text-aq-muted">
-                          <Droplet className="w-4 h-4 text-aq-blue" /> {f}
+                          <Droplet className="w-4 h-4 text-aq-ink" /> {f}
                         </div>
                       ))}
                     </div>
                     <div className="flex flex-wrap gap-2 mt-4">
-                      <Link to="/urunler?kategori=filtreler" className="flex items-center gap-1.5 bg-aq-blue text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-aq-deep hover:text-white transition-all">
+                      <Link to="/kategori/filtreler-membranlar" className="flex items-center gap-1.5 bg-aq-ink text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-aq-ink-soft hover:text-white transition-all">
                         <ShoppingCart className="w-3 h-3" /> Filtre Al
                       </Link>
-                      <Link to="/filtre-aboneligi" className="flex items-center gap-1.5 border border-aq-border/60 text-aq-muted text-xs font-semibold px-4 py-2 rounded-xl hover:border-aq-blue hover:text-aq-blue transition-all">
+                      <Link to="/filtre-aboneligi" className="flex items-center gap-1.5 border border-aq-border/60 text-aq-muted text-xs font-semibold px-4 py-2 rounded-full hover:border-aq-blue hover:text-aq-blue transition-all">
                         <RefreshCw className="w-3 h-3" /> Abonelik Oluştur
                       </Link>
                     </div>

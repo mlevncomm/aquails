@@ -53,15 +53,13 @@ export default function LoginPage() {
     <div className="w-full">
       <AuthBrand />
 
-      <div className="relative overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/75 p-7 sm:p-8 shadow-[0_30px_80px_-40px_rgba(6,38,61,0.45)] backdrop-blur-xl">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-aq-aqua/15 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-10 h-36 w-36 rounded-full bg-aq-blue/10 blur-3xl" />
+      <div className="relative">
 
         <div className="relative">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-aq-blue/70">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-aq-muted">
             Hesap
           </p>
-          <h1 className="mt-2 font-[Poppins,ui-sans-serif,sans-serif] text-2xl font-semibold tracking-tight text-aq-deep">
+          <h1 className="mt-2 text-3xl font-bold tracking-[-0.02em] text-aq-ink">
             Giriş Yap
           </h1>
           <p className="mt-2 text-sm text-aq-muted leading-relaxed">
@@ -124,10 +122,9 @@ export default function LoginPage() {
               type="submit"
               disabled={loading}
               className={cn(
-                'group mt-1 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5',
-                'bg-gradient-to-r from-aq-blue to-[#0d6fba] text-sm font-semibold text-white',
-                'shadow-[0_14px_30px_-12px_rgba(18,134,216,0.75)]',
-                'transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_34px_-12px_rgba(18,134,216,0.85)]',
+                'group mt-1 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5',
+                'bg-aq-ink hover:bg-aq-ink-soft text-sm font-semibold text-white',
+                'transition-all hover:-translate-y-0.5',
                 'disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0',
               )}
             >

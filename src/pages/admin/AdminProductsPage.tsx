@@ -145,7 +145,7 @@ export default function AdminProductsPage() {
             {filtered.map((p) => (
               <AdminCard key={p.id} className="!p-4">
                 <div className="flex gap-3">
-                  <div className="w-16 h-16 rounded-xl bg-aq-ice overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-16 rounded-xl bg-aq-cloud overflow-hidden flex-shrink-0">
                     <img
                       src={p.images?.[0] || '/images/products/placeholder.jpg'}
                       alt={p.name}
@@ -156,10 +156,10 @@ export default function AdminProductsPage() {
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-aq-text line-clamp-2">{p.name}</p>
+                    <p className="text-sm font-semibold text-aq-ink line-clamp-2">{p.name}</p>
                     <p className="text-[11px] text-aq-muted mt-0.5">{p.category}</p>
                     <div className="flex items-center justify-between mt-2 gap-2">
-                      <p className="text-sm font-bold text-aq-text">{p.price.toLocaleString('tr-TR')}₺</p>
+                      <p className="text-sm font-bold text-aq-ink">{p.price.toLocaleString('tr-TR')}₺</p>
                       <StatusBadge status={p.isActive ? (p.stock <= 5 ? 'low' : 'active') : 'inactive'} />
                     </div>
                   </div>
@@ -190,7 +190,7 @@ export default function AdminProductsPage() {
             <AdminTableWrap stickyFirst>
               <table className="w-full">
                 <thead>
-                  <tr className="bg-aq-ice">
+                  <tr className="bg-aq-cloud">
                     {['Ürün', 'Kategori', 'Fiyat', 'İndirimli', 'Stok', 'Durum', 'İşlemler'].map((h) => (
                       <th
                         key={h}
@@ -203,10 +203,10 @@ export default function AdminProductsPage() {
                 </thead>
                 <tbody>
                   {filtered.map((p) => (
-                    <tr key={p.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50 transition-colors">
+                    <tr key={p.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-cloud/50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 bg-aq-ice rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          <div className="w-10 h-10 bg-aq-cloud rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                             <img
                               src={p.images?.[0] || '/images/products/placeholder.jpg'}
                               alt={p.name}
@@ -216,17 +216,17 @@ export default function AdminProductsPage() {
                               }}
                             />
                           </div>
-                          <span className="text-sm font-medium text-aq-text line-clamp-1 max-w-[220px]">{p.name}</span>
+                          <span className="text-sm font-medium text-aq-ink line-clamp-1 max-w-[220px]">{p.name}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-aq-muted">{p.category}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-aq-text whitespace-nowrap">
+                      <td className="px-4 py-3 text-sm font-semibold text-aq-ink whitespace-nowrap">
                         {p.price.toLocaleString('tr-TR')}₺
                       </td>
                       <td className="px-4 py-3 text-sm text-[#E85454] whitespace-nowrap">
                         {p.oldPrice ? `${p.oldPrice.toLocaleString('tr-TR')}₺` : '-'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-aq-text">{p.stock}</td>
+                      <td className="px-4 py-3 text-sm text-aq-ink">{p.stock}</td>
                       <td className="px-4 py-3">
                         <StatusBadge status={p.isActive ? (p.stock <= 5 ? 'low' : 'active') : 'inactive'} />
                       </td>
@@ -234,7 +234,7 @@ export default function AdminProductsPage() {
                         <div className="flex items-center gap-1">
                           <Link
                             to={`/admin/urunler/${p.id}`}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue"
+                            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-aq-cloud text-aq-muted hover:text-aq-ink"
                             aria-label="Ürünü düzenle"
                             title="Düzenle"
                           >
@@ -243,7 +243,7 @@ export default function AdminProductsPage() {
                           <button
                             type="button"
                             onClick={() => setPendingDelete({ id: p.id, name: p.name })}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500"
+                            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 text-aq-muted hover:text-red-500"
                             aria-label="Ürünü sil"
                             title="Sil"
                           >
@@ -286,7 +286,7 @@ export default function AdminProductsPage() {
 
       {deleting && (
         <div className="fixed bottom-4 right-4 z-[80] flex items-center gap-2 rounded-xl bg-white border border-aq-border/60 shadow-sm px-3 py-2 text-xs text-aq-muted">
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-aq-blue" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-aq-ink" />
           Ürün siliniyor…
         </div>
       )}

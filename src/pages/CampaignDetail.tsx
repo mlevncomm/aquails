@@ -1,144 +1,139 @@
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { motion } from 'framer-motion';
-import { Tag, Clock, ArrowRight, Percent, Truck, Gift, ChevronRight } from 'lucide-react';
+import { Clock, ArrowRight, Copy, Check, Loader2 } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { useToastStore } from '@/components/Toast';
 import { SEO } from '@/components/SEO';
+import { PageHero } from '@/components/PageHero';
+import { getCampaignBySlug, type Campaign } from '@/services/campaignService';
 
-
-const campaigns: Record<string, { title: string; desc: string; code: string; endDate: string; discount: string }> = {
-  'yaz-indirimi': { title: 'Yaz İndirimi %20', desc: 'Tüm su arıtma cihazlarında geçerli %20 indirim fırsatı. Bu kampanya kapsamında PurePro, Compact ve Business serisi tüm cihazlarımızda geçerlidir.', code: 'YAZ20', endDate: '30 Haziran 2026', discount: '%20' },
-  'filtre-kampanya': { title: 'Filtre Setinde %15', desc: 'Tüm filtre setleri ve yedek parçalarda %15 indirim. 4\'lü, 5\'li ve premium filtre setlerinde geçerlidir.', code: 'FILTRE15', endDate: '15 Temmuz 2026', discount: '%15' },
-  'ucretsiz-kargo': { title: 'Ücretsiz Kargo', desc: '1500₺ ve üzeri tüm siparişlerde ücretsiz kargo avantajı.', code: 'KARGO', endDate: 'Süresiz', discount: '0₺' },
-  'bedava-kurulum': { title: 'Bedava Kurulum', desc: 'PurePro serisi cihaz alımlarında ücretsiz profesyonel kurulum.', code: 'KURULUM', endDate: '31 Ağustos 2026', discount: 'Ücretsiz' },
-};
+const FALLBACK_IMAGE = '/images/lifestyle/story-lake.jpg';
 
 export default function CampaignDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const c = campaigns[slug || ''] || campaigns['yaz-indirimi'];
-  const addToast = useToastStore(s => s.add);
+  const addToast = useToastStore((s) => s.add);
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    void getCampaignBySlug(slug ?? '').then((c) => {
+      if (cancelled) return;
+      setCampaign(c);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [slug]);
 
   const copyCode = () => {
-    navigator.clipboard?.writeText(c.code);
-    addToast(`${c.code} kopyalandı!`, 'success');
+    if (!campaign?.couponCode) return;
+    void navigator.clipboard?.writeText(campaign.couponCode);
+    setCopied(true);
+    addToast(`${campaign.couponCode} kopyalandı!`, 'success');
+    window.setTimeout(() => setCopied(false), 2000);
   };
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <div className="flex justify-center py-32 text-aq-muted"><Loader2 className="h-6 w-6 animate-spin" /></div>
+      </PageLayout>
+    );
+  }
+
+  if (!campaign) {
+    return (
+      <PageLayout>
+        <SEO title="Kampanya bulunamadı | Aquails" noindex />
+        <PageHero
+          size="sm"
+          title="Kampanya bulunamadı"
+          description="Bu kampanya sona ermiş veya kaldırılmış olabilir."
+          breadcrumbs={[{ label: 'Kampanyalar', to: '/kampanyalar' }, { label: 'Bulunamadı' }]}
+        >
+          <Link to="/kampanyalar" className="inline-flex items-center gap-2 rounded-full bg-aq-ink px-6 py-3 text-sm font-semibold text-white hover:bg-aq-ink-soft">
+            Güncel Kampanyalar <ArrowRight className="h-4 w-4" />
+          </Link>
+        </PageHero>
+      </PageLayout>
+    );
+  }
+
+  const steps = campaign.couponCode
+    ? [
+        'Ürünler sayfasından dilediğiniz ürünleri sepete ekleyin.',
+        `Sepet sayfasındaki "Kupon Kodu" alanına ${campaign.couponCode} kodunu girin.`,
+        'İndirim sepet toplamına otomatik olarak uygulanır.',
+        'Ödeme adımına geçerek siparişinizi tamamlayın.',
+      ]
+    : [
+        'Ürünler sayfasından kampanyalı ürünleri sepete ekleyin.',
+        'Kampanya avantajı sepetinize otomatik olarak yansır.',
+        'Ödeme adımına geçerek siparişinizi tamamlayın.',
+      ];
 
   return (
     <>
-      <SEO
-        title={`${c.title} | Aquails Kampanyalar`}
-        description={c.desc}
-        canonical={`/kampanya/${slug}`}
-      />
-    <PageLayout variant="blue">
-      {/* Breadcrumb */}
-      <div className="max-w-[800px] mx-auto px-4 pt-6">
-        <div className="flex items-center gap-2 text-[13px] text-aq-muted">
-          <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link>
-          <span>/</span>
-          <Link to="/kampanyalar" className="hover:text-aq-blue">Kampanyalar</Link>
-          <span>/</span>
-          <span className="text-aq-muted">{c.title}</span>
-        </div>
-      </div>
-
-      <div className="max-w-[800px] mx-auto px-4 py-6">
-        {/* Campaign Hero Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep rounded-2xl p-8 text-white mb-6 relative overflow-hidden"
+      <SEO title={`${campaign.title} | Aquails Kampanyalar`} description={campaign.description.slice(0, 160)} canonical={`/kampanya/${campaign.slug}`} />
+      <PageLayout>
+        <PageHero
+          eyebrow={campaign.discountLabel || 'Kampanya'}
+          title={campaign.title}
+          breadcrumbs={[{ label: 'Kampanyalar', to: '/kampanyalar' }, { label: campaign.title }]}
         >
-          {/* Decorative circles */}
-          <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
-
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                <Tag className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">{c.discount} İndirim</span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-3">{c.title}</h1>
-            <p className="text-white/80 text-sm md:text-base mb-6 leading-relaxed max-w-lg">{c.desc}</p>
-            <div className="flex items-center gap-1.5 text-sm text-white/70 mb-6">
-              <Clock className="w-4 h-4" /> Son Geçerlilik: <strong className="text-white">{c.endDate}</strong>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={copyCode}
-                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all backdrop-blur-sm"
-              >
-                <Gift className="w-4 h-4" />
-                {c.code} - Kopyala
-              </button>
-              <Link
-                to="/urunler"
-                className="flex items-center gap-2 bg-white text-aq-blue text-sm font-semibold px-6 py-3 rounded-xl hover:bg-white/90 hover:shadow-sm transition-all"
-              >
-                Alışverişe Başla <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
+          <div className="flex items-center gap-1.5 text-sm text-aq-muted">
+            <Clock className="h-4 w-4" /> Son geçerlilik: <strong className="text-aq-ink">{campaign.endLabel}</strong>
           </div>
-        </motion.div>
+        </PageHero>
 
-        {/* Campaign Details */}
-        <ScrollReveal delay={0.2}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {[
-              { icon: Percent, title: 'İndirim', desc: c.discount },
-              { icon: Clock, title: 'Son Tarih', desc: c.endDate },
-              { icon: Truck, title: 'Kargo', desc: 'Ücretsiz' },
-            ].map((item) => (
-              <div key={item.title} className="bg-white border border-aq-border/60 rounded-xl p-5 text-center hover:shadow-sm transition-all">
-                <div className="w-10 h-10 bg-aq-sky rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <item.icon className="w-5 h-5 text-aq-blue" />
+        <div className="page-container grid gap-10 py-12 lg:grid-cols-[1.1fr_1fr] lg:gap-14 lg:py-16">
+          <ScrollReveal>
+            <div className="overflow-hidden rounded-xl bg-aq-cloud">
+              <img src={campaign.imageUrl || FALLBACK_IMAGE} alt={campaign.title} className="aspect-[4/3] w-full object-cover" />
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.1}>
+            {campaign.description && (
+              <p className="whitespace-pre-line text-[15px] leading-relaxed text-aq-ink/80">{campaign.description}</p>
+            )}
+
+            {campaign.couponCode && (
+              <div className="mt-7 rounded-xl bg-[#EEF4FA] p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-aq-muted">Kupon kodu</p>
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <span className="font-mono text-2xl font-bold tracking-wider text-aq-ink">{campaign.couponCode}</span>
+                  <button
+                    type="button"
+                    onClick={copyCode}
+                    className="inline-flex items-center gap-2 rounded-full bg-aq-ink px-5 py-2.5 text-sm font-semibold text-white hover:bg-aq-ink-soft"
+                  >
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    {copied ? 'Kopyalandı' : 'Kopyala'}
+                  </button>
                 </div>
-                <p className="text-xs text-aq-muted mb-1">{item.title}</p>
-                <p className="text-sm font-semibold text-aq-text">{item.desc}</p>
               </div>
-            ))}
-          </div>
-        </ScrollReveal>
+            )}
 
-        {/* How to Use */}
-        <ScrollReveal delay={0.3}>
-          <div className="bg-white border border-aq-border/60 rounded-2xl p-6 md:p-8">
-            <h3 className="text-base font-semibold text-aq-text mb-4">Kampanya Nasıl Kullanılır?</h3>
-            <div className="space-y-4">
-              {[
-                'Ürünler sayfasından dilediğiniz ürünleri sepete ekleyin.',
-                'Sepet sayfasında "Kupon Kodu" alanına kampanya kodunu girin.',
-                `İndirim otomatik olarak uygulanacaktır.`,
-                'Ödeme adımına geçerek alışverişinizi tamamlayın.',
-              ].map((step, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className="w-7 h-7 bg-aq-sky rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-semibold text-aq-blue">{i + 1}</span>
-                  </div>
-                  <p className="text-sm text-aq-muted pt-1">{step}</p>
-                </div>
+            <h2 className="mt-8 text-lg font-bold text-aq-ink">Nasıl yararlanırım?</h2>
+            <ol className="mt-4 space-y-3">
+              {steps.map((step, i) => (
+                <li key={step} className="flex items-start gap-3">
+                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-aq-ink text-xs font-bold text-white">{i + 1}</span>
+                  <p className="pt-1 text-sm text-aq-ink/75">{step}</p>
+                </li>
               ))}
-            </div>
-          </div>
-        </ScrollReveal>
+            </ol>
 
-        {/* CTA */}
-        <ScrollReveal delay={0.4}>
-          <div className="mt-6 text-center">
-            <Link
-              to="/urunler"
-              className="inline-flex items-center gap-2 bg-aq-blue text-white px-8 py-3 rounded-xl font-semibold hover:bg-aq-deep hover:text-white transition-all"
-            >
-              Tüm Ürünleri Gör <ChevronRight className="w-5 h-5" />
+            <Link to="/urunler" className="mt-8 inline-flex items-center gap-2 rounded-full bg-aq-ink px-7 py-3.5 text-sm font-semibold text-white hover:bg-aq-ink-soft">
+              Alışverişe Başla <ArrowRight className="h-4 w-4" />
             </Link>
-          </div>
-        </ScrollReveal>
-      </div>
-    </PageLayout>
+          </ScrollReveal>
+        </div>
+      </PageLayout>
     </>
   );
 }

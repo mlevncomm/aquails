@@ -26,7 +26,7 @@ export function ConfirmModal({
   const colors = {
     danger: { confirm: 'bg-red-500 hover:bg-red-600', icon: 'text-red-500 bg-red-50' },
     warning: { confirm: 'bg-amber-500 hover:bg-amber-600', icon: 'text-amber-500 bg-amber-50' },
-    info: { confirm: 'bg-aq-blue hover:bg-aq-deep text-white', icon: 'text-aq-blue bg-aq-sky' },
+    info: { confirm: 'bg-aq-ink hover:bg-aq-ink-soft text-white', icon: 'text-aq-blue bg-aq-cloud' },
   };
 
   return (

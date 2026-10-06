@@ -11,6 +11,7 @@ import { useToastStore } from '@/components/Toast';
 import { ProductPrice } from '@/components/ProductPrice';
 import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
+import { PageHero } from '@/components/PageHero';
 
 function collectSpecRows(products: Product[]): { key: string; label: string }[] {
   const keys: string[] = [];
@@ -55,7 +56,7 @@ export default function ComparePage() {
       <PageLayout>
         <SEO title="Ürün Karşılaştırma" description="Aquails ürünlerini yan yana karşılaştırın." />
         <div className="page-container py-16 flex justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-aq-blue" />
+          <Loader2 className="w-8 h-8 animate-spin text-aq-ink" />
         </div>
       </PageLayout>
     );
@@ -65,19 +66,12 @@ export default function ComparePage() {
     return (
       <PageLayout>
         <SEO title="Ürün Karşılaştırma" description="Aquails ürünlerini yan yana karşılaştırın." />
-        <div className="relative bg-gradient-to-br from-aq-ice via-white to-aq-sky/50 border-b border-aq-border/60">
-          <div className="page-container py-10 md:py-12">
-            <div className="flex items-center gap-2 text-[13px] text-aq-muted mb-2">
-              <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link>
-              <span>/</span>
-              <span className="text-aq-text">Karşılaştır</span>
-            </div>
-            <h1 className="text-xl md:text-2xl font-bold text-aq-text">Ürün Karşılaştırma</h1>
-            <p className="text-sm text-aq-muted mt-1.5">
-              En fazla {COMPARE_MAX} ürünü yan yana karşılaştırın.
-            </p>
-          </div>
-        </div>
+        <PageHero
+          size="sm"
+          title="Ürün Karşılaştırma"
+          description={`En fazla ${COMPARE_MAX} ürünü yan yana karşılaştırın.`}
+          breadcrumbs={[{ label: 'Karşılaştır' }]}
+        />
         <div className="page-container py-8">
           <EmptyState
             icon={<GitCompare className="w-8 h-8" />}
@@ -100,35 +94,23 @@ export default function ComparePage() {
         title="Ürün Karşılaştırma"
         description={`${compareProducts.length} Aquails ürününü yan yana karşılaştırın.`}
       />
-      <div className="relative bg-gradient-to-br from-aq-ice via-white to-aq-sky/50 border-b border-aq-border/60">
-        <div className="page-container py-10 md:py-12">
-          <div className="flex items-center gap-2 text-[13px] text-aq-muted mb-2">
-            <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link>
-            <span>/</span>
-            <span className="text-aq-text">Karşılaştır</span>
-          </div>
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-aq-text">
-                Ürün Karşılaştırma ({compareProducts.length}/{COMPARE_MAX})
-              </h1>
-              <p className="text-sm text-aq-muted mt-1.5">
-                Özellikleri yan yana inceleyin, doğru cihazı seçin.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                clear();
-                addToast('Karşılaştırma listesi temizlendi.', 'info');
-              }}
-              className="text-sm text-[#E85454] font-medium hover:underline"
-            >
-              Tümünü Temizle
-            </button>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        size="sm"
+        title={`Ürün Karşılaştırma (${compareProducts.length}/${COMPARE_MAX})`}
+        description="Özellikleri yan yana inceleyin, doğru cihazı seçin."
+        breadcrumbs={[{ label: 'Karşılaştır' }]}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            clear();
+            addToast('Karşılaştırma listesi temizlendi.', 'info');
+          }}
+          className="rounded-full border border-aq-ink/15 bg-white px-4 py-2 text-xs font-semibold text-aq-ink transition-colors hover:border-aq-ink"
+        >
+          Tümünü Temizle
+        </button>
+      </PageHero>
 
       <div className="page-container py-8">
         <div className="overflow-x-auto -mx-4 px-4">
@@ -155,7 +137,7 @@ export default function ComparePage() {
                           <X className="w-3 h-3" />
                         </button>
                         <Link to={`/urun/${p.slug}`} className="block group">
-                          <div className="w-24 h-24 bg-white border border-aq-border/60 rounded-2xl flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                          <div className="w-24 h-24 bg-white rounded-2xl flex items-center justify-center mx-auto mb-3 overflow-hidden shadow-soft">
                             <img
                               src={img}
                               alt={p.name}
@@ -214,7 +196,7 @@ export default function ComparePage() {
                       <span
                         className={cn(
                           'inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full',
-                          inStock ? 'bg-aq-sky text-aq-blue' : 'bg-red-50 text-red-500',
+                          inStock ? 'bg-aq-cloud text-aq-blue' : 'bg-red-50 text-red-500',
                         )}
                       >
                         {inStock ? (
@@ -242,7 +224,7 @@ export default function ComparePage() {
                       className={cn(
                         'mx-auto w-11 h-11 flex items-center justify-center rounded-full border transition-all active:scale-[0.96]',
                         p.stock > 0
-                          ? 'border-aq-border/60 text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-sky'
+                          ? 'border-aq-border/60 text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-cloud'
                           : 'border-aq-border/60 text-aq-muted bg-aq-ice cursor-not-allowed',
                       )}
                     >

@@ -19,6 +19,9 @@ export interface AdminCoupon {
   used: number;
   start: string;
   end: string;
+  /** yyyy-mm-dd for form inputs ('' when unset). */
+  startInput: string;
+  endInput: string;
   active: boolean;
 }
 
@@ -43,6 +46,8 @@ function mapAdminCoupon(row: DbCoupon): AdminCoupon {
     used: row.usage_count,
     start: row.start_date ? formatDateTR(row.start_date) : '—',
     end: row.end_date ? formatDateTR(row.end_date) : '—',
+    startInput: row.start_date ? row.start_date.slice(0, 10) : '',
+    endInput: row.end_date ? row.end_date.slice(0, 10) : '',
     active: row.is_active,
   };
 }
@@ -202,5 +207,39 @@ export async function deleteCoupon(id: string): Promise<{ success: boolean; erro
   const { data, error } = await supabase.from('coupons').delete().eq('id', id).select('id');
   if (error) return { success: false, error: error.message };
   if (!data?.length) return { success: false, error: 'Kupon silinemedi veya yetkiniz yok.' };
+  return { success: true };
+}
+
+export async function updateCoupon(
+  id: string,
+  input: {
+    code: string;
+    type: 'percent' | 'fixed' | 'shipping';
+    value: number;
+    minOrder: number;
+    usageLimit: number;
+    start: string;
+    end: string;
+  },
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  const { data, error } = await supabase
+    .from('coupons')
+    .update({
+      code: input.code.toUpperCase(),
+      type: uiTypeToDb(input.type),
+      value: input.value,
+      min_order_amount: input.minOrder,
+      usage_limit: input.usageLimit,
+      start_date: input.start ? new Date(input.start).toISOString() : null,
+      end_date: input.end ? new Date(input.end).toISOString() : null,
+    })
+    .eq('id', id)
+    .select('id');
+
+  if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Kupon güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }

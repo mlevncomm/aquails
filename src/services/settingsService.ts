@@ -292,3 +292,17 @@ export async function getFreeShippingThreshold(): Promise<number> {
   const cfg = await getSiteConfig();
   return cfg.freeShippingLimit;
 }
+
+/** Field technicians that service requests can be assigned to (admin-managed). */
+export async function getTechnicians(): Promise<string[]> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+  const { data } = await supabase.from('site_settings').select('value').eq('key', 'technicians').maybeSingle();
+  const names = asRecord(data?.value)?.names;
+  return Array.isArray(names) ? (names as unknown[]).filter((n): n is string => typeof n === 'string' && n.trim() !== '') : [];
+}
+
+export async function saveTechnicians(names: string[]): Promise<MutationResult> {
+  const cleaned = Array.from(new Set(names.map((n) => n.trim()).filter(Boolean)));
+  return setSetting('technicians', { names: cleaned });
+}

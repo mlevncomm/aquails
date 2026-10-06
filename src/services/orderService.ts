@@ -474,8 +474,3 @@ export async function pollOrderPaymentStatus(
   return 'pending';
 }
 
-/** @deprecated Use createOrder instead */
-export function saveOrder(_order: CustomerOrder): void {
-  void _order;
-  console.warn('saveOrder is deprecated — use createOrder with Supabase');
-}

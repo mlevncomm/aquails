@@ -243,7 +243,7 @@ export default function CustomerAddressesPage() {
               )}
               <div className="flex items-center gap-2 mb-2 pr-20">
                 {a.type === 'shipping' ? (
-                  <Home className="w-4 h-4 text-aq-blue flex-shrink-0" />
+                  <Home className="w-4 h-4 text-aq-ink flex-shrink-0" />
                 ) : (
                   <Building2 className="w-4 h-4 text-aq-deep flex-shrink-0" />
                 )}

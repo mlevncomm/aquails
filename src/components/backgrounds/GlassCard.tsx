@@ -10,7 +10,7 @@ interface GlassCardProps {
 export function GlassCard({ children, className, variant = 'white', hover = false }: GlassCardProps) {
   const variants = {
     white: 'bg-white/80 backdrop-blur-md border border-white/40 shadow-sm',
-    blue: 'bg-aq-sky/60 backdrop-blur-md border border-aq-deep/10',
+    blue: 'bg-aq-cloud backdrop-blur-md border border-aq-deep/10',
     dark: 'bg-aq-deep/80 backdrop-blur-md border border-white/10',
   };
 

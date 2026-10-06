@@ -173,7 +173,7 @@ export default function AdminOrderDetailPage() {
           <select
             value={orderStatusToTr(currentStatus)}
             onChange={(e) => void handleStatusChange(e.target.value)}
-            className="appearance-none cursor-pointer pl-4 pr-10 py-2.5 text-sm font-medium bg-white border border-aq-border/60 rounded-xl text-aq-text focus:outline-none focus:ring-2 focus:ring-aq-aqua/30 min-w-[160px] min-h-[40px]"
+            className="appearance-none cursor-pointer pl-4 pr-10 py-2.5 text-sm font-medium bg-white border border-aq-border/60 rounded-xl text-aq-ink focus:outline-none focus:ring-2 focus:ring-aq-ink/10 min-w-[160px] min-h-[40px]"
           >
             {ADMIN_ORDER_STATUS_OPTIONS.map((s) => (
               <option key={s} value={s}>{s}</option>
@@ -188,10 +188,10 @@ export default function AdminOrderDetailPage() {
 
       <AdminCard className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-aq-text">Sipariş Durumu</span>
-          <span className="text-sm font-semibold text-aq-blue">%{Math.round(progress)}</span>
+          <span className="text-sm font-medium text-aq-ink">Sipariş Durumu</span>
+          <span className="text-sm font-semibold text-aq-ink">%{Math.round(progress)}</span>
         </div>
-        <div className="w-full h-2.5 bg-aq-ice rounded-full overflow-hidden">
+        <div className="w-full h-2.5 bg-aq-cloud rounded-full overflow-hidden">
           <div className="h-full bg-gradient-to-r from-aq-blue to-aq-aqua rounded-full transition-all" style={{ width: `${progress}%` }} />
         </div>
       </AdminCard>
@@ -199,43 +199,43 @@ export default function AdminOrderDetailPage() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-6">
           <AdminCard>
-            <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
-              <Package className="w-4 h-4 text-aq-blue" /> Sipariş Ürünleri ({order.products.length})
+            <h3 className="text-sm font-semibold text-aq-ink mb-4 flex items-center gap-2">
+              <Package className="w-4 h-4 text-aq-ink" /> Sipariş Ürünleri ({order.products.length})
             </h3>
             {order.products.map((p, i) => (
               <div key={i} className="flex items-center gap-4 py-4 border-b border-aq-border/60 last:border-0">
-                <div className="w-14 h-14 bg-aq-ice rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-14 h-14 bg-aq-cloud rounded-xl flex items-center justify-center flex-shrink-0">
                   <Package className="w-6 h-6 text-aq-sky/50" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-aq-text">{p.name}</p>
+                  <p className="text-sm font-semibold text-aq-ink">{p.name}</p>
                   <p className="text-xs text-aq-muted mt-1">{p.qty} adet</p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className="text-sm font-semibold text-aq-text">{(p.price * p.qty).toLocaleString('tr-TR')}₺</p>
+                  <p className="text-sm font-semibold text-aq-ink">{(p.price * p.qty).toLocaleString('tr-TR')}₺</p>
                 </div>
               </div>
             ))}
           </AdminCard>
 
           <AdminCard>
-            <h3 className="text-sm font-semibold text-aq-text mb-5 flex items-center gap-2">
-              <Truck className="w-4 h-4 text-aq-blue" /> Sipariş Takibi
+            <h3 className="text-sm font-semibold text-aq-ink mb-5 flex items-center gap-2">
+              <Truck className="w-4 h-4 text-aq-ink" /> Sipariş Takibi
             </h3>
             <div className="relative pl-2">
-              <div className="absolute left-[23px] top-3 bottom-3 w-0.5 bg-aq-ice" />
+              <div className="absolute left-[23px] top-3 bottom-3 w-0.5 bg-aq-cloud" />
               {timeline.map((t, i) => {
                 const Icon = t.icon;
                 return (
                   <div key={i} className="relative flex items-start gap-4 pb-6 last:pb-0">
                     <div className={cn(
                       'relative z-10 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0',
-                      t.done ? 'bg-aq-deep text-white' : 'bg-aq-ice border border-aq-border/60',
+                      t.done ? 'bg-aq-ink text-white' : 'bg-aq-cloud border border-aq-border/60',
                     )}>
                       <Icon className="w-5 h-5" />
                     </div>
                     <div className="flex-1 pt-1">
-                      <p className={cn('text-sm font-semibold', t.done ? 'text-aq-text' : 'text-aq-muted')}>{t.step}</p>
+                      <p className={cn('text-sm font-semibold', t.done ? 'text-aq-ink' : 'text-aq-muted')}>{t.step}</p>
                       {t.date && <p className="text-xs text-aq-muted mt-0.5">{t.date}</p>}
                     </div>
                   </div>
@@ -254,11 +254,11 @@ export default function AdminOrderDetailPage() {
 
         <div className="space-y-6">
           <AdminCard>
-            <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
-              <User className="w-4 h-4 text-aq-blue" /> Müşteri
+            <h3 className="text-sm font-semibold text-aq-ink mb-4 flex items-center gap-2">
+              <User className="w-4 h-4 text-aq-ink" /> Müşteri
             </h3>
-            <div className="bg-aq-ice rounded-xl p-4">
-              <p className="text-sm font-semibold text-aq-text">{order.customer.name}</p>
+            <div className="bg-aq-cloud rounded-xl p-4">
+              <p className="text-sm font-semibold text-aq-ink">{order.customer.name}</p>
               <p className="text-xs text-aq-muted mt-1 flex items-center gap-1"><Mail className="w-3 h-3" />{order.customer.email}</p>
               {order.customer.phone && (
                 <p className="text-xs text-aq-muted flex items-center gap-1"><Phone className="w-3 h-3" />{order.customer.phone}</p>
@@ -267,10 +267,10 @@ export default function AdminOrderDetailPage() {
           </AdminCard>
 
           <AdminCard>
-            <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-aq-blue" /> Teslimat & Kargo
+            <h3 className="text-sm font-semibold text-aq-ink mb-4 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-aq-ink" /> Teslimat & Kargo
             </h3>
-            <div className="bg-aq-ice rounded-xl p-4 mb-4">
+            <div className="bg-aq-cloud rounded-xl p-4 mb-4">
               <p className="text-xs text-aq-muted mb-1">{order.shipping.title}</p>
               <p className="text-sm text-aq-muted leading-relaxed">{order.shipping.address || '—'}</p>
             </div>
@@ -298,8 +298,8 @@ export default function AdminOrderDetailPage() {
           </AdminCard>
 
           <AdminCard>
-            <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-aq-blue" /> Ödeme
+            <h3 className="text-sm font-semibold text-aq-ink mb-4 flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-aq-ink" /> Ödeme
             </h3>
             <p className="text-sm text-aq-muted mb-3">{order.payment}</p>
             <div className="space-y-2 text-sm">
@@ -321,7 +321,7 @@ export default function AdminOrderDetailPage() {
                   <span>Kapıda Ödeme</span><span>+{order.codFee.toLocaleString('tr-TR')}₺</span>
                 </div>
               )}
-              <div className="flex justify-between font-semibold text-aq-text pt-2 border-t border-aq-border/60">
+              <div className="flex justify-between font-semibold text-aq-ink pt-2 border-t border-aq-border/60">
                 <span>Toplam</span><span>{order.total.toLocaleString('tr-TR')}₺</span>
               </div>
             </div>

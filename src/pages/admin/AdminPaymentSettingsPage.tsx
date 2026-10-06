@@ -92,8 +92,8 @@ export default function AdminPaymentSettingsPage() {
       <form onSubmit={(e) => void handleSave(e)} className="space-y-5">
         <AdminCard>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-aq-text flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-aq-blue" />
+            <h3 className="text-sm font-semibold text-aq-ink flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-aq-ink" />
               PayTR Sanal POS
             </h3>
             <label className="flex items-center gap-2 text-sm text-aq-muted cursor-pointer">
@@ -101,7 +101,7 @@ export default function AdminPaymentSettingsPage() {
                 type="checkbox"
                 checked={paytr.enabled}
                 onChange={(e) => setPaytr({ ...paytr, enabled: e.target.checked })}
-                className="w-4 h-4 accent-aq-deep"
+                className="w-4 h-4 accent-aq-ink"
               />
               Aktif
             </label>
@@ -140,7 +140,7 @@ export default function AdminPaymentSettingsPage() {
         </AdminCard>
 
         <AdminCard>
-          <h3 className="text-sm font-semibold text-aq-text mb-4">Havale / EFT Banka Hesapları</h3>
+          <h3 className="text-sm font-semibold text-aq-ink mb-4">Havale / EFT Banka Hesapları</h3>
           {banks.map((bank, i) => (
             <div key={i} className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
               <AdminInput

@@ -156,7 +156,7 @@ export default function AdminLinksPage() {
             <Link
               to="/all-links"
               target="_blank"
-              className="flex items-center gap-2 text-sm font-medium text-aq-blue hover:underline"
+              className="flex items-center gap-2 text-sm font-medium text-aq-ink hover:underline"
             >
               <Eye className="w-4 h-4" /> Sayfayı Görüntüle
             </Link>
@@ -181,7 +181,7 @@ export default function AdminLinksPage() {
 
       {showAdd && (
         <AdminCard className="mb-6">
-          <p className="text-sm font-semibold text-aq-text mb-4">Yeni Link Ekle</p>
+          <p className="text-sm font-semibold text-aq-ink mb-4">Yeni Link Ekle</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <AdminLabel>Başlık *</AdminLabel>
@@ -224,7 +224,7 @@ export default function AdminLinksPage() {
 
       {isEditing && editForm && (
         <AdminCard className="mb-6">
-          <p className="text-sm font-semibold text-aq-text mb-4">Link Düzenle</p>
+          <p className="text-sm font-semibold text-aq-ink mb-4">Link Düzenle</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <AdminLabel>Başlık *</AdminLabel>
@@ -279,7 +279,7 @@ export default function AdminLinksPage() {
         <AdminTableWrap stickyFirst>
           <table className="w-full">
             <thead>
-              <tr className="bg-aq-ice border-b border-aq-border/60">
+              <tr className="bg-aq-cloud border-b border-aq-border/60">
                 {['Sıra', 'Başlık', 'URL', 'Aktif', 'Öne Çıkan', 'İşlemler'].map((h) => (
                   <th
                     key={h}
@@ -300,7 +300,7 @@ export default function AdminLinksPage() {
                   <tr
                     key={link.id}
                     className={cn(
-                      'border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50',
+                      'border-b border-aq-border/60 last:border-0 hover:bg-aq-cloud/50',
                       !link.active && 'opacity-50',
                     )}
                   >
@@ -312,10 +312,10 @@ export default function AdminLinksPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 bg-aq-ice rounded-lg flex items-center justify-center">
-                          <Icon className="w-3.5 h-3.5 text-aq-blue" />
+                        <div className="w-7 h-7 bg-aq-cloud rounded-lg flex items-center justify-center">
+                          <Icon className="w-3.5 h-3.5 text-aq-ink" />
                         </div>
-                        <span className="text-sm font-medium text-aq-text">{link.title}</span>
+                        <span className="text-sm font-medium text-aq-ink">{link.title}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -344,7 +344,7 @@ export default function AdminLinksPage() {
                         onClick={() => handleToggleFeatured(link.id)}
                         className={cn(
                           'p-1.5 rounded-lg transition-all',
-                          link.featured ? 'bg-aq-ice text-aq-blue' : 'text-aq-border',
+                          link.featured ? 'bg-aq-cloud text-aq-ink' : 'text-aq-border',
                         )}
                       >
                         <Check className="w-3.5 h-3.5" />
@@ -355,7 +355,7 @@ export default function AdminLinksPage() {
                         <button
                           type="button"
                           onClick={() => handleEdit(link)}
-                          className="p-1.5 rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue transition-all"
+                          className="p-1.5 rounded-lg hover:bg-aq-cloud text-aq-muted hover:text-aq-ink transition-all"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
@@ -378,16 +378,15 @@ export default function AdminLinksPage() {
 
       <AdminCard className="mt-6">
         <div className="flex items-start gap-3">
-          <Eye className="w-5 h-5 text-aq-blue flex-shrink-0 mt-0.5" />
+          <Eye className="w-5 h-5 text-aq-ink flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-aq-text">Önizleme</p>
+            <p className="text-sm font-semibold text-aq-ink">Önizleme</p>
             <p className="text-xs text-aq-muted mt-1">
               Yaptığınız değişiklikler anında All Links sayfasına yansır. Sayfayı görüntüle butonu ile
               kontrol edebilirsiniz.
             </p>
             <p className="text-xs text-aq-muted mt-1">
-              Not: Bu yönetim paneli localStorage üzerinde çalışır. Tarayıcı verileri temizlenirse
-              varsayılan ayarlara döner.
+              Bağlantılar veritabanında saklanır; tüm cihazlarda ve ziyaretçilerde aynı görünür.
             </p>
           </div>
         </div>

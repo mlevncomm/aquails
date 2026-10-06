@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Droplet, Zap, Coffee, Building2, Filter, Settings, Wrench, FolderTree } from 'lucide-react';
+import { Plus, Pencil, Trash2, Droplet, Zap, Coffee, Building2, Filter, Settings, Wrench, FolderTree } from 'lucide-react';
 import { useToastStore } from '@/components/Toast';
-import { getAdminCategories, createCategory, updateCategory } from '@/services/categoryService';
+import { getAdminCategories, createCategory, updateCategory, deleteCategory } from '@/services/categoryService';
 import type { AdminCategory } from '@/services/categoryService';
 import {
   AdminPageShell,
@@ -66,6 +66,22 @@ export default function AdminCategoriesPage() {
   };
 
   const activeCategories = categories;
+
+  const remove = async (cat: AdminCategory) => {
+    if ((cat.productCount ?? 0) > 0) {
+      addToast(`"${cat.name}" kategorisinde ${cat.productCount} ürün var. Önce ürünleri başka kategoriye taşıyın veya kategoriyi pasife alın.`, 'error');
+      return;
+    }
+    if (!window.confirm(`"${cat.name}" kategorisini silmek istediğinize emin misiniz?`)) return;
+    try {
+      await deleteCategory(cat.id);
+      addToast('Kategori silindi.', 'success');
+      void load();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      addToast(/foreign key|23503|violates/i.test(msg) ? 'Bu kategoriye bağlı ürünler var; silinemez.' : msg || 'Kategori silinemedi.', 'error');
+    }
+  };
 
   const toggleActive = async (cat: AdminCategory) => {
     try {
@@ -155,7 +171,7 @@ export default function AdminCategoriesPage() {
         <AdminTableWrap stickyFirst>
           <table className="w-full">
             <thead>
-              <tr className="bg-aq-ice border-b border-aq-border/60">
+              <tr className="bg-aq-cloud border-b border-aq-border/60">
                 {['Kategori', 'Slug', 'Ürün Sayısı', 'Durum', 'İşlemler'].map((h) => (
                   <th
                     key={h}
@@ -172,16 +188,16 @@ export default function AdminCategoriesPage() {
                 return (
                   <tr
                     key={cat.id}
-                    className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50"
+                    className="border-b border-aq-border/60 last:border-0 hover:bg-aq-cloud/50"
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4 text-aq-blue" />
-                        <span className="text-sm font-medium text-aq-text">{cat.name}</span>
+                        <Icon className="w-4 h-4 text-aq-ink" />
+                        <span className="text-sm font-medium text-aq-ink">{cat.name}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-aq-muted">{cat.slug}</td>
-                    <td className="px-4 py-3 text-sm text-aq-text">{cat.productCount ?? 0}</td>
+                    <td className="px-4 py-3 text-sm text-aq-ink">{cat.productCount ?? 0}</td>
                     <td className="px-4 py-3 text-sm">
                       <button
                         type="button"
@@ -192,13 +208,25 @@ export default function AdminCategoriesPage() {
                       </button>
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => startEdit(cat)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-sky text-aq-muted hover:text-aq-blue"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => startEdit(cat)}
+                          className="rounded-full p-2 text-aq-muted hover:bg-aq-cloud hover:text-aq-ink"
+                          aria-label="Düzenle"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void remove(cat)}
+                          className="rounded-full p-2 text-aq-muted hover:bg-red-50 hover:text-red-600"
+                          aria-label="Sil"
+                          title={(cat.productCount ?? 0) > 0 ? 'Ürünü olan kategori silinemez' : 'Sil'}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );

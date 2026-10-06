@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, ArrowRight, ShoppingCart, RefreshCw, CheckCircle, Droplet } from 'lucide-react';
+import { ArrowRight, ShoppingCart, RefreshCw, CheckCircle, Droplet } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { getProducts } from '@/services/productService';
 import type { Product } from '@/types';
+import { PageHero } from '@/components/PageHero';
 
 
 const deviceModels = [
@@ -57,15 +58,13 @@ export default function FilterGuidePage() {
         canonical="/filtre-secim-rehberi"
       />
     <PageLayout>
-      <section className="relative bg-gradient-to-br from-aq-ice via-white to-aq-sky/40 py-12 md:py-16">
-        <div className="page-container text-center">
-          <div className="w-14 h-14 bg-white rounded-2xl shadow-sm mx-auto mb-4 flex items-center justify-center">
-            <Filter className="w-7 h-7 text-aq-blue" />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-aq-text">Cihazınıza Uygun Filtreyi Bulun</h1>
-          <p className="text-sm text-aq-muted mt-2 max-w-lg mx-auto">Cihaz modelinizi ve ihtiyacınızı seçin, uyumlu filtreleri görün.</p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Filtre rehberi"
+        title="Cihazınıza Uygun Filtreyi Bulun"
+        description="Cihaz modelinizi ve ihtiyacınızı seçin, uyumlu filtreleri görün."
+        breadcrumbs={[{ label: 'Filtre Seçim Rehberi' }]}
+        image="/images/filter-subscription.jpg"
+      />
 
       <div className="max-w-[600px] mx-auto px-4 sm:px-6 py-10">
         <AnimatePresence mode="wait">
@@ -75,7 +74,7 @@ export default function FilterGuidePage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="bg-white border border-aq-border/60 rounded-2xl p-6"
+              className="bg-white rounded-2xl p-6 shadow-soft"
             >
               {step === 0 && (
                 <>
@@ -114,7 +113,7 @@ export default function FilterGuidePage() {
                         onClick={() => setNeed(n.value)}
                         className={`p-3 rounded-xl border-2 text-left text-sm font-medium transition-all ${
                           need === n.value
-                            ? 'border-aq-deep bg-aq-sky text-aq-blue'
+                            ? 'border-aq-deep bg-aq-cloud text-aq-blue'
                             : 'border-aq-border/60 text-aq-muted'
                         }`}
                       >
@@ -127,7 +126,7 @@ export default function FilterGuidePage() {
               <button
                 onClick={handleNext}
                 disabled={step === 0 && !deviceModel || step === 2 && !need}
-                className="w-full flex items-center justify-center gap-2 bg-aq-blue text-white py-3 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all disabled:opacity-50 mt-6"
+                className="w-full flex items-center justify-center gap-2 bg-aq-ink text-white py-3 rounded-full text-sm font-semibold hover:bg-aq-ink-soft hover:text-white transition-all disabled:opacity-50 mt-6"
               >
                 {step === 2 ? 'Sonuçları Gör' : 'Devam Et'} <ArrowRight className="w-4 h-4" />
               </button>
@@ -140,7 +139,7 @@ export default function FilterGuidePage() {
               className="space-y-4"
             >
               <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-aq-sky rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="w-12 h-12 bg-aq-cloud rounded-full flex items-center justify-center mx-auto mb-3">
                   <CheckCircle className="w-6 h-6 text-aq-aqua" />
                 </div>
                 <h2 className="text-lg font-semibold text-aq-text">Uyumlu Filtreler</h2>
@@ -148,25 +147,25 @@ export default function FilterGuidePage() {
               </div>
 
               {filterProducts.map(p => (
-                <div key={p.id} className="bg-white border border-aq-border/60 rounded-2xl p-4 flex items-center gap-4">
-                  <div className="w-16 h-16 bg-aq-sky rounded-xl overflow-hidden flex-shrink-0">
+                <div key={p.id} className="bg-white rounded-2xl p-4 flex items-center gap-4 shadow-soft">
+                  <div className="w-16 h-16 bg-aq-cloud rounded-xl overflow-hidden flex-shrink-0">
                     <img src={p.images?.[0] || '/images/products/placeholder.jpg'} alt={p.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-semibold text-aq-text">{p.name}</h4>
                     <p className="text-xs text-aq-muted">{p.price.toLocaleString('tr-TR')} ₺</p>
                   </div>
-                  <Link to={`/urun/${p.slug}`} className="flex items-center gap-1 bg-aq-blue text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-aq-deep hover:text-white transition-all flex-shrink-0">
+                  <Link to={`/urun/${p.slug}`} className="flex items-center gap-1 bg-aq-ink text-white text-xs font-medium px-3 py-2 rounded-full hover:bg-aq-ink-soft hover:text-white transition-all flex-shrink-0">
                     <ShoppingCart className="w-3 h-3" />
                   </Link>
                 </div>
               ))}
 
               <div className="flex flex-wrap gap-2 mt-4">
-                <Link to="/filtre-aboneligi" className="flex items-center gap-1.5 bg-aq-blue text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-aq-deep hover:text-white transition-all">
+                <Link to="/filtre-aboneligi" className="flex items-center gap-1.5 bg-aq-ink text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-aq-ink-soft hover:text-white transition-all">
                   <RefreshCw className="w-3 h-3" /> Filtre Aboneliği
                 </Link>
-                <Link to="/filtre-hesaplayici" className="flex items-center gap-1.5 border border-aq-border/60 text-aq-muted text-xs font-semibold px-4 py-2 rounded-xl hover:border-aq-blue hover:text-aq-blue transition-all">
+                <Link to="/filtre-hesaplayici" className="flex items-center gap-1.5 border border-aq-border/60 text-aq-muted text-xs font-semibold px-4 py-2 rounded-full hover:border-aq-blue hover:text-aq-blue transition-all">
                   <Droplet className="w-3 h-3" /> Hesaplayici
                 </Link>
               </div>

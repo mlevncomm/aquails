@@ -62,7 +62,7 @@ export default function AdminStockPage() {
         <AdminTableWrap stickyFirst>
           <table className="w-full">
             <thead>
-              <tr className="bg-aq-ice border-b border-aq-border/60">
+              <tr className="bg-aq-cloud border-b border-aq-border/60">
                 {['Ürün', 'SKU', 'Mevcut Stok', 'Kritik Limit', 'Durum', 'İşlem'].map((h) => (
                   <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
                     {h}
@@ -74,12 +74,12 @@ export default function AdminStockPage() {
               {items.map((i) => (
                 <tr
                   key={i.id}
-                  className={`border-b border-aq-border/60 last:border-0 ${i.stock <= i.critical ? 'bg-red-50/50' : 'hover:bg-aq-ice/50'}`}
+                  className={`border-b border-aq-border/60 last:border-0 ${i.stock <= i.critical ? 'bg-red-50/50' : 'hover:bg-aq-cloud/50'}`}
                 >
-                  <td className="px-4 py-3 text-sm font-medium text-aq-text">{i.name}</td>
+                  <td className="px-4 py-3 text-sm font-medium text-aq-ink">{i.name}</td>
                   <td className="px-4 py-3 text-sm text-aq-muted font-mono">{i.sku}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-sm font-semibold ${i.stock <= i.critical ? 'text-red-600' : 'text-aq-text'}`}>
+                    <span className={`text-sm font-semibold ${i.stock <= i.critical ? 'text-red-600' : 'text-aq-ink'}`}>
                       {i.stock}
                     </span>
                   </td>
@@ -101,7 +101,7 @@ export default function AdminStockPage() {
                       <button
                         type="button"
                         onClick={() => void adjust(i.id, -1)}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-aq-ice hover:bg-red-100 text-aq-muted hover:text-red-500 transition-all"
+                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-aq-cloud hover:bg-red-100 text-aq-muted hover:text-red-500 transition-all"
                       >
                         <Minus className="w-3 h-3" />
                       </button>
@@ -109,7 +109,7 @@ export default function AdminStockPage() {
                       <button
                         type="button"
                         onClick={() => void adjust(i.id, 1)}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-aq-ice hover:bg-emerald-100 text-aq-muted hover:text-emerald-600 transition-all"
+                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-aq-cloud hover:bg-emerald-100 text-aq-muted hover:text-emerald-600 transition-all"
                       >
                         <Plus className="w-3 h-3" />
                       </button>

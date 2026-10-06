@@ -24,6 +24,7 @@ import { OrderPriceBreakdown } from '@/components/OrderPriceBreakdown';
 import { getProductGrossPrice } from '@/lib/pricing';
 import { CartLinePrice } from '@/components/CartLinePrice';
 import { cn } from '@/lib/utils';
+import { PageHero } from '@/components/PageHero';
 
 const steps = [
   { label: 'Sepet', href: '/sepet' },
@@ -381,7 +382,7 @@ export default function Checkout() {
           </p>
           <div className="space-y-3 mb-6">
             {bankAccounts.map((b, i) => (
-              <div key={i} className="bg-white border border-aq-border/60 rounded-xl p-4 text-sm">
+              <div key={i} className="bg-white rounded-xl p-4 text-sm shadow-soft">
                 <p className="font-semibold text-aq-text">{b.bankName}</p>
                 <p className="text-aq-muted">{b.accountName}</p>
                 <p className="font-mono text-aq-blue mt-1">{b.iban}</p>
@@ -390,7 +391,7 @@ export default function Checkout() {
           </div>
           <button
             onClick={() => void finishOrder(completedOrderNo).then(() => addToast('Sipariş kaydedildi.', 'success'))}
-            className="w-full bg-aq-blue text-white py-3 rounded-xl font-semibold hover:bg-aq-deep hover:text-white"
+            className="w-full bg-aq-ink text-white py-3 rounded-full font-semibold hover:bg-aq-ink-soft hover:text-white"
           >
             Anladım, Siparişi Tamamla
           </button>
@@ -403,21 +404,21 @@ export default function Checkout() {
     return (
       <PageLayout>
         <div className="max-w-[600px] mx-auto px-6 py-20 text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-20 h-20 bg-aq-sky rounded-full flex items-center justify-center mx-auto">
-            <Check className="w-10 h-10 text-aq-blue" />
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-20 h-20 bg-aq-cloud rounded-full flex items-center justify-center mx-auto">
+            <Check className="w-10 h-10 text-aq-ink" />
           </motion.div>
           <h1 className="text-2xl md:text-3xl font-bold text-aq-text mt-6">Siparişiniz Alındı!</h1>
-          <span className="inline-block bg-aq-sky text-aq-blue font-semibold px-4 py-2 rounded-lg mt-4">
+          <span className="inline-block bg-aq-cloud text-aq-blue font-semibold px-4 py-2 rounded-lg mt-4">
             Sipariş No: {completedOrderNo}
           </span>
           <p className="text-[15px] text-aq-muted leading-relaxed mt-4">
             Siparişiniz başarıyla oluşturuldu. Kargo takip bilgileri e-posta adresinize gönderilecektir.
           </p>
           <div className="flex justify-center gap-3 mt-8">
-            <Link to="/hesabim/siparisler" className="bg-aq-blue text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-aq-deep hover:text-white transition-colors">
+            <Link to="/hesabim/siparisler" className="bg-aq-ink text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-aq-ink-soft hover:text-white transition-colors">
               Siparişlerim
             </Link>
-            <Link to="/" className="border-2 border-aq-border/60 text-aq-muted px-6 py-3 rounded-xl font-semibold text-sm hover:border-aq-blue hover:text-aq-blue transition-all">
+            <Link to="/" className="border border-aq-ink/15 text-aq-ink px-6 py-3 rounded-full font-semibold text-sm hover:border-aq-ink transition-all">
               Ana Sayfaya Dön
             </Link>
           </div>
@@ -444,7 +445,7 @@ export default function Checkout() {
             >
               <div className="flex items-center justify-between px-5 py-4 border-b border-aq-border/60">
                 <h3 className="font-semibold text-aq-text flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-aq-blue" />
+                  <CreditCard className="w-5 h-5 text-aq-ink" />
                   Güvenli Ödeme
                 </h3>
                 <button onClick={() => setPaytrIframeUrl(null)} className="text-aq-muted hover:text-aq-text">
@@ -462,40 +463,43 @@ export default function Checkout() {
         )}
       </AnimatePresence>
 
-      <div className="bg-white border-b border-aq-border/60 py-4 sm:py-6 overflow-x-hidden">
-        <div className="max-w-[1080px] mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-center gap-0 overflow-x-auto">
-            {steps.map((step, index) => (
-              <div key={step.label} className="flex items-center">
-                <div className="flex items-center gap-2">
-                  <div className={cn(
-                    'w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium',
-                    index < currentStep ? 'bg-aq-deep border-aq-deep text-white' :
-                    index === currentStep ? 'border-aq-deep text-aq-blue bg-white' :
-                    'border-aq-border/60 text-aq-muted bg-white'
-                  )}>
-                    {index < currentStep ? <Check className="w-4 h-4" /> : index + 1}
-                  </div>
-                  <span className={cn('text-sm font-medium hidden sm:block', index <= currentStep ? 'text-aq-text' : 'text-aq-muted')}>
-                    {step.label}
-                  </span>
-                </div>
-                {index < steps.length - 1 && (
-                  <div className={cn('w-12 md:w-16 h-0.5 mx-3', index < currentStep ? 'bg-aq-deep' : 'bg-aq-border')} />
+      <PageHero
+        size="sm"
+        title="Güvenli Ödeme"
+        breadcrumbs={[{ label: 'Sepet', to: '/sepet' }, { label: 'Ödeme' }]}
+      >
+        <ol className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {steps.map((step, index) => (
+            <li key={step.label} className="flex items-center gap-2 sm:gap-3">
+              <span
+                className={cn(
+                  'inline-flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3.5 text-xs font-semibold',
+                  index <= currentStep ? 'bg-white text-aq-ink shadow-soft' : 'text-aq-muted ring-1 ring-aq-border',
                 )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+              >
+                <span
+                  className={cn(
+                    'flex h-6 w-6 items-center justify-center rounded-full text-[11px]',
+                    index < currentStep ? 'bg-emerald-500 text-white' : index === currentStep ? 'bg-aq-ink text-white' : 'bg-aq-border text-aq-muted',
+                  )}
+                >
+                  {index < currentStep ? <Check className="h-3.5 w-3.5" /> : index + 1}
+                </span>
+                {step.label}
+              </span>
+              {index < steps.length - 1 && <span className="hidden h-px w-6 bg-aq-border sm:block" aria-hidden />}
+            </li>
+          ))}
+        </ol>
+      </PageHero>
 
       <div className="max-w-[1080px] mx-auto px-4 sm:px-6 py-8 sm:py-10 overflow-x-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-7 lg:gap-10 min-w-0">
           <div className="space-y-5">
             <ScrollReveal>
-              <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+              <div className="bg-white rounded-2xl p-6 shadow-soft">
                 <h3 className="text-base font-semibold text-aq-text flex items-center gap-2">
-                  <User className="w-5 h-5 text-aq-blue" />
+                  <User className="w-5 h-5 text-aq-ink" />
                   İletişim Bilgileri
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
@@ -520,9 +524,9 @@ export default function Checkout() {
             </ScrollReveal>
 
             <ScrollReveal delay={0.1}>
-              <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+              <div className="bg-white rounded-2xl p-6 shadow-soft">
                 <h3 className="text-base font-semibold text-aq-text flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-aq-blue" />
+                  <MapPin className="w-5 h-5 text-aq-ink" />
                   Teslimat Adresi
                 </h3>
                 {savedAddresses.length > 0 && (
@@ -595,9 +599,9 @@ export default function Checkout() {
             </ScrollReveal>
 
             <ScrollReveal delay={0.15}>
-              <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+              <div className="bg-white rounded-2xl p-6 shadow-soft">
                 <h3 className="text-base font-semibold text-aq-text flex items-center gap-2">
-                  <Wrench className="w-5 h-5 text-aq-blue" />
+                  <Wrench className="w-5 h-5 text-aq-ink" />
                   Kurulum ve Servis
                 </h3>
                 <div className="mt-5 pt-2">
@@ -620,7 +624,7 @@ export default function Checkout() {
                     <div className="grid grid-cols-2 gap-2">
                       {availableSlots.filter((s) => s.available).map((slot) => (
                         <button key={slot.id} type="button" onClick={() => setSelectedSlot(slot.id)} className={cn('flex items-center gap-2 p-3 rounded-xl border-2 text-left', selectedSlot === slot.id ? 'border-aq-deep bg-aq-ice/50' : 'border-aq-border/60')}>
-                          <Clock className="w-4 h-4 text-aq-blue" />
+                          <Clock className="w-4 h-4 text-aq-ink" />
                           <span className="text-sm">{slot.label}</span>
                         </button>
                       ))}
@@ -631,9 +635,9 @@ export default function Checkout() {
             </ScrollReveal>
 
             <ScrollReveal delay={0.2}>
-              <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+              <div className="bg-white rounded-2xl p-6 shadow-soft">
                 <h3 className="text-base font-semibold text-aq-text flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-aq-blue" />
+                  <CreditCard className="w-5 h-5 text-aq-ink" />
                   Ödeme Yöntemi
                 </h3>
                 <div className="mt-4 space-y-2.5">
@@ -667,9 +671,9 @@ export default function Checkout() {
             </ScrollReveal>
 
             <ScrollReveal delay={0.25}>
-              <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+              <div className="bg-white rounded-2xl p-6 shadow-soft">
                 <h3 className="text-base font-semibold text-aq-text flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-aq-blue" />
+                  <Truck className="w-5 h-5 text-aq-ink" />
                   Kargo Seçimi
                 </h3>
                 <div className="mt-4 space-y-2.5">
@@ -693,7 +697,7 @@ export default function Checkout() {
           </div>
 
           <ScrollReveal x={20} delay={0.3}>
-            <div className="lg:sticky lg:top-28 bg-white border border-aq-border/60 rounded-2xl p-6">
+            <div className="lg:sticky lg:top-28 bg-white rounded-2xl p-6 shadow-soft">
               <h3 className="text-base font-semibold text-aq-text mb-5">Sipariş Özeti</h3>
               <div className="space-y-3 mb-5">
                 {items.map((item) => (
@@ -717,14 +721,14 @@ export default function Checkout() {
                       <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-aq-muted" />
                       <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()} placeholder="Kupon kodu" className="w-full pl-8 pr-3 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice" />
                     </div>
-                    <button onClick={handleApplyCoupon} disabled={couponLoading} className="px-4 py-2.5 text-sm font-semibold text-aq-blue border-2 border-aq-deep rounded-xl disabled:opacity-50">
+                    <button onClick={handleApplyCoupon} disabled={couponLoading} className="px-4 py-2.5 text-sm font-semibold text-aq-blue border-2 border-aq-deep rounded-full disabled:opacity-50">
                       {couponLoading ? '...' : 'Uygula'}
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between p-3 bg-aq-sky border border-aq-aqua/30 rounded-xl">
+                  <div className="flex items-center justify-between p-3 bg-aq-cloud border border-aq-aqua/30 rounded-xl">
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-aq-blue" />
+                      <CheckCircle className="w-4 h-4 text-aq-ink" />
                       <span className="text-sm font-semibold text-aq-blue">{appliedCoupon.code}</span>
                     </div>
                     <button onClick={() => { setAppliedCoupon(null); setCartCoupon(null); setCouponCode(''); }} className="text-xs text-aq-blue">Kaldır</button>
@@ -742,7 +746,7 @@ export default function Checkout() {
               <button
                 onClick={handleCompleteOrder}
                 disabled={submitting}
-                className="flex items-center justify-center gap-2 w-full bg-aq-blue text-white py-4 rounded-xl font-semibold hover:bg-aq-deep hover:text-white transition-all mt-4 disabled:opacity-60"
+                className="flex items-center justify-center gap-2 w-full bg-aq-ink text-white py-4 rounded-full font-semibold hover:bg-aq-ink-soft hover:text-white transition-all mt-4 disabled:opacity-60"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
                 {submitting ? 'İşleniyor...' : paymentMethod === 'card' ? 'Ödemeye Geç' : 'Siparişi Tamamla'}
@@ -755,7 +759,7 @@ export default function Checkout() {
                   { icon: CheckCircle, label: '3D Secure' },
                 ].map((b) => (
                   <span key={b.label} className="inline-flex items-center gap-1.5 text-[11px] font-medium text-aq-muted">
-                    <b.icon className="w-3.5 h-3.5 text-aq-blue" />
+                    <b.icon className="w-3.5 h-3.5 text-aq-ink" />
                     {b.label}
                   </span>
                 ))}

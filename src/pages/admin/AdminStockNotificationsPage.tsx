@@ -69,7 +69,7 @@ export default function AdminStockNotificationsPage() {
         <AdminTableWrap stickyFirst>
           <table className="w-full">
             <thead>
-              <tr className="bg-aq-ice border-b border-aq-border/60">
+              <tr className="bg-aq-cloud border-b border-aq-border/60">
                 {['Ürün', 'E-posta', 'Talep Tarihi', 'Durum', 'İşlem'].map((h) => (
                   <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
                     {h}
@@ -79,8 +79,8 @@ export default function AdminStockNotificationsPage() {
             </thead>
             <tbody>
               {items.map((item) => (
-                <tr key={item.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
-                  <td className="px-4 py-3 text-sm font-medium text-aq-text">{item.productName}</td>
+                <tr key={item.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-cloud/50">
+                  <td className="px-4 py-3 text-sm font-medium text-aq-ink">{item.productName}</td>
                   <td className="px-4 py-3">
                     <span className="flex items-center gap-1.5 text-sm text-aq-muted">
                       <Mail className="w-3.5 h-3.5 text-aq-muted" />
@@ -99,7 +99,7 @@ export default function AdminStockNotificationsPage() {
                         <button
                           type="button"
                           onClick={() => void markSent(item.id)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-emerald-50 text-aq-muted hover:text-emerald-500"
+                          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-emerald-50 text-aq-muted hover:text-emerald-500"
                         >
                           <Check className="w-4 h-4" />
                         </button>
@@ -107,7 +107,7 @@ export default function AdminStockNotificationsPage() {
                       <button
                         type="button"
                         onClick={() => void remove(item.id)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500"
+                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 text-aq-muted hover:text-red-500"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

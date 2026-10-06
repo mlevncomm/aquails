@@ -68,7 +68,7 @@ export default function AdminReturnsPage() {
         <AdminTableWrap stickyFirst>
           <table className="w-full">
             <thead>
-              <tr className="bg-aq-ice border-b border-aq-border/60">
+              <tr className="bg-aq-cloud border-b border-aq-border/60">
                 {['Müşteri', 'Sipariş', 'Ürün', 'Tür', 'Sebep', 'Durum', 'Tarih', 'İşlem'].map((h) => (
                   <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">{h}</th>
                 ))}
@@ -76,9 +76,9 @@ export default function AdminReturnsPage() {
             </thead>
             <tbody>
               {items.map((item) => (
-                <tr key={item.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
-                  <td className="px-4 py-3 text-sm font-medium text-aq-text">{item.customer}</td>
-                  <td className="px-4 py-3 text-sm text-aq-blue">{item.orderNumber}</td>
+                <tr key={item.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-cloud/50">
+                  <td className="px-4 py-3 text-sm font-medium text-aq-ink">{item.customer}</td>
+                  <td className="px-4 py-3 text-sm text-aq-ink">{item.orderNumber}</td>
                   <td className="px-4 py-3 text-sm text-aq-muted">{item.productName}</td>
                   <td className="px-4 py-3 text-sm">{item.type === 'return' ? 'İade' : 'Değişim'}</td>
                   <td className="px-4 py-3 text-sm text-aq-muted max-w-[200px] truncate">{item.reason}</td>
@@ -91,8 +91,8 @@ export default function AdminReturnsPage() {
                   <td className="px-4 py-3">
                     {item.status === 'pending' && (
                       <div className="flex gap-1">
-                        <button type="button" onClick={() => void handleAction(item.id, 'approved')} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-emerald-50 text-emerald-500" title="Onayla"><Check className="w-4 h-4" /></button>
-                        <button type="button" onClick={() => void handleAction(item.id, 'rejected')} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-red-500" title="Reddet"><X className="w-4 h-4" /></button>
+                        <button type="button" onClick={() => void handleAction(item.id, 'approved')} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-emerald-50 text-emerald-500" title="Onayla"><Check className="w-4 h-4" /></button>
+                        <button type="button" onClick={() => void handleAction(item.id, 'rejected')} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 text-red-500" title="Reddet"><X className="w-4 h-4" /></button>
                       </div>
                     )}
                   </td>

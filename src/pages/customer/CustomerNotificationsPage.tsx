@@ -29,12 +29,12 @@ const typeIcons: Record<string, React.ElementType> = {
 };
 
 const typeColors: Record<string, string> = {
-  order: 'bg-aq-sky text-aq-blue',
+  order: 'bg-aq-cloud text-aq-blue',
   shipping: 'bg-aq-ice text-aq-deep',
-  filter: 'bg-aq-sky/70 text-aq-blue',
+  filter: 'bg-aq-cloud text-aq-blue',
   service: 'bg-amber-50 text-amber-700',
-  campaign: 'bg-aq-sky text-aq-blue',
-  promo: 'bg-aq-sky text-aq-blue',
+  campaign: 'bg-aq-cloud text-aq-blue',
+  promo: 'bg-aq-cloud text-aq-blue',
   system: 'bg-aq-ice text-aq-muted',
   info: 'bg-aq-ice text-aq-muted',
 };
@@ -111,7 +111,7 @@ export default function CustomerNotificationsPage() {
                   'flex items-start gap-3 p-4 rounded-2xl w-full text-left transition-all border',
                   n.isRead
                     ? 'bg-white border-aq-border/60'
-                    : 'bg-white border-aq-blue/20 shadow-[0_1px_2px_rgba(18,134,216,0.06)]',
+                    : 'bg-white border-aq-blue/20',
                 )}
               >
                 <div

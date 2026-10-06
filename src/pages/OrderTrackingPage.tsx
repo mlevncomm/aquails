@@ -5,6 +5,7 @@ import { PageLayout } from '@/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { trackOrderByNumberAndEmail, type OrderTrackingResult } from '@/services/orderService';
 import { useToastStore } from '@/components/Toast';
+import { PageHero } from '@/components/PageHero';
 
 export default function OrderTrackingPage() {
   const addToast = useToastStore((s) => s.add);
@@ -38,13 +39,15 @@ export default function OrderTrackingPage() {
         canonical="/siparis-takip"
       />
       <PageLayout>
-        <div className="max-w-[700px] mx-auto px-4 py-8">
-          <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold text-aq-text mb-2">Sipariş Takip</h1>
-            <p className="text-sm text-aq-muted">Sipariş numaranızı ve kayıtlı e-posta/telefonunuzu girin.</p>
-          </div>
+        <PageHero
+          size="sm"
+          title="Sipariş Takip"
+          description="Sipariş numaranızı ve kayıtlı e-posta/telefonunuzu girin."
+          breadcrumbs={[{ label: 'Sipariş Takip' }]}
+        />
+        <div className="max-w-[700px] mx-auto px-4 py-10">
 
-          <form onSubmit={handleSearch} className="bg-white border border-aq-border/60 rounded-2xl p-6 mb-8">
+          <form onSubmit={handleSearch} className="bg-white rounded-2xl p-6 mb-8 shadow-soft">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="text-xs font-medium text-aq-muted mb-1.5 block">Sipariş Numarası</label>
@@ -68,7 +71,7 @@ export default function OrderTrackingPage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center justify-center gap-2 w-full sm:w-auto bg-aq-blue text-white px-8 py-2.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white disabled:opacity-60"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto bg-aq-ink text-white px-8 py-2.5 rounded-full text-sm font-semibold hover:bg-aq-ink-soft hover:text-white disabled:opacity-60"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               Sorgula
@@ -77,16 +80,16 @@ export default function OrderTrackingPage() {
 
           {result && (
             <div className="space-y-5">
-              <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+              <div className="bg-white rounded-2xl p-6 shadow-soft">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-aq-sky rounded-xl flex items-center justify-center">
-                    <Package className="w-6 h-6 text-aq-blue" />
+                  <div className="w-12 h-12 bg-aq-cloud rounded-xl flex items-center justify-center">
+                    <Package className="w-6 h-6 text-aq-ink" />
                   </div>
                   <div>
                     <p className="text-sm text-aq-muted">Sipariş No</p>
                     <p className="text-lg font-semibold text-aq-text">{result.orderNo}</p>
                   </div>
-                  <span className="ml-auto inline-flex items-center gap-1.5 bg-aq-sky text-aq-blue text-xs font-medium px-3 py-1 rounded-full">
+                  <span className="ml-auto inline-flex items-center gap-1.5 bg-aq-cloud text-aq-blue text-xs font-medium px-3 py-1 rounded-full">
                     <Truck className="w-3 h-3" /> {result.statusLabel}
                   </span>
                 </div>
@@ -101,12 +104,12 @@ export default function OrderTrackingPage() {
                 </div>
               </div>
 
-              <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+              <div className="bg-white rounded-2xl p-6 shadow-soft">
                 <h3 className="text-base font-semibold text-aq-text mb-5">Sipariş Durumu</h3>
                 {result.timeline.map((t, i) => (
                   <div key={i} className="flex gap-4">
                     <div className="flex flex-col items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${t.done ? 'bg-aq-sky text-aq-aqua' : 'bg-gray-100 text-gray-400'}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${t.done ? 'bg-aq-cloud text-aq-aqua' : 'bg-gray-100 text-gray-400'}`}>
                         {t.done ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                       </div>
                       {i < result.timeline.length - 1 && <div className={`w-0.5 h-10 ${t.done ? 'bg-aq-aqua/30' : 'bg-gray-200'}`} />}
@@ -119,7 +122,7 @@ export default function OrderTrackingPage() {
                 ))}
               </div>
 
-              <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+              <div className="bg-white rounded-2xl p-6 shadow-soft">
                 <h3 className="text-base font-semibold text-aq-text mb-4">Sipariş Özeti</h3>
                 {result.items.map((item, i) => (
                   <div key={i} className="flex justify-between py-3 border-b border-aq-border/60 last:border-0">
@@ -130,7 +133,7 @@ export default function OrderTrackingPage() {
               </div>
 
               <p className="text-center text-sm text-aq-muted">
-                <Link to="/giris" className="text-aq-blue hover:underline">Giriş yaparak</Link> tüm siparişlerinizi görüntüleyebilirsiniz.
+                <Link to="/giris" className="text-aq-muted hover:text-aq-ink">Giriş yaparak</Link> tüm siparişlerinizi görüntüleyebilirsiniz.
               </p>
             </div>
           )}

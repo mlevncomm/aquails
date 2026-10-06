@@ -7,6 +7,7 @@ import { ScrollReveal } from '@/components/ScrollReveal';
 import { openWhatsApp, getServiceRequestMessage } from '@/services/whatsappService';
 import { SEO } from '@/components/SEO';
 import { CONTACT_PHONE_DISPLAY } from '@/lib/contact';
+import { PageHero } from '@/components/PageHero';
 
 
 const cities = [
@@ -41,15 +42,14 @@ export default function ServiceNetworkPage() {
         canonical="/servis-agimiz"
       />
     <PageLayout>
-      <section className="relative bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep py-12 md:py-16 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-20 w-64 h-64 bg-aq-aqua rounded-full blur-3xl" />
-        </div>
-        <div className="page-container relative text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Aquails Servis ve Kurulum Agi</h1>
-          <p className="text-sm text-white/70 mt-2 max-w-lg mx-auto">Kurulum, filtre değişimi ve bakım hizmetlerinde size en yakın destek noktasıyla yanınızdayız.</p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="81 ilde yanınızda"
+        title="Aquails Servis ve Kurulum Ağı"
+        description="Kurulum, filtre değişimi ve bakım hizmetlerinde size en yakın destek noktasıyla yanınızdayız."
+        breadcrumbs={[{ label: 'Servis Ağımız' }]}
+        image="/images/service-installation.jpg"
+        imagePosition="70% center"
+      />
 
       <div className="page-container py-10">
         {/* Stats */}
@@ -60,8 +60,8 @@ export default function ServiceNetworkPage() {
             { icon: Wrench, label: '500+', desc: 'Yetkili servis' },
             { icon: Users, label: '10.000+', desc: 'Mutlu müşteri' },
           ].map(s => (
-            <div key={s.label} className="bg-white border border-aq-border/60 rounded-2xl p-5 text-center">
-              <s.icon className="w-6 h-6 text-aq-blue mx-auto mb-2" />
+            <div key={s.label} className="bg-white rounded-2xl p-5 text-center shadow-soft">
+              <s.icon className="w-6 h-6 text-aq-ink mx-auto mb-2" />
               <p className="text-lg font-semibold text-aq-text">{s.label}</p>
               <p className="text-xs text-aq-muted">{s.desc}</p>
             </div>
@@ -78,7 +78,7 @@ export default function ServiceNetworkPage() {
                 onClick={() => setSelectedCity(c.name)}
                 className={`p-3 rounded-xl text-sm font-medium border-2 transition-all ${
                   selectedCity === c.name
-                    ? 'border-aq-deep bg-aq-sky text-aq-blue'
+                    ? 'border-aq-deep bg-aq-cloud text-aq-blue'
                     : 'border-aq-border/60 bg-white text-aq-muted hover:border-aq-border/60'
                 }`}
               >
@@ -94,7 +94,7 @@ export default function ServiceNetworkPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white border border-aq-border/60 rounded-2xl p-6 mb-12"
+            className="bg-white rounded-2xl p-6 mb-12 shadow-soft"
           >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
@@ -122,10 +122,10 @@ export default function ServiceNetworkPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Link to="/servis-randevusu" className="flex items-center gap-1.5 bg-aq-blue text-white text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-aq-deep hover:text-white transition-all">
+                <Link to="/servis-randevusu" className="flex items-center gap-1.5 bg-aq-ink text-white text-xs font-semibold px-4 py-2.5 rounded-full hover:bg-aq-ink-soft hover:text-white transition-all">
                   <Wrench className="w-3.5 h-3.5" /> Randevu Al
                 </Link>
-                <button onClick={() => openWhatsApp(getServiceRequestMessage(`${city.name} servis`))} className="flex items-center gap-1.5 border border-aq-border/60 text-aq-muted text-xs font-semibold px-4 py-2.5 rounded-xl hover:border-aq-blue hover:text-aq-blue transition-all">
+                <button onClick={() => openWhatsApp(getServiceRequestMessage(`${city.name} servis`))} className="flex items-center gap-1.5 border border-aq-ink/15 text-aq-ink text-xs font-semibold px-4 py-2.5 rounded-full hover:border-aq-ink transition-all">
                   <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
                 </button>
               </div>
@@ -135,11 +135,11 @@ export default function ServiceNetworkPage() {
 
         {/* Process Steps */}
         <ScrollReveal className="mb-12">
-          <h2 className="text-xl font-semibold text-aq-text mb-6 text-center">Kurulum Sureci</h2>
+          <h2 className="text-xl font-semibold text-aq-text mb-6 text-center">Kurulum Süreci</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {processSteps.map(s => (
-              <div key={s.step} className="bg-white border border-aq-border/60 rounded-2xl p-5 text-center">
-                <div className="w-10 h-10 bg-aq-sky rounded-full flex items-center justify-center mx-auto mb-3">
+              <div key={s.step} className="bg-white rounded-2xl p-5 text-center shadow-soft">
+                <div className="w-10 h-10 bg-aq-cloud rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-sm font-semibold text-aq-blue">{s.step}</span>
                 </div>
                 <h4 className="text-sm font-semibold text-aq-text">{s.title}</h4>

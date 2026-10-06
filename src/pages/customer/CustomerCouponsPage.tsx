@@ -74,13 +74,13 @@ export default function CustomerCouponsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {coupons.map((c) => (
             <CustomerCard key={c.code} className="relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-aq-sky/50 rounded-bl-full" />
+              <div className="absolute top-0 right-0 w-16 h-16 bg-aq-cloud rounded-bl-full" />
               <p className="text-lg font-semibold text-aq-text mb-1 relative">{formatDiscount(c)}</p>
               <p className="text-xs text-aq-muted mb-3 relative">Min. sipariş: {formatMin(c)}</p>
               <button
                 type="button"
                 onClick={() => copyCode(c.code)}
-                className="relative flex items-center gap-2 bg-aq-ice text-aq-blue px-4 py-2 rounded-xl text-sm font-semibold hover:bg-aq-sky transition-all"
+                className="relative flex items-center gap-2 bg-aq-ice text-aq-blue px-4 py-2 rounded-xl text-sm font-semibold hover:bg-aq-cloud transition-all"
               >
                 {copied === c.code ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 {c.code}

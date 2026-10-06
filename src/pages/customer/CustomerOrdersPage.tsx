@@ -112,7 +112,7 @@ export default function CustomerOrdersPage() {
                   </div>
                   <Link
                     to={`/hesabim/siparisler/${order.id}`}
-                    className="w-11 h-11 flex items-center justify-center rounded-xl bg-aq-sky/70 text-aq-blue hover:bg-aq-deep hover:text-white transition-all"
+                    className="w-11 h-11 flex items-center justify-center rounded-xl bg-aq-cloud text-aq-blue hover:bg-aq-deep hover:text-white transition-all"
                     aria-label="Sipariş detayı"
                   >
                     <Eye className="w-4 h-4" />

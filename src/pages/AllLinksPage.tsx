@@ -75,7 +75,7 @@ function LinkRow({
       <div
         className={cn(
           'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors',
-          featured ? 'bg-white/20' : 'bg-aq-sky group-hover:bg-aq-deep',
+          featured ? 'bg-white/20' : 'bg-aq-cloud group-hover:bg-aq-deep',
         )}
       >
         <Icon className={cn('w-[18px] h-[18px]', featured ? 'text-white' : 'text-aq-blue group-hover:text-white')} />
@@ -193,7 +193,7 @@ export default function AllLinksPage() {
                   key={label}
                   className="inline-flex items-center gap-1 bg-white/80 text-[10px] font-medium text-aq-muted px-2.5 py-1 rounded-full border border-aq-border/60 shadow-sm"
                 >
-                  <ShieldCheck className="w-3 h-3 text-aq-blue" />
+                  <ShieldCheck className="w-3 h-3 text-aq-ink" />
                   {label}
                 </span>
               ))}
@@ -258,9 +258,9 @@ export default function AllLinksPage() {
                     <Link
                       key={cat.id}
                       to={`/urunler?kategori=${cat.id}`}
-                      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-aq-border/60 text-xs font-medium text-aq-muted hover:border-aq-blue/30 hover:bg-aq-sky hover:text-aq-blue shadow-sm transition-all"
+                      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-aq-border/60 text-xs font-medium text-aq-muted hover:border-aq-blue/30 hover:bg-aq-cloud hover:text-aq-blue shadow-sm transition-all"
                     >
-                      <Icon className="w-3.5 h-3.5 text-aq-blue" />
+                      <Icon className="w-3.5 h-3.5 text-aq-ink" />
                       {cat.name}
                       <span className="text-aq-muted font-normal">({cat.productCount})</span>
                     </Link>
@@ -289,7 +289,7 @@ export default function AllLinksPage() {
                   <Link
                     key={p!.id}
                     to={`/urun/${p!.slug}`}
-                    className="flex-shrink-0 w-[148px] snap-start bg-white rounded-2xl border border-aq-border/60 overflow-hidden shadow-sm hover:-translate-y-0.5 transition-all group"
+                    className="flex-shrink-0 w-[148px] snap-start bg-white rounded-2xl overflow-hidden hover:-translate-y-0.5 transition-all group shadow-soft"
                   >
                     <div className="aspect-square bg-aq-ice overflow-hidden">
                       <img
@@ -336,7 +336,7 @@ export default function AllLinksPage() {
                 </button>
                 <Link
                   to="/kampanyalar"
-                  className="inline-flex items-center gap-1 bg-white text-aq-text text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-aq-sky transition-colors"
+                  className="inline-flex items-center gap-1 bg-white text-aq-text text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-aq-cloud transition-colors"
                 >
                   Kampanyalar <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -353,7 +353,7 @@ export default function AllLinksPage() {
           >
             {trustItems.map((t) => (
               <div key={t.label} className="text-center p-2 rounded-xl bg-white/60 border border-white/80">
-                <t.icon className="w-4 h-4 text-aq-blue mx-auto mb-1" />
+                <t.icon className="w-4 h-4 text-aq-ink mx-auto mb-1" />
                 <p className="text-[10px] font-semibold text-aq-text">{t.value}</p>
                 <p className="text-[9px] text-aq-muted leading-tight">{t.label}</p>
               </div>
@@ -382,16 +382,16 @@ export default function AllLinksPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     title={s.label}
-                    className="w-10 h-10 bg-white border border-aq-border/60 rounded-full flex items-center justify-center hover:border-aq-blue/30 hover:bg-aq-sky transition-all shadow-sm"
+                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:border-aq-blue/30 hover:bg-aq-cloud transition-all shadow-sm"
                   >
-                    <s.icon className="w-4 h-4 text-aq-muted hover:text-aq-blue" />
+                    <s.icon className="w-4 h-4 text-aq-muted hover:text-aq-ink" />
                   </a>
                 ) : (
                   <Link
                     key={s.label}
                     to={s.href}
                     title={s.label}
-                    className="w-10 h-10 bg-white border border-aq-border/60 rounded-full flex items-center justify-center hover:border-aq-blue/30 hover:bg-aq-sky transition-all shadow-sm"
+                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:border-aq-blue/30 hover:bg-aq-cloud transition-all shadow-sm"
                   >
                     <s.icon className="w-4 h-4 text-aq-muted" />
                   </Link>

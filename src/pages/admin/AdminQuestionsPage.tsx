@@ -77,11 +77,11 @@ export default function AdminQuestionsPage() {
             <AdminCard key={q.id}>
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-aq-ice rounded-lg flex items-center justify-center">
-                    <HelpCircle className="w-4 h-4 text-aq-blue" />
+                  <div className="w-8 h-8 bg-aq-cloud rounded-full flex items-center justify-center">
+                    <HelpCircle className="w-4 h-4 text-aq-ink" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-aq-text">{q.customerName}</p>
+                    <p className="text-sm font-semibold text-aq-ink">{q.customerName}</p>
                     <p className="text-xs text-aq-muted">
                       {q.productName} | {formatDate(q.createdAt)}
                     </p>
@@ -93,10 +93,10 @@ export default function AdminQuestionsPage() {
               </div>
               <p className="text-sm text-aq-muted mb-3 pl-10">{q.question}</p>
               {q.answer && (
-                <div className="bg-aq-ice rounded-xl p-3 ml-10 mb-3">
+                <div className="bg-aq-cloud rounded-xl p-3 ml-10 mb-3">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <MessageCircle className="w-3.5 h-3.5 text-aq-blue" />
-                    <span className="text-xs font-medium text-aq-blue">Cevap</span>
+                    <MessageCircle className="w-3.5 h-3.5 text-aq-ink" />
+                    <span className="text-xs font-medium text-aq-ink">Cevap</span>
                   </div>
                   <p className="text-sm text-aq-muted">{q.answer}</p>
                 </div>

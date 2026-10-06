@@ -65,13 +65,13 @@ export default function CheckoutResultPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${
-                status === 'failed' ? 'bg-red-50' : 'bg-aq-sky'
+                status === 'failed' ? 'bg-red-50' : 'bg-aq-cloud'
               }`}
             >
               {status === 'failed' ? (
                 <XCircle className="w-10 h-10 text-red-500" />
               ) : (
-                <Check className="w-10 h-10 text-aq-blue" />
+                <Check className="w-10 h-10 text-aq-ink" />
               )}
             </motion.div>
             <h1 className="text-2xl font-bold text-aq-text mt-6">
@@ -104,20 +104,20 @@ export default function CheckoutResultPage() {
         <div className="flex justify-center gap-3 mt-8">
           <Link
             to="/hesabim/siparisler"
-            className="bg-aq-blue text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-aq-deep hover:text-white transition-colors"
+            className="bg-aq-ink text-white px-6 py-3 rounded-full font-semibold text-sm hover:bg-aq-ink-soft hover:text-white transition-colors"
           >
             Siparişlerim
           </Link>
           <Link
             to={isSuccess ? '/' : '/odeme'}
-            className="border-2 border-aq-border/60 text-aq-muted px-6 py-3 rounded-xl font-semibold text-sm hover:border-aq-blue hover:text-aq-blue transition-all"
+            className="border border-aq-ink/15 text-aq-ink px-6 py-3 rounded-full font-semibold text-sm hover:border-aq-ink transition-all"
           >
             {isSuccess ? 'Ana Sayfa' : 'Ödemeye Dön'}
           </Link>
         </div>
 
         <div className="flex items-center justify-center gap-2 mt-6 pt-5 border-t border-aq-border/60 text-xs text-aq-muted">
-          <Lock className="w-3.5 h-3.5 text-aq-blue" />
+          <Lock className="w-3.5 h-3.5 text-aq-ink" />
           Güvenli ödeme altyapısı PayTR
         </div>
         </div>

@@ -6,6 +6,7 @@ import { getAddresses, type Address } from '@/services/addressService';
 import {
   getCustomerServiceRequests,
   createServiceRequest,
+  cancelMyServiceRequest,
   labelToServiceType,
   type CustomerServiceRequest,
 } from '@/services/serviceRequestService';
@@ -28,6 +29,14 @@ const types = ['Filtre Değişimi', 'Kurulum', 'Bakım', 'Arıza', 'Genel Kontro
 function formatAddressLabel(a: Address): string {
   return `${a.title} - ${a.district}/${a.city}`;
 }
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Onay bekliyor',
+  scheduled: 'Planlandı',
+  in_progress: 'Ekip yolda',
+  completed: 'Tamamlandı',
+  cancelled: 'İptal edildi',
+};
 
 function serviceTone(status: string): 'success' | 'warning' | 'info' | 'neutral' {
   if (status === 'completed' || status === 'done') return 'success';
@@ -57,6 +66,21 @@ export default function CustomerServiceRequestsPage() {
     setRequests(data);
     setLoading(false);
   }, [user]);
+
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+
+  const handleCancel = async (id: string) => {
+    if (!window.confirm('Bu servis talebini iptal etmek istediğinize emin misiniz?')) return;
+    setCancellingId(id);
+    const res = await cancelMyServiceRequest(id);
+    setCancellingId(null);
+    if (!res.success) {
+      addToast(res.error ?? 'Talep iptal edilemedi.', 'error');
+      return;
+    }
+    addToast('Servis talebiniz iptal edildi.', 'success');
+    void loadRequests();
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -208,10 +232,10 @@ export default function CustomerServiceRequestsPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                 <div className="flex items-center gap-3 flex-wrap">
                   <h3 className="text-sm font-semibold text-aq-text flex items-center gap-1.5">
-                    <Wrench className="w-4 h-4 text-aq-blue" />
+                    <Wrench className="w-4 h-4 text-aq-ink" />
                     {r.type}
                   </h3>
-                  <CustomerBadge tone={serviceTone(r.status)}>{r.status}</CustomerBadge>
+                  <CustomerBadge tone={serviceTone(r.status)}>{STATUS_LABELS[r.status] ?? r.status}</CustomerBadge>
                 </div>
                 <span className="text-xs text-aq-muted flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
@@ -226,6 +250,18 @@ export default function CustomerServiceRequestsPage() {
                 <MapPin className="w-3 h-3" />
                 {r.address}
               </p>
+              {r.status === 'pending' && (
+                <div className="mt-3 flex justify-end border-t border-aq-border/60 pt-3">
+                  <button
+                    type="button"
+                    disabled={cancellingId === r.id}
+                    onClick={() => void handleCancel(r.id)}
+                    className="rounded-full px-4 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:opacity-50"
+                  >
+                    {cancellingId === r.id ? 'İptal ediliyor…' : 'Talebi iptal et'}
+                  </button>
+                </div>
+              )}
             </CustomerCard>
           ))}
         </div>

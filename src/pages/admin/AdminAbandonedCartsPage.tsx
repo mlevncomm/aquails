@@ -103,14 +103,14 @@ export default function AdminAbandonedCartsPage() {
             <AdminCard key={cart.id}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                 <div>
-                  <p className="text-sm font-semibold text-aq-text">{cart.customerName}</p>
+                  <p className="text-sm font-semibold text-aq-ink">{cart.customerName}</p>
                   {cart.customerEmail && <p className="text-xs text-aq-muted">{cart.customerEmail}</p>}
                 </div>
                 <div className="flex items-center gap-2">
                   <AdminBadge tone={statusTone[cart.status] ?? 'neutral'}>
                     {statusLabel[cart.status] ?? cart.status}
                   </AdminBadge>
-                  <span className="text-sm font-semibold text-aq-text">{cart.total.toLocaleString('tr-TR')}₺</span>
+                  <span className="text-sm font-semibold text-aq-ink">{cart.total.toLocaleString('tr-TR')}₺</span>
                 </div>
               </div>
               <p className="text-xs text-aq-muted mb-3">

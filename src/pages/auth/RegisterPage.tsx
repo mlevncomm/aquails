@@ -88,11 +88,10 @@ export default function RegisterPage() {
     <div className="w-full">
       <AuthBrand />
 
-      <div className="relative overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/75 p-7 sm:p-8 shadow-[0_30px_80px_-40px_rgba(6,38,61,0.45)] backdrop-blur-xl">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-aq-aqua/15 blur-3xl" />
+      <div className="relative">
         <div className="relative">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-aq-blue/70">Hesap</p>
-          <h1 className="mt-2 font-[Poppins,ui-sans-serif,sans-serif] text-2xl font-semibold tracking-tight text-aq-deep">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-aq-muted">Hesap</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-[-0.02em] text-aq-ink">
             Kayıt Ol
           </h1>
           <p className="mt-2 text-sm text-aq-muted leading-relaxed">
@@ -172,7 +171,7 @@ export default function RegisterPage() {
                     className={cn(
                       'flex h-5 w-5 items-center justify-center rounded-md border transition-all',
                       'border-aq-border/80 bg-white shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-aq-aqua/40',
-                      agree && 'border-aq-blue bg-gradient-to-br from-aq-blue to-[#0d6fba] text-white shadow-[0_6px_14px_-6px_rgba(18,134,216,0.8)]',
+                      agree && 'border-aq-blue bg-aq-ink hover:bg-aq-ink-soft text-white',
                     )}
                     aria-hidden
                   >
@@ -208,7 +207,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group mt-1 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-aq-blue to-[#0d6fba] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(18,134,216,0.75)] transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+              className="group mt-1 inline-flex w-full items-center justify-center gap-2 rounded-full bg-aq-ink hover:bg-aq-ink-soft px-5 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? 'Kaydediliyor...' : 'Kayıt Ol'}
               {!loading && <ArrowUpRight className="h-4 w-4" />}

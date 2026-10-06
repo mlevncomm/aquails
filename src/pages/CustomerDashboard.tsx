@@ -27,9 +27,9 @@ import {
 } from '@/components/customer/customer-ui';
 
 const quickActions = [
-  { icon: ShoppingBag, label: 'Sipariş Ver', href: '/urunler', tone: 'bg-aq-sky text-aq-blue' },
+  { icon: ShoppingBag, label: 'Sipariş Ver', href: '/urunler', tone: 'bg-aq-cloud text-aq-blue' },
   { icon: Wrench, label: 'Servis Talebi', href: '/hesabim/servis-talepleri', tone: 'bg-aq-ice text-aq-deep' },
-  { icon: RefreshCw, label: 'Filtre Değişim', href: '/hesabim/filtre-takibi', tone: 'bg-aq-sky/70 text-aq-blue' },
+  { icon: RefreshCw, label: 'Filtre Değişim', href: '/hesabim/filtre-takibi', tone: 'bg-aq-cloud text-aq-blue' },
   { icon: MapPin, label: 'Adres Ekle', href: '/hesabim/adresler', tone: 'bg-aq-ice text-aq-muted' },
 ];
 
@@ -73,7 +73,7 @@ export default function CustomerDashboard() {
       icon: ShoppingBag,
       label: 'Toplam Sipariş',
       value: String(orders.length),
-      tone: 'bg-aq-sky text-aq-blue' as const,
+      tone: 'bg-aq-cloud text-aq-blue' as const,
     },
     {
       icon: Truck,
@@ -85,7 +85,7 @@ export default function CustomerDashboard() {
       icon: FilterIcon,
       label: 'Filtre Değişimine',
       value: nextFilterDays != null ? `${nextFilterDays} Gün` : '—',
-      tone: 'bg-aq-sky/70 text-aq-blue' as const,
+      tone: 'bg-aq-cloud text-aq-blue' as const,
     },
     {
       icon: Heart,
@@ -113,15 +113,15 @@ export default function CustomerDashboard() {
   return (
     <CustomerPageShell>
       <ScrollReveal>
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-aq-deep via-aq-navy to-aq-blue p-6 sm:p-8 mb-6 sm:mb-8">
-          <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-aq-aqua/20 blur-2xl" />
-          <div className="absolute -left-6 bottom-0 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
+        <div className="relative isolate overflow-hidden rounded-3xl bg-aq-ink p-6 sm:p-8 mb-6 sm:mb-8">
+          <img src="/images/lifestyle/hero-lake.jpg" alt="" aria-hidden className="absolute inset-0 -z-20 h-full w-full object-cover object-[60%_center]" />
+          <div className="absolute inset-0 -z-10 bg-[linear-gradient(100deg,rgba(11,37,64,0.92)_0%,rgba(11,37,64,0.7)_55%,rgba(11,37,64,0.35)_100%)]" />
           <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-aq-aqua/90 mb-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-aq-mist mb-2">
                 Hesabım
               </p>
-              <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-[-0.02em]">
                 Merhaba, {firstName}
               </h1>
               <p className="text-sm text-white/75 mt-1.5 max-w-md leading-relaxed">
@@ -160,7 +160,7 @@ export default function CustomerDashboard() {
             <Link
               key={action.label}
               to={action.href}
-              className="flex items-center gap-3 p-3.5 sm:p-4 bg-white border border-aq-border/60 rounded-2xl hover:border-aq-blue/40 hover:shadow-[0_4px_16px_rgba(18,134,216,0.08)] transition-all group"
+              className="flex items-center gap-3 p-3.5 sm:p-4 bg-white rounded-2xl hover:border-aq-blue/40 transition-all group shadow-soft"
             >
               <div className={cn('w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center', action.tone)}>
                 <action.icon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -205,8 +205,8 @@ export default function CustomerDashboard() {
                       className="flex items-center justify-between gap-3 px-5 py-3.5 hover:bg-aq-ice/60 transition-colors"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 bg-aq-sky/70 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Package className="w-4 h-4 text-aq-blue" />
+                        <div className="w-9 h-9 bg-aq-cloud rounded-xl flex items-center justify-center flex-shrink-0">
+                          <Package className="w-4 h-4 text-aq-ink" />
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-aq-text truncate">{order.orderNo}</p>
@@ -240,7 +240,7 @@ export default function CustomerDashboard() {
                       key={`${act.detail}-${i}`}
                       className="flex items-start gap-3 p-3 rounded-xl hover:bg-aq-ice transition-colors"
                     >
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 bg-aq-sky text-aq-blue">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 bg-aq-cloud text-aq-blue">
                         <act.icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -298,7 +298,7 @@ export default function CustomerDashboard() {
               <div className="px-4 pb-4">
                 <Link
                   to="/servis-randevusu"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold text-aq-blue border border-aq-border/60 rounded-xl hover:border-aq-blue hover:bg-aq-sky/40 transition-all"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold text-aq-blue border border-aq-border/60 rounded-xl hover:border-aq-blue hover:bg-aq-cloud transition-all"
                 >
                   <Wrench className="w-3.5 h-3.5" /> Yeni Servis Talebi
                 </Link>
@@ -407,7 +407,7 @@ export default function CustomerDashboard() {
               </p>
               <Link
                 to="/filtre-aboneligi"
-                className="inline-flex items-center gap-1.5 bg-white/15 border border-white/30 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-white/25 transition-all"
+                className="inline-flex items-center gap-1.5 bg-white/15 border border-white/30 text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-white/25 transition-all"
               >
                 Keşfet <ChevronRight className="w-3 h-3" />
               </Link>
@@ -421,7 +421,7 @@ export default function CustomerDashboard() {
           <CustomerCard padding={false} className="overflow-hidden">
             <div className="flex items-end justify-between gap-3 px-5 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-aq-border/50">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-aq-blue mb-1">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-aq-muted mb-1">
                   Öneriler
                 </p>
                 <h2 className="text-lg sm:text-xl font-bold text-aq-text tracking-tight">

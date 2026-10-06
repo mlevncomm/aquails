@@ -89,12 +89,12 @@ export default function CustomerReferralPage() {
 
       <div className="grid grid-cols-2 gap-3 mb-6">
         <CustomerCard className="text-center !p-4">
-          <Users className="w-6 h-6 text-aq-blue mx-auto mb-2" />
+          <Users className="w-6 h-6 text-aq-ink mx-auto mb-2" />
           <p className="text-xl font-semibold text-aq-text tabular-nums">{data.invitedCount}</p>
           <p className="text-xs text-aq-muted">Davet Edilen</p>
         </CustomerCard>
         <CustomerCard className="text-center !p-4">
-          <Gift className="w-6 h-6 text-aq-blue mx-auto mb-2" />
+          <Gift className="w-6 h-6 text-aq-ink mx-auto mb-2" />
           <p className="text-xl font-semibold text-aq-text tabular-nums">
             {data.earnedCoupons.reduce((s, c) => s + c.value, 0)} puan
           </p>

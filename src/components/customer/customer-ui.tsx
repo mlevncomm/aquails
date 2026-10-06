@@ -46,7 +46,7 @@ export function CustomerPageHeader({
       )}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-aq-text tracking-tight">{title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-aq-ink tracking-[-0.02em]">{title}</h1>
           {description && (
             <p className="text-aq-muted mt-1 text-sm leading-relaxed">{description}</p>
           )}
@@ -69,7 +69,7 @@ export function CustomerCard({
   return (
     <div
       className={cn(
-        'bg-white rounded-2xl border border-aq-border/60 min-w-0 shadow-[0_1px_2px_rgba(7,24,39,0.03)]',
+        'bg-white rounded-3xl min-w-0 shadow-soft',
         padding && 'p-5 sm:p-6',
         className,
       )}
@@ -172,17 +172,17 @@ export function CustomerButton({
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'dark';
 }) {
   const variants = {
-    primary: 'bg-aq-blue hover:bg-aq-deep text-white',
-    dark: 'bg-aq-deep hover:bg-aq-navy text-white',
+    primary: 'bg-aq-ink hover:bg-aq-ink-soft text-white',
+    dark: 'bg-aq-ink hover:bg-aq-ink-soft text-white',
     secondary:
-      'bg-white border border-aq-border/60 text-aq-muted hover:border-aq-blue hover:text-aq-blue',
+      'bg-white border border-aq-ink/15 text-aq-ink hover:border-aq-ink',
     danger: 'bg-red-600 hover:bg-red-700 text-white',
     ghost: 'text-aq-muted hover:bg-aq-ice hover:text-aq-text',
   };
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none min-h-[40px]',
+        'inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none min-h-[40px]',
         variants[variant],
         className,
       )}
@@ -206,8 +206,8 @@ export function CustomerEmpty({
 }) {
   return (
     <div className="flex flex-col items-center justify-center text-center py-14 sm:py-16 px-4">
-      <div className="w-14 h-14 rounded-2xl bg-aq-sky/70 flex items-center justify-center mb-4 border border-aq-border/40">
-        <Icon className="w-6 h-6 text-aq-blue" />
+      <div className="w-14 h-14 rounded-full bg-aq-cloud flex items-center justify-center mb-4">
+        <Icon className="w-6 h-6 text-aq-ink" />
       </div>
       <p className="text-base font-semibold text-aq-text">{title}</p>
       <p className="text-sm text-aq-muted mt-1.5 max-w-sm leading-relaxed">{message}</p>
@@ -228,7 +228,7 @@ export function CustomerLoading({
   if (variant === 'spinner') {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16 text-aq-muted">
-        <Loader2 className="w-6 h-6 animate-spin text-aq-blue" />
+        <Loader2 className="w-6 h-6 animate-spin text-aq-ink" />
         <p className="text-sm">{label}</p>
       </div>
     );
@@ -237,7 +237,7 @@ export function CustomerLoading({
   return (
     <div className="space-y-3 animate-pulse" aria-busy="true" aria-label={label}>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="h-16 rounded-2xl bg-white border border-aq-border/40" />
+        <div key={i} className="h-16 rounded-2xl bg-white shadow-soft" />
       ))}
     </div>
   );
@@ -272,10 +272,10 @@ export function CustomerChip({
     <button
       type="button"
       className={cn(
-        'inline-flex items-center px-3.5 py-2 rounded-xl text-[13px] font-medium transition-colors min-h-[36px]',
+        'inline-flex items-center px-4 py-2 rounded-full text-[13px] font-semibold transition-colors min-h-[36px]',
         active
-          ? 'bg-aq-deep text-white'
-          : 'bg-white border border-aq-border/60 text-aq-muted hover:border-aq-blue hover:text-aq-blue',
+          ? 'bg-aq-ink text-white'
+          : 'bg-white border border-aq-ink/15 text-aq-ink/70 hover:border-aq-ink hover:text-aq-ink',
         className,
       )}
       {...props}
@@ -299,7 +299,7 @@ export function CustomerBadge({
     success: 'bg-emerald-50 text-emerald-700',
     warning: 'bg-amber-50 text-amber-700',
     danger: 'bg-red-50 text-red-600',
-    info: 'bg-aq-sky text-aq-blue',
+    info: 'bg-aq-cloud text-aq-blue',
   };
   return (
     <span
@@ -326,7 +326,7 @@ export function CustomerStatCard({
   tone?: 'info' | 'success' | 'warning' | 'neutral';
 }) {
   const tones = {
-    info: 'bg-aq-sky text-aq-blue',
+    info: 'bg-aq-cloud text-aq-blue',
     success: 'bg-emerald-50 text-emerald-600',
     warning: 'bg-amber-50 text-amber-600',
     neutral: 'bg-aq-ice text-aq-muted',

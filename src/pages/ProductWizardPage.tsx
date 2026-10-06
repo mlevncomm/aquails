@@ -16,6 +16,7 @@ import { getRecommendations, type WizardAnswers, type Recommendation } from '@/s
 import { loadPublicProducts } from '@/services/productService';
 import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
+import { PageHero } from '@/components/PageHero';
 
 type StepKey = keyof WizardAnswers;
 
@@ -210,17 +211,14 @@ export default function ProductWizardPage() {
         canonical="/urun-secim-sihirbazi"
       />
 
-      <section className="relative bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep py-12 md:py-16 overflow-hidden">
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="absolute top-10 right-20 w-64 h-64 bg-aq-aqua rounded-full blur-3xl" />
-        </div>
-        <div className="page-container relative text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-white">
-            Size En Uygun Su Arıtma Cihazını Birlikte Seçelim
-          </h1>
-          <p className="text-sm text-white/70 mt-2 max-w-lg mx-auto">{subtitle}</p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Ürün seçim sihirbazı"
+        title="Size En Uygun Su Arıtma Cihazını Birlikte Seçelim"
+        description={subtitle}
+        breadcrumbs={[{ label: 'Sihirbaz' }]}
+        image="/images/lifestyle/drinking-water.jpg"
+        imagePosition="center 30%"
+      />
 
       <div className="max-w-[720px] mx-auto px-4 sm:px-6 py-10">
         {!showingResults && (
@@ -265,7 +263,7 @@ export default function ProductWizardPage() {
                       className={cn(
                         'flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition-all',
                         isSelected
-                          ? 'border-aq-deep bg-aq-sky'
+                          ? 'border-aq-deep bg-aq-cloud'
                           : 'border-aq-border/60 bg-white hover:border-aq-blue/40',
                         (advancing || catalogLoading) && 'opacity-70',
                       )}
@@ -273,7 +271,7 @@ export default function ProductWizardPage() {
                       <div
                         className={cn(
                           'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
-                          isSelected ? 'bg-aq-aqua' : 'bg-aq-sky',
+                          isSelected ? 'bg-aq-aqua' : 'bg-aq-cloud',
                         )}
                       >
                         <Icon className={cn('w-5 h-5', isSelected ? 'text-aq-text' : 'text-aq-blue')} />
@@ -302,7 +300,7 @@ export default function ProductWizardPage() {
                   type="button"
                   onClick={handleNext}
                   disabled={!selectedValue || advancing || catalogLoading}
-                  className="flex items-center gap-2 bg-aq-blue text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-aq-deep transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 bg-aq-ink text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-aq-ink-soft transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {catalogLoading ? (
                     <>
@@ -328,8 +326,8 @@ export default function ProductWizardPage() {
               transition={{ duration: 0.35 }}
             >
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-aq-sky rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-8 h-8 text-aq-blue" />
+                <div className="w-16 h-16 bg-aq-cloud rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 text-aq-ink" />
                 </div>
                 <h2 className="text-xl font-semibold text-aq-text">Size Özel Önerilerimiz</h2>
                 <p className="text-sm text-aq-muted mt-2">
@@ -341,9 +339,9 @@ export default function ProductWizardPage() {
 
               {recommendations?.map((rec, i) => (
                 <ScrollReveal key={rec.product.id} delay={i * 0.08}>
-                  <div className="bg-white border border-aq-border/60 rounded-2xl p-5 mb-4 hover:shadow-sm transition-all">
+                  <div className="bg-white rounded-2xl p-5 mb-4 hover: transition-all shadow-soft">
                     <div className="flex items-start gap-4">
-                      <div className="w-20 h-20 bg-aq-sky rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center">
+                      <div className="w-20 h-20 bg-aq-cloud rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center">
                         <img
                           src={rec.product.images?.[0] || '/images/products/placeholder.jpg'}
                           alt={rec.product.name}
@@ -355,7 +353,7 @@ export default function ProductWizardPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <span className="text-xs font-medium text-aq-blue bg-aq-sky px-2 py-0.5 rounded-full">
+                          <span className="text-xs font-medium text-aq-blue bg-aq-cloud px-2 py-0.5 rounded-full">
                             %{rec.score} Uyum
                           </span>
                           {rec.tags.map((t) => (
@@ -370,14 +368,14 @@ export default function ProductWizardPage() {
                         <div className="flex flex-wrap gap-2 mt-3">
                           <Link
                             to={`/urun/${rec.product.slug}`}
-                            className="flex items-center gap-1.5 bg-aq-blue text-white text-xs font-semibold px-4 py-2 rounded-xl hover:bg-aq-deep transition-all"
+                            className="flex items-center gap-1.5 bg-aq-ink text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-aq-ink-soft transition-all"
                           >
                             <ShoppingCart className="w-3 h-3" /> Ürünü İncele
                           </Link>
                           <button
                             type="button"
                             onClick={() => openWhatsApp(getProductInquiryMessage(rec.product.name))}
-                            className="flex items-center gap-1.5 border border-aq-border/60 text-aq-muted text-xs font-semibold px-4 py-2 rounded-xl hover:border-aq-blue hover:text-aq-blue transition-all"
+                            className="flex items-center gap-1.5 border border-aq-border/60 text-aq-muted text-xs font-semibold px-4 py-2 rounded-full hover:border-aq-blue hover:text-aq-blue transition-all"
                           >
                             <MessageCircle className="w-3 h-3" /> WhatsApp
                           </button>
@@ -398,7 +396,7 @@ export default function ProductWizardPage() {
                 </button>
                 <Link
                   to="/urunler"
-                  className="flex items-center gap-2 bg-aq-blue text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-aq-deep transition-all"
+                  className="flex items-center gap-2 bg-aq-ink text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-aq-ink-soft transition-all"
                 >
                   Tüm Ürünler <ArrowRight className="w-4 h-4" />
                 </Link>

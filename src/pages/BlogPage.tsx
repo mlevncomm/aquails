@@ -5,11 +5,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { SEO } from '@/components/SEO';
+import { PageHero } from '@/components/PageHero';
 import { getPublishedBlogPosts, type PublicBlogPost } from '@/services/blogService';
 
 const categoryColors: Record<string, string> = {
-  'Teknik Bilgiler': 'bg-aq-sky text-aq-blue',
-  'Bakım Önerileri': 'bg-aq-sky text-aq-blue',
+  'Teknik Bilgiler': 'bg-aq-cloud text-aq-blue',
+  'Bakım Önerileri': 'bg-aq-cloud text-aq-blue',
   'Sağlıklı Yaşam': 'bg-purple-50 text-purple-600',
   'Rehber': 'bg-amber-50 text-amber-600',
 };
@@ -46,24 +47,23 @@ export default function BlogPage() {
         canonical="/blog"
       />
       <PageLayout>
-        <section className="relative bg-gradient-to-br from-aq-ice via-white to-aq-sky/40 py-12 md:py-16">
-          <div className="page-container">
-            <div className="flex items-center gap-2 text-[13px] text-aq-muted mb-3">
-              <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link><span>/</span><span className="text-aq-muted">Blog</span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-aq-text">Aquails Bilgi Merkezi</h1>
-            <p className="text-sm text-aq-muted mt-2 max-w-lg">Su arıtma teknolojileri, bakım ipuçları ve sağlıklı yaşam rehberi.</p>
-            <div className="relative max-w-md mt-6">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-aq-muted" />
-              <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Blog yazısı ara..." className="w-full pl-9 pr-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-white focus:outline-none focus:border-aq-blue" />
-            </div>
+        <PageHero
+          eyebrow="Blog"
+          title="Aquails Bilgi Merkezi"
+          description="Su arıtma teknolojileri, bakım ipuçları ve sağlıklı yaşam rehberi."
+          breadcrumbs={[{ label: 'Blog' }]}
+          image="/images/lifestyle/pour-glass.jpg"
+        >
+          <div className="relative max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-aq-muted" />
+            <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Blog yazısı ara..." className="w-full pl-10 pr-4 py-3 text-sm rounded-full bg-white text-aq-ink ring-1 ring-aq-border focus:outline-none focus:ring-2 focus:ring-aq-ink/20" />
           </div>
-        </section>
+        </PageHero>
 
         <div className="page-container py-8">
           <div className="flex flex-wrap gap-2 mb-8">
             {categories.map((c) => (
-              <button key={c} onClick={() => setActiveCat(c)} className={`px-4 py-2 text-sm font-semibold rounded-xl border transition-all ${activeCat === c ? 'bg-aq-deep text-white border-aq-deep' : 'border-aq-border/60 text-aq-muted hover:bg-aq-sky hover:text-aq-blue'}`}>
+              <button key={c} onClick={() => setActiveCat(c)} className={`px-4 py-2 text-sm font-semibold rounded-full border transition-all ${activeCat === c ? 'bg-aq-ink text-white border-aq-ink' : 'border-aq-ink/15 text-aq-ink/70 hover:border-aq-ink hover:text-aq-ink'}`}>
                 {c}
               </button>
             ))}
@@ -77,7 +77,7 @@ export default function BlogPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((post, i) => (
                 <motion.article key={post.slug} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <Link to={`/blog/${post.slug}`} className="block group bg-white border border-aq-border/60 rounded-2xl overflow-hidden transition-all duration-300 h-full">
+                  <Link to={`/blog/${post.slug}`} className="block group bg-white rounded-2xl overflow-hidden transition-all duration-300 h-full shadow-soft">
                     <div className="aspect-[16/9] overflow-hidden bg-aq-ice">
                       <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                     </div>
@@ -104,10 +104,12 @@ export default function BlogPage() {
           )}
 
           <ScrollReveal className="mt-12">
-            <div className="bg-gradient-to-r from-aq-deep to-aq-navy rounded-2xl p-8 text-center text-white">
-              <h3 className="text-xl font-semibold mb-2">Filtre Değişim Hatırlatıcısı</h3>
+            <div className="relative isolate overflow-hidden rounded-3xl bg-aq-ink px-6 py-12 text-center text-white sm:px-10">
+              <img src="/images/filter-subscription.jpg" alt="" aria-hidden className="absolute inset-0 -z-20 h-full w-full object-cover" loading="lazy" />
+              <div className="absolute inset-0 -z-10 bg-aq-ink/85" />
+              <h3 className="text-2xl font-bold tracking-[-0.02em] mb-2">Filtre Değişim Hatırlatıcısı</h3>
               <p className="text-sm text-white/70 mb-5">Filtre değişim tarihlerinizi kaçırmayın, size hatırlatalım.</p>
-              <Link to="/filtre-aboneligi" className="inline-flex items-center gap-2 bg-aq-blue text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all">Aboneliği İncele <ArrowRight className="w-4 h-4" /></Link>
+              <Link to="/filtre-aboneligi" className="inline-flex items-center gap-2 bg-aq-mist text-aq-ink px-6 py-3 rounded-full text-sm font-semibold hover:bg-white transition-all">Aboneliği İncele <ArrowRight className="w-4 h-4" /></Link>
             </div>
           </ScrollReveal>
         </div>

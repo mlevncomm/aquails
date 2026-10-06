@@ -61,7 +61,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
   if (!hasHydrated && (isProtected || isAuthRoute)) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-white">
-        <Loader2 className="w-7 h-7 animate-spin text-aq-blue" />
+        <Loader2 className="w-7 h-7 animate-spin text-aq-ink" />
       </div>
     );
   }
@@ -69,7 +69,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
   if (hasHydrated && isProtected && !isAuthenticated) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-white">
-        <Loader2 className="w-7 h-7 animate-spin text-aq-blue" />
+        <Loader2 className="w-7 h-7 animate-spin text-aq-ink" />
       </div>
     );
   }
@@ -77,7 +77,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
   if (hasHydrated && isAdminRoute && !isAdmin) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-white">
-        <Loader2 className="w-7 h-7 animate-spin text-aq-blue" />
+        <Loader2 className="w-7 h-7 animate-spin text-aq-ink" />
       </div>
     );
   }

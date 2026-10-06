@@ -8,7 +8,7 @@ type ButtonSize = 'sm' | 'md' | 'lg';
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-white text-aq-deep hover:bg-aq-sky',
+    'bg-white text-aq-deep hover:bg-aq-cloud',
   secondary:
     'bg-aq-text text-white hover:bg-aq-deep',
   ghost:
@@ -16,7 +16,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   outline:
     'border border-aq-border/60 text-aq-text hover:border-aq-deep bg-white',
   dark:
-    'bg-aq-blue text-white hover:bg-aq-deep',
+    'bg-aq-ink text-white hover:bg-aq-ink-soft',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -46,7 +46,7 @@ export function AquailsButton({
   ...props
 }: AquailsButtonProps) {
   const classes = cn(
-    'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200',
+    'inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-200',
     variantClasses[variant],
     sizeClasses[size],
     className,

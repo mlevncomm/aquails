@@ -455,7 +455,7 @@ export default function AdminProductEditPage() {
       <form onSubmit={(e) => void handleSave(e)} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <AdminCard>
-            <h3 className="text-sm font-semibold text-aq-text mb-4">Temel Bilgiler</h3>
+            <h3 className="text-sm font-semibold text-aq-ink mb-4">Temel Bilgiler</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <AdminLabel>Ürün Adı</AdminLabel>
@@ -513,8 +513,8 @@ export default function AdminProductEditPage() {
 
           <AdminCard>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-aq-text">Teknik Özellikler</h3>
-              <button type="button" onClick={addSpec} className="flex items-center gap-1 text-xs text-aq-blue font-medium hover:underline">
+              <h3 className="text-sm font-semibold text-aq-ink">Teknik Özellikler</h3>
+              <button type="button" onClick={addSpec} className="flex items-center gap-1 text-xs text-aq-ink font-medium hover:underline">
                 <Plus className="w-3 h-3" /> Ekle
               </button>
             </div>
@@ -534,7 +534,7 @@ export default function AdminProductEditPage() {
 
         <div className="space-y-6">
           <AdminCard>
-            <h3 className="text-sm font-semibold text-aq-text mb-4">Fiyat & Stok</h3>
+            <h3 className="text-sm font-semibold text-aq-ink mb-4">Fiyat & Stok</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <AdminLabel>Fiyat — KDV Hariç (₺)</AdminLabel>
@@ -554,7 +554,7 @@ export default function AdminProductEditPage() {
               </div>
             </div>
             {form.price && (
-              <p className="text-xs text-aq-blue mt-3 bg-aq-sky px-3 py-2 rounded-lg">
+              <p className="text-xs text-aq-ink mt-3 bg-aq-cloud px-3 py-2 rounded-lg">
                 {siteTaxEnabled ? (
                   <>
                     Müşteri fiyatı (KDV dahil):{' '}
@@ -573,40 +573,40 @@ export default function AdminProductEditPage() {
               </p>
             )}
             <label className="flex items-center gap-2 text-sm text-aq-muted mt-4">
-              <input type="checkbox" checked={form.isActive} onChange={(e) => setFormField('isActive', e.target.checked)} className="w-4 h-4 accent-aq-deep" />
+              <input type="checkbox" checked={form.isActive} onChange={(e) => setFormField('isActive', e.target.checked)} className="w-4 h-4 accent-aq-ink" />
               Aktif
             </label>
           </AdminCard>
 
           <AdminCard>
-            <h3 className="text-sm font-semibold text-aq-text mb-3">Ürün Görselleri</h3>
+            <h3 className="text-sm font-semibold text-aq-ink mb-3">Ürün Görselleri</h3>
             <div className="space-y-3 mb-3">
               {sortedImages.map((img, index) => (
                 <div key={img.id} className="flex gap-2 items-center rounded-xl border border-aq-border/60 p-2">
                   <img
                     src={img.url}
                     alt={img.alt_text || form.name}
-                    className="w-16 h-16 rounded-lg object-cover bg-aq-ice"
+                    className="w-16 h-16 rounded-lg object-cover bg-aq-cloud"
                     onError={(e) => { (e.target as HTMLImageElement).src = '/images/products/placeholder.jpg'; }}
                   />
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-aq-muted truncate">{img.alt_text || `Görsel #${index + 1}`}</p>
                     {img.sort_order === 0 && (
-                      <span className="inline-flex items-center gap-1 text-[10px] text-aq-blue font-medium mt-1">
+                      <span className="inline-flex items-center gap-1 text-[10px] text-aq-ink font-medium mt-1">
                         <Star className="w-3 h-3" /> Ana görsel
                       </span>
                     )}
                   </div>
                   <div className="flex flex-col gap-1">
-                    <button type="button" disabled={busy} className="p-1 text-aq-muted hover:text-aq-blue disabled:opacity-40" onClick={() => void moveImage(index, -1)} aria-label="Yukarı">
+                    <button type="button" disabled={busy} className="p-1 text-aq-muted hover:text-aq-ink disabled:opacity-40" onClick={() => void moveImage(index, -1)} aria-label="Yukarı">
                       <ArrowUp className="w-3.5 h-3.5" />
                     </button>
-                    <button type="button" disabled={busy} className="p-1 text-aq-muted hover:text-aq-blue disabled:opacity-40" onClick={() => void moveImage(index, 1)} aria-label="Aşağı">
+                    <button type="button" disabled={busy} className="p-1 text-aq-muted hover:text-aq-ink disabled:opacity-40" onClick={() => void moveImage(index, 1)} aria-label="Aşağı">
                       <ArrowDown className="w-3.5 h-3.5" />
                     </button>
                   </div>
                   {img.sort_order !== 0 && (
-                    <button type="button" disabled={busy} className="p-1 text-aq-muted hover:text-aq-blue disabled:opacity-40" onClick={() => void makePrimary(img.id)} aria-label="Ana görsel yap">
+                    <button type="button" disabled={busy} className="p-1 text-aq-muted hover:text-aq-ink disabled:opacity-40" onClick={() => void makePrimary(img.id)} aria-label="Ana görsel yap">
                       <Star className="w-3.5 h-3.5" />
                     </button>
                   )}
@@ -625,7 +625,7 @@ export default function AdminProductEditPage() {
               </ul>
             )}
 
-            <label className="border-2 border-dashed border-aq-border/60 rounded-xl p-6 text-center block cursor-pointer hover:border-aq-blue/40 transition-colors">
+            <label className="border-2 border-dashed border-aq-border/60 rounded-xl p-6 text-center block cursor-pointer hover:border-aq-ink/40/40 transition-colors">
               <ImageIcon className="w-8 h-8 text-aq-muted/60 mx-auto mb-2" />
               <p className="text-xs text-aq-muted">
                 {uploadingImage

@@ -84,7 +84,7 @@ export default function ProductDetail() {
     return (
       <PageLayout>
         <div className="page-container py-20 flex justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-aq-blue" />
+          <Loader2 className="w-8 h-8 animate-spin text-aq-ink" />
         </div>
       </PageLayout>
     );
@@ -210,9 +210,9 @@ export default function ProductDetail() {
       {/* Breadcrumb */}
       <div className="page-container pt-6">
         <nav className="text-[13px] text-aq-muted">
-          <Link to="/" className="text-aq-blue hover:underline">Ana Sayfa</Link>
+          <Link to="/" className="text-aq-muted hover:text-aq-ink">Ana Sayfa</Link>
           <ChevronRight className="w-3 h-3 inline mx-1" />
-          <Link to="/urunler" className="text-aq-blue hover:underline">Ürünler</Link>
+          <Link to="/urunler" className="text-aq-muted hover:text-aq-ink">Ürünler</Link>
           <ChevronRight className="w-3 h-3 inline mx-1" />
           <span className="text-aq-muted">{product.category}</span>
           <ChevronRight className="w-3 h-3 inline mx-1" />
@@ -230,11 +230,11 @@ export default function ProductDetail() {
 
           {/* Right - Info */}
           <ScrollReveal x={20} delay={0.1}>
-            <span className="inline-block bg-aq-sky text-aq-blue text-xs font-medium px-3 py-1 rounded-md">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-aq-muted">
               {product.category}
             </span>
 
-            <h1 className="text-2xl md:text-3xl font-bold text-aq-text mt-3 leading-tight">
+            <h1 className="text-2xl md:text-[2.1rem] font-bold tracking-[-0.02em] text-aq-ink mt-2 leading-tight">
               {product.name}
             </h1>
 
@@ -260,7 +260,7 @@ export default function ProductDetail() {
                   Son {product.stock} adet - Hemen sipariş verin
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-aq-sky text-aq-blue px-2.5 py-1 rounded-md">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full">
                   <Check className="w-3 h-3" />
                   Stokta ({product.stock} adet)
                 </span>
@@ -273,8 +273,8 @@ export default function ProductDetail() {
 
             <div className="flex flex-wrap gap-2 mt-4">
               {product.features.map((f) => (
-                <span key={f} className="inline-flex items-center gap-1.5 bg-aq-ice border border-aq-border/60 rounded-lg px-3 py-1.5 text-[13px] font-medium text-aq-text">
-                  <Check className="w-3 h-3 text-aq-aqua" />
+                <span key={f} className="inline-flex items-center gap-1.5 bg-aq-cloud rounded-full px-3 py-1.5 text-[13px] font-medium text-aq-ink">
+                  <Check className="w-3 h-3 text-aq-ink" />
                   {f}
                 </span>
               ))}
@@ -291,41 +291,44 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 mt-6">
+            <div className="mt-6 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={isOutOfStock}
+                className={cn(
+                  'flex items-center justify-center gap-2 rounded-full py-4 text-sm font-semibold transition-all active:scale-[0.98]',
+                  isOutOfStock
+                    ? 'bg-aq-cloud text-aq-muted cursor-not-allowed'
+                    : 'bg-aq-ink text-white hover:bg-aq-ink-soft',
+                )}
+              >
+                <ShoppingCart className="w-4 h-4" />
+                {isOutOfStock ? 'Stokta Yok' : 'Sepete Ekle'}
+              </button>
               <button
                 type="button"
                 disabled={isOutOfStock}
                 onClick={handleBuyNow}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-2 border border-aq-border/60 py-3.5 sm:py-4 rounded-xl font-semibold transition-all',
+                  'flex items-center justify-center gap-2 rounded-full py-4 text-sm font-semibold transition-all active:scale-[0.98]',
                   isOutOfStock
-                    ? 'border-gray-200 text-gray-300 cursor-not-allowed'
-                    : 'text-aq-text hover:border-aq-blue hover:text-aq-blue active:scale-[0.98]'
+                    ? 'bg-aq-cloud text-aq-muted cursor-not-allowed'
+                    : 'bg-aq-mist text-aq-ink hover:bg-aq-mist-strong',
                 )}
               >
-                <Zap className="w-5 h-5" />
+                <Zap className="w-4 h-4" />
                 Hemen Al
               </button>
+            </div>
+            <div className="mt-3 flex gap-2.5">
               <button
-                onClick={handleAddToCart}
-                disabled={isOutOfStock}
-                aria-label={isOutOfStock ? 'Stokta Yok' : 'Sepete Ekle'}
-                title={isOutOfStock ? 'Stokta Yok' : 'Sepete Ekle'}
-                className={cn(
-                  'w-full sm:w-14 h-12 sm:h-14 flex items-center justify-center rounded-full border transition-all active:scale-[0.96]',
-                  isOutOfStock
-                    ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'border-aq-border/60 text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-sky'
-                )}
-              >
-                <ShoppingCart className="w-5 h-5" />
-              </button>
-              <button
+                type="button"
                 onClick={() => openWhatsApp(getProductInquiryMessage(product.name))}
-                className="flex-1 flex items-center justify-center gap-2 border-2 border-aq-aqua text-aq-aqua py-3.5 sm:py-4 rounded-xl font-semibold hover:bg-aq-sky active:scale-[0.98] transition-all"
+                className="flex flex-1 items-center justify-center gap-2 rounded-full border border-aq-ink/15 py-3 text-sm font-semibold text-aq-ink transition-colors hover:border-emerald-500 hover:text-emerald-700"
               >
                 <MessageCircle className="w-4 h-4" />
-                WhatsApp
+                WhatsApp ile Sor
               </button>
               <button
                 type="button"
@@ -335,24 +338,26 @@ export default function ProductDetail() {
                 }}
                 aria-label={isComparing ? 'Karşılaştırmadan çıkar' : 'Karşılaştırmaya ekle'}
                 className={cn(
-                  'w-full sm:w-14 h-12 sm:h-14 flex items-center justify-center border rounded-xl transition-all',
+                  'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border transition-all',
                   isComparing
-                    ? 'border-aq-blue bg-aq-sky text-aq-blue'
-                    : 'border-aq-border/60 text-aq-muted hover:border-aq-deep'
+                    ? 'border-aq-ink bg-aq-ink text-white'
+                    : 'border-aq-ink/15 text-aq-muted hover:border-aq-ink',
                 )}
               >
-                <GitCompare className="w-5 h-5" />
+                <GitCompare className="w-[18px] h-[18px]" />
               </button>
               <button
+                type="button"
                 onClick={() => toggleFavorite(product.id)}
+                aria-label={isFavorited ? 'Favorilerden çıkar' : 'Favorilere ekle'}
                 className={cn(
-                  'w-full sm:w-14 h-12 sm:h-14 flex items-center justify-center border rounded-xl transition-all',
+                  'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border transition-all',
                   isFavorited
                     ? 'border-aqua-danger bg-aqua-danger/5 text-aqua-danger'
-                    : 'border-aq-border/60 text-aq-muted hover:border-aq-deep'
+                    : 'border-aq-ink/15 text-aq-muted hover:border-aq-ink',
                 )}
               >
-                <Heart className={cn('w-5 h-5', isFavorited && 'fill-aqua-danger')} />
+                <Heart className={cn('w-[18px] h-[18px]', isFavorited && 'fill-aqua-danger')} />
               </button>
             </div>
 
@@ -436,10 +441,10 @@ export default function ProductDetail() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-4 bg-aq-sky border border-aq-aqua/30 rounded-xl p-4 flex items-center gap-3"
+                className="mt-4 bg-aq-cloud border border-aq-aqua/30 rounded-xl p-4 flex items-center gap-3"
               >
                 <div className="w-8 h-8 bg-aq-aqua/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Check className="w-4 h-4 text-aq-blue" />
+                  <Check className="w-4 h-4 text-aq-ink" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-aq-blue">Bildirim kaydınız alındı</p>
@@ -459,8 +464,8 @@ export default function ProductDetail() {
                   key={item.label}
                   className="rounded-2xl bg-aq-ice border border-aq-border/60 px-3 py-3 flex flex-col gap-1.5"
                 >
-                  <div className="w-8 h-8 rounded-xl bg-white border border-aq-border/60 flex items-center justify-center">
-                    <item.icon className="w-4 h-4 text-aq-blue" />
+                  <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-soft">
+                    <item.icon className="w-4 h-4 text-aq-ink" />
                   </div>
                   <p className="text-[12px] font-semibold text-aq-text leading-tight">{item.label}</p>
                   <p className="text-[11px] text-aq-muted">{item.value}</p>
@@ -498,7 +503,7 @@ export default function ProductDetail() {
                     'snap-start flex-shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 sm:px-4 py-2 text-[12px] sm:text-[13px] font-semibold transition-all',
                     isActive
                       ? 'bg-aq-deep text-white'
-                      : 'bg-aq-ice text-aq-muted hover:text-aq-text hover:bg-aq-sky',
+                      : 'bg-aq-ice text-aq-muted hover:text-aq-text hover:bg-aq-cloud',
                   )}
                 >
                   <span>{tab.label}</span>
@@ -612,26 +617,26 @@ export default function ProductDetail() {
                 className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5"
               >
                 <div className="rounded-2xl border border-aq-border/80 bg-aq-ice/40 p-5 sm:p-6 sm:col-span-3 md:col-span-1">
-                  <div className="w-9 h-9 rounded-xl bg-white border border-aq-border/60 flex items-center justify-center mb-3">
-                    <Truck className="w-4 h-4 text-aq-blue" />
+                  <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center mb-3 shadow-soft">
+                    <Truck className="w-4 h-4 text-aq-ink" />
                   </div>
                   <h4 className="text-sm font-semibold text-aq-text mb-1.5">Kargo</h4>
                   <p className="text-[13px] text-aq-muted leading-relaxed">
                     1–3 iş günü içinde kargoya verilir. İstanbul içi aynı gün; diğer iller 2–4 iş günü.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-aq-border/80 bg-white p-5 sm:p-6">
+                <div className="rounded-2xl bg-white p-5 sm:p-6 shadow-soft">
                   <div className="w-9 h-9 rounded-xl bg-aq-ice border border-aq-border/60 flex items-center justify-center mb-3">
-                    <Wrench className="w-4 h-4 text-aq-blue" />
+                    <Wrench className="w-4 h-4 text-aq-ink" />
                   </div>
                   <h4 className="text-sm font-semibold text-aq-text mb-1.5">Kurulum</h4>
                   <p className="text-[13px] text-aq-muted leading-relaxed">
                     Profesyonel kurulum ücretsizdir. Ekibimiz montajı yapar ve cihazı çalıştırır.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-aq-border/80 bg-white p-5 sm:p-6">
+                <div className="rounded-2xl bg-white p-5 sm:p-6 shadow-soft">
                   <div className="w-9 h-9 rounded-xl bg-aq-ice border border-aq-border/60 flex items-center justify-center mb-3">
-                    <Shield className="w-4 h-4 text-aq-blue" />
+                    <Shield className="w-4 h-4 text-aq-ink" />
                   </div>
                   <h4 className="text-sm font-semibold text-aq-text mb-1.5">İade</h4>
                   <p className="text-[13px] text-aq-muted leading-relaxed">
@@ -673,7 +678,7 @@ export default function ProductDetail() {
                   </div>
                   <button
                     type="button"
-                    className="w-full sm:w-auto border border-aq-border/60 text-aq-text px-5 py-2.5 rounded-xl text-[13px] font-semibold hover:border-aq-blue hover:text-aq-blue transition-all"
+                    className="w-full sm:w-auto border border-aq-ink/15 text-aq-ink px-5 py-2.5 rounded-full text-[13px] font-semibold hover:border-aq-ink transition-all"
                   >
                     Yorum Yaz
                   </button>
@@ -683,7 +688,7 @@ export default function ProductDetail() {
                   {reviews.map((review) => (
                     <div key={review.id} className="py-6 first:pt-0">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-aq-sky rounded-full flex items-center justify-center">
+                        <div className="w-9 h-9 bg-aq-cloud rounded-full flex items-center justify-center">
                           <span className="text-sm font-semibold text-aq-blue">{review.name[0]}</span>
                         </div>
                         <div className="min-w-0 flex-1">
@@ -718,7 +723,7 @@ export default function ProductDetail() {
               >
                 <div>
                   <h4 className="text-sm font-semibold text-aq-text flex items-center gap-2 mb-4">
-                    <HelpCircle className="w-4 h-4 text-aq-blue" />
+                    <HelpCircle className="w-4 h-4 text-aq-ink" />
                     Soru Sor
                   </h4>
                   {questionSubmitted ? (
@@ -743,7 +748,7 @@ export default function ProductDetail() {
                       />
                       <button
                         type="submit"
-                        className="inline-flex items-center gap-2 border border-aq-border/60 text-aq-text px-5 py-2.5 rounded-xl text-[13px] font-semibold hover:border-aq-blue hover:text-aq-blue transition-all"
+                        className="inline-flex items-center gap-2 border border-aq-ink/15 text-aq-ink px-5 py-2.5 rounded-full text-[13px] font-semibold hover:border-aq-ink transition-all"
                       >
                         <Send className="w-4 h-4" />
                         Soruyu Gönder
@@ -757,7 +762,7 @@ export default function ProductDetail() {
                     {publicQuestions.map((q) => (
                       <div key={q.id} className="py-5 first:pt-0">
                         <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 bg-aq-sky rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 bg-aq-cloud rounded-full flex items-center justify-center flex-shrink-0">
                             <span className="text-xs font-semibold text-aq-blue">{q.customerName[0]}</span>
                           </div>
                           <div className="flex-1 min-w-0">
@@ -792,7 +797,7 @@ export default function ProductDetail() {
       {relatedProducts.length > 0 && (
         <section className="page-container pb-20">
           <h2 className="text-xl md:text-2xl font-bold text-aq-text mb-6">Benzer Ürünler</h2>
-          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" staggerDelay={0.08}>
+          <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-x-3 gap-y-7 sm:gap-x-5 sm:gap-y-9" staggerDelay={0.08}>
             {relatedProducts.map((rp) => (
               <StaggerItem key={rp.id}>
                 <ProductCard product={rp} />
