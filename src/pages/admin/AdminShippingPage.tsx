@@ -84,8 +84,8 @@ export default function AdminShippingPage() {
 
       <form onSubmit={(e) => void handleSave(e)}>
         <AdminCard className="mb-6">
-          <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
-            <Truck className="w-4 h-4 text-aq-blue" />Genel
+          <h3 className="text-sm font-semibold text-aq-ink mb-4 flex items-center gap-2">
+            <Truck className="w-4 h-4 text-aq-ink" />Genel
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
             <div>
@@ -101,14 +101,14 @@ export default function AdminShippingPage() {
 
         <AdminCard className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-aq-text">Kargo Yöntemleri</h3>
+            <h3 className="text-sm font-semibold text-aq-ink">Kargo Yöntemleri</h3>
             <AdminButton type="button" variant="ghost" onClick={addMethod} className="text-xs min-h-0 py-1.5 px-3">
               <Plus className="w-3.5 h-3.5" />Ekle
             </AdminButton>
           </div>
           <div className="space-y-4">
             {methods.map((m, idx) => (
-              <div key={m.id} className="grid grid-cols-1 sm:grid-cols-5 gap-3 p-4 bg-aq-ice rounded-xl border border-aq-border/60">
+              <div key={m.id} className="grid grid-cols-1 sm:grid-cols-5 gap-3 p-4 bg-aq-cloud rounded-xl border border-aq-border/60">
                 <div><AdminLabel>Ad</AdminLabel><AdminInput value={m.label} onChange={(e) => updateMethod(idx, 'label', e.target.value)} /></div>
                 <div><AdminLabel>Açıklama</AdminLabel><AdminInput value={m.desc} onChange={(e) => updateMethod(idx, 'desc', e.target.value)} /></div>
                 <div><AdminLabel>Fiyat (₺)</AdminLabel><AdminInput type="number" value={m.price} onChange={(e) => updateMethod(idx, 'price', Number(e.target.value))} /></div>

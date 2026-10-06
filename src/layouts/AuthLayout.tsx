@@ -1,34 +1,61 @@
 import { Outlet, Link } from 'react-router';
+import { Check } from 'lucide-react';
 import { BrandLogo } from '@/components/BrandLogo';
 
+const perks = ['Siparişlerinizi tek yerden takip edin', 'Filtre değişim hatırlatmaları alın', 'Size özel kampanyalardan yararlanın'];
+
+/** Split auth screen: brand photo panel on large screens, form column everywhere. */
 export function AuthLayout() {
   return (
-    <div className="relative min-h-[100dvh] w-full max-w-[100vw] overflow-x-hidden flex items-center justify-center p-5 sm:p-8 bg-[#F7FBFE]">
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_10%_-10%,rgba(32,211,242,0.18),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_95%_10%,rgba(18,134,216,0.16),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_110%,rgba(6,38,61,0.06),transparent)]" />
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(6,38,61,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(6,38,61,0.35) 1px, transparent 1px)',
-            backgroundSize: '56px 56px',
-          }}
+    <div className="grid min-h-[100dvh] w-full max-w-[100vw] overflow-x-hidden bg-white lg:grid-cols-[1.05fr_1fr]">
+      <aside className="relative isolate hidden overflow-hidden bg-aq-ink lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16">
+        <img
+          src="/images/lifestyle/hero-lake.jpg"
+          alt=""
+          aria-hidden
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-[60%_center]"
         />
-      </div>
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(160deg,rgba(11,37,64,0.88)_0%,rgba(11,37,64,0.55)_55%,rgba(11,37,64,0.35)_100%)]" />
 
-      <div className="relative z-10 w-full max-w-[420px]">
-        <Outlet />
-      </div>
+        <Link to="/" aria-label="Aquails Ana Sayfa" className="self-start">
+          <BrandLogo variant="logo" bare inverted className="text-[1.2rem] gap-[0.32em]" />
+        </Link>
+
+        <div className="max-w-md">
+          <p className="font-script text-4xl leading-none text-aq-mist">Hoş geldiniz</p>
+          <h2 className="mt-3 text-4xl font-bold leading-[1.1] tracking-[-0.02em] text-white xl:text-5xl">
+            Saf Su,
+            <br />
+            Sağlıklı Yaşam
+          </h2>
+          <ul className="mt-8 space-y-3">
+            {perks.map((p) => (
+              <li key={p} className="flex items-center gap-3 text-sm text-white/85">
+                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-white/15">
+                  <Check className="h-3.5 w-3.5 text-aq-mist" />
+                </span>
+                {p}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="text-xs text-white/50">© {new Date().getFullYear()} Aquails</p>
+      </aside>
+
+      <main className="flex items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
+        <div className="w-full max-w-[420px]">
+          <Outlet />
+        </div>
+      </main>
     </div>
   );
 }
 
 export function AuthBrand() {
   return (
-    <Link to="/" className="mb-8 flex justify-center" aria-label="Aquails Ana Sayfa">
-      <BrandLogo variant="logo" bare className="text-[1.2rem] gap-[0.32em]" />
+    <Link to="/" className="mb-10 flex lg:hidden" aria-label="Aquails Ana Sayfa">
+      <BrandLogo variant="logo" bare className="text-[1.15rem] gap-[0.32em]" />
     </Link>
   );
 }

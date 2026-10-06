@@ -82,12 +82,12 @@ export default function CustomerLoyaltyPage() {
           <p className="text-xs text-white/70 mt-1">Kullanılabilir Puan</p>
         </div>
         <CustomerCard>
-          <TrendingUp className="w-8 h-8 text-aq-blue mb-3" />
+          <TrendingUp className="w-8 h-8 text-aq-ink mb-3" />
           <p className="text-3xl font-bold text-aq-text tabular-nums">{data.totalPoints}</p>
           <p className="text-xs text-aq-muted mt-1">Toplam Kazanılan</p>
         </CustomerCard>
         <CustomerCard>
-          <Gift className="w-8 h-8 text-aq-blue mb-3" />
+          <Gift className="w-8 h-8 text-aq-ink mb-3" />
           <p className="text-3xl font-bold text-aq-text tabular-nums">{data.totalRedeemed}</p>
           <p className="text-xs text-aq-muted mt-1">Kullanılan</p>
         </CustomerCard>

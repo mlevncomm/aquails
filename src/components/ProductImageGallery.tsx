@@ -128,7 +128,7 @@ export function ProductImageGallery({ images, alt }: ProductImageGalleryProps) {
             zoomActive ? 'opacity-0' : 'opacity-100'
           )}
         >
-          <ZoomIn className="w-3.5 h-3.5 text-aq-blue" />
+          <ZoomIn className="w-3.5 h-3.5 text-aq-ink" />
           <span className="hidden sm:inline">Büyüt</span>
         </div>
       </div>

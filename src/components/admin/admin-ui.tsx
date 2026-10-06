@@ -17,13 +17,13 @@ export function AdminPageHeader({
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6 sm:mb-8 min-w-0',
+        'flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6 sm:mb-8 min-w-0',
         className,
       )}
     >
       <div className="min-w-0">
-        <h1 className="text-xl sm:text-2xl font-bold text-aq-text tracking-tight">{title}</h1>
-        {description && <p className="text-aq-muted mt-1 text-sm leading-relaxed">{description}</p>}
+        <h1 className="text-2xl sm:text-[1.7rem] font-bold text-aq-ink tracking-[-0.02em]">{title}</h1>
+        {description && <p className="text-aq-muted mt-1.5 text-sm leading-relaxed max-w-2xl">{description}</p>}
       </div>
       {action && <div className="shrink-0 flex flex-wrap gap-2">{action}</div>}
     </div>
@@ -52,7 +52,7 @@ export function AdminCard({
   return (
     <div
       className={cn(
-        'bg-white rounded-2xl border border-aq-border/60 min-w-0 shadow-[0_1px_2px_rgba(7,24,39,0.03)]',
+        'bg-white rounded-xl min-w-0 ring-1 ring-aq-border/60 shadow-[0_1px_2px_rgba(11,37,64,0.04)]',
         padding && 'p-5 sm:p-6',
         className,
       )}
@@ -62,19 +62,14 @@ export function AdminCard({
   );
 }
 
+const fieldBase =
+  'w-full px-3.5 py-2.5 rounded-lg border border-aq-border bg-white text-aq-ink placeholder:text-aq-muted/80 text-sm transition-colors focus:outline-none focus:border-aq-ink/40 focus:ring-2 focus:ring-aq-ink/10 disabled:bg-aq-cloud disabled:text-aq-muted min-w-0';
+
 export function AdminInput({
   className = '',
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      className={cn(
-        'w-full px-4 py-2.5 rounded-xl border border-aq-border/60 bg-white text-aq-text placeholder:text-aq-muted text-sm focus:outline-none focus:ring-2 focus:ring-aq-aqua/30 focus:border-aq-blue min-w-0',
-        className,
-      )}
-      {...props}
-    />
-  );
+  return <input className={cn(fieldBase, className)} {...props} />;
 }
 
 export function AdminSelect({
@@ -83,13 +78,7 @@ export function AdminSelect({
   ...props
 }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
-    <select
-      className={cn(
-        'w-full px-4 py-2.5 rounded-xl border border-aq-border/60 bg-white text-aq-text text-sm focus:outline-none focus:ring-2 focus:ring-aq-aqua/30 focus:border-aq-blue min-w-0',
-        className,
-      )}
-      {...props}
-    >
+    <select className={cn(fieldBase, 'pr-8', className)} {...props}>
       {children}
     </select>
   );
@@ -99,19 +88,11 @@ export function AdminTextarea({
   className = '',
   ...props
 }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return (
-    <textarea
-      className={cn(
-        'w-full px-4 py-2.5 rounded-xl border border-aq-border/60 bg-white text-aq-text placeholder:text-aq-muted text-sm focus:outline-none focus:ring-2 focus:ring-aq-aqua/30 focus:border-aq-blue resize-none min-w-0',
-        className,
-      )}
-      {...props}
-    />
-  );
+  return <textarea className={cn(fieldBase, 'resize-y min-h-[88px]', className)} {...props} />;
 }
 
 export function AdminLabel({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <label className={cn('block text-sm font-medium text-aq-muted mb-1.5', className)}>{children}</label>;
+  return <label className={cn('block text-[13px] font-medium text-aq-ink/80 mb-1.5', className)}>{children}</label>;
 }
 
 export function AdminButton({
@@ -123,15 +104,15 @@ export function AdminButton({
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
 }) {
   const variants = {
-    primary: 'bg-aq-blue hover:bg-aq-deep text-white rounded-xl',
-    secondary: 'bg-white border border-aq-border/60 text-aq-muted hover:border-aq-blue hover:text-aq-blue rounded-xl',
-    danger: 'bg-red-600 hover:bg-red-700 text-white rounded-xl',
-    ghost: 'text-aq-muted hover:bg-aq-ice rounded-xl',
+    primary: 'bg-aq-ink text-white hover:bg-aq-ink-soft',
+    secondary: 'bg-white text-aq-ink ring-1 ring-aq-border hover:ring-aq-ink/30',
+    danger: 'bg-red-600 text-white hover:bg-red-700',
+    ghost: 'text-aq-ink/70 hover:bg-aq-cloud hover:text-aq-ink',
   };
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none min-h-[40px]',
+        'inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none min-h-[40px]',
         variants[variant],
         className,
       )}
@@ -144,16 +125,16 @@ export function AdminButton({
 
 export function AdminBreadcrumb({ items }: { items: { label: string; to?: string }[] }) {
   return (
-    <nav className="flex flex-wrap items-center gap-1 text-sm text-aq-muted mb-4 sm:mb-5">
+    <nav className="flex flex-wrap items-center gap-1 text-[13px] text-aq-muted mb-4 sm:mb-5">
       {items.map((item, i) => (
         <span key={`${item.label}-${i}`} className="flex items-center gap-1 min-w-0">
-          {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-aq-border flex-shrink-0" />}
+          {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-aq-muted/50 flex-shrink-0" />}
           {item.to ? (
-            <Link to={item.to} className="hover:text-aq-blue transition-colors truncate">
+            <Link to={item.to} className="hover:text-aq-ink transition-colors truncate">
               {item.label}
             </Link>
           ) : (
-            <span className="text-aq-text font-medium truncate">{item.label}</span>
+            <span className="text-aq-ink font-medium truncate">{item.label}</span>
           )}
         </span>
       ))}
@@ -176,11 +157,11 @@ export function AdminStatCard({
     <AdminCard>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm text-aq-muted">{label}</p>
-          <p className="text-2xl font-bold text-aq-text mt-1 tabular-nums truncate">{value}</p>
-          {sub && <p className="text-xs text-aq-muted mt-1">{sub}</p>}
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-aq-muted">{label}</p>
+          <p className="text-[1.6rem] font-bold text-aq-ink mt-1.5 tabular-nums truncate leading-none">{value}</p>
+          {sub && <p className="text-xs text-aq-muted mt-2">{sub}</p>}
         </div>
-        {icon && <div className="p-2.5 rounded-xl bg-aq-sky text-aq-blue flex-shrink-0">{icon}</div>}
+        {icon && <div className="p-2.5 rounded-full bg-aq-cloud text-aq-ink flex-shrink-0">{icon}</div>}
       </div>
     </AdminCard>
   );
@@ -199,10 +180,10 @@ export function AdminEmpty({
 }) {
   return (
     <div className="flex flex-col items-center justify-center text-center py-14 sm:py-16 px-4">
-      <div className="w-12 h-12 rounded-2xl bg-aq-sky flex items-center justify-center mb-4">
-        <Icon className="w-5 h-5 text-aq-blue" />
+      <div className="w-12 h-12 rounded-full bg-aq-cloud flex items-center justify-center mb-4">
+        <Icon className="w-5 h-5 text-aq-ink" />
       </div>
-      <p className="text-sm font-semibold text-aq-text">{title}</p>
+      <p className="text-sm font-semibold text-aq-ink">{title}</p>
       <p className="text-sm text-aq-muted mt-1 max-w-sm leading-relaxed">{message}</p>
       {action && <div className="mt-5">{action}</div>}
     </div>
@@ -221,7 +202,7 @@ export function AdminLoading({
   if (variant === 'spinner') {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16 text-aq-muted">
-        <Loader2 className="w-6 h-6 animate-spin text-aq-blue" />
+        <Loader2 className="w-6 h-6 animate-spin text-aq-ink" />
         <p className="text-sm">{label}</p>
       </div>
     );
@@ -230,7 +211,7 @@ export function AdminLoading({
   return (
     <div className="space-y-3 animate-pulse" aria-busy="true" aria-label={label}>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="h-14 rounded-xl bg-aq-ice border border-aq-border/40" />
+        <div key={i} className="h-14 rounded-xl bg-white ring-1 ring-aq-border/50" />
       ))}
     </div>
   );
@@ -255,21 +236,23 @@ export function AdminFilterBar({
   );
 }
 
+export type AdminTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'purple';
+
 export function AdminBadge({
   children,
   tone = 'neutral',
   className,
 }: {
   children: ReactNode;
-  tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'purple';
+  tone?: AdminTone;
   className?: string;
 }) {
-  const tones = {
-    neutral: 'bg-aq-ice text-aq-muted',
+  const tones: Record<AdminTone, string> = {
+    neutral: 'bg-aq-cloud text-aq-ink/70',
     success: 'bg-emerald-50 text-emerald-700',
     warning: 'bg-amber-50 text-amber-700',
     danger: 'bg-red-50 text-red-600',
-    info: 'bg-aq-sky text-aq-blue',
+    info: 'bg-sky-50 text-sky-700',
     purple: 'bg-violet-50 text-violet-700',
   };
   return (
@@ -286,7 +269,7 @@ export function AdminBadge({
 }
 
 /** Shared order-status chip styles (TR labels). */
-export const ORDER_STATUS_TONES: Record<string, 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'purple'> = {
+export const ORDER_STATUS_TONES: Record<string, AdminTone> = {
   Yeni: 'purple',
   Hazırlanıyor: 'warning',
   Kargoda: 'info',
@@ -313,8 +296,11 @@ export function AdminTableWrap({
       <div
         className={cn(
           'overflow-x-auto',
+          // Consistent table typography for every admin list.
+          '[&_thead_tr]:bg-aq-cloud/70 [&_th]:text-[11px] [&_th]:font-semibold [&_th]:uppercase [&_th]:tracking-[0.08em] [&_th]:text-aq-muted',
+          '[&_tbody_tr]:border-t [&_tbody_tr]:border-aq-border/60 [&_tbody_tr:hover]:bg-aq-cloud/40',
           stickyFirst &&
-            '[&_th:first-child]:sticky [&_th:first-child]:left-0 [&_th:first-child]:z-10 [&_th:first-child]:bg-aq-ice [&_td:first-child]:sticky [&_td:first-child]:left-0 [&_td:first-child]:z-[1] [&_td:first-child]:bg-white',
+            '[&_th:first-child]:sticky [&_th:first-child]:left-0 [&_th:first-child]:z-10 [&_th:first-child]:bg-aq-cloud [&_td:first-child]:sticky [&_td:first-child]:left-0 [&_td:first-child]:z-[1] [&_td:first-child]:bg-white',
         )}
       >
         {children}
@@ -341,4 +327,70 @@ export function AdminDesktopOnly({
   className?: string;
 }) {
   return <div className={cn('hidden md:block', className)}>{children}</div>;
+}
+
+/** Simple segmented tabs used by list pages (status filters etc.). */
+export function AdminTabs<T extends string>({
+  value,
+  onChange,
+  options,
+  className,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: { value: T; label: string; count?: number }[];
+  className?: string;
+}) {
+  return (
+    <div className={cn('inline-flex flex-wrap gap-1 rounded-full bg-white p-1 ring-1 ring-aq-border/60', className)}>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          onClick={() => onChange(o.value)}
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors',
+            value === o.value ? 'bg-aq-ink text-white' : 'text-aq-ink/65 hover:text-aq-ink',
+          )}
+        >
+          {o.label}
+          {o.count !== undefined && (
+            <span className={cn('rounded-full px-1.5 text-[11px] tabular-nums', value === o.value ? 'bg-white/20' : 'bg-aq-cloud')}>{o.count}</span>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Right-side drawer for detail/edit panels. */
+export function AdminDrawer({
+  open,
+  title,
+  onClose,
+  children,
+  footer,
+}: {
+  open: boolean;
+  title: string;
+  onClose: () => void;
+  children: ReactNode;
+  footer?: ReactNode;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[80]" role="dialog" aria-modal="true" aria-label={title}>
+      <div className="absolute inset-0 bg-aq-ink/40" onClick={onClose} />
+      <div className="absolute inset-y-0 right-0 flex w-full max-w-[560px] flex-col bg-white shadow-2xl">
+        <div className="flex items-center justify-between gap-3 border-b border-aq-border/60 px-5 py-4 sm:px-6">
+          <h2 className="truncate text-lg font-bold text-aq-ink">{title}</h2>
+          <button type="button" onClick={onClose} className="rounded-full p-2 text-aq-muted hover:bg-aq-cloud hover:text-aq-ink" aria-label="Kapat">
+            <span aria-hidden className="block h-4 w-4 text-center leading-4">✕</span>
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">{children}</div>
+        {footer && <div className="border-t border-aq-border/60 px-5 py-4 sm:px-6">{footer}</div>}
+      </div>
+    </div>
+  );
 }

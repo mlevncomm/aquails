@@ -28,13 +28,12 @@ export default function ForgotPasswordPage() {
     <div className="w-full">
       <AuthBrand />
 
-      <div className="relative overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/75 p-7 sm:p-8 shadow-[0_30px_80px_-40px_rgba(6,38,61,0.45)] backdrop-blur-xl">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-aq-aqua/15 blur-3xl" />
+      <div className="relative">
         <div className="relative">
           {!sent ? (
             <>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-aq-blue/70">Hesap</p>
-              <h1 className="mt-2 font-[Poppins,ui-sans-serif,sans-serif] text-2xl font-semibold tracking-tight text-aq-deep">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-aq-muted">Hesap</p>
+              <h1 className="mt-2 text-3xl font-bold tracking-[-0.02em] text-aq-ink">
                 Şifremi Unuttum
               </h1>
               <p className="mt-2 mb-7 text-sm leading-relaxed text-aq-muted">
@@ -57,7 +56,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-2xl bg-gradient-to-r from-aq-blue to-[#0d6fba] py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(18,134,216,0.75)] transition-all hover:-translate-y-0.5 disabled:opacity-60"
+                  className="w-full rounded-full bg-aq-ink hover:bg-aq-ink-soft py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 disabled:opacity-60"
                 >
                   {loading ? 'Gönderiliyor...' : 'Sıfırlama Bağlantısı Gönder'}
                 </button>
@@ -65,8 +64,8 @@ export default function ForgotPasswordPage() {
             </>
           ) : (
             <div className="py-2 text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-aq-sky">
-                <CheckCircle className="h-7 w-7 text-aq-blue" />
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-aq-cloud">
+                <CheckCircle className="h-7 w-7 text-aq-ink" />
               </div>
               <h2 className="mb-2 text-lg font-semibold text-aq-deep">Bağlantı Gönderildi</h2>
               <p className="mb-2 text-sm text-aq-muted">

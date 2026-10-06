@@ -1,142 +1,602 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowRight, ShieldCheck, Clock, Award, Truck,
-  Droplet, Cpu, Zap, Shield, Wrench, RefreshCw, Sparkles,
-  Search, Calendar, ClipboardCheck, Check, Users,
-  Home as HomeIcon, Monitor, Coffee, Filter, CircleDot, Settings, Plug, ChefHat, Activity, Building2,
+  ArrowRight, Play, Droplets, ShieldCheck, Wrench, BellRing,
+  Layers, VolumeX, Gauge, PackageCheck, Truck, RotateCcw, Lock, Star, Plus,
+  Home as HomeIcon, Briefcase, UtensilsCrossed, Building2, CircleCheck,
 } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
-import { ScrollReveal, StaggerContainer, StaggerItem } from '@/components/ScrollReveal';
-import { ProductCard } from '@/components/ProductCard';
+import { ScrollReveal } from '@/components/ScrollReveal';
 import { SEO } from '@/components/SEO';
 import { getOrganizationSchema, getWebsiteSchema } from '@/components/SchemaOrg';
-import { AquailsButton, SectionHeading, MetricStat } from '@/components/design';
+import { ProductPrice } from '@/components/ProductPrice';
+import { QuantitySelector } from '@/components/QuantitySelector';
+import { RatingStars } from '@/components/RatingStars';
+import { useToastStore } from '@/components/Toast';
 import { useCatalog } from '@/hooks/useCatalog';
+import { useCartStore } from '@/stores/cartStore';
+import { testimonials, faqItems } from '@/data/testimonials';
 import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
 
-const iconMap: Record<string, React.ElementType> = {
-  Droplet, Zap, Monitor, Coffee, Filter, CircleDot, Settings, Wrench, Plug, Sparkles,
-  ChefHat, Activity, Home: HomeIcon, Building2,
-};
-
-const DEVICE_CATEGORY_SLUGS = new Set([
-  'direkt-akis-ro',
-  'klasik-ro-sistemleri',
-  'soft-kompakt',
-  'sebiller',
-  'bina-giris-filtrasyon',
-]);
-
-const categoryImages: Record<string, string> = {
-  'direkt-akis-ro': '/images/products/direkt-akis-su-aritma.jpg',
-  'klasik-ro-sistemleri': '/images/products/su-aritma-cihazlari.jpg',
-  'soft-kompakt': '/images/products/dijital-su-aritma.jpg',
-  sebiller: '/images/products/sebiller.jpg',
-  'bina-giris-filtrasyon': '/images/products/bina-girisi-filtrasyon.jpg',
-  'filtreler-membranlar': '/images/products/filtreler.jpg',
-  'musluklar-aksesuarlar': '/images/products/musluklar.jpg',
-};
-
-const trustRow = [
-  { icon: Truck, label: 'Ücretsiz Kargo', desc: '1.500₺ üzeri siparişlerde' },
-  { icon: Wrench, label: 'Ücretsiz Kurulum', desc: 'Profesyonel montaj ekibi' },
-  { icon: ShieldCheck, label: '5 Yıl Garanti', desc: 'Tam kapsamlı güvence' },
-  { icon: Clock, label: 'Aynı Gün Servis', desc: '500+ servis noktası' },
-  { icon: Award, label: 'Yetkili Servis', desc: 'Orijinal yedek parça' },
+const heroFeatures = [
+  { icon: Droplets, label: '7 Aşamalı\nFiltrasyon' },
+  { icon: ShieldCheck, label: '5 Yıl\nGaranti' },
+  { icon: Wrench, label: 'Ücretsiz\nKurulum' },
+  { icon: BellRing, label: 'Filtre\nHatırlatma' },
 ];
 
-const nedenAquails = [
-  { icon: Cpu, title: 'Akıllı Filtre Teknolojisi', desc: 'Sensör tabanlı gerçek zamanlı su kalitesi izleme ve otomatik filtre değişim uyarıları.' },
-  { icon: Droplet, title: 'Sağlıklı Mineral Dengesi', desc: 'Ters ozmoz sonrası kalsiyum ve magnezyum mineralizasyonu ile sağlıklı su.' },
-  { icon: Zap, title: 'Sessiz ve Verimli Sistem', desc: 'Özel izolasyon teknolojisi ile 35 dB altında çalışma sesi, enerji verimli motor.' },
-  { icon: RefreshCw, title: 'Kolay Filtre Değişimi', desc: 'Tak-çıkar mekanizması ile tek elinizle 30 saniyede filtre değişimi.' },
-  { icon: Wrench, title: 'Kurulum ve Servis Desteği', desc: 'Türkiye genelinde 500+ servis noktası ile aynı gün kurulum ve bakım.' },
-  { icon: Shield, title: 'Uzun Ömürlü Yedek Parça', desc: '5 yıl garanti, 10+ yıl yedek parça temini, orijinal parça garantisi.' },
+const trustedStats = [
+  { value: '10.000+', label: 'Mutlu Müşteri' },
+  { value: '500+', label: 'Servis Noktası' },
+  { value: '17 Yıl', label: 'Deneyim' },
+  { value: '%99', label: 'Memnuniyet' },
 ];
 
-const nasilCalisir = [
-  { step: '01', title: 'İhtiyacına Uygun Cihazı Seç', desc: 'Evinizin su kalitesi ve kullanım alışkanlıklarınıza en uygun su arıtma sistemini keşfedin.', icon: Search },
-  { step: '02', title: 'Online Sipariş veya Randevu', desc: 'Güvenli ödeme ile sipariş verin veya ücretsiz keşif randevusu alın.', icon: Calendar },
-  { step: '03', title: 'Kurulum ve Filtre Takibi', desc: 'Profesyonel ekibimiz kurulumu yapar, Aquails filtre değişimlerini sizin için takip eder.', icon: ClipboardCheck },
+const specIcons = [
+  { icon: Layers, label: '7 Aşamalı', sub: 'Filtrasyon' },
+  { icon: VolumeX, label: 'Sessiz', sub: '35 dB altı' },
+  { icon: Gauge, label: 'TDS', sub: 'Göstergeli' },
+  { icon: PackageCheck, label: '10+ Yıl', sub: 'Yedek Parça' },
 ];
 
-const heroBadges = ['Ücretsiz Keşif', 'Kurulum Desteği', '5 Yıl Garanti', 'Filtre Hatırlatma'];
+const premiumFeatures = [
+  { image: '/images/products/filtreler.jpg', title: 'Çok Aşamalı Filtre', desc: 'Sediment, karbon, membran.' },
+  { image: '/images/products/musluklar.jpg', title: 'Paslanmaz Musluk', desc: '304 çelik gövde.' },
+  { image: '/images/products/membran-filtreler.jpg', title: 'RO Membran', desc: 'Yüksek arıtma oranı.' },
+  { image: '/images/products/sebiller.jpg', title: 'Sebil Seçenekleri', desc: 'Ofis ve ev için.' },
+];
 
-function pickProducts(list: Product[], fallback: Product[], limit = 4): Product[] {
-  if (list.length > 0) return list.slice(0, limit);
-  return fallback.slice(0, limit);
+/** Systems shown in "Size Uygun Sistemi Seçin": clean renders, each tied to its category's best seller. */
+const systemTiles = [
+  { slug: 'klasik-ro-sistemleri', label: 'Klasik RO', image: '/images/products/su-aritma-cihazlari.jpg' },
+  { slug: 'direkt-akis-ro', label: 'Direkt Akış', image: '/images/products/direkt-akis-su-aritma.jpg' },
+  { slug: 'soft-kompakt', label: 'Kompakt', image: '/images/products/dijital-su-aritma.jpg' },
+  { slug: 'sebiller', label: 'Sebil', image: '/images/products/sebiller.jpg' },
+  { slug: 'bina-giris-filtrasyon', label: 'Bina Girişi', image: '/images/products/bina-girisi-filtrasyon.jpg' },
+];
+
+const useCases = [
+  { icon: HomeIcon, label: 'Ev', to: '/kategori/klasik-ro-sistemleri' },
+  { icon: Briefcase, label: 'Ofis', to: '/kategori/sebiller' },
+  { icon: UtensilsCrossed, label: 'İşletme', to: '/kategori/direkt-akis-ro' },
+  { icon: Building2, label: 'Bina', to: '/kategori/bina-giris-filtrasyon' },
+];
+
+function rankByPopularity(list: Product[]): Product[] {
+  return [...list].sort((a, b) => (b.rating * b.reviewCount) - (a.rating * a.reviewCount));
 }
 
-function CategoryCard({
-  id,
-  name,
-  productCount,
-  icon,
-  image,
-}: {
-  id: string;
-  name: string;
-  productCount: number;
-  icon: string;
+/** Small uppercase eyebrow above section titles (gray on light, sky on dark — as in the reference). */
+function Eyebrow({ children, tone = 'dark', className }: { children: React.ReactNode; tone?: 'dark' | 'light'; className?: string }) {
+  return (
+    <p
+      className={cn(
+        'text-[11px] font-semibold uppercase tracking-[0.18em]',
+        tone === 'dark' ? 'text-aq-muted' : 'text-aq-mist',
+        className,
+      )}
+    >
+      {children}
+    </p>
+  );
+}
+
+function SectionTitle({ children, className, light }: { children: React.ReactNode; className?: string; light?: boolean }) {
+  return (
+    <h2 className={cn('text-[1.75rem] font-bold leading-[1.15] tracking-[-0.02em] sm:text-[2.1rem] lg:text-[2.35rem]', light ? 'text-white' : 'text-aq-ink', className)}>
+      {children}
+    </h2>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 1. Hero                                                             */
+/* ------------------------------------------------------------------ */
+
+function Hero() {
+  return (
+    <section className="relative isolate overflow-hidden bg-aq-ink">
+      <img
+        src="/images/lifestyle/hero-lake.jpg"
+        alt=""
+        aria-hidden
+        className="absolute inset-0 -z-20 h-full w-full object-cover object-[60%_center]"
+        fetchPriority="high"
+      />
+      {/* Legibility veil: deep on the left where the copy sits, clear on the right */}
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(8,30,52,0.86)_0%,rgba(8,30,52,0.62)_38%,rgba(8,30,52,0.12)_70%,rgba(8,30,52,0.05)_100%)]" />
+      <div className="absolute inset-x-0 bottom-0 -z-10 h-48 bg-gradient-to-t from-aq-ink/80 to-transparent" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-40 bg-gradient-to-b from-aq-ink/50 to-transparent" />
+
+      <div className="page-container flex min-h-[640px] flex-col pt-[132px] pb-8 sm:min-h-[720px] lg:min-h-[min(860px,100svh)] lg:pt-[160px]">
+        <div className="relative flex-1">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-[560px]"
+          >
+            <Eyebrow tone="light">Sağlıklı yaşam için saf su</Eyebrow>
+            <h1 className="mt-4 text-[2.6rem] font-bold leading-[1.02] tracking-[-0.03em] text-white sm:text-6xl lg:text-[4.6rem]">
+              Doğanın <span className="text-aq-mist">Saflığı</span>
+              <br />
+              Musluğunuzda
+            </h1>
+            <p className="mt-5 max-w-[440px] text-[15px] leading-relaxed text-white/80 sm:text-base">
+              Aquails su arıtma sistemleri, dağ kaynağı kadar berrak suyu evinize ve işletmenize getirir. Her yudumda güven, her gün sağlık.
+            </p>
+
+            <ul className="mt-8 grid max-w-[480px] grid-cols-4 divide-x divide-white/15">
+              {heroFeatures.map(({ icon: Icon, label }) => (
+                <li key={label} className="flex flex-col items-center gap-2 px-1 text-center first:pl-0">
+                  <Icon className="h-6 w-6 text-white" strokeWidth={1.6} />
+                  <span className="whitespace-pre-line text-[11px] font-medium leading-tight text-white/85 sm:text-xs">
+                    {label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-9 flex flex-wrap items-center gap-4">
+              <Link
+                to="/urunler"
+                className="group inline-flex items-center gap-2 rounded-full bg-aq-mist px-7 py-3.5 text-sm font-semibold text-aq-ink shadow-[0_12px_30px_-12px_rgba(159,216,255,0.8)] transition-all hover:-translate-y-0.5 hover:bg-white"
+              >
+                Ürünleri İncele
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <a
+                href="#nasil-calisir"
+                className="group inline-flex items-center gap-3 text-sm font-medium text-white"
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/50 transition-colors group-hover:border-white group-hover:bg-white/10">
+                  <Play className="ml-0.5 h-4 w-4 fill-white" />
+                </span>
+                Nasıl Çalışır?
+              </a>
+            </div>
+          </motion.div>
+
+          {/* Handwritten accent */}
+          <motion.div
+            initial={{ opacity: 0, rotate: -12 }}
+            animate={{ opacity: 1, rotate: -8 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="pointer-events-none absolute right-0 top-2 hidden select-none text-right lg:block"
+            aria-hidden
+          >
+            <p className="font-script text-[2.6rem] leading-[0.95] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]">
+              Sudan Çok
+              <br />
+              Daha Fazlası
+            </p>
+            <svg viewBox="0 0 140 18" className="ml-auto mt-1 h-4 w-32 text-white" fill="none">
+              <path d="M2 12C30 4 70 2 138 8M60 16c20-3 45-4 70-2" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+            </svg>
+          </motion.div>
+        </div>
+
+        {/* Trusted-by strip */}
+        <div className="mt-12 border-t border-white/15 pt-6">
+          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/60">Rakamlarla Aquails</p>
+          <dl className="mt-3 grid grid-cols-2 gap-y-3 sm:flex sm:flex-wrap sm:gap-x-12">
+            {trustedStats.map((s) => (
+              <div key={s.label} className="flex items-baseline gap-2">
+                <dt className="text-lg font-bold text-white tabular-nums">{s.value}</dt>
+                <dd className="text-xs text-white/65">{s.label}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
+/* ------------------------------------------------------------------ */
+/* 2. Designed for real life                                           */
+/* ------------------------------------------------------------------ */
+
+function DesignedForLife() {
+  return (
+    <section id="nasil-calisir" className="scroll-mt-20 bg-[#F4F8FB] py-20 lg:py-24">
+      <div className="page-container grid items-center gap-12 lg:grid-cols-[1fr_1.1fr_1fr] lg:gap-10">
+        <ScrollReveal>
+          <Eyebrow>Aquails su arıtma</Eyebrow>
+          <SectionTitle className="mt-3">
+            Gerçek Hayat
+            <br />
+            İçin Tasarlandı
+          </SectionTitle>
+          <p className="mt-4 max-w-[340px] text-[15px] leading-relaxed text-aq-muted">
+            Mutfakta, ofiste ya da işletmenizde; Aquails sessizce çalışır, az yer kaplar ve her gün aynı kalitede su verir.
+          </p>
+          <ul className="mt-10 grid max-w-[360px] grid-cols-4 gap-2">
+            {specIcons.map(({ icon: Icon, label, sub }) => (
+              <li key={label} className="flex flex-col items-center gap-2.5 text-center">
+                <Icon className="h-6 w-6 text-aq-ink" strokeWidth={1.4} />
+                <span className="text-[11px] font-medium leading-tight text-aq-ink">
+                  {label}
+                  <span className="block text-aq-muted">{sub}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </ScrollReveal>
+
+        <ScrollReveal delay={0.1}>
+          <img
+            src="/images/products/su-aritma-cihazlari.jpg"
+            alt="Aquails tezgah altı su arıtma cihazı ve musluğu"
+            className="mx-auto aspect-square sm:aspect-[4/5] w-full max-w-[420px] rounded-2xl object-cover object-[45%_center] shadow-soft-lg"
+            loading="lazy"
+          />
+        </ScrollReveal>
+
+        <ScrollReveal delay={0.15}>
+          <h3 className="mb-4 text-[15px] font-semibold text-aq-ink">Öne Çıkan Özellikler</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {premiumFeatures.map((f) => (
+              <div key={f.title} className="overflow-hidden rounded-xl bg-white shadow-soft">
+                <div className="aspect-[4/3] overflow-hidden bg-white">
+                  <img src={f.image} alt="" className="h-full w-full object-cover mix-blend-multiply" loading="lazy" />
+                </div>
+                <div className="px-3 pb-3 pt-2">
+                  <p className="text-[12px] font-semibold text-aq-ink">{f.title}</p>
+                  <p className="mt-0.5 text-[11px] text-aq-muted">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollReveal>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Choose your system                                               */
+/* ------------------------------------------------------------------ */
+
+interface SystemOption {
+  slug: string;
+  label: string;
   image: string;
-}) {
-  const Icon = iconMap[icon] || Droplet;
+  product: Product;
+}
+
+function ChooseYourSystem({ options }: { options: SystemOption[] }) {
+  const [selected, setSelected] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const { addItem, openDrawer } = useCartStore();
+  const addToast = useToastStore((s) => s.add);
+
+  if (options.length === 0) return null;
+  const current = options[Math.min(selected, options.length - 1)];
+  const p = current.product;
+  const inStock = p.stock > 0;
+
+  const addToCart = () => {
+    addItem(p, quantity);
+    addToast(`${p.name} sepete eklendi.`, 'success');
+    openDrawer();
+  };
 
   return (
-    <Link
-      to={`/kategori/${id}`}
-      className="group flex h-full min-w-0 w-full max-w-full flex-col overflow-hidden rounded-xl border border-aq-border/60 bg-white transition-all duration-300 hover:border-aq-blue/20 sm:rounded-2xl"
-    >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-aq-ice">
-        <img
-          src={image}
-          alt={name}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-          decoding="async"
-        />
+    <section className="bg-white py-20 lg:py-24">
+      <div className="page-container grid gap-10 lg:grid-cols-[1.55fr_1fr] lg:items-start lg:gap-14">
+        <div className="min-w-0">
+          <ScrollReveal>
+            <h2 className="text-[1.6rem] font-bold tracking-[-0.02em] text-aq-ink sm:text-[1.9rem]">Size Uygun Sistemi Seçin</h2>
+            <p className="mt-2 text-sm text-aq-muted">Aynı güvenilir arıtma kalitesi. İhtiyacınıza göre farklı çözümler.</p>
+          </ScrollReveal>
+
+          <div className="responsive-scroll-x mt-10">
+            <div className="flex min-w-max gap-6 pb-2 sm:grid sm:min-w-0 sm:grid-cols-5 sm:gap-4">
+              {options.map((o, i) => {
+                const active = i === selected;
+                return (
+                  <button
+                    key={o.slug}
+                    type="button"
+                    onClick={() => { setSelected(i); setQuantity(1); }}
+                    aria-pressed={active}
+                    className="group flex w-[120px] flex-col items-center text-center sm:w-auto"
+                  >
+                    <div className={cn('aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#F3F6F9] ring-1 transition-all', active ? 'ring-aq-blue/50 shadow-soft' : 'ring-transparent group-hover:shadow-soft')}>
+                      <img src={o.image} alt={o.label} className="h-full w-full object-cover mix-blend-multiply transition-transform duration-500 group-hover:scale-[1.04]" loading="lazy" />
+                    </div>
+                    <span className={cn('mt-3 text-[13px] font-semibold', active ? 'text-aq-blue' : 'text-aq-ink/55')}>{o.label}</span>
+                    <ProductPrice product={o.product} size="sm" className="mt-0.5 [&_span:first-child]:text-[12px] [&_span:first-child]:font-medium [&_span:first-child]:text-aq-muted [&_span:last-child:not(:first-child)]:hidden" />
+                    <span className={cn('mt-2 h-1.5 w-1.5 rounded-full', active ? 'bg-aq-blue' : 'bg-transparent')} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <ScrollReveal delay={0.1}>
+          <div className="rounded-xl bg-white p-6 shadow-soft sm:p-7 shadow-soft">
+            {selected === 0 && (
+              <span className="mb-3 inline-flex rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-semibold text-white">En Popüler</span>
+            )}
+            <h3 className="text-xl font-bold leading-snug text-aq-ink">{p.name}</h3>
+            <div className="mt-2 flex items-center gap-2">
+              <RatingStars rating={p.rating} size="sm" />
+              <span className="text-[12px] text-aq-muted">{p.rating.toFixed(1)}/5 ({p.reviewCount} değerlendirme)</span>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <ProductPrice product={p} size="lg" className="[&_span:first-child]:text-[1.75rem] [&_span:first-child]:text-aq-ink" />
+              {p.discountPercent ? (
+                <span className="rounded-full bg-rose-500 px-2.5 py-1 text-[11px] font-bold text-white">%{p.discountPercent} İNDİRİM</span>
+              ) : null}
+            </div>
+            <p className="mt-4 line-clamp-3 text-[13px] leading-relaxed text-aq-muted">{p.shortDescription || p.description}</p>
+            <div className="mt-5 flex items-center justify-between gap-3">
+              <QuantitySelector
+                quantity={quantity}
+                onIncrease={() => setQuantity((q) => Math.min(q + 1, Math.max(p.stock, 1)))}
+                onDecrease={() => setQuantity((q) => Math.max(1, q - 1))}
+                size="sm"
+              />
+              <Link to={`/urun/${p.slug}`} className="text-[12px] font-semibold text-aq-ink underline-offset-4 hover:underline">Ürün detayı</Link>
+            </div>
+            <button
+              type="button"
+              onClick={addToCart}
+              disabled={!inStock}
+              className="mt-5 w-full rounded-full bg-aq-ink py-3.5 text-sm font-semibold text-white transition-colors hover:bg-aq-ink-soft disabled:cursor-not-allowed disabled:bg-aq-muted/40"
+            >
+              {inStock ? 'Sepete Ekle' : 'Tükendi'}
+            </button>
+            <ul className="mt-5 grid grid-cols-3 gap-2 border-t border-aq-border/70 pt-4">
+              {[
+                { icon: Truck, title: 'Ücretsiz Kargo', sub: 'Uygun siparişlerde' },
+                { icon: RotateCcw, title: '14 Gün İade', sub: 'Koşulsuz' },
+                { icon: Lock, title: 'Güvenli Ödeme', sub: '256-bit SSL' },
+              ].map(({ icon: Icon, title, sub }) => (
+                <li key={title} className="min-w-0">
+                  <p className="flex items-center gap-1.5 text-[11px] font-semibold text-aq-ink">
+                    <Icon className="h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.8} />
+                    <span className="leading-tight">{title}</span>
+                  </p>
+                  <p className="mt-0.5 text-[10px] text-aq-muted">{sub}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </ScrollReveal>
       </div>
-      <div className="flex min-h-[4.5rem] flex-1 flex-col items-center justify-start px-1.5 py-2 text-center sm:min-h-[4.75rem] sm:px-3 sm:py-3">
-        <Icon className="mb-1 h-3.5 w-3.5 flex-shrink-0 text-aq-blue sm:h-4 sm:w-4" aria-hidden />
-        <h3 className="w-full max-w-full break-words text-[11px] font-semibold leading-snug text-aq-text transition-colors line-clamp-2 group-hover:text-aq-blue sm:text-xs">
-          {name}
-        </h3>
-        <p className="mt-auto pt-1 text-[10px] leading-none text-aq-muted">
-          {productCount} ürün
-        </p>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. Lifestyle                                                        */
+/* ------------------------------------------------------------------ */
+
+function Lifestyle() {
+  return (
+    <section className="grid bg-[#F4F8FB] lg:grid-cols-2">
+      <div className="relative min-h-[320px] overflow-hidden sm:min-h-[440px]">
+        <img src="/images/lifestyle/drinking-water.jpg" alt="Bir bardak arıtılmış su içen kadın" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
       </div>
-    </Link>
+      <div className="flex items-center px-5 py-16 sm:px-12 lg:px-16 xl:px-24">
+        <ScrollReveal className="max-w-[440px]">
+          <Eyebrow>Her anınızda yanınızda</Eyebrow>
+          <SectionTitle className="mt-3">Temiz Su, Hayatın Her Anında</SectionTitle>
+          <p className="mt-4 text-[15px] leading-relaxed text-aq-muted">
+            Sabah kahvesinden ofis sebiline, restoran mutfağından apartman girişine kadar Aquails güvenilir su ortağınızdır.
+          </p>
+          <Link to="/urunler" className="group mt-7 inline-flex items-center gap-2 rounded-full bg-aq-ink px-6 py-3 text-[13px] font-semibold text-white transition-colors hover:bg-aq-ink-soft">
+            Keşfedin <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <ul className="mt-10 grid grid-cols-4 gap-4">
+            {useCases.map(({ icon: Icon, label, to }) => (
+              <li key={label}>
+                <Link to={to} className="group flex flex-col items-center gap-2">
+                  <Icon className="h-6 w-6 text-aq-ink transition-colors group-hover:text-aq-ink" strokeWidth={1.4} />
+                  <span className="text-[12px] font-medium text-aq-ink">{label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </ScrollReveal>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. Testimonials                                                     */
+/* ------------------------------------------------------------------ */
+
+function Testimonials({ products }: { products: Product[] }) {
+  const { avg, total } = useMemo(() => {
+    const rated = products.filter((p) => p.reviewCount > 0);
+    const reviews = rated.reduce((sum, p) => sum + p.reviewCount, 0);
+    const weighted = rated.reduce((sum, p) => sum + p.rating * p.reviewCount, 0);
+    return { avg: reviews > 0 ? weighted / reviews : 0, total: reviews };
+  }, [products]);
+
+  return (
+    <section className="relative isolate overflow-hidden bg-aq-ink py-20 lg:py-24">
+      <img src="/images/lifestyle/dusk-lake.jpg" alt="" aria-hidden className="absolute inset-0 -z-20 h-full w-full object-cover" loading="lazy" />
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(11,37,64,0.92),rgba(11,37,64,0.82))]" />
+      <div className="page-container">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <ScrollReveal>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60">Gerçek insanlar, gerçek deneyimler</p>
+            <SectionTitle light className="mt-3">Binlerce Ailenin Tercihi</SectionTitle>
+          </ScrollReveal>
+          {avg > 0 && (
+            <div className="sm:text-right">
+              <p className="flex items-center gap-2 sm:justify-end">
+                <span className="flex gap-0.5" aria-hidden>
+                  {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />)}
+                </span>
+                <span className="text-lg font-bold text-white">{avg.toFixed(1)}/5</span>
+              </p>
+              <p className="mt-1 text-[12px] text-white/60">{total.toLocaleString('tr-TR')} ürün değerlendirmesi</p>
+            </div>
+          )}
+        </div>
+
+        <div className={cn('mt-10 grid gap-4 sm:grid-cols-2', testimonials.length >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3')}>
+          {testimonials.slice(0, 4).map((t, i) => (
+            <ScrollReveal key={t.id} delay={i * 0.06}>
+              <figure className="flex h-full flex-col rounded-xl bg-white p-5">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-aq-cloud text-sm font-bold text-aq-ink">{t.name.charAt(0)}</span>
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-semibold text-aq-ink">{t.name}</p>
+                    <RatingStars rating={t.rating} size="sm" />
+                  </div>
+                </div>
+                <blockquote className="mt-4 flex-1 text-[13px] leading-relaxed text-aq-muted">“{t.content}”</blockquote>
+                <figcaption className="mt-4 flex items-center gap-1.5 text-[11px] font-medium text-aq-ink/70">
+                  <CircleCheck className="h-3.5 w-3.5 text-emerald-600" />
+                  {t.product}
+                </figcaption>
+              </figure>
+            </ScrollReveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 6. Story + free discovery                                           */
+/* ------------------------------------------------------------------ */
+
+function StoryAndOffer() {
+  const navigate = useNavigate();
+  const [phone, setPhone] = useState('');
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate('/servis-randevusu', { state: { phone: phone.trim() } });
+  };
+
+  return (
+    <section className="bg-white py-20 lg:py-24">
+      <div className="page-container grid gap-5 lg:grid-cols-[1.25fr_1fr]">
+        <ScrollReveal className="relative min-h-[300px] overflow-hidden rounded-xl sm:min-h-[340px]">
+          <img src="/images/lifestyle/story-lake.jpg" alt="Turkuaz bir dağ gölü" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-l from-black/35 via-black/5 to-transparent" />
+          <div className="absolute inset-y-0 right-6 flex flex-col items-end justify-center text-right sm:right-10">
+            <p className="font-script text-[2.4rem] leading-[0.95] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)] sm:text-5xl">
+              Saf Su,
+              <br />
+              Sağlıklı Yarınlar
+            </p>
+            <Link to="/hakkimizda" className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[12px] font-semibold text-aq-ink transition-colors hover:bg-aq-cloud">
+              <Play className="h-3 w-3 fill-aq-ink" /> Hikayemizi Okuyun
+            </Link>
+          </div>
+        </ScrollReveal>
+
+        <ScrollReveal delay={0.1} className="flex flex-col justify-center rounded-xl bg-[#EEF4FA] p-7 sm:p-10">
+          <Eyebrow>Ücretsiz keşif</Eyebrow>
+          <h2 className="mt-3 text-[1.6rem] font-bold leading-[1.2] tracking-[-0.02em] text-aq-ink sm:text-[1.9rem]">
+            Suyunuzu Ücretsiz
+            <br />
+            Analiz Edelim
+          </h2>
+          <p className="mt-3 text-[13px] leading-relaxed text-aq-muted">
+            Uzman ekibimiz evinizdeki suyu ölçsün, size en uygun sistemi önersin.
+          </p>
+          <form onSubmit={submit} className="mt-6 flex gap-2">
+            <input
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Telefon numaranız"
+              aria-label="Telefon numaranız"
+              className="min-w-0 flex-1 rounded-full bg-white px-5 py-3 text-[13px] text-aq-ink placeholder:text-aq-muted focus:outline-none focus:ring-2 focus:ring-aq-ink/15"
+            />
+            <button type="submit" className="flex-shrink-0 rounded-full bg-aq-ink px-5 py-3 text-[13px] font-semibold text-white transition-colors hover:bg-aq-ink-soft sm:px-6">
+              Randevu Al
+            </button>
+          </form>
+          <p className="mt-3 text-[11px] text-aq-muted">Ücret ve satın alma zorunluluğu yok.</p>
+        </ScrollReveal>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. FAQ                                                              */
+/* ------------------------------------------------------------------ */
+
+function FAQ() {
+  const [open, setOpen] = useState<string | null>(null);
+
+  return (
+    <section className="bg-white pb-24">
+      <div className="page-container grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-20">
+        <ScrollReveal>
+          <h2 className="text-[1.6rem] font-bold tracking-[-0.02em] text-aq-ink sm:text-[1.9rem]">Sıkça Sorulan Sorular</h2>
+          <p className="mt-2 text-sm text-aq-muted">Aquails hakkında bilmeniz gereken her şey.</p>
+          <Link to="/sss" className="mt-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-aq-ink underline-offset-4 hover:underline">
+            Tüm sorular <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </ScrollReveal>
+        <ScrollReveal delay={0.1}>
+          <ul className="space-y-2.5">
+            {faqItems.slice(0, 5).map((f) => {
+              const isOpen = open === f.id;
+              return (
+                <li key={f.id} className="rounded-lg border border-aq-border">
+                  <button
+                    type="button"
+                    onClick={() => setOpen(isOpen ? null : f.id)}
+                    aria-expanded={isOpen}
+                    className="flex w-full items-center justify-between gap-4 px-4 py-3.5 text-left text-[13px] font-semibold text-aq-ink"
+                  >
+                    {f.question}
+                    <Plus className={cn('h-4 w-4 flex-shrink-0 transition-transform', isOpen && 'rotate-45')} />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <p className="px-4 pb-4 text-[13px] leading-relaxed text-aq-muted">{f.answer}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </li>
+              );
+            })}
+          </ul>
+        </ScrollReveal>
+      </div>
+    </section>
   );
 }
 
 export default function Home() {
-  const { products, categories } = useCatalog();
-  const catalogProducts = products;
-  const catalogCategories = categories;
-  const [activeTab, setActiveTab] = useState('cok-satanlar');
+  const { products } = useCatalog();
 
-  const shownCategories = catalogCategories.slice(0, 6);
-
-  const tabProducts = useMemo(() => {
-    const fallback = catalogProducts;
-    const bestsellers = [...catalogProducts].sort((a, b) => (b.rating * b.reviewCount) - (a.rating * a.reviewCount));
-    const newOnes = catalogProducts.filter((p) => p.badge === 'new');
-    const discounted = catalogProducts.filter((p) => (p.discountPercent ?? 0) > 0);
-    const devices = catalogProducts.filter((p) => DEVICE_CATEGORY_SLUGS.has(p.categorySlug));
-
-    return {
-      'cok-satanlar': pickProducts(
-        bestsellers.filter((p) => p.rating >= 4.5),
-        bestsellers.length > 0 ? bestsellers : fallback,
-      ),
-      'yeni-gelenler': pickProducts(newOnes, fallback),
-      kampanyali: pickProducts(discounted, fallback),
-      cihazlar: pickProducts(devices, fallback),
-    } satisfies Record<string, Product[]>;
-  }, [catalogProducts]);
+  const systems = useMemo<SystemOption[]>(() => {
+    const ranked = rankByPopularity(products);
+    return systemTiles.flatMap((tile) => {
+      const product = ranked.find((p) => p.categorySlug === tile.slug);
+      return product ? [{ ...tile, product }] : [];
+    });
+  }, [products]);
 
   return (
     <>
@@ -147,308 +607,13 @@ export default function Home() {
         schema={[getOrganizationSchema(), getWebsiteSchema()]}
       />
       <PageLayout>
-        {/* ========== 1. HERO ========== */}
-        <section className="px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4 md:pt-5">
-          <div className="relative overflow-hidden rounded-[22px] sm:rounded-[28px] md:rounded-[40px] lg:rounded-[48px] hero-aqua">
-            {/* Decorative water glow */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="absolute -top-32 right-[10%] w-[480px] h-[480px] rounded-full bg-aq-aqua/15 blur-[110px]" />
-              <div className="absolute -bottom-24 left-[5%] w-[420px] h-[420px] rounded-full bg-aq-blue/25 blur-[100px]" />
-              <div className="absolute inset-0 opacity-[0.05] tech-grid" />
-            </div>
-
-            <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 sm:px-8 lg:px-12 py-9 sm:py-12 md:py-16 lg:py-20">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-14 items-center">
-                {/* Left copy */}
-                <motion.div
-                  initial={{ opacity: 0, y: 28 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="min-w-0"
-                >
-                  <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-5 sm:mb-6">
-                    {heroBadges.map((b) => (
-                      <span key={b} className="inline-flex items-center gap-1.5 bg-white/[0.07] backdrop-blur-sm text-[10px] sm:text-[11px] font-medium text-white/85 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-white/15">
-                        <Check className="w-3 h-3 text-aq-aqua flex-shrink-0" />{b}
-                      </span>
-                    ))}
-                  </div>
-                  <h1 className="text-[1.7rem] sm:text-4xl md:text-[2.9rem] lg:text-5xl font-bold text-white leading-[1.15]">
-                    Yeni Nesil<br />
-                    <span className="text-aq-aqua">Su Arıtma</span> Teknolojisi
-                  </h1>
-                  <p className="text-sm sm:text-base text-white/70 mt-4 sm:mt-5 leading-relaxed max-w-md">
-                    Aquails, eviniz ve işletmeniz için sağlıklı, güvenilir ve ölçülebilir su kalitesi sunar.
-                  </p>
-                  <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-3 mt-6 sm:mt-8">
-                    <AquailsButton to="/urunler" variant="primary" size="lg" showArrow className="w-full sm:w-auto">
-                      Ürünleri İncele
-                    </AquailsButton>
-                    <AquailsButton href="#nasil-calisir" variant="ghost" size="lg" className="w-full sm:w-auto">
-                      Nasıl Çalışır?
-                    </AquailsButton>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 sm:gap-6 mt-8 sm:mt-10">
-                    {[
-                      { v: '10.000+', l: 'Mutlu Müşteri' },
-                      { v: '500+', l: 'Servis Noktası' },
-                      { v: '%99', l: 'Memnuniyet' },
-                    ].map((s) => (
-                      <div key={s.l} className="min-w-0">
-                        <p className="text-lg sm:text-2xl font-bold text-white tabular-nums">{s.v}</p>
-                        <p className="text-[10px] sm:text-[11px] text-white/50 mt-0.5 leading-snug">{s.l}</p>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-
-                {/* Right product visual */}
-                <motion.div
-                  initial={{ opacity: 0, x: 32, scale: 0.96 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  transition={{ duration: 0.7, delay: 0.15 }}
-                  className="relative mt-2 sm:mt-0"
-                >
-                  <div className="relative bg-gradient-to-b from-white/[0.10] to-white/[0.04] backdrop-blur-sm border border-white/15 rounded-2xl sm:rounded-[28px] p-2 sm:p-3 md:p-4 max-w-md mx-auto">
-                    <img
-                      src="/images/hero-product.jpg"
-                      alt="Aquails Su Arıtma Cihazı"
-                      className="w-full aspect-[4/3] object-cover rounded-xl sm:rounded-[20px]"
-                    />
-                  </div>
-                  <div className="absolute -bottom-3 -left-1 sm:-bottom-4 sm:-left-2 md:-left-6 bg-white rounded-xl sm:rounded-2xl shadow-sm p-2.5 sm:p-3.5 hidden sm:flex items-center gap-2.5">
-                    <div className="w-9 h-9 bg-aq-sky rounded-xl flex items-center justify-center">
-                      <ShieldCheck className="w-4.5 h-4.5 text-aq-blue" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-aq-text">5 Yıl Garanti</p>
-                      <p className="text-[10px] text-aq-muted">Tam Kapsamlı</p>
-                    </div>
-                  </div>
-                  <div className="absolute -top-2 -right-1 sm:-top-3 sm:-right-2 md:-right-4 bg-white rounded-xl sm:rounded-2xl shadow-sm p-2.5 sm:p-3.5 hidden sm:flex items-center gap-2.5">
-                    <div className="w-9 h-9 bg-aq-sky rounded-xl flex items-center justify-center">
-                      <Droplet className="w-4.5 h-4.5 text-aq-aqua" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-aq-text">7 Aşama</p>
-                      <p className="text-[10px] text-aq-muted">Filtrasyon</p>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ========== 2. GUVEN / OZELLIK SATIRI ========== */}
-        <section className="py-8 sm:py-12 md:py-16 border-b border-aq-border/50 bg-white">
-          <div className="page-container">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-3 gap-y-5 sm:gap-6 md:gap-8">
-              {trustRow.map((t) => (
-                <div key={t.label} className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 sm:gap-3 min-w-0">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-aq-sky/70 flex items-center justify-center flex-shrink-0">
-                    <t.icon className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-aq-blue" strokeWidth={1.9} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[12px] sm:text-[13px] font-medium text-aq-text leading-tight">{t.label}</p>
-                    <p className="text-[10px] sm:text-[11px] text-aq-muted mt-0.5 leading-snug">{t.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ========== 3. METRICS ========== */}
-        <section className="py-12 sm:py-16 md:py-24 bg-white">
-          <div className="page-container">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
-              <ScrollReveal>
-                <h2 className="text-2xl md:text-3xl lg:text-[2.4rem] font-bold text-aq-text leading-tight">
-                  Temiz Su,<br />Ölçülebilir Sonuçlar
-                </h2>
-                <div className="flex items-center gap-3 mt-5 sm:mt-6 flex-wrap">
-                  <div className="flex -space-x-2">
-                    {['A', 'M', 'S', 'E'].map((c) => (
-                      <div key={c} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-aq-blue to-aq-deep border-2 border-white flex items-center justify-center text-white text-xs font-medium">
-                        {c}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <div className="w-5 h-5 rounded-full bg-aq-aqua flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-aq-deep" />
-                    </div>
-                    <span className="text-xs sm:text-sm text-aq-muted font-medium">Güvenen 10.000+ aile</span>
-                  </div>
-                </div>
-              </ScrollReveal>
-              <ScrollReveal delay={0.1}>
-                <div className="grid grid-cols-3 gap-3 sm:gap-6 md:gap-8">
-                  <MetricStat value="50M+" label="Filtrelenen Litre" />
-                  <MetricStat value="2M+" label="Kurtarılan Plastik Şişe" />
-                  <MetricStat value="%99" label="Müşteri Memnuniyeti" />
-                </div>
-              </ScrollReveal>
-            </div>
-          </div>
-        </section>
-
-        {/* ========== 4. KATEGORILER ========== */}
-        <section className="overflow-x-clip bg-aq-ice/50 py-12 sm:py-16 md:py-24">
-          <div className="page-container">
-            <SectionHeading
-              tag="Kategoriler"
-              title="İhtiyacınıza Uygun Çözümler"
-              description="Modern su arıtma teknolojileri, filtre sistemleri ve profesyonel hizmetler tek çatı altında."
-            />
-            <StaggerContainer
-              className="grid w-full min-w-0 grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6 lg:gap-5"
-              staggerDelay={0.06}
-            >
-              {shownCategories.map((cat) => (
-                <StaggerItem key={cat.id} className="min-w-0 h-full max-w-full">
-                  <CategoryCard
-                    id={cat.id}
-                    name={cat.name}
-                    productCount={cat.productCount}
-                    icon={cat.icon}
-                    image={categoryImages[cat.id] || '/images/products/placeholder.jpg'}
-                  />
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-        </section>
-
-        {/* ========== 5. ONE CIKAN URUNLER ========== */}
-        <section className="py-12 sm:py-16 md:py-24 bg-white">
-          <div className="page-container">
-            <SectionHeading tag="Öne Çıkan Ürünler" title="En Çok Tercih Edilenler" />
-            <div className="responsive-scroll-x mb-7 sm:mb-9">
-              <div className="flex sm:flex-wrap sm:justify-center gap-2 min-w-max sm:min-w-0 pb-1 sm:pb-0">
-                {[
-                  { key: 'cok-satanlar', label: 'Çok Satanlar' },
-                  { key: 'yeni-gelenler', label: 'Yeni Gelenler' },
-                  { key: 'kampanyali', label: 'Kampanyalı' },
-                  { key: 'cihazlar', label: 'Su Arıtma Cihazları' },
-                ].map((t) => (
-                  <button
-                    key={t.key}
-                    type="button"
-                    onClick={() => setActiveTab(t.key)}
-                    className={cn(
-                      'px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap',
-                      activeTab === t.key
-                        ? 'bg-aq-deep text-white shadow-sm'
-                        : 'bg-aq-ice text-aq-muted border border-aq-border/60 hover:border-aq-blue/40 hover:text-aq-blue',
-                    )}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {(tabProducts[activeTab as keyof typeof tabProducts] ?? catalogProducts.slice(0, 4)).map((p) => (
-                <div key={p.id} className="min-w-0"><ProductCard product={p} /></div>
-              ))}
-            </div>
-            <div className="text-center mt-7 sm:mt-9">
-              <Link to="/urunler" className="inline-flex items-center gap-2 text-sm font-semibold text-aq-blue hover:underline">
-                Tüm Ürünleri Gör <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* ========== 6. NEDEN AQUAILS ========== */}
-        <section className="py-12 sm:py-16 md:py-24 bg-aq-ice/50">
-          <div className="page-container">
-            <SectionHeading
-              tag="Neden Aquails?"
-              title="Fark Yaratan Teknoloji"
-              description="17 yıllık deneyim ve en son teknoloji ile ürettiğimiz çözümler, ailenizin sağlığını ön planda tutar."
-            />
-            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" staggerDelay={0.08}>
-              {nedenAquails.map((f) => (
-                <StaggerItem key={f.title}>
-                  <div className="bg-white border border-aq-border/60 rounded-2xl p-5 sm:p-7 hover:border-aq-blue/20 transition-all duration-300 h-full">
-                    <div className="w-11 h-11 bg-aq-sky rounded-xl flex items-center justify-center mb-4">
-                      <f.icon className="w-5 h-5 text-aq-blue" />
-                    </div>
-                    <h3 className="text-base font-semibold text-aq-text">{f.title}</h3>
-                    <p className="text-sm text-aq-muted mt-2 leading-relaxed">{f.desc}</p>
-                  </div>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-        </section>
-
-        {/* ========== 7. NASIL CALISIR ========== */}
-        <section id="nasil-calisir" className="py-12 sm:py-16 md:py-24 bg-white scroll-mt-24">
-          <div className="page-container">
-            <SectionHeading tag="Nasıl Çalışır?" title="3 Adımda Temiz Su" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 md:gap-8 relative">
-              <div className="hidden md:block absolute top-8 left-[18%] right-[18%] h-px bg-aq-border z-0" />
-              {nasilCalisir.map((s, i) => (
-                <ScrollReveal key={s.step} y={20} delay={i * 0.12} className="relative z-10">
-                  <div className="text-center px-2">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white border border-aq-blue/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <s.icon className="w-6 h-6 sm:w-7 sm:h-7 text-aq-blue" />
-                    </div>
-                    <span className="text-xs font-medium text-aq-blue bg-aq-sky px-3 py-1 rounded-full">Adım {s.step}</span>
-                    <h3 className="text-base sm:text-lg font-semibold text-aq-text mt-3">{s.title}</h3>
-                    <p className="text-sm text-aq-muted mt-2 leading-relaxed max-w-xs mx-auto">{s.desc}</p>
-                  </div>
-                </ScrollReveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ========== 8. CTA ========== */}
-        <section className="px-3 sm:px-6 lg:px-8 pb-12 sm:pb-14 md:pb-16 pt-2 bg-white">
-          <div className="relative overflow-hidden rounded-[22px] sm:rounded-[28px] md:rounded-[40px] hero-aqua">
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="absolute -top-20 right-[15%] w-[380px] h-[380px] rounded-full bg-aq-aqua/15 blur-[90px]" />
-              <div className="absolute -bottom-24 left-[10%] w-[340px] h-[340px] rounded-full bg-aq-blue/20 blur-[80px]" />
-            </div>
-            <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 sm:px-8 lg:px-12 py-10 sm:py-14 md:py-20 text-center">
-              <ScrollReveal>
-                <span className="inline-block text-aq-aqua text-[10px] sm:text-xs font-semibold tracking-[0.18em] sm:tracking-[0.2em] uppercase mb-3 sm:mb-4">
-                  Temiz Su · Sağlıklı Yaşam
-                </span>
-                <h2 className="text-xl sm:text-3xl md:text-4xl font-bold text-white leading-tight max-w-2xl mx-auto">
-                  Size En Uygun Su Arıtma Sistemini Birlikte Bulalım
-                </h2>
-                <p className="text-sm sm:text-base text-white/65 mt-3 sm:mt-4 max-w-lg mx-auto leading-relaxed">
-                  Ücretsiz keşif randevusu alın; uzman ekibimiz su kalitenizi analiz etsin, ihtiyacınıza en uygun çözümü önersin.
-                </p>
-                <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-2.5 sm:gap-3 mt-6 sm:mt-8">
-                  <AquailsButton to="/servis-randevusu" variant="primary" size="lg" showArrow className="w-full sm:w-auto">
-                    Ücretsiz Keşif Randevusu
-                  </AquailsButton>
-                  <AquailsButton to="/urunler" variant="ghost" size="lg" className="w-full sm:w-auto">
-                    Ürünleri İncele
-                  </AquailsButton>
-                </div>
-                <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-6 mt-7 sm:mt-9 pt-6 sm:pt-7 border-t border-white/10">
-                  {[
-                    { icon: Users, label: '10.000+ Mutlu Müşteri' },
-                    { icon: ShieldCheck, label: '5 Yıl Garanti' },
-                    { icon: Wrench, label: 'Ücretsiz Kurulum' },
-                  ].map(({ icon: Icon, label }) => (
-                    <span key={label} className="inline-flex items-center justify-center gap-2 text-xs font-medium text-white/70">
-                      <Icon className="w-4 h-4 text-aq-aqua flex-shrink-0" />{label}
-                    </span>
-                  ))}
-                </div>
-              </ScrollReveal>
-            </div>
-          </div>
-        </section>
+        <Hero />
+        <DesignedForLife />
+        <ChooseYourSystem options={systems} />
+        <Lifestyle />
+        <Testimonials products={products} />
+        <StoryAndOffer />
+        <FAQ />
       </PageLayout>
     </>
   );

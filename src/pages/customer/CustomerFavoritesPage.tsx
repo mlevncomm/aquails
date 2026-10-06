@@ -113,7 +113,7 @@ export default function CustomerFavoritesPage() {
                     type="button"
                     onClick={() => handleAddToCart(p)}
                     aria-label="Sepete Ekle"
-                    className="w-9 h-9 flex items-center justify-center rounded-xl border border-aq-border/60 text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-sky transition-all"
+                    className="w-9 h-9 flex items-center justify-center rounded-xl text-aq-deep hover:border-aq-blue hover:text-aq-blue hover:bg-aq-cloud transition-all"
                   >
                     <ShoppingCart className="w-3.5 h-3.5" />
                   </button>

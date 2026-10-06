@@ -105,3 +105,56 @@ export async function completeSlot(slotId: string): Promise<{ success: boolean; 
   if (!data?.length) return { success: false, error: 'Slot güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }
+
+export interface AdminServiceSlot {
+  id: string;
+  date: string;
+  time: string;
+  capacity: number;
+  booked: number;
+  isAvailable: boolean;
+}
+
+/** Admin: raw slot rows for the next `daysAhead` days (creates missing default slots first). */
+export async function getAdminSlots(daysAhead = 14): Promise<AdminServiceSlot[]> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return [];
+  await ensureSlots(daysAhead);
+  const end = new Date();
+  end.setDate(end.getDate() + daysAhead);
+  const { data } = await supabase
+    .from('service_slots')
+    .select('*')
+    .gte('slot_date', new Date().toISOString().split('T')[0])
+    .lte('slot_date', end.toISOString().split('T')[0])
+    .order('slot_date', { ascending: true })
+    .order('slot_time', { ascending: true });
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    date: r.slot_date,
+    time: r.slot_time,
+    capacity: r.capacity,
+    booked: r.booked,
+    isAvailable: r.is_available,
+  }));
+}
+
+export async function updateServiceSlot(
+  id: string,
+  patch: { capacity?: number; isAvailable?: boolean },
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+  const update: { capacity?: number; is_available?: boolean } = {};
+  if (patch.capacity !== undefined) {
+    if (!Number.isInteger(patch.capacity) || patch.capacity < 0 || patch.capacity > 50) {
+      return { success: false, error: 'Kapasite 0 ile 50 arasında olmalı.' };
+    }
+    update.capacity = patch.capacity;
+  }
+  if (patch.isAvailable !== undefined) update.is_available = patch.isAvailable;
+  const { data, error } = await supabase.from('service_slots').update(update).eq('id', id).select('id');
+  if (error) return { success: false, error: error.message };
+  if (!data?.length) return { success: false, error: 'Slot güncellenemedi veya yetkiniz yok.' };
+  return { success: true };
+}

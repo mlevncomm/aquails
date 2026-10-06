@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
+import { PageHero } from '@/components/PageHero';
 import { getFAQSchema } from '@/components/SchemaOrg';
 
 
@@ -31,21 +31,19 @@ export default function FAQPage() {
         schema={getFAQSchema(faqs.map((item) => ({ question: item.q, answer: item.a })))}
       />
     <PageLayout>
-      <div className="max-w-[800px] mx-auto px-4 py-8">
-        <div className="mb-8 text-center">
-          <div className="flex items-center justify-center gap-2 text-[13px] text-aq-muted mb-2">
-            <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link>
-            <span>/</span>
-            <span className="text-aq-muted">SSS</span>
-          </div>
-          <h1 className="text-2xl font-bold text-aq-text mb-2">Sıkça Sorulan Sorular</h1>
-          <p className="text-sm text-aq-muted">Aklınıza takılan soruların yanıtlarını burada bulabilirsiniz.</p>
-        </div>
+      <PageHero
+        eyebrow="Yardım merkezi"
+        title="Sıkça Sorulan Sorular"
+        description="Aklınıza takılan soruların yanıtlarını burada bulabilirsiniz."
+        breadcrumbs={[{ label: 'SSS' }]}
+        image="/images/lifestyle/pour-glass.jpg"
+      />
+      <div className="max-w-[800px] mx-auto px-4 py-10 sm:py-14">
 
         {/* Categories */}
         <div className="flex flex-wrap justify-center gap-2 mb-8">
           {categories.map(c => (
-            <button key={c} className="px-4 py-2 text-sm font-semibold rounded-xl border border-aq-border/60 text-aq-muted hover:bg-aq-sky hover:text-aq-blue transition-all">
+            <button key={c} className="px-4 py-2 text-sm font-semibold rounded-full border border-aq-border/60 text-aq-muted hover:bg-aq-cloud hover:text-aq-blue transition-all">
               {c}
             </button>
           ))}
@@ -54,13 +52,13 @@ export default function FAQPage() {
         {/* FAQ Accordion */}
         <div className="space-y-3">
           {faqs.map((f, i) => (
-            <div key={i} className="bg-white border border-aq-border/60 rounded-2xl overflow-hidden">
+            <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-soft">
               <button
                 onClick={() => setOpenIdx(openIdx === i ? null : i)}
                 className="w-full flex items-center justify-between p-5 text-left"
               >
                 <div className="flex items-center gap-3">
-                  <HelpCircle className="w-5 h-5 text-aq-blue flex-shrink-0" />
+                  <HelpCircle className="w-5 h-5 text-aq-ink flex-shrink-0" />
                   <span className="text-sm font-semibold text-aq-text">{f.q}</span>
                 </div>
                 <ChevronDown className={`w-5 h-5 text-aq-muted transition-transform flex-shrink-0 ${openIdx === i ? 'rotate-180' : ''}`} />

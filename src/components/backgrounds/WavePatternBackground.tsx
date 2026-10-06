@@ -8,9 +8,9 @@ interface WavePatternBackgroundProps {
 
 export function WavePatternBackground({ children, className, variant = 'light' }: WavePatternBackgroundProps) {
   const colors = {
-    light: '#06263D08',
-    subtle: '#06263D05',
-    hero: '#06263D0D',
+    light: '#0B254008',
+    subtle: '#0B254005',
+    hero: '#0B25400D',
   };
 
   return (

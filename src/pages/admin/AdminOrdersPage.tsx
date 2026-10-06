@@ -41,7 +41,7 @@ function StatusMenu({
             key={s}
             type="button"
             onClick={() => onUpdate(orderId, s)}
-            className="block w-full text-left px-3 py-2 text-xs text-aq-muted hover:bg-aq-ice hover:text-aq-text"
+            className="block w-full text-left px-3 py-2 text-xs text-aq-muted hover:bg-aq-cloud hover:text-aq-ink"
           >
             {s}
           </button>
@@ -136,8 +136,8 @@ export default function AdminOrdersPage() {
               <AdminCard key={o.id} className="!p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-aq-blue">{o.orderNo}</p>
-                    <p className="text-sm text-aq-text mt-0.5 truncate">{o.customer}</p>
+                    <p className="text-sm font-semibold text-aq-ink">{o.orderNo}</p>
+                    <p className="text-sm text-aq-ink mt-0.5 truncate">{o.customer}</p>
                     <p className="text-[11px] text-aq-muted truncate">{o.email}</p>
                   </div>
                   <StatusMenu status={o.status} orderId={o.id} onUpdate={(id, s) => void handleUpdateStatus(id, s)} />
@@ -145,7 +145,7 @@ export default function AdminOrdersPage() {
                 <p className="text-xs text-aq-muted mt-3 line-clamp-2">{o.product}</p>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-aq-border/50">
                   <div>
-                    <p className="text-sm font-semibold text-aq-text">{o.amount.toLocaleString('tr-TR')}₺</p>
+                    <p className="text-sm font-semibold text-aq-ink">{o.amount.toLocaleString('tr-TR')}₺</p>
                     <p className="text-[11px] text-aq-muted">{o.date}</p>
                   </div>
                   <Link to={`/admin/siparisler/${o.id}`}>
@@ -162,7 +162,7 @@ export default function AdminOrdersPage() {
             <AdminTableWrap stickyFirst>
               <table className="w-full">
                 <thead>
-                  <tr className="bg-aq-ice">
+                  <tr className="bg-aq-cloud">
                     {['Sipariş No', 'Müşteri', 'Ürün', 'Tutar', 'Durum', 'Tarih', 'İşlem'].map((h) => (
                       <th
                         key={h}
@@ -175,21 +175,21 @@ export default function AdminOrdersPage() {
                 </thead>
                 <tbody>
                   {filtered.map((o) => (
-                    <tr key={o.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
-                      <td className="px-4 py-3 text-sm font-medium text-aq-blue whitespace-nowrap">{o.orderNo}</td>
+                    <tr key={o.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-cloud/50">
+                      <td className="px-4 py-3 text-sm font-medium text-aq-ink whitespace-nowrap">{o.orderNo}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-7 h-7 bg-aq-sky rounded-full flex items-center justify-center text-xs font-medium text-aq-blue flex-shrink-0">
+                          <div className="w-7 h-7 bg-aq-cloud rounded-full flex items-center justify-center text-xs font-medium text-aq-ink flex-shrink-0">
                             {o.customer[0]}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-aq-text truncate">{o.customer}</p>
+                            <p className="text-sm font-medium text-aq-ink truncate">{o.customer}</p>
                             <p className="text-[11px] text-aq-muted truncate">{o.email}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-aq-muted max-w-[160px] truncate">{o.product}</td>
-                      <td className="px-4 py-3 text-sm font-semibold text-aq-text whitespace-nowrap">
+                      <td className="px-4 py-3 text-sm font-semibold text-aq-ink whitespace-nowrap">
                         {o.amount.toLocaleString('tr-TR')}₺
                       </td>
                       <td className="px-4 py-3">
@@ -199,7 +199,7 @@ export default function AdminOrdersPage() {
                       <td className="px-4 py-3">
                         <Link
                           to={`/admin/siparisler/${o.id}`}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-ice text-aq-muted hover:text-aq-blue transition-all"
+                          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-aq-cloud text-aq-muted hover:text-aq-ink transition-all"
                           aria-label="Sipariş detayı"
                         >
                           <Eye className="w-4 h-4" />

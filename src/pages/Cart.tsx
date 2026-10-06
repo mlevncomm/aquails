@@ -18,6 +18,7 @@ import { CartLinePrice } from '@/components/CartLinePrice';
 import { getProductGrossPrice } from '@/lib/pricing';
 import { validateCoupon } from '@/services/couponService';
 import { useToastStore } from '@/components/Toast';
+import { PageHero } from '@/components/PageHero';
 
 
 export default function Cart() {
@@ -65,21 +66,13 @@ export default function Cart() {
       />
     <PageLayout>
       {/* Hero */}
-      <div className="relative overflow-hidden border-b border-aq-border/40 bg-[#F7FBFE] py-12 md:py-14">
-        <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_0%_0%,rgba(32,211,242,0.14),transparent_55%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_60%_at_100%_0%,rgba(18,134,216,0.1),transparent_50%)]" />
-        </div>
-        <div className="page-container relative">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-aq-blue/70">Alışveriş</p>
-          <h1 className="mt-2 font-[Poppins,ui-sans-serif,sans-serif] text-2xl font-semibold tracking-tight text-aq-deep md:text-3xl">
-            Sepetim
-          </h1>
-          <p className="mt-2 text-sm text-aq-muted">
-            {items.length === 0 ? 'Sepetiniz boş' : `Sepetinizde ${items.length} ürün bulunuyor`}
-          </p>
-        </div>
-      </div>
+      <PageHero
+        size="sm"
+        eyebrow="Alışveriş"
+        title="Sepetim"
+        description={items.length === 0 ? 'Sepetiniz boş' : `Sepetinizde ${items.length} ürün bulunuyor`}
+        breadcrumbs={[{ label: 'Sepet' }]}
+      />
 
       <div className="page-container overflow-x-hidden py-8 sm:py-10">
         {items.length === 0 ? (
@@ -87,17 +80,12 @@ export default function Cart() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative mx-auto max-w-lg overflow-hidden rounded-[1.75rem] border border-white/70 bg-white/75 px-6 py-16 text-center shadow-[0_30px_80px_-40px_rgba(6,38,61,0.35)] backdrop-blur-xl sm:px-10"
+            className="relative mx-auto max-w-lg overflow-hidden rounded-3xl bg-white px-6 py-14 text-center sm:px-10 shadow-soft"
           >
-            <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-aq-aqua/15 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-20 -left-10 h-36 w-36 rounded-full bg-aq-blue/10 blur-3xl" />
-            <div className="relative mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-[1.75rem] border border-white/80 bg-white/90 shadow-[0_20px_50px_-28px_rgba(6,38,61,0.4)]">
-              <ShoppingCart className="h-11 w-11 text-aq-blue/50" strokeWidth={1.5} />
-              <span className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-aq-aqua to-aq-blue text-white shadow-md">
-                <Sparkles className="h-3.5 w-3.5" />
-              </span>
+            <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-aq-cloud">
+              <ShoppingCart className="h-9 w-9 text-aq-ink/60" strokeWidth={1.5} />
             </div>
-            <h2 className="relative font-[Poppins,ui-sans-serif,sans-serif] text-xl font-semibold tracking-tight text-aq-deep">
+            <h2 className="relative text-2xl font-bold tracking-[-0.02em] text-aq-ink">
               Sepetiniz Henüz Boş
             </h2>
             <p className="relative mx-auto mt-2 mb-7 max-w-sm text-sm leading-relaxed text-aq-muted">
@@ -106,13 +94,13 @@ export default function Cart() {
             <div className="relative flex flex-col justify-center gap-3 sm:flex-row">
               <Link
                 to="/urunler"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-aq-blue to-[#0d6fba] px-8 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(18,134,216,0.75)] transition-all hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-aq-ink hover:bg-aq-ink-soft px-8 py-3.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
               >
                 <Package className="h-4 w-4" /> Ürünleri Keşfet
               </Link>
               <Link
                 to="/urun-secim-sihirbazi"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-aq-border/70 bg-white/80 px-8 py-3.5 text-sm font-semibold text-aq-muted transition-all hover:border-aq-blue/35 hover:text-aq-blue"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-aq-ink/15 bg-white px-8 py-3.5 text-sm font-semibold text-aq-ink transition-all hover:border-aq-ink"
               >
                 <Sparkles className="h-4 w-4" /> Sihirbaz Kullan
               </Link>
@@ -122,7 +110,7 @@ export default function Cart() {
           <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6 lg:gap-8 min-w-0">
             {/* Product List */}
             <ScrollReveal>
-              <div className="bg-white border border-aq-border/60 rounded-2xl overflow-hidden">
+              <div className="bg-white rounded-2xl overflow-hidden shadow-soft">
                 <AnimatePresence mode="popLayout">
                   {items.map((item) => (
                     <motion.div
@@ -145,10 +133,10 @@ export default function Cart() {
                       </div>
 
                       {/* Info */}
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-[calc(100%-6.5rem)] sm:min-w-0">
                         <Link
                           to={`/urun/${item.product.slug}`}
-                          className="text-sm font-semibold text-aq-text hover:text-aq-blue transition-colors line-clamp-1"
+                          className="text-sm font-semibold text-aq-text hover:text-aq-blue transition-colors line-clamp-2 sm:line-clamp-1"
                         >
                           {item.product.name}
                         </Link>
@@ -159,7 +147,7 @@ export default function Cart() {
                       </div>
 
                       {/* Quantity */}
-                      <div className="flex items-center bg-aq-ice rounded-xl overflow-hidden border border-aq-border/60">
+                      <div className="flex items-center bg-aq-ice rounded-full overflow-hidden border border-aq-border/60">
                         <button
                           onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                           className="w-8 h-8 flex items-center justify-center text-aq-muted hover:bg-aq-border transition-colors"
@@ -176,8 +164,8 @@ export default function Cart() {
                       </div>
 
                       {/* Price */}
-                      <div className="text-right w-20 flex-shrink-0 hidden sm:block">
-                        <p className="text-base font-semibold text-aq-text">
+                      <div className="ml-auto sm:ml-0 text-right sm:min-w-[6rem] flex-shrink-0">
+                        <p className="text-sm sm:text-base font-semibold text-aq-text whitespace-nowrap">
                           <CartLinePrice product={item.product} quantity={item.quantity} />
                         </p>
                       </div>
@@ -185,7 +173,8 @@ export default function Cart() {
                       {/* Delete */}
                       <button
                         onClick={() => removeItem(item.product.id)}
-                        className="w-9 h-9 flex items-center justify-center rounded-xl text-aq-muted hover:bg-red-50 hover:text-red-500 transition-colors flex-shrink-0"
+                        aria-label="Ürünü sepetten çıkar"
+                        className="w-9 h-9 flex items-center justify-center rounded-full text-aq-muted hover:bg-red-50 hover:text-red-500 transition-colors flex-shrink-0"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -198,7 +187,7 @@ export default function Cart() {
               {recommendations.length > 0 && (
                 <ScrollReveal className="mt-8">
                   <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="w-4 h-4 text-aq-blue" />
+                    <Sparkles className="w-4 h-4 text-aq-ink" />
                     <h3 className="text-sm font-semibold text-aq-text">Bu Ürünlerle Birlikte Önerilenler</h3>
                   </div>
                   <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-3" staggerDelay={0.08}>
@@ -217,9 +206,9 @@ export default function Cart() {
               <div className="space-y-5 lg:sticky lg:top-28">
                 {/* Free Shipping Progress */}
                 {remainingForFreeShipping > 0 ? (
-                  <div className="bg-white border border-aq-border/60 rounded-2xl p-5">
+                  <div className="bg-white rounded-2xl p-5 shadow-soft">
                     <div className="flex items-center gap-2 mb-3">
-                      <Truck className="w-4 h-4 text-aq-blue" />
+                      <Truck className="w-4 h-4 text-aq-ink" />
                       <p className="text-sm font-semibold text-aq-text">Ücretsiz Kargo</p>
                     </div>
                     <div className="w-full h-2 bg-aq-border rounded-full overflow-hidden">
@@ -233,17 +222,17 @@ export default function Cart() {
                     </p>
                   </div>
                 ) : (
-                  <div className="bg-aq-sky border border-aq-aqua/30 rounded-2xl p-4 flex items-center gap-3">
-                    <Check className="w-5 h-5 text-aq-blue flex-shrink-0" />
+                  <div className="bg-aq-cloud border border-aq-aqua/30 rounded-2xl p-4 flex items-center gap-3">
+                    <Check className="w-5 h-5 text-aq-ink flex-shrink-0" />
                     <p className="text-sm font-medium text-aq-blue">Tebrikler! Kargonuz ücretsiz.</p>
                   </div>
                 )}
 
                 {/* Coupon */}
-                <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+                <div className="bg-white rounded-2xl p-6 shadow-soft">
                   <h3 className="text-sm font-semibold text-aq-text mb-3">Kupon Kodu</h3>
                   {appliedCoupon ? (
-                    <div className="flex items-center justify-between gap-3 rounded-xl border border-aq-aqua/30 bg-aq-sky/40 px-4 py-3">
+                    <div className="flex items-center justify-between gap-3 rounded-xl border border-aq-aqua/30 bg-aq-cloud px-4 py-3">
                       <div>
                         <p className="text-sm font-semibold text-aq-blue">{appliedCoupon.code}</p>
                         <p className="text-xs text-aq-muted mt-0.5">
@@ -275,7 +264,7 @@ export default function Cart() {
                         type="button"
                         onClick={() => void handleApplyCoupon()}
                         disabled={couponLoading}
-                        className="bg-aq-blue text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all disabled:opacity-60"
+                        className="bg-aq-ink text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-aq-ink-soft hover:text-white transition-all disabled:opacity-60"
                       >
                         {couponLoading ? '...' : 'Uygula'}
                       </button>
@@ -284,7 +273,7 @@ export default function Cart() {
                 </div>
 
                 {/* Summary */}
-                <div className="bg-white border border-aq-border/60 rounded-2xl p-6">
+                <div className="bg-white rounded-2xl p-6 shadow-soft">
                   <h3 className="text-lg font-semibold text-aq-text mb-5">Sipariş Özeti</h3>
 
                   <div className="space-y-3">
@@ -310,7 +299,7 @@ export default function Cart() {
 
                   <Link
                     to="/odeme"
-                    className="flex items-center justify-center gap-2 w-full bg-aq-blue text-white py-4 rounded-xl font-semibold hover:bg-aq-deep hover:text-white transition-all mt-2"
+                    className="flex items-center justify-center gap-2 w-full bg-aq-ink text-white py-4 rounded-full font-semibold hover:bg-aq-ink-soft hover:text-white transition-all mt-2"
                   >
                     Ödemeye Geç <ArrowRight className="w-4 h-4" />
                   </Link>

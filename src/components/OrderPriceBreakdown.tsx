@@ -83,12 +83,12 @@ export function OrderPriceBreakdown({
         </>
       )}
 
-      <div className="flex justify-between text-base font-semibold pt-3 border-t-2 border-aq-border/60 gap-4">
-        <span className="text-aq-text shrink-0">
+      <div className="flex flex-wrap items-baseline justify-between text-base font-semibold pt-3 border-t-2 border-aq-border/60 gap-x-4 gap-y-1">
+        <span className="text-aq-text">
           {totalLabel}
           {hasTax ? ' (KDV Dahil)' : ''}
         </span>
-        <span className="text-xl font-semibold text-aq-blue text-right">{formatPrice(totalGross)}</span>
+        <span className="ml-auto whitespace-nowrap text-lg sm:text-xl font-bold text-aq-ink text-right tabular-nums">{formatPrice(totalGross)}</span>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { useToastStore } from '@/components/Toast';
 import { SEO } from '@/components/SEO';
+import { PageHero } from '@/components/PageHero';
 import { submitContactMessage } from '@/services/contactService';
 import { getSiteConfig } from '@/services/settingsService';
 import { CONTACT_PHONE_DISPLAY, CONTACT_WHATSAPP_DIGITS } from '@/lib/contact';
@@ -79,15 +80,12 @@ export default function ContactPage() {
       />
     <PageLayout>
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-aq-ice via-white to-aq-sky/40 py-12 md:py-16">
-        <div className="page-container">
-          <div className="flex items-center gap-2 text-[13px] text-aq-muted mb-3">
-            <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link><span>/</span><span className="text-aq-muted">İletişim</span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-aq-text">Bize Ulaşın</h1>
-          <p className="text-sm text-aq-muted mt-2 max-w-lg">Sorularınız, önerileriniz veya destek talepleriniz için bize ulaşabilirsiniz.</p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="İletişim"
+        title="Bize Ulaşın"
+        description="Sorularınız, önerileriniz veya destek talepleriniz için bize ulaşabilirsiniz."
+        breadcrumbs={[{ label: 'İletişim' }]}
+      />
 
       <div className="page-container py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -95,9 +93,9 @@ export default function ContactPage() {
           <ScrollReveal className="lg:col-span-1">
             <div className="space-y-3">
               {contactInfo.map(item => (
-                <div key={item.label} className="bg-white border border-aq-border/60 rounded-2xl p-4 flex items-start gap-3 hover:shadow-sm transition-all">
-                  <div className="w-9 h-9 bg-aq-sky rounded-lg flex items-center justify-center flex-shrink-0">
-                    <item.icon className="w-4 h-4 text-aq-blue" />
+                <div key={item.label} className="bg-white rounded-2xl p-4 flex items-start gap-3 hover: transition-all shadow-soft">
+                  <div className="w-9 h-9 bg-aq-cloud rounded-lg flex items-center justify-center flex-shrink-0">
+                    <item.icon className="w-4 h-4 text-aq-ink" />
                   </div>
                   <div>
                     <p className="text-[11px] font-medium text-aq-muted mb-0.5">{item.label}</p>
@@ -108,7 +106,7 @@ export default function ContactPage() {
               ))}
 
               {/* WhatsApp Card */}
-              <div className="bg-gradient-to-r from-aq-aqua to-aq-aqua-hover rounded-2xl p-5 text-aq-text">
+              <div className="bg-aq-cloud rounded-2xl p-5 text-aq-text ring-1 ring-aq-border/70">
                 <div className="flex items-center gap-3 mb-3">
                   <MessageCircle className="w-6 h-6" />
                   <div>
@@ -123,16 +121,16 @@ export default function ContactPage() {
               </div>
 
               {/* Service Redirect */}
-              <Link to="/servis-randevusu" className="block bg-white border border-aq-border/60 rounded-2xl p-4 hover:border-aq-blue/20 transition-all group">
+              <Link to="/servis-randevusu" className="block bg-white rounded-2xl p-4 hover:border-aq-blue/20 transition-all group shadow-soft">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-aq-sky rounded-lg flex items-center justify-center">
-                    <Wrench className="w-4 h-4 text-aq-blue" />
+                  <div className="w-9 h-9 bg-aq-cloud rounded-lg flex items-center justify-center">
+                    <Wrench className="w-4 h-4 text-aq-ink" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-aq-text group-hover:text-aq-blue transition-colors">Servis Randevusu Al</p>
                     <p className="text-[11px] text-aq-muted">Kurulum, bakım ve arıza talepleri</p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-aq-muted group-hover:text-aq-blue" />
+                  <ArrowRight className="w-4 h-4 text-aq-muted group-hover:text-aq-ink" />
                 </div>
               </Link>
 
@@ -155,10 +153,10 @@ export default function ContactPage() {
 
           {/* Form */}
           <ScrollReveal delay={0.1} className="lg:col-span-2">
-            <div className="bg-white border border-aq-border/60 rounded-2xl p-6 md:p-8">
+            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-soft">
               {sent ? (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-aq-sky rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-aq-cloud rounded-full flex items-center justify-center mx-auto mb-4">
                     <CheckCircle className="w-8 h-8 text-aq-aqua" />
                   </div>
                   <h3 className="text-lg font-semibold text-aq-text mb-2">Mesajınız Gönderildi!</h3>
@@ -202,7 +200,7 @@ export default function ContactPage() {
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="flex items-center justify-center gap-2 w-full sm:w-auto bg-aq-blue text-white px-8 py-3 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="flex items-center justify-center gap-2 w-full sm:w-auto bg-aq-ink text-white px-8 py-3 rounded-full text-sm font-semibold hover:bg-aq-ink-soft hover:text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                       {submitting ? 'Gönderiliyor…' : 'Gönder'}

@@ -17,7 +17,7 @@ export function EmptyState({ icon, title, description, action, actionNode, class
   if (variant === 'default') {
     return (
       <div className={cn('flex flex-col items-center justify-center py-16 px-4 text-center', className)}>
-        <div className="w-16 h-16 bg-aq-sky rounded-2xl flex items-center justify-center text-aq-muted mb-4">
+        <div className="w-16 h-16 bg-aq-cloud rounded-2xl flex items-center justify-center text-aq-muted mb-4">
           {icon}
         </div>
         <h3 className="text-base font-semibold text-aq-text mb-1">{title}</h3>
@@ -25,7 +25,7 @@ export function EmptyState({ icon, title, description, action, actionNode, class
         {action && (
           <Link
             to={action.href}
-            className="inline-flex items-center gap-2 bg-aq-blue text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all"
+            className="inline-flex items-center gap-2 bg-aq-ink text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-aq-ink-soft hover:text-white transition-all"
           >
             {action.label}
           </Link>
@@ -55,7 +55,7 @@ export function EmptyState({ icon, title, description, action, actionNode, class
       {action && (
         <Link
           to={action.href}
-          className="inline-flex items-center gap-2 bg-aq-blue text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white hover:-translate-y-0.5 transition-all"
+          className="inline-flex items-center gap-2 bg-aq-ink text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-aq-ink-soft hover:text-white hover:-translate-y-0.5 transition-all"
         >
           {action.label}
         </Link>

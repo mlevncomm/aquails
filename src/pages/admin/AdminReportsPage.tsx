@@ -101,15 +101,15 @@ export default function AdminReportsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <AdminCard>
-              <h3 className="text-sm font-semibold text-aq-text mb-4">Satış Trendi</h3>
+              <h3 className="text-sm font-semibold text-aq-ink mb-4">Satış Trendi</h3>
               {stats.dailySales.length === 0 ? (
                 <p className="text-sm text-aq-muted text-center py-12">Bu dönemde sipariş yok</p>
               ) : (
-                <div className="h-48 flex items-end justify-center gap-2 p-4 bg-aq-ice rounded-xl">
+                <div className="h-48 flex items-end justify-center gap-2 p-4 bg-aq-cloud rounded-xl">
                   {stats.dailySales.map((d, i) => (
                     <div key={i} className="flex-1 flex flex-col items-center gap-1">
                       <div
-                        className="w-full bg-aq-sky rounded-t-sm min-h-[4px] transition-all"
+                        className="w-full bg-aq-cloud rounded-t-sm min-h-[4px] transition-all"
                         style={{ height: `${(d.amount / maxDaily) * 100}%` }}
                         title={`₺${d.amount.toLocaleString('tr-TR')}`}
                       />
@@ -121,17 +121,17 @@ export default function AdminReportsPage() {
             </AdminCard>
 
             <AdminCard>
-              <h3 className="text-sm font-semibold text-aq-text mb-4">Kategori Dağılımı (Ürün)</h3>
+              <h3 className="text-sm font-semibold text-aq-ink mb-4">Kategori Dağılımı (Ürün)</h3>
               <div className="space-y-3">
                 {stats.categoryBreakdown.map((c, i) => {
-                  const colors = ['bg-aq-sky', 'bg-emerald-500', 'bg-violet-500', 'bg-amber-500', 'bg-rose-500', 'bg-teal-500', 'bg-indigo-500'];
+                  const colors = ['bg-aq-cloud', 'bg-emerald-500', 'bg-violet-500', 'bg-amber-500', 'bg-rose-500', 'bg-teal-500', 'bg-indigo-500'];
                   return (
                     <div key={c.name}>
                       <div className="flex justify-between text-xs mb-1">
                         <span className="text-aq-muted">{c.name}</span>
-                        <span className="text-aq-text font-medium">{c.count} ürün ({c.percent}%)</span>
+                        <span className="text-aq-ink font-medium">{c.count} ürün ({c.percent}%)</span>
                       </div>
-                      <div className="w-full h-2 bg-aq-ice rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-aq-cloud rounded-full overflow-hidden">
                         <div className={`h-full ${colors[i % colors.length]} rounded-full`} style={{ width: `${c.percent}%` }} />
                       </div>
                     </div>

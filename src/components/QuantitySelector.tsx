@@ -17,7 +17,7 @@ export function QuantitySelector({ quantity, onIncrease, onDecrease, size = 'md'
         type="button"
         onClick={onDecrease}
         aria-label="Azalt"
-        className={`${btnClass} flex items-center justify-center bg-aq-ice text-aq-muted hover:bg-aq-sky hover:text-aq-blue transition-colors`}
+        className={`${btnClass} flex items-center justify-center bg-aq-ice text-aq-muted hover:bg-aq-cloud hover:text-aq-blue transition-colors`}
       >
         <Minus className={size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'} />
       </button>
@@ -28,7 +28,7 @@ export function QuantitySelector({ quantity, onIncrease, onDecrease, size = 'md'
         type="button"
         onClick={onIncrease}
         aria-label="Artır"
-        className={`${btnClass} flex items-center justify-center bg-aq-ice text-aq-muted hover:bg-aq-sky hover:text-aq-blue transition-colors`}
+        className={`${btnClass} flex items-center justify-center bg-aq-ice text-aq-muted hover:bg-aq-cloud hover:text-aq-blue transition-colors`}
       >
         <Plus className={size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'} />
       </button>

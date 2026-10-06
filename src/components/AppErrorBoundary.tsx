@@ -34,7 +34,7 @@ export class AppErrorBoundary extends Component<Props, State> {
       <div className="min-h-[100dvh] flex items-center justify-center bg-[#F7FBFE] px-4">
         <div className="max-w-md w-full text-center rounded-2xl border border-[#D7E6F2] bg-white p-8 shadow-sm">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#E8F4FB]">
-            <AlertTriangle className="h-6 w-6 text-aq-blue" aria-hidden />
+            <AlertTriangle className="h-6 w-6 text-aq-ink" aria-hidden />
           </div>
           <h1 className="text-xl font-semibold text-aq-text">Bir sorun oluştu</h1>
           <p className="mt-2 text-sm text-aq-muted leading-relaxed">
@@ -44,7 +44,7 @@ export class AppErrorBoundary extends Component<Props, State> {
             <button
               type="button"
               onClick={this.handleRetry}
-              className="inline-flex items-center justify-center rounded-xl bg-aq-blue px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
+              className="inline-flex items-center justify-center rounded-full bg-aq-ink px-5 py-2.5 text-sm font-semibold text-white hover:bg-aq-ink-soft"
             >
               Tekrar Dene
             </button>

@@ -1,9 +1,8 @@
-import { Link } from 'react-router';
-import { motion } from 'framer-motion';
 import { FileText, Users, ShieldCheck, KeyRound, Ban, Scale } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
 import { SEO } from '@/components/SEO';
+import { PageHero } from '@/components/PageHero';
 
 const sections = [
   {
@@ -49,42 +48,25 @@ export default function MembershipTermsPage() {
     <>
       <SEO title="Üyelik Sözleşmesi | Aquails" noindex />
       <PageLayout variant="gradient">
-        <div className="relative overflow-hidden bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep py-16 md:py-24">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-5 right-20 h-40 w-40 rounded-full border border-white" />
-            <div className="absolute bottom-5 left-10 h-24 w-24 rounded-full border border-white" />
-          </div>
-          <div className="relative z-10 mx-auto max-w-[800px] px-4">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <div className="mb-4 flex items-center gap-2 text-sm text-white/60">
-                <Link to="/" className="transition-colors hover:text-white">
-                  Ana Sayfa
-                </Link>
-                <span>/</span>
-                <span className="text-white/80">Üyelik Sözleşmesi</span>
-              </div>
-              <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
-                  <FileText className="h-6 w-6 text-white" />
-                </div>
-                <h1 className="text-2xl font-bold text-white md:text-3xl">Üyelik Sözleşmesi</h1>
-              </div>
-              <p className="text-sm text-white/70">Aquails hesabı oluştururken geçerli üyelik koşulları.</p>
-            </motion.div>
-          </div>
-        </div>
+        <PageHero
+        size="sm"
+        title="Üyelik Sözleşmesi"
+        description="Aquails hesabı oluştururken geçerli üyelik koşulları."
+        breadcrumbs={[{ label: 'Üyelik Sözleşmesi' }]}
+        image="/images/lifestyle/story-lake.jpg"
+      />
 
         <div className="relative z-10 mx-auto -mt-6 max-w-[800px] px-4 py-8">
           <ScrollReveal>
-            <div className="overflow-hidden rounded-2xl border border-aq-border/60 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-soft">
               {sections.map((section, i) => (
                 <div
                   key={section.title}
                   className={`p-6 md:p-8 ${i !== sections.length - 1 ? 'border-b border-aq-border/60' : ''}`}
                 >
                   <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-aq-sky">
-                      <section.icon className="h-5 w-5 text-aq-blue" />
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-aq-cloud">
+                      <section.icon className="h-5 w-5 text-aq-ink" />
                     </div>
                     <div>
                       <h2 className="mb-2 text-base font-semibold text-aq-text">{section.title}</h2>

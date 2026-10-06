@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Wrench, Package, HelpCircle, Send, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { openWhatsApp, getWhatsAppUrl } from '@/services/whatsappService';
+import { useCartStore } from '@/stores/cartStore';
 
 const QUICK_MESSAGES = [
   { label: 'Ürün bilgisi', message: 'Merhaba, su arıtma ürünleriniz hakkında bilgi almak istiyorum.' },
@@ -59,6 +60,7 @@ export function FloatingWhatsApp() {
   const panelRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
+  const isDrawerOpen = useCartStore((st) => st.isDrawerOpen);
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -108,6 +110,9 @@ export function FloatingWhatsApp() {
     navigate(to);
   };
 
+  // The cart drawer owns the right edge while it is open; don't cover its checkout button.
+  if (isDrawerOpen) return null;
+
   return (
     <div
       className="fixed z-50 flex flex-col items-end gap-2.5"
@@ -123,7 +128,7 @@ export function FloatingWhatsApp() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-[min(100vw-2rem,300px)] bg-white rounded-2xl border border-aq-border/60 shadow-sm overflow-hidden"
+            className="relative w-[min(100vw-2rem,300px)] bg-white rounded-2xl overflow-hidden shadow-soft"
           >
             <div className="flex items-center justify-between gap-3 px-4 py-3.5 border-b border-aq-border/80">
               <div className="min-w-0">
@@ -177,7 +182,7 @@ export function FloatingWhatsApp() {
                     onClick={() => handleRoute(action.to)}
                     className="flex items-center gap-3 w-full py-2.5 text-left group"
                   >
-                    <action.icon className="w-4 h-4 text-aq-muted group-hover:text-aq-blue transition-colors flex-shrink-0" />
+                    <action.icon className="w-4 h-4 text-aq-muted group-hover:text-aq-ink transition-colors flex-shrink-0" />
                     <div className="min-w-0">
                       <p className="text-[13px] font-medium text-aq-text group-hover:text-aq-blue transition-colors">
                         {action.label}

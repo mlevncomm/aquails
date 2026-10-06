@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { Wrench, Calendar, CheckCircle, ShieldCheck, Phone, Package, ChevronDown, Loader2 } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
 import { ScrollReveal } from '@/components/ScrollReveal';
@@ -8,6 +8,7 @@ import { SEO } from '@/components/SEO';
 import { useAuthStore } from '@/stores/authStore';
 import { createServiceRequest } from '@/services/serviceRequestService';
 import { CONTACT_PHONE_DISPLAY, telHref } from '@/lib/contact';
+import { PageHero } from '@/components/PageHero';
 
 
 const serviceTypes = [
@@ -38,7 +39,12 @@ export default function ServiceAppointmentPage() {
   const [submitting, setSubmitting] = useState(false);
   const [requestNo, setRequestNo] = useState('');
   const [type, setType] = useState('installation');
-  const [form, setForm] = useState({ name: '', phone: '', address: '', device: '', date: '', notes: '' });
+  const location = useLocation();
+  // The home page "Ücretsiz Keşif" card hands over the phone number it collected.
+  const prefillPhone = typeof (location.state as { phone?: unknown } | null)?.phone === 'string'
+    ? (location.state as { phone: string }).phone
+    : '';
+  const [form, setForm] = useState({ name: '', phone: prefillPhone, address: '', device: '', date: '', notes: '' });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,26 +85,22 @@ export default function ServiceAppointmentPage() {
       />
     <PageLayout>
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-aq-deep via-aq-navy to-aq-deep py-12 md:py-16 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-20 w-64 h-64 bg-aq-aqua rounded-full blur-3xl" />
-        </div>
-        <div className="page-container relative">
-          <div className="flex items-center gap-2 text-[13px] text-white/50 mb-3">
-            <Link to="/" className="hover:text-white">Ana Sayfa</Link><span>/</span><span className="text-white/70">Servis Randevusu</span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Profesyonel Servis Hizmeti</h1>
-          <p className="text-sm text-white/70 mt-2 max-w-lg">Uzman ekibimiz kurulum, bakım ve arıza çözümleri için yanınızda.</p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Servis & kurulum"
+        title="Profesyonel Servis Hizmeti"
+        description="Uzman ekibimiz kurulum, bakım ve arıza çözümleri için yanınızda."
+        breadcrumbs={[{ label: 'Servis Randevusu' }]}
+        image="/images/service-installation.jpg"
+        imagePosition="70% center"
+      />
 
       <div className="page-container py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Form */}
           <div className="lg:col-span-2">
             {submitted ? (
-              <div className="bg-white border border-aq-border/60 rounded-2xl p-8 text-center">
-                <div className="w-16 h-16 bg-aq-sky rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-white rounded-2xl p-8 text-center shadow-soft">
+                <div className="w-16 h-16 bg-aq-cloud rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="w-8 h-8 text-aq-aqua" />
                 </div>
                 <h2 className="text-lg font-semibold text-aq-text mb-2">Randevunuz Alindi!</h2>
@@ -110,15 +112,15 @@ export default function ServiceAppointmentPage() {
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="bg-white border border-aq-border/60 rounded-2xl p-6 space-y-5">
+              <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 space-y-5 shadow-soft">
                 {/* Service Type */}
                 <div>
-                  <label className="text-xs font-medium text-aq-muted mb-2 block">Talep Turu</label>
+                  <label className="text-xs font-medium text-aq-muted mb-2 block">Talep Türü</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {serviceTypes.map(s => {
                       const Icon = s.icon;
                       return (
-                        <button key={s.id} type="button" onClick={() => setType(s.id)} className={`flex items-center gap-3 p-3 rounded-xl text-sm font-medium border-2 transition-all text-left ${type === s.id ? 'border-aq-deep bg-aq-sky text-aq-blue' : 'border-aq-border/60 text-aq-muted hover:border-aq-border/60'}`}>
+                        <button key={s.id} type="button" onClick={() => setType(s.id)} className={`flex items-center gap-3 p-3 rounded-xl text-sm font-medium border-2 transition-all text-left ${type === s.id ? 'border-aq-deep bg-aq-cloud text-aq-blue' : 'border-aq-border/60 text-aq-muted hover:border-aq-border/60'}`}>
                           <Icon className="w-4 h-4 flex-shrink-0" />
                           <div>
                             <p className="text-sm font-medium">{s.label}</p>
@@ -158,7 +160,7 @@ export default function ServiceAppointmentPage() {
                   <label className="text-xs font-medium text-aq-muted mb-1.5 block">Açıklama</label>
                   <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={3} placeholder="Sorunuzu kısaca açıklayın..." className="w-full px-4 py-2.5 text-sm border border-aq-border/60 rounded-xl bg-aq-ice focus:outline-none focus:border-aq-blue resize-none" />
                 </div>
-                <button type="submit" disabled={submitting} className="flex items-center justify-center gap-2 w-full bg-aq-blue text-white py-3 rounded-xl text-sm font-semibold hover:bg-aq-deep hover:text-white transition-all disabled:opacity-60">
+                <button type="submit" disabled={submitting} className="flex items-center justify-center gap-2 w-full bg-aq-ink text-white py-3 rounded-full text-sm font-semibold hover:bg-aq-ink-soft hover:text-white transition-all disabled:opacity-60">
                   {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calendar className="w-4 h-4" />} Randevu Oluştur
                 </button>
               </form>
@@ -167,13 +169,13 @@ export default function ServiceAppointmentPage() {
 
           {/* Sidebar */}
           <div className="space-y-5">
-            <div className="bg-gradient-to-br from-aq-blue to-aq-aqua-hover rounded-2xl p-5 text-white">
+            <div className="bg-aq-ink rounded-2xl p-5 text-white">
               <h3 className="text-base font-semibold mb-1">Hızlı Destek</h3>
               <p className="text-xs text-white/70 mb-3">Acil durumlar için 7/24 telefon desteği</p>
               <a href={telHref()} className="flex items-center gap-2 text-sm font-semibold"><Phone className="w-4 h-4" /> {CONTACT_PHONE_DISPLAY}</a>
             </div>
-            <div className="bg-white border border-aq-border/60 rounded-2xl p-5">
-              <h3 className="text-sm font-semibold text-aq-text mb-3">Servis Kapsami</h3>
+            <div className="bg-white rounded-2xl p-5 shadow-soft">
+              <h3 className="text-sm font-semibold text-aq-text mb-3">Servis Kapsamı</h3>
               <div className="space-y-2.5">
                 {[
                   { icon: CheckCircle, label: 'Yeni cihaz kurulumu' },
@@ -190,8 +192,8 @@ export default function ServiceAppointmentPage() {
               </div>
             </div>
             {/* SSS */}
-            <div className="bg-white border border-aq-border/60 rounded-2xl p-5">
-              <h3 className="text-sm font-semibold text-aq-text mb-3">Sik Sorulan</h3>
+            <div className="bg-white rounded-2xl p-5 shadow-soft">
+              <h3 className="text-sm font-semibold text-aq-text mb-3">Sık Sorulan</h3>
               <div className="space-y-2">
                 {serviceSss.map((f, i) => (
                   <details key={i} className="group">
@@ -209,13 +211,13 @@ export default function ServiceAppointmentPage() {
         {/* Kurulum Sureci */}
         <ScrollReveal className="mt-16">
           <div className="text-center mb-8">
-            <span className="text-xs font-semibold text-aq-blue tracking-[0.15em] uppercase">Kurulum Sureci</span>
-            <h2 className="text-xl md:text-2xl font-bold text-aq-text mt-2">4 Adimda Profesyonel Kurulum</h2>
+            <span className="text-xs font-semibold text-aq-muted tracking-[0.15em] uppercase">Kurulum Süreci</span>
+            <h2 className="text-xl md:text-2xl font-bold text-aq-text mt-2">4 Adımda Profesyonel Kurulum</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {kurulumSureci.map(k => (
-              <div key={k.step} className="bg-white border border-aq-border/60 rounded-2xl p-5 text-center">
-                <div className="w-10 h-10 bg-aq-sky rounded-full flex items-center justify-center mx-auto mb-3">
+              <div key={k.step} className="bg-white rounded-2xl p-5 text-center shadow-soft">
+                <div className="w-10 h-10 bg-aq-cloud rounded-full flex items-center justify-center mx-auto mb-3">
                   <span className="text-sm font-semibold text-aq-blue">{k.step}</span>
                 </div>
                 <h4 className="text-sm font-semibold text-aq-text">{k.title}</h4>

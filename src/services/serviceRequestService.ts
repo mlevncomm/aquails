@@ -9,8 +9,11 @@ export interface AdminServiceRequest {
   type: string;
   address: string;
   date: string;
+  /** Raw preferred appointment timestamp (null when the customer gave none). */
+  dateISO: string | null;
   status: DbServiceRequest['status'];
   tech: string;
+  notes: string;
 }
 
 export interface CustomerServiceRequest {
@@ -50,8 +53,10 @@ function mapRequest(row: ServiceWithProfile): AdminServiceRequest {
     type: TYPE_LABELS[row.type] ?? row.type,
     address: row.address,
     date: row.preferred_date ? formatDateTR(row.preferred_date) : formatDateTR(row.created_at),
+    dateISO: row.preferred_date,
     status: row.status,
     tech: row.assigned_to ?? '',
+    notes: row.notes ?? '',
   };
 }
 
@@ -100,7 +105,7 @@ export function labelToServiceType(label: string): DbServiceRequest['type'] {
 
 export async function updateServiceRequest(
   id: string,
-  updates: { status?: DbServiceRequest['status']; assigned_to?: string }
+  updates: { status?: DbServiceRequest['status']; assigned_to?: string; preferred_date?: string | null; notes?: string }
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
@@ -168,4 +173,22 @@ export async function getTodayScheduledCount(): Promise<number> {
     .lte('preferred_date', end.toISOString());
 
   return count ?? 0;
+}
+
+/** Customer: cancel one of their own requests while it is still pending. */
+export async function cancelMyServiceRequest(id: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+  const { data, error } = await supabase.rpc('cancel_my_service_request', { p_request_id: id });
+  if (error) return { success: false, error: error.message };
+  const result = data as { success?: boolean; error?: string } | null;
+  if (!result?.success) {
+    return {
+      success: false,
+      error: result?.error === 'not_cancellable'
+        ? 'Planlanmış veya başlamış talepler iptal edilemez. Lütfen bizimle iletişime geçin.'
+        : 'Talep iptal edilemedi.',
+    };
+  }
+  return { success: true };
 }

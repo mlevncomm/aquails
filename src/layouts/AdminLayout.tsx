@@ -65,6 +65,7 @@ const menuItems: MenuItem[] = [
     children: [
       { label: 'Yorumlar', href: '/admin/yorumlar' },
       { label: 'Sorular', href: '/admin/sorular' },
+      { label: 'İletişim Mesajları', href: '/admin/mesajlar' },
     ],
   },
   {
@@ -120,6 +121,7 @@ const PAGE_TITLES: { match: string | RegExp; title: string }[] = [
   { match: '/admin/sadakat', title: 'Sadakat' },
   { match: '/admin/yorumlar', title: 'Yorumlar' },
   { match: '/admin/sorular', title: 'Sorular' },
+  { match: '/admin/mesajlar', title: 'İletişim Mesajları' },
   { match: '/admin/servis-talepleri', title: 'Servis Talepleri' },
   { match: '/admin/servis-takvimi', title: 'Servis Takvimi' },
   { match: '/admin/filtre-takibi', title: 'Filtre Takibi' },
@@ -198,17 +200,17 @@ export function AdminLayout() {
   const profileInitial = (user?.name ?? 'A')[0];
 
   return (
-    <div className="min-h-[100dvh] flex bg-aq-ice overflow-x-hidden">
+    <div className="min-h-[100dvh] flex bg-[#F4F7FA] overflow-x-hidden">
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-aq-deep/30 z-40 lg:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-aq-ink/40 z-40 lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       <aside
         className={cn(
-          'fixed lg:static inset-y-0 left-0 z-50 bg-aq-deep border-r border-aq-navy flex flex-col transition-all duration-300',
+          'fixed lg:sticky lg:top-0 lg:h-[100dvh] inset-y-0 left-0 z-50 bg-aq-ink flex flex-col transition-all duration-300',
           sidebarWidth,
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         )}
@@ -216,13 +218,13 @@ export function AdminLayout() {
         <button
           type="button"
           onClick={() => setMobileOpen(false)}
-          className="lg:hidden absolute top-3 right-3 w-9 h-9 bg-aq-navy hover:bg-aq-blue rounded-lg flex items-center justify-center text-white/70 z-10"
+          className="lg:hidden absolute top-3 right-3 w-9 h-9 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white/80 z-10"
           aria-label="Menüyü kapat"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="px-4 py-5 border-b border-aq-navy">
+        <div className="px-4 py-5 border-b border-white/10">
           <Link to="/admin" className="flex items-center gap-3 px-1" onClick={() => setMobileOpen(false)}>
             {collapsed ? (
               <BrandLogo variant="icon" inverted className="text-2xl flex-shrink-0" />
@@ -255,13 +257,13 @@ export function AdminLayout() {
                       toggleMenu(item.label);
                     }}
                     className={cn(
-                      'flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors min-h-[44px]',
-                      active ? 'bg-aq-sky/15 text-aq-aqua' : 'text-white/70 hover:bg-white/5 hover:text-white',
+                      'flex items-center gap-3 w-full px-3 py-2.5 rounded-full text-[13px] font-medium transition-colors min-h-[44px]',
+                      active ? 'bg-white/10 text-white' : 'text-white/65 hover:bg-white/5 hover:text-white',
                       'justify-between',
                     )}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <item.icon className={cn('w-[18px] h-[18px] flex-shrink-0', active && 'text-aq-aqua')} />
+                      <item.icon className={cn('w-[18px] h-[18px] flex-shrink-0', active && 'text-aq-mist')} />
                       {!collapsed && <span className="truncate">{item.label}</span>}
                     </div>
                     {!collapsed && (
@@ -278,27 +280,27 @@ export function AdminLayout() {
                     to={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                      'flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium transition-colors min-h-[44px]',
-                      active ? 'bg-aq-sky/15 text-aq-aqua' : 'text-white/70 hover:bg-white/5 hover:text-white',
+                      'flex items-center gap-3 w-full px-3 py-2.5 rounded-full text-[13px] font-medium transition-colors min-h-[44px]',
+                      active ? 'bg-white/10 text-white' : 'text-white/65 hover:bg-white/5 hover:text-white',
                     )}
                   >
-                    <item.icon className={cn('w-[18px] h-[18px] flex-shrink-0', active && 'text-aq-aqua')} />
+                    <item.icon className={cn('w-[18px] h-[18px] flex-shrink-0', active && 'text-aq-mist')} />
                     {!collapsed && <span>{item.label}</span>}
                   </Link>
                 )}
 
                 {item.children && expandedMenus.includes(item.label) && !collapsed && (
-                  <div className="ml-4 mt-0.5 space-y-0.5 border-l border-aq-navy pl-3">
+                  <div className="ml-5 mt-0.5 space-y-0.5 border-l border-white/10 pl-3">
                     {item.children.map((child) => (
                       <Link
                         key={child.href}
                         to={child.href}
                         onClick={() => setMobileOpen(false)}
                         className={cn(
-                          'block px-3 py-2 text-[12px] rounded-lg transition-colors min-h-[40px] flex items-center',
+                          'relative block px-3 py-2 text-[12.5px] rounded-lg transition-colors min-h-[38px] flex items-center',
                           pathMatchesChild(location.pathname, child.href)
-                            ? 'text-aq-aqua bg-aq-sky/10 font-medium'
-                            : 'text-white/50 hover:text-white hover:bg-white/5',
+                            ? 'text-white font-semibold'
+                            : 'text-white/50 hover:text-white',
                         )}
                       >
                         {child.label}
@@ -311,14 +313,14 @@ export function AdminLayout() {
           })}
         </nav>
 
-        <div className="p-3 border-t border-aq-navy">
+        <div className="p-3 border-t border-white/10">
           <Link
             to="/admin/ayarlar"
             onClick={() => setMobileOpen(false)}
-            className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5 transition-colors min-h-[44px]"
+            className="flex items-center gap-3 px-3 py-2 rounded-full hover:bg-white/5 transition-colors min-h-[44px]"
           >
-            <div className="w-9 h-9 bg-aq-sky/20 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-semibold text-aq-aqua">{profileInitial}</span>
+            <div className="w-9 h-9 bg-aq-mist rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-sm font-bold text-aq-ink">{profileInitial}</span>
             </div>
             {!collapsed && (
               <div className="min-w-0">
@@ -332,7 +334,7 @@ export function AdminLayout() {
           <button
             type="button"
             onClick={() => { logout(); navigate('/giris'); }}
-            className="flex items-center gap-3 w-full px-3 py-2.5 mt-1 rounded-xl text-[13px] font-medium text-red-400 hover:bg-red-500/10 transition-colors min-h-[44px]"
+            className="flex items-center gap-3 w-full px-3 py-2.5 mt-1 rounded-full text-[13px] font-medium text-red-300 hover:bg-red-500/10 transition-colors min-h-[44px]"
           >
             <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
             {!collapsed && 'Çıkış Yap'}
@@ -342,7 +344,7 @@ export function AdminLayout() {
         <button
           type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-white border border-aq-border/60 rounded-full items-center justify-center z-10 shadow-sm"
+          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-white ring-1 ring-aq-border rounded-full items-center justify-center z-10 shadow-soft"
           aria-label={collapsed ? 'Menüyü genişlet' : 'Menüyü daralt'}
         >
           <ChevronDown className={cn('w-3 h-3 text-aq-muted transition-transform', collapsed ? '-rotate-90' : 'rotate-90')} />
@@ -350,36 +352,46 @@ export function AdminLayout() {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 bg-white/90 backdrop-blur border-b border-aq-border/60 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
+        <header className="h-16 bg-white/95 backdrop-blur border-b border-aq-border/60 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-aq-ice text-aq-muted flex-shrink-0"
+              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-aq-cloud text-aq-ink flex-shrink-0"
               aria-label="Menüyü aç"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="min-w-0">
-              <p className="text-[10px] uppercase tracking-wider text-aq-muted/80 font-semibold hidden sm:block">
+              <p className="text-[10px] uppercase tracking-[0.16em] text-aq-muted font-semibold hidden sm:block">
                 Aquails Admin
               </p>
-              <h2 className="text-sm sm:text-base font-semibold text-aq-text truncate leading-tight">
+              <h2 className="text-sm sm:text-base font-semibold text-aq-ink truncate leading-tight">
                 {pageTitle}
               </h2>
             </div>
           </div>
-          <Link
-            to="/admin/ayarlar"
-            className="w-9 h-9 bg-aq-sky rounded-full flex items-center justify-center border border-aq-aqua/30 flex-shrink-0 hover:ring-2 hover:ring-aq-aqua/30 transition-all"
-            aria-label="Profil ve Ayarlar"
-            title="Profil ve Ayarlar"
-          >
-            <span className="text-sm font-semibold text-aq-blue">{profileInitial}</span>
-          </Link>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Link
+              to="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center rounded-full px-4 py-2 text-[13px] font-semibold text-aq-ink ring-1 ring-aq-border hover:ring-aq-ink/30 transition-colors"
+            >
+              Siteyi Görüntüle
+            </Link>
+            <Link
+              to="/admin/ayarlar"
+              className="w-9 h-9 bg-aq-ink rounded-full flex items-center justify-center flex-shrink-0 hover:bg-aq-ink-soft transition-colors"
+              aria-label="Profil ve Ayarlar"
+              title="Profil ve Ayarlar"
+            >
+              <span className="text-sm font-bold text-white">{profileInitial}</span>
+            </Link>
+          </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto overflow-x-hidden w-full max-w-[1600px] mx-auto min-w-0 bg-aq-ice">
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 overflow-x-hidden w-full max-w-[1600px] mx-auto min-w-0">
           <Outlet />
         </main>
       </div>

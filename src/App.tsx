@@ -68,6 +68,7 @@ const AdminCampaignsPage = lazy(() => import('./pages/admin/AdminCampaignsPage')
 const AdminBlogPage = lazy(() => import('./pages/admin/AdminBlogPage'));
 const AdminReviewsPage = lazy(() => import('./pages/admin/AdminReviewsPage'));
 const AdminQuestionsPage = lazy(() => import('./pages/admin/AdminQuestionsPage'));
+const AdminContactMessagesPage = lazy(() => import('./pages/admin/AdminContactMessagesPage'));
 const AdminServiceRequestsPage = lazy(() => import('./pages/admin/AdminServiceRequestsPage'));
 const AdminServiceCalendarPage = lazy(() => import('./pages/admin/AdminServiceCalendarPage'));
 const AdminFilterTrackingPage = lazy(() => import('./pages/admin/AdminFilterTrackingPage'));
@@ -176,6 +177,7 @@ export default function App() {
           <Route path="/admin/blog" element={<AdminBlogPage />} />
           <Route path="/admin/yorumlar" element={<AdminReviewsPage />} />
           <Route path="/admin/sorular" element={<AdminQuestionsPage />} />
+          <Route path="/admin/mesajlar" element={<AdminContactMessagesPage />} />
           <Route path="/admin/servis-talepleri" element={<AdminServiceRequestsPage />} />
           <Route path="/admin/servis-takvimi" element={<AdminServiceCalendarPage />} />
           <Route path="/admin/filtre-takibi" element={<AdminFilterTrackingPage />} />

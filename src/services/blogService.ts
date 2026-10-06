@@ -125,7 +125,8 @@ export async function createBlogPost(input: {
   title: string;
   category: string;
   content?: string;
-}): Promise<{ success: boolean; error?: string }> {
+  status?: 'draft' | 'published';
+}): Promise<{ success: boolean; error?: string; id?: string }> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
 
@@ -135,16 +136,20 @@ export async function createBlogPost(input: {
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
 
-  const { error } = await supabase.from('blog_posts').insert({
-    title: input.title,
-    slug: `${slug}-${Date.now()}`,
-    category: input.category,
-    content: input.content ?? '',
-    status: 'draft',
-  });
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .insert({
+      title: input.title,
+      slug: `${slug}-${Date.now()}`,
+      category: input.category,
+      content: input.content ?? '',
+      status: input.status ?? 'draft',
+    })
+    .select('id')
+    .single();
 
   if (error) return { success: false, error: error.message };
-  return { success: true };
+  return { success: true, id: data?.id };
 }
 
 export async function toggleBlogStatus(
@@ -167,5 +172,48 @@ export async function deleteBlogPost(id: string): Promise<{ success: boolean; er
   const { data, error } = await supabase.from('blog_posts').delete().eq('id', id).select('id');
   if (error) return { success: false, error: error.message };
   if (!data?.length) return { success: false, error: 'Yazı silinemedi veya yetkiniz yok.' };
+  return { success: true };
+}
+
+export interface AdminBlogPostDetail {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  content: string;
+  status: 'draft' | 'published';
+}
+
+export async function getBlogPostForEdit(id: string): Promise<AdminBlogPostDetail | null> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase.from('blog_posts').select('*').eq('id', id).maybeSingle();
+  if (error || !data) return null;
+  const row = data as DbBlogPost;
+  return { id: row.id, title: row.title, slug: row.slug, category: row.category, content: row.content, status: row.status };
+}
+
+export async function updateBlogPost(
+  id: string,
+  input: { title: string; slug: string; category: string; content: string },
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return { success: false, error: 'Servis yapılandırılmamış.' };
+
+  const slug = input.slug.trim().toLowerCase().replace(/[^a-z0-9ğüşıöç-]+/gi, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  if (!input.title.trim() || !slug) return { success: false, error: 'Başlık ve bağlantı (slug) zorunludur.' };
+
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .update({ title: input.title.trim(), slug, category: input.category, content: input.content })
+    .eq('id', id)
+    .select('id');
+
+  if (error) {
+    if (/duplicate|unique/i.test(error.message)) return { success: false, error: 'Bu bağlantı (slug) başka bir yazıda kullanılıyor.' };
+    return { success: false, error: error.message };
+  }
+  if (!data?.length) return { success: false, error: 'Yazı güncellenemedi veya yetkiniz yok.' };
   return { success: true };
 }

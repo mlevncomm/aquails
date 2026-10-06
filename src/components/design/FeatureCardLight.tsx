@@ -19,13 +19,13 @@ export function FeatureCardLight({
   return (
     <div
       className={cn(
-        'bg-white border border-aq-border/60 rounded-2xl p-6 transition-all duration-300 h-full flex flex-col',
+        'bg-white rounded-2xl p-6 transition-all duration-300 h-full flex flex-col shadow-soft',
         className,
       )}
     >
       {Icon && (
-        <div className="w-12 h-12 rounded-full bg-aq-sky flex items-center justify-center mb-4">
-          <Icon className="w-5 h-5 text-aq-blue" />
+        <div className="w-12 h-12 rounded-full bg-aq-cloud flex items-center justify-center mb-4">
+          <Icon className="w-5 h-5 text-aq-ink" />
         </div>
       )}
       {image && (

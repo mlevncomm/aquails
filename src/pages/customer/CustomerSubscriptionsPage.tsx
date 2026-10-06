@@ -57,6 +57,17 @@ export default function CustomerSubscriptionsPage() {
     }
   };
 
+  const handleCancel = async (id: string) => {
+    if (!window.confirm('Aboneliğinizi iptal etmek istediğinize emin misiniz? İptal edilen abonelik yeniden başlatılamaz; yeni abonelik oluşturmanız gerekir.')) return;
+    const res = await updateSubscriptionStatus(id, 'cancelled');
+    if (res.success) {
+      addToast('Aboneliğiniz iptal edildi.', 'info');
+      void loadSubscriptions();
+    } else {
+      addToast(res.error ?? 'İşlem başarısız.', 'error');
+    }
+  };
+
   const handleResume = async (id: string) => {
     const res = await updateSubscriptionStatus(id, 'active');
     if (res.success) {
@@ -131,6 +142,15 @@ export default function CustomerSubscriptionsPage() {
                 <CustomerButton onClick={() => void handleResume(sub.id)}>
                   <Play className="w-3.5 h-3.5" /> Devam Ettir
                 </CustomerButton>
+              )}
+              {sub.status !== 'cancelled' && (
+                <button
+                  type="button"
+                  onClick={() => void handleCancel(sub.id)}
+                  className="ml-2 rounded-full px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
+                >
+                  Aboneliği iptal et
+                </button>
               )}
             </CustomerCard>
           ))}

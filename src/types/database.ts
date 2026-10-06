@@ -702,6 +702,54 @@ export interface Database {
         };
         Relationships: [];
       };
+      campaigns: {
+        Row: {
+          id: string;
+          title: string;
+          slug: string;
+          description: string;
+          image_url: string | null;
+          discount_label: string;
+          coupon_code: string | null;
+          start_date: string | null;
+          end_date: string | null;
+          is_active: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          slug: string;
+          description?: string;
+          image_url?: string | null;
+          discount_label?: string;
+          coupon_code?: string | null;
+          start_date?: string | null;
+          end_date?: string | null;
+          is_active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          slug?: string;
+          description?: string;
+          image_url?: string | null;
+          discount_label?: string;
+          coupon_code?: string | null;
+          start_date?: string | null;
+          end_date?: string | null;
+          is_active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       contact_messages: {
         Row: {
           id: string;
@@ -826,6 +874,8 @@ export interface Database {
           change_interval_days: number;
           reminder_enabled: boolean;
           last_changed_at: string | null;
+          reminded_upcoming_for: string | null;
+          reminded_overdue_for: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -930,6 +980,18 @@ export interface Database {
       };
       cancel_my_order: {
         Args: { p_order_id: string };
+        Returns: Record<string, unknown>;
+      };
+      cancel_my_service_request: {
+        Args: { p_request_id: string };
+        Returns: Record<string, unknown>;
+      };
+      admin_run_filter_reminders: {
+        Args: Record<string, never>;
+        Returns: Record<string, unknown>;
+      };
+      admin_adjust_loyalty_points: {
+        Args: { p_user_id: string; p_amount: number; p_reason: string };
         Returns: Record<string, unknown>;
       };
       create_my_subscription: {
@@ -1109,3 +1171,4 @@ export type DbBlogPost = Database['public']['Tables']['blog_posts']['Row'];
 export type DbSubscription = Database['public']['Tables']['subscriptions']['Row'];
 export type DbStockNotification = Database['public']['Tables']['stock_notifications']['Row'];
 export type DbContactMessage = Database['public']['Tables']['contact_messages']['Row'];
+export type DbCampaign = Database['public']['Tables']['campaigns']['Row'];

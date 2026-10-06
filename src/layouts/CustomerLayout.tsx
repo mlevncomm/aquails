@@ -161,7 +161,7 @@ export function CustomerLayout() {
         <button
           type="button"
           onClick={() => setMobileOpen(false)}
-          className="lg:hidden absolute top-3 right-3 w-9 h-9 bg-aq-ice hover:bg-aq-sky rounded-xl flex items-center justify-center text-aq-muted z-10"
+          className="lg:hidden absolute top-3 right-3 w-9 h-9 bg-aq-ice hover:bg-aq-cloud rounded-xl flex items-center justify-center text-aq-muted z-10"
           aria-label="Menüyü kapat"
         >
           <X className="w-5 h-5" />
@@ -176,7 +176,7 @@ export function CustomerLayout() {
         <Link
           to="/hesabim/profil"
           onClick={() => setMobileOpen(false)}
-          className="mx-4 mt-4 p-3.5 rounded-2xl bg-aq-ice/80 border border-aq-border/40 hover:border-aq-blue/30 hover:bg-aq-sky/40 transition-colors"
+          className="mx-4 mt-4 p-3.5 rounded-3xl bg-aq-cloud hover:bg-aq-cloud transition-colors"
         >
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 bg-aq-deep rounded-full flex items-center justify-center flex-shrink-0">
@@ -206,10 +206,10 @@ export function CustomerLayout() {
                       to={item.href}
                       onClick={() => setMobileOpen(false)}
                       className={cn(
-                        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all relative min-h-[44px]',
+                        'flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[13px] font-medium transition-all relative min-h-[44px]',
                         active
-                          ? 'bg-aq-sky/70 text-aq-blue'
-                          : 'text-aq-muted hover:bg-aq-ice hover:text-aq-text',
+                          ? 'bg-aq-ink text-white'
+                          : 'text-aq-ink/65 hover:bg-aq-cloud hover:text-aq-ink',
                       )}
                     >
                       <item.icon className="w-[18px] h-[18px] flex-shrink-0" />

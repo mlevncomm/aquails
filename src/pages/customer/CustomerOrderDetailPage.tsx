@@ -156,15 +156,15 @@ export default function CustomerOrderDetailPage() {
 
           <CustomerCard>
             <h3 className="text-sm font-semibold text-aq-text mb-4 flex items-center gap-2">
-              <Box className="w-4 h-4 text-aq-blue" /> Sipariş Ürünleri ({order.products.length})
+              <Box className="w-4 h-4 text-aq-ink" /> Sipariş Ürünleri ({order.products.length})
             </h3>
             {order.products.map((p, i) => (
               <div
                 key={`${p.name}-${i}`}
                 className="flex items-center gap-3 py-4 border-b border-aq-border/60 last:border-0"
               >
-                <div className="w-14 h-14 bg-aq-sky/50 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Package className="w-6 h-6 text-aq-blue/40" />
+                <div className="w-14 h-14 bg-aq-cloud rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Package className="w-6 h-6 text-aq-ink/40" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-aq-text">{p.name}</p>
@@ -179,7 +179,7 @@ export default function CustomerOrderDetailPage() {
 
           <CustomerCard>
             <h3 className="text-sm font-semibold text-aq-text mb-5 flex items-center gap-2">
-              <Truck className="w-4 h-4 text-aq-blue" /> Sipariş Takibi
+              <Truck className="w-4 h-4 text-aq-ink" /> Sipariş Takibi
             </h3>
             {timeline.map((t, i) => (
               <div key={t.step} className="flex items-start gap-4 pb-5 last:pb-0">
@@ -214,7 +214,7 @@ export default function CustomerOrderDetailPage() {
         <div className="space-y-4">
           <CustomerCard>
             <h3 className="text-sm font-semibold text-aq-text mb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-aq-blue" /> Teslimat Adresi
+              <MapPin className="w-4 h-4 text-aq-ink" /> Teslimat Adresi
             </h3>
             <p className="text-xs text-aq-muted">{order.shipping.title}</p>
             <p className="text-sm text-aq-muted mt-1 leading-relaxed">{order.shipping.address}</p>

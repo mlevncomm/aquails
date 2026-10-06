@@ -65,7 +65,7 @@ export default function AdminReviewsPage() {
         <AdminTableWrap stickyFirst>
           <table className="w-full">
             <thead>
-              <tr className="bg-aq-ice border-b border-aq-border/60">
+              <tr className="bg-aq-cloud border-b border-aq-border/60">
                 {['Müşteri', 'Ürün', 'Puan', 'Başlık', 'Tarih', 'Durum', 'İşlem'].map((h) => (
                   <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold text-aq-muted uppercase whitespace-nowrap">
                     {h}
@@ -75,16 +75,16 @@ export default function AdminReviewsPage() {
             </thead>
             <tbody>
               {reviews.map((r) => (
-                <tr key={r.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
-                  <td className="px-4 py-3 text-sm font-medium text-aq-text">{r.customer}</td>
+                <tr key={r.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-cloud/50">
+                  <td className="px-4 py-3 text-sm font-medium text-aq-ink">{r.customer}</td>
                   <td className="px-4 py-3 text-sm text-aq-muted line-clamp-1 max-w-[120px]">{r.product}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-0.5">
                       <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                      <span className="text-sm font-semibold text-aq-text">{r.rating}</span>
+                      <span className="text-sm font-semibold text-aq-ink">{r.rating}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-sm text-aq-text line-clamp-1 max-w-[150px]">{r.title}</td>
+                  <td className="px-4 py-3 text-sm text-aq-ink line-clamp-1 max-w-[150px]">{r.title}</td>
                   <td className="px-4 py-3 text-sm text-aq-muted">{r.date}</td>
                   <td className="px-4 py-3">
                     <button type="button" onClick={() => void toggleApprove(r.id, r.approved)}>
@@ -98,7 +98,7 @@ export default function AdminReviewsPage() {
                       <button
                         type="button"
                         onClick={() => void remove(r.id)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-aq-muted hover:text-red-500"
+                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 text-aq-muted hover:text-red-500"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

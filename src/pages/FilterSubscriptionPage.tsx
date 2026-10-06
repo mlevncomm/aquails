@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { RefreshCw, Check, Truck, Shield, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { PageLayout } from '@/layouts/PageLayout';
@@ -7,6 +7,7 @@ import { SEO } from '@/components/SEO';
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/components/Toast';
 import { createSubscription } from '@/services/subscriptionService';
+import { PageHero } from '@/components/PageHero';
 
 
 const plans = [
@@ -58,20 +59,14 @@ export default function FilterSubscriptionPage() {
         canonical="/filtre-aboneligi"
       />
     <PageLayout>
-      <div className="page-container py-8">
-        {/* Hero */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-2 text-[13px] text-aq-muted mb-2">
-            <Link to="/" className="hover:text-aq-blue">Ana Sayfa</Link>
-            <span>/</span>
-            <span className="text-aq-muted">Filtre Aboneliği</span>
-          </div>
-          <h1 className="text-3xl font-bold text-aq-text mb-3">Filtre Aboneliği</h1>
-          <p className="text-aq-muted max-w-xl mx-auto">
-            Filtre değişimini unutmayın! Abone olun, filtreleriniz düzenli olarak kapınıza gelsin.
-            Hem daha uygun fiyatla alın, hem sağlığınızdan ödün vermeyin.
-          </p>
-        </div>
+      <PageHero
+        eyebrow="Filtre aboneliği"
+        title="Filtreleriniz Kapınıza Gelsin"
+        description="Filtre değişimini unutmayın! Abone olun, filtreleriniz düzenli olarak kapınıza gelsin. Hem daha uygun fiyatla alın, hem sağlığınızdan ödün vermeyin."
+        breadcrumbs={[{ label: 'Filtre Aboneliği' }]}
+        image="/images/filter-subscription.jpg"
+      />
+      <div className="page-container py-12 sm:py-16">
 
         {/* Benefits */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
@@ -81,10 +76,10 @@ export default function FilterSubscriptionPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white border border-aq-border/60 rounded-2xl p-5 text-center"
+              className="bg-white rounded-2xl p-5 text-center shadow-soft"
             >
-              <div className="w-10 h-10 bg-aq-sky rounded-xl flex items-center justify-center mx-auto mb-3">
-                <b.icon className="w-5 h-5 text-aq-blue" />
+              <div className="w-10 h-10 bg-aq-cloud rounded-xl flex items-center justify-center mx-auto mb-3">
+                <b.icon className="w-5 h-5 text-aq-ink" />
               </div>
               <h3 className="text-sm font-semibold text-aq-text mb-1">{b.title}</h3>
               <p className="text-xs text-aq-muted">{b.desc}</p>
@@ -125,7 +120,7 @@ export default function FilterSubscriptionPage() {
                 onClick={() => void subscribe(plan)}
                 disabled={submittingPlan !== null}
                 className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                  plan.popular ? 'bg-aq-blue text-white hover:bg-aq-deep' : 'border-2 border-aq-deep text-aq-blue hover:bg-aq-sky'
+                  plan.popular ? 'bg-aq-ink text-white hover:bg-aq-ink-soft' : 'border-2 border-aq-deep text-aq-blue hover:bg-aq-cloud'
                 } disabled:opacity-60`}
               >
                 {submittingPlan === plan.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}

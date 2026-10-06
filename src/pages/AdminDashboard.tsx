@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   Banknote, ShoppingBag, Clock, Users, AlertTriangle, Wrench,
   Package, MessageSquare, Star, Bell, RefreshCw, Zap,
-  ArrowRight, Eye, TrendingUp, Loader2, ChevronRight,
+  ArrowRight, Eye, TrendingUp, Loader2, ChevronRight, Mail,
 } from 'lucide-react';
 import {
   getDashboardStats,
@@ -14,6 +14,7 @@ import {
   type CategoryBreakdown,
 } from '@/services/adminStatsService';
 import { orderStatusToTr } from '@/lib/orderStatus';
+import { getNewContactMessageCount } from '@/services/contactService';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
 import {
@@ -22,7 +23,7 @@ import {
 } from 'recharts';
 import { AdminCard, AdminTableWrap, AdminEmpty, AdminPageShell, AdminPageHeader, AdminButton, AdminOrderStatusBadge } from '@/components/admin/admin-ui';
 
-const PIE_COLORS = ['#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b', '#f43f5e', '#06b6d4', '#6366f1'];
+const PIE_COLORS = ['#0B2540', '#1F7FD1', '#7CC8F8', '#5F7186', '#9FD8FF', '#123457', '#C9D6E2'];
 
 function formatCurrency(n: number) {
   if (n >= 1_000_000) return `₺${(n / 1_000_000).toFixed(1)}M`;
@@ -32,10 +33,10 @@ function formatCurrency(n: number) {
 
 function KpiSkeleton() {
   return (
-    <div className="animate-pulse bg-white rounded-2xl border border-aq-border/60 p-6 h-[132px]">
-      <div className="w-10 h-10 bg-aq-ice rounded-xl mb-4" />
-      <div className="h-7 w-24 bg-aq-ice rounded-lg mb-2" />
-      <div className="h-4 w-16 bg-aq-ice rounded" />
+    <div className="animate-pulse bg-white rounded-xl ring-1 ring-aq-border/60 p-6 h-[132px]">
+      <div className="w-10 h-10 bg-aq-cloud rounded-xl mb-4" />
+      <div className="h-7 w-24 bg-aq-cloud rounded-lg mb-2" />
+      <div className="h-4 w-16 bg-aq-cloud rounded" />
     </div>
   );
 }
@@ -51,6 +52,7 @@ export default function AdminDashboard() {
   const [lowStock, setLowStock] = useState<Awaited<ReturnType<typeof getLowStockProducts>>>([]);
   const [recentOrders, setRecentOrders] = useState<Awaited<ReturnType<typeof getRecentOrders>>>([]);
   const [categories, setCategories] = useState<CategoryBreakdown[]>([]);
+  const [newMessages, setNewMessages] = useState(0);
 
   useEffect(() => {
     void Promise.all([
@@ -58,7 +60,9 @@ export default function AdminDashboard() {
       getLowStockProducts(),
       getRecentOrders(6),
       getCatalogCategoryBreakdown(),
-    ]).then(([s, stock, orders, cats]) => {
+      getNewContactMessageCount(),
+    ]).then(([s, stock, orders, cats, messages]) => {
+      setNewMessages(messages);
       setStats(s);
       setLowStock(stock);
       setRecentOrders(orders);
@@ -85,9 +89,8 @@ export default function AdminDashboard() {
           value: formatCurrency(stats.monthlyRevenue),
           sub: `${stats.monthlyOrders} sipariş`,
           icon: Banknote,
-          accent: 'from-aq-blue to-aq-navy',
-          bg: 'bg-aq-sky',
-          text: 'text-aq-blue',
+          bg: 'bg-aq-cloud',
+          text: 'text-aq-ink',
           href: '/admin/raporlar',
         },
         {
@@ -95,9 +98,8 @@ export default function AdminDashboard() {
           value: formatCurrency(stats.todayRevenue),
           sub: 'Günlük toplam',
           icon: TrendingUp,
-          accent: 'from-emerald-500 to-teal-600',
-          bg: 'bg-emerald-50',
-          text: 'text-emerald-700',
+          bg: 'bg-aq-cloud',
+          text: 'text-aq-ink',
           href: '/admin/raporlar',
         },
         {
@@ -105,9 +107,8 @@ export default function AdminDashboard() {
           value: String(stats.pendingOrders),
           sub: 'İşlem bekliyor',
           icon: Clock,
-          accent: 'from-amber-500 to-orange-500',
-          bg: 'bg-amber-50',
-          text: 'text-amber-700',
+          bg: 'bg-aq-cloud',
+          text: 'text-aq-ink',
           href: '/admin/siparisler',
         },
         {
@@ -115,9 +116,8 @@ export default function AdminDashboard() {
           value: stats.totalCustomers.toLocaleString('tr-TR'),
           sub: stats.newCustomersToday > 0 ? `+${stats.newCustomersToday} bugün` : 'Kayıtlı müşteri',
           icon: Users,
-          accent: 'from-violet-500 to-purple-600',
-          bg: 'bg-violet-50',
-          text: 'text-violet-700',
+          bg: 'bg-aq-cloud',
+          text: 'text-aq-ink',
           href: '/admin/musteriler',
         },
       ]
@@ -134,10 +134,11 @@ export default function AdminDashboard() {
           { label: 'Onay Bekleyen Yorum', value: stats.unreadReviews, href: '/admin/yorumlar', icon: Star, urgent: stats.unreadReviews > 0 },
           { label: 'Kritik Uyarı', value: stats.criticalAlerts, href: '/admin/stok-bildirimleri', icon: Bell, urgent: stats.criticalAlerts > 0 },
           { label: 'Bekleyen İade', value: stats.pendingReturns, href: '/admin/iade-degisim', icon: RefreshCw, urgent: stats.pendingReturns > 0 },
+          { label: 'Yeni Mesaj', value: newMessages, href: '/admin/mesajlar', icon: Mail, urgent: newMessages > 0 },
           { label: 'Aktif Abonelik', value: stats.activeSubscriptions, href: '/admin/abonelikler', icon: Zap, urgent: false },
         ]
       : [],
-    [stats],
+    [stats, newMessages],
   );
 
   const attentionItems = useMemo(() => operations.filter((o) => o.urgent), [operations]);
@@ -187,16 +188,15 @@ export default function AdminDashboard() {
             <Link
               key={kpi.label}
               to={kpi.href}
-              className="group relative bg-white rounded-2xl border border-aq-border/60 p-6 hover:border-aq-blue/25 transition-all overflow-hidden"
+              className="group relative bg-white rounded-xl ring-1 ring-aq-border/60 p-6 hover:ring-aq-ink/25 transition-all overflow-hidden"
             >
-              <div className={cn('absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r opacity-70', kpi.accent)} />
               <div className="flex items-start justify-between">
-                <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center', kpi.bg)}>
+                <div className={cn('w-11 h-11 rounded-full flex items-center justify-center', kpi.bg)}>
                   <kpi.icon className={cn('w-5 h-5', kpi.text)} />
                 </div>
                 <ChevronRight className="w-4 h-4 text-aq-muted/60 group-hover:text-aq-muted group-hover:translate-x-0.5 transition-all" />
               </div>
-              <p className="text-2xl font-bold text-aq-text mt-4 tracking-tight">{kpi.value}</p>
+              <p className="text-[1.7rem] font-bold text-aq-ink mt-4 tracking-tight leading-none">{kpi.value}</p>
               <p className="text-sm font-medium text-aq-muted mt-0.5">{kpi.label}</p>
               <p className="text-xs text-aq-muted mt-1">{kpi.sub}</p>
             </Link>
@@ -205,7 +205,7 @@ export default function AdminDashboard() {
 
       {/* Attention banner */}
       {!loading && attentionItems.length > 0 && (
-        <AdminCard className="!p-0 overflow-hidden border-amber-200/60 bg-gradient-to-r from-amber-50/80 to-white">
+        <AdminCard className="!p-0 overflow-hidden ring-amber-200 bg-amber-50/60">
           <div className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex items-center gap-2 text-amber-800">
               <AlertTriangle className="w-5 h-5 flex-shrink-0" />
@@ -232,10 +232,10 @@ export default function AdminDashboard() {
         <AdminCard className="xl:col-span-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
-              <h2 className="text-base font-semibold text-aq-text">Satış Trendi</h2>
+              <h2 className="text-base font-semibold text-aq-ink">Satış Trendi</h2>
               <p className="text-xs text-aq-muted mt-0.5">Dönemsel ciro grafiği</p>
             </div>
-            <div className="flex bg-aq-ice rounded-xl p-1 self-start">
+            <div className="flex bg-white ring-1 ring-aq-border/60 rounded-full p-1 self-start">
               {([
                 ['week', 'Haftalık'],
                 ['month', 'Aylık'],
@@ -246,9 +246,9 @@ export default function AdminDashboard() {
                   type="button"
                   onClick={() => setChartRange(key)}
                   className={cn(
-                    'px-3 py-1.5 text-xs font-medium rounded-lg transition-all',
+                    'px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all',
                     chartRange === key
-                      ? 'bg-white text-aq-blue shadow-sm'
+                      ? 'bg-aq-ink text-white'
                       : 'text-aq-muted hover:text-aq-muted',
                   )}
                 >
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
             </div>
           ) : chartData.every((d) => d.sales === 0) ? (
             <div className="h-[280px] flex flex-col items-center justify-center text-center px-4">
-              <div className="w-14 h-14 rounded-2xl bg-aq-ice flex items-center justify-center mb-3">
+              <div className="w-14 h-14 rounded-2xl bg-aq-cloud flex items-center justify-center mb-3">
                 <TrendingUp className="w-6 h-6 text-aq-muted/60" />
               </div>
               <p className="text-sm font-medium text-aq-muted">Henüz satış verisi yok</p>
@@ -274,8 +274,8 @@ export default function AdminDashboard() {
               <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="dashSalesGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#1F7FD1" stopOpacity={0.18} />
+                    <stop offset="95%" stopColor="#1F7FD1" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -291,14 +291,14 @@ export default function AdminDashboard() {
                     boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                   }}
                 />
-                <Area type="monotone" dataKey="sales" stroke="#0ea5e9" strokeWidth={2} fill="url(#dashSalesGrad)" />
+                <Area type="monotone" dataKey="sales" stroke="#0B2540" strokeWidth={2} fill="url(#dashSalesGrad)" />
               </AreaChart>
             </ResponsiveContainer>
           )}
         </AdminCard>
 
         <AdminCard>
-          <h2 className="text-base font-semibold text-aq-text">Katalog Dağılımı</h2>
+          <h2 className="text-base font-semibold text-aq-ink">Katalog Dağılımı</h2>
           <p className="text-xs text-aq-muted mt-0.5 mb-5">Ürün sayısına göre kategoriler</p>
           {loading ? (
             <div className="h-[220px] flex items-center justify-center">
@@ -327,7 +327,7 @@ export default function AdminDashboard() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-2xl font-bold text-aq-text">
+                  <span className="text-2xl font-bold text-aq-ink">
                     {pieData.reduce((s, c) => s + c.value, 0)}
                   </span>
                   <span className="text-[11px] text-aq-muted">ürün</span>
@@ -340,7 +340,7 @@ export default function AdminDashboard() {
                       <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
                       <span className="text-aq-muted truncate">{cat.name}</span>
                     </div>
-                    <span className="font-semibold text-aq-text flex-shrink-0">{cat.value}</span>
+                    <span className="font-semibold text-aq-ink flex-shrink-0">{cat.value}</span>
                   </div>
                 ))}
               </div>
@@ -353,31 +353,31 @@ export default function AdminDashboard() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-base font-semibold text-aq-text">Operasyon Özeti</h2>
+            <h2 className="text-base font-semibold text-aq-ink">Operasyon Özeti</h2>
             <p className="text-xs text-aq-muted mt-0.5">Tüm metrikler — tıklayarak ilgili sayfaya gidin</p>
           </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {loading
             ? Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="animate-pulse h-24 bg-white rounded-xl border border-aq-border/60" />
+              <div key={i} className="animate-pulse h-24 bg-white rounded-xl ring-1 ring-aq-border/60" />
             ))
             : operations.map((op) => (
               <Link
                 key={op.label}
                 to={op.href}
                 className={cn(
-                  'flex flex-col justify-between p-4 rounded-xl border bg-white transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-aq-blue/30 min-h-[96px] group',
-                  op.urgent ? 'border-amber-200 bg-amber-50/30' : 'border-aq-border/60',
+                  'flex flex-col justify-between p-4 rounded-xl ring-1 bg-white transition-all hover:-translate-y-0.5 hover:ring-aq-ink/25 min-h-[96px] group',
+                  op.urgent ? 'ring-amber-200 bg-amber-50/40' : 'ring-aq-border/60',
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <op.icon className={cn('w-4 h-4 transition-colors', op.urgent ? 'text-amber-600' : 'text-aq-muted group-hover:text-aq-blue')} />
+                  <op.icon className={cn('w-4 h-4 transition-colors', op.urgent ? 'text-amber-600' : 'text-aq-muted group-hover:text-aq-ink')} />
                   {op.urgent && <span className="w-2 h-2 rounded-full bg-amber-500" />}
                 </div>
                 <div className="mt-3">
-                  <p className="text-xl font-semibold text-aq-text leading-none">{op.value}</p>
-                  <p className="text-[11px] text-aq-muted mt-1.5 leading-snug group-hover:text-aq-text transition-colors">{op.label}</p>
+                  <p className="text-xl font-semibold text-aq-ink leading-none">{op.value}</p>
+                  <p className="text-[11px] text-aq-muted mt-1.5 leading-snug group-hover:text-aq-ink transition-colors">{op.label}</p>
                 </div>
               </Link>
             ))}
@@ -389,10 +389,10 @@ export default function AdminDashboard() {
         <AdminTableWrap className="xl:col-span-2">
           <div className="flex items-center justify-between px-6 py-4 border-b border-aq-border/60">
             <div>
-              <h2 className="text-base font-semibold text-aq-text">Son Siparişler</h2>
+              <h2 className="text-base font-semibold text-aq-ink">Son Siparişler</h2>
               <p className="text-xs text-aq-muted">En son gelen siparişler</p>
             </div>
-            <Link to="/admin/siparisler" className="text-xs font-medium text-aq-blue hover:text-aq-navy flex items-center gap-1">
+            <Link to="/admin/siparisler" className="text-xs font-semibold text-aq-ink hover:underline underline-offset-4 flex items-center gap-1">
               Tümünü gör <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -403,7 +403,7 @@ export default function AdminDashboard() {
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="bg-aq-ice/80">
+                <tr className="bg-aq-cloud/70">
                   {['Sipariş', 'Müşteri', 'Tutar', 'Durum', ''].map((h) => (
                     <th key={h} className="text-left px-5 py-3 text-[10px] font-semibold text-aq-muted uppercase tracking-wider">
                       {h}
@@ -416,22 +416,22 @@ export default function AdminDashboard() {
                   const statusTr = orderStatusToTr(order.status);
                   const customerName = (order.profiles as { name?: string } | null)?.name ?? 'Müşteri';
                   return (
-                    <tr key={order.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-ice/50">
+                    <tr key={order.id} className="border-b border-aq-border/60 last:border-0 hover:bg-aq-cloud/40">
                       <td className="px-5 py-3.5">
-                        <p className="text-sm font-semibold text-aq-blue">{order.order_number}</p>
+                        <p className="text-sm font-semibold text-aq-ink">{order.order_number}</p>
                         <p className="text-[11px] text-aq-muted">
                           {new Date(order.created_at).toLocaleDateString('tr-TR')}
                         </p>
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 bg-aq-sky rounded-full flex items-center justify-center text-xs font-medium text-aq-blue">
+                          <div className="w-7 h-7 bg-aq-cloud rounded-full flex items-center justify-center text-xs font-semibold text-aq-ink">
                             {customerName[0]}
                           </div>
                           <span className="text-sm text-aq-muted">{customerName}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-semibold text-aq-text">
+                      <td className="px-5 py-3.5 text-sm font-semibold text-aq-ink">
                         {Number(order.total).toLocaleString('tr-TR')}₺
                       </td>
                       <td className="px-5 py-3.5">
@@ -440,7 +440,7 @@ export default function AdminDashboard() {
                       <td className="px-5 py-3.5">
                         <Link
                           to={`/admin/siparisler/${order.id}`}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-aq-sky text-aq-muted hover:text-aq-blue transition-colors"
+                          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-aq-cloud text-aq-muted hover:text-aq-ink transition-colors"
                         >
                           <Eye className="w-4 h-4" />
                         </Link>
@@ -456,7 +456,7 @@ export default function AdminDashboard() {
         <AdminCard>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-base font-semibold text-aq-text">Düşük Stok</h2>
+              <h2 className="text-base font-semibold text-aq-ink">Düşük Stok</h2>
               <p className="text-xs text-aq-muted">10 adet ve altı</p>
             </div>
             {lowStock.length > 0 && (
@@ -475,7 +475,7 @@ export default function AdminDashboard() {
           ) : (
             <div className="space-y-2">
               {lowStock.slice(0, 6).map((p) => (
-                <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-aq-ice transition-colors">
+                <div key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-aq-cloud transition-colors">
                   <div className={cn(
                     'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
                     p.stock <= 3 ? 'bg-red-50' : 'bg-amber-50',
@@ -483,7 +483,7 @@ export default function AdminDashboard() {
                     <Package className={cn('w-4 h-4', p.stock <= 3 ? 'text-red-500' : 'text-amber-500')} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-aq-text line-clamp-1">{p.name}</p>
+                    <p className="text-sm font-medium text-aq-ink line-clamp-1">{p.name}</p>
                     <p className="text-[10px] text-aq-muted">{p.sku}</p>
                   </div>
                   <span className={cn(
@@ -498,7 +498,7 @@ export default function AdminDashboard() {
           )}
           <Link
             to="/admin/stok"
-            className="flex items-center justify-center gap-1.5 mt-5 pt-4 border-t border-aq-border/60 text-xs font-semibold text-aq-blue hover:text-aq-navy"
+            className="flex items-center justify-center gap-1.5 mt-5 pt-4 border-t border-aq-border/60 text-xs font-semibold text-aq-ink hover:underline underline-offset-4"
           >
             Stok yönetimi <ArrowRight className="w-3.5 h-3.5" />
           </Link>
